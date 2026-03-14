@@ -366,7 +366,7 @@ const state={
   user:null,session:null,
   coin:500,dp:0,
   rank:'ブロンズIV',totalSpent:0,
-  currentCat:'all',currentSort:'new',
+  currentCat:'pokemon',currentSort:'new',
   activePack:null,drawCount:1,
   sessions:[],packs:[],notices:[],banners:[],videos:[],
   tenjoCount:{},
@@ -662,6 +662,8 @@ async function doLogin(){
   if(error){showToast('⚠️ '+error.message);return;}
   state.session=data.session;
   await loadUserProfile(data.user.id);
+  await loadHistoryFromDB();
+  await loadTenjoFromDB();
   closeAllModals();showToast('✅ ログインしました！');
 }
 async function doRegister(){
@@ -698,7 +700,7 @@ async function doRegister(){
 async function doForgotPassword(){
   const email=prompt('登録済みのメールアドレスを入力:');
   if(!email)return;
-  await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+  await db.auth.resetPasswordForEmail(email,{redirectTo:'https://oripa-max.netlify.app'});
   showToast('📧 パスワードリセットメールを送信しました',3000);
 }
 async function doLogout(){
@@ -1072,8 +1074,7 @@ async function executeDraw(){
   updateHeaderPts();closeDrawModal();
   const prizes=pack.prizes||[];
   const results=Array.from({length:state.drawCount},()=>({prize:pickPrize(prizes,Math.random())}));
-  state.tenjoCount[pack.id]=(state.tenjoCount[pack.id]||0)+state.drawCount;
-  localStorage.setItem('tenjo',JSON.stringify(state.tenjoCount));
+  await saveTenjoCount(pack.id,state.drawCount);
   await saveDrawSession(pack.id,results,cost);
   state.dp+=Math.floor(cost*0.05);
   state.totalSpent+=cost;
@@ -1098,7 +1099,8 @@ async function saveDrawSession(packId,results,totalCost){
   const resultRows=results.map(r=>({
     session_id:session.id,user_id:state.user.id,
     pack_id:packId,prize_id:r.prize.id||r.prize.name,
-    result_hash:generateSeed(),
+    prize_name:r.prize.name,prize_tier:r.prize.tier,
+    result_hash:generateSeed(),is_converted:false,
   }));
   await db.from('draw_results').insert(resultRows).catch(()=>{});
   await db.from('transactions').insert({
@@ -1107,7 +1109,57 @@ async function saveDrawSession(packId,results,totalCost){
   }).catch(()=>{});
 }
 
-/* ══ ポイント還元 ══ */
+/* ══ 天井 DB保存 ══ */
+async function saveTenjoCount(packId,count){
+  state.tenjoCount[packId]=(state.tenjoCount[packId]||0)+count;
+  localStorage.setItem('tenjo',JSON.stringify(state.tenjoCount));
+  if(state.user){
+    // DBにも保存
+    const existing=await db.from('transactions').select('id').eq('user_id',state.user.id).eq('type','tenjo').eq('description',packId).single();
+    if(existing.data){
+      await db.from('transactions').update({amount:state.tenjoCount[packId]}).eq('id',existing.data.id);
+    } else {
+      await db.from('transactions').insert({user_id:state.user.id,type:'tenjo',amount:state.tenjoCount[packId],currency:'coin',description:packId}).catch(()=>{});
+    }
+  }
+}
+
+async function loadTenjoFromDB(){
+  if(!state.user)return;
+  const{data}=await db.from('transactions').select('amount,description').eq('user_id',state.user.id).eq('type','tenjo');
+  if(data){
+    data.forEach(t=>{state.tenjoCount[t.description]=t.amount;});
+    localStorage.setItem('tenjo',JSON.stringify(state.tenjoCount));
+  }
+}
+
+/* ══ 当選履歴 DB取得 ══ */
+async function loadHistoryFromDB(){
+  if(!state.user)return;
+  const{data}=await db.from('draw_sessions').select(`
+    id,pack_id,draw_count,total_cost,created_at,
+    packs(name,emoji),
+    draw_results(id,prize_name,prize_tier,is_converted,is_shipped)
+  `).eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
+  if(!data)return;
+  state.sessions=data.map(s=>({
+    id:s.id,
+    packId:s.pack_id,
+    packName:s.packs?.name||'—',
+    packEmoji:s.packs?.emoji||'🎴',
+    cost:s.total_cost,
+    currency:'coin',
+    date:new Date(s.created_at).toLocaleString('ja-JP'),
+    shipped:s.draw_results?.some(r=>r.is_shipped)||false,
+    results:(s.draw_results||[]).map(r=>({
+      dbId:r.id,
+      prize:{name:r.prize_name||'—',tier:r.prize_tier||'c'},
+      converted:r.is_converted||false,
+    })),
+  }));
+}
+
+/* ══ ポイント還元 DB連動 ══ */
 async function convertToPoints(sessionIdx,resultIdx){
   const session=state.sessions[sessionIdx];if(!session||session.shipped)return;
   const result=session.results[resultIdx];
@@ -1117,6 +1169,9 @@ async function convertToPoints(sessionIdx,resultIdx){
   result.converted=true;state.coin+=points;updateHeaderPts();
   if(state.user){
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    if(result.dbId){
+      await db.from('draw_results').update({is_converted:true}).eq('id',result.dbId);
+    }
     await db.from('transactions').insert({
       user_id:state.user.id,type:'convert',amount:points,
       currency:'coin',description:`${result.prize.name} をポイント還元`,
@@ -1125,14 +1180,27 @@ async function convertToPoints(sessionIdx,resultIdx){
   renderHistory();renderItemsPage();
   showToast(`💰 ${points}コインに還元しました！`,2500);
 }
+
 async function convertAllToPoints(sessionIdx){
   const session=state.sessions[sessionIdx];if(!session)return;
   const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
   let total=0;
-  session.results.forEach(r=>{if(!r.converted){r.converted=true;total+=tierValue[r.prize.tier]||50;}});
+  const dbIds=[];
+  session.results.forEach(r=>{
+    if(!r.converted){
+      r.converted=true;
+      total+=tierValue[r.prize.tier]||50;
+      if(r.dbId)dbIds.push(r.dbId);
+    }
+  });
   if(total===0){showToast('還元できるカードがありません');return;}
   state.coin+=total;updateHeaderPts();
-  if(state.user)await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+  if(state.user){
+    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    if(dbIds.length){
+      await db.from('draw_results').update({is_converted:true}).in('id',dbIds);
+    }
+  }
   renderHistory();renderItemsPage();
   showToast(`💰 ${total}コインに一括還元しました！`,2500);
 }
@@ -1158,11 +1226,13 @@ async function submitShipping(){
   const tel=document.getElementById('ship-tel').value;
   if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
   const session=state.sessions[shippingSessionIdx];
-  const unconverted=session.results.filter(r=>!r.converted).map(r=>r.prize.name);
-  if(!unconverted.length){showToast('発送するカードがありません');return;}
+  const unconvertedResults=session.results.filter(r=>!r.converted);
+  if(!unconvertedResults.length){showToast('発送するカードがありません');return;}
   const address={name,zip,prefecture:pref,city,building:document.getElementById('ship-building').value,tel};
   if(state.user){
-    await db.from('shipping_requests').insert({user_id:state.user.id,result_ids:unconverted,address,status:'pending'}).catch(()=>{});
+    await db.from('shipping_requests').insert({user_id:state.user.id,result_ids:unconvertedResults.map(r=>r.prize.name),address,status:'pending'}).catch(()=>{});
+    const dbIds=unconvertedResults.filter(r=>r.dbId).map(r=>r.dbId);
+    if(dbIds.length)await db.from('draw_results').update({is_shipped:true}).in('id',dbIds).catch(()=>{});
   }
   session.shipped=true;
   closeModal('shipping-modal');
@@ -1385,19 +1455,7 @@ function copyCode(code){
   showToast('📋 コードをコピーしました！');
 }
 
-/* ══ TICKER ══ */
-function renderTicker(){
-  const wins=[
-    {r:'sar',user:'ゆず***',card:'リザードン ex SAR'},
-    {r:'sar',user:'たか***',card:'マックピカチュウ SAR'},
-    {r:'sr',user:'みく***',card:'ピカチュウ SR'},
-    {r:'sar',user:'そう***',card:'PSA10 リーリエ'},
-    {r:'sr',user:'はる***',card:'ブラッキー SR'},
-  ];
-  document.getElementById('wins-track').innerHTML=[...wins,...wins].map(w=>
-    `<span class="wins-item"><span class="wi-badge wi-${w.r}">${w.r.toUpperCase()}</span>${w.user} さんが「${w.card}」を当てました！🎉</span>`
-  ).join('');
-}
+
 
 /* ══ ナビ ══ */
 function showPage(name,el){
@@ -1449,8 +1507,11 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 
 /* ══ INIT ══ */
 (async()=>{
-  renderTicker();
   await checkSession();
+  if(state.user){
+    await loadHistoryFromDB();
+    await loadTenjoFromDB();
+  }
   await Promise.all([
     loadAndRenderPacks(),
     loadBanners(),
