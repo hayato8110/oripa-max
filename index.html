@@ -14,55 +14,38 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 input{font-family:inherit;outline:none}
 ::-webkit-scrollbar{display:none}
 :root{
-  --gold:#e8a800;--gold2:#c88000;
+  --gold:#e8a800;--gold2:#c88000;--gold-light:#ffd740;
   --red:#e82020;--red2:#c00000;
   --green:#00b050;--blue:#0066cc;
   --bg:#f2f2f2;--card:#fff;
   --border:#e8e8e8;
   --text:#1a1a1a;--text2:#555;--text3:#999;
 }
-
-/* TOAST */
-#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:9px 20px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #toast.show{opacity:1}
-
-/* HEADER */
 .header{position:sticky;top:0;z-index:100;background:#fff;height:56px;display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.06)}
 .h-logo{font-size:1.45rem;font-weight:900;color:var(--gold);flex:1;display:flex;align-items:center;gap:4px}
 .h-logo .logo-mark{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:.65rem;font-weight:900;padding:2px 6px;border-radius:4px}
 .h-currencies{display:flex;align-items:center;gap:6px}
 .h-cur{display:flex;align-items:center;gap:4px;background:#f5f5f5;border-radius:999px;padding:4px 10px;cursor:pointer;border:1px solid var(--border)}
-.h-cur .cur-icon{font-size:1rem}
 .h-cur .cur-val{font-size:.85rem;font-weight:900;color:var(--text)}
 .h-cur .cur-label{background:linear-gradient(135deg,#cc0000,#ff2222);color:#fff;font-size:.5rem;font-weight:900;padding:1px 4px;border-radius:3px}
-.h-add-btn{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;width:22px;height:22px;border-radius:50%;font-size:.9rem;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(200,0,0,.3)}
+.h-add-btn{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;width:22px;height:22px;border-radius:50%;font-size:.9rem;font-weight:900;display:flex;align-items:center;justify-content:center}
 .h-notif{position:relative;background:none;padding:6px;color:var(--text3);font-size:1.25rem}
 .h-notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid #fff}
-
-/* CAT TABS */
 .cat-bar{position:sticky;top:56px;z-index:99;background:#fff;display:flex;border-bottom:2px solid var(--border);overflow-x:auto;height:44px}
 .cat-tab{flex-shrink:0;padding:0 16px;height:100%;display:flex;align-items:center;font-size:.88rem;font-weight:700;color:var(--text3);background:none;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:.15s}
 .cat-tab.active{color:var(--gold);border-color:var(--gold)}
-
-/* ALERT */
 .alert-bar{background:linear-gradient(90deg,#dd1100,#ff4400,#ff6600);color:#fff;padding:7px 12px;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:5px}
-
-/* SORT */
 .sort-bar{background:#fff;padding:8px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border)}
 .sort-chip{flex-shrink:0;padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:700;background:#f5f5f5;color:var(--text2);border:1px solid var(--border);transition:.15s}
 .sort-chip.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border-color:transparent}
-
-/* WINS TICKER */
 .wins-bar{background:#fff8e0;border-bottom:1px solid #f0e0a0;padding:6px 0;overflow:hidden}
 .wins-track{display:flex;animation:winscroll 22s linear infinite;white-space:nowrap}
 .wins-item{display:inline-flex;align-items:center;gap:6px;padding:0 20px;font-size:.75rem;font-weight:700;color:#665500}
 .wi-badge{font-size:.6rem;font-weight:900;padding:1px 5px;border-radius:2px}
-.wi-sar{background:#e8a800;color:#fff}
-.wi-sr{background:#8800cc;color:#fff}
-.wi-rr{background:#0066cc;color:#fff}
+.wi-sar{background:#e8a800;color:#fff}.wi-sr{background:#8800cc;color:#fff}.wi-rr{background:#0066cc;color:#fff}
 @keyframes winscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* PACK CARD */
 .packs-list{padding:8px}
 .pack-card{background:#fff;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1px solid var(--border);cursor:pointer;transition:transform .12s}
 .pack-card:active{transform:scale(.99)}
@@ -79,13 +62,13 @@ input{font-family:inherit;outline:none}
 .ribbon-limit{background:linear-gradient(90deg,#660099,#aa00ee);color:#fff}
 .pcb-top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .pcb-name{font-size:1.5rem;font-weight:900;color:#fff;line-height:1.15;text-shadow:1px 2px 6px rgba(0,0,0,.5)}
-.pcb-series{font-size:.72rem;font-weight:700;color:rgba(255,255,240,.75);text-shadow:1px 1px 3px rgba(0,0,0,.4);margin-top:2px}
+.pcb-series{font-size:.72rem;font-weight:700;color:rgba(255,255,240,.75);margin-top:2px}
 .pcb-rate{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,220,80,.5);border-radius:8px;padding:4px 8px;flex-shrink:0;backdrop-filter:blur(4px);min-width:60px}
 .pcb-rate-label{font-size:.52rem;color:rgba(255,220,80,.8);font-weight:700}
-.pcb-rate-num{font-size:1.55rem;font-weight:900;line-height:1;color:#ffe566;text-shadow:0 0 10px rgba(255,200,0,.5)}
+.pcb-rate-num{font-size:1.55rem;font-weight:900;line-height:1;color:#ffe566}
 .pcb-rate-unit{font-size:.58rem;color:rgba(255,210,80,.8);font-weight:700}
 .pcb-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
-.pcb-chip{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 9px;backdrop-filter:blur(3px)}
+.pcb-chip{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 9px}
 .pcb-chip span{font-size:.67rem;font-weight:700;color:rgba(255,255,220,.9)}
 .pcb-tiers{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
 .tier-pill{font-size:.6rem;font-weight:900;padding:2px 7px;border-radius:3px}
@@ -112,13 +95,9 @@ input{font-family:inherit;outline:none}
 .pc-btn-5{flex:1;padding:12px 6px;border-radius:10px;font-size:.95rem;font-weight:900;background:linear-gradient(160deg,#ff3333,#cc0000);color:#fff;box-shadow:0 3px 10px rgba(200,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2);position:relative;overflow:hidden;transition:.1s}
 .pc-btn-5::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,transparent 55%)}
 .pc-btn-5:active{transform:scale(.97)}
-
-/* LOADING */
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:16px}
 .spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(232,168,0,.2);border-top-color:var(--gold);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* MODAL */
 .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal-overlay.show{opacity:1;pointer-events:all}
 .bottom-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:0 0 28px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:90vh;overflow-y:auto}
@@ -147,8 +126,6 @@ input{font-family:inherit;outline:none}
 .bs-draw-btn{margin:10px 16px 0;width:calc(100% - 32px);background:linear-gradient(160deg,#ff3333,#cc0000);color:#fff;font-size:1rem;font-weight:900;padding:14px;border-radius:12px;box-shadow:0 4px 16px rgba(200,0,0,.25);letter-spacing:.02em;transition:.1s}
 .bs-draw-btn:active{transform:scale(.98)}
 .bs-cancel-btn{width:100%;padding:12px;margin-top:6px;background:none;color:var(--text3);font-size:.85rem;font-weight:700}
-
-/* AUTH */
 .auth-sheet{max-height:85vh}
 .auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:0}
 .auth-tab{flex:1;padding:12px;text-align:center;font-size:.9rem;font-weight:700;color:var(--text3);background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
@@ -157,57 +134,266 @@ input{font-family:inherit;outline:none}
 .auth-label{font-size:.75rem;font-weight:700;color:var(--text2);margin-bottom:4px;display:block}
 .auth-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;color:var(--text);transition:.2s;margin-bottom:12px}
 .auth-input:focus{border-color:var(--gold)}
-.auth-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:.95rem;font-weight:900;box-shadow:0 3px 12px rgba(200,140,0,.3);margin-top:4px;transition:.1s}
+.auth-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:.95rem;font-weight:900;margin-top:4px;transition:.1s}
 .auth-submit:active{transform:scale(.98)}
-.auth-divider{text-align:center;font-size:.75rem;color:var(--text3);margin:12px 0;position:relative}
-.auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--border)}
-.auth-divider::before{left:0}.auth-divider::after{right:0}
-.auth-sns-btn{width:100%;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:.88rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px}
-
-/* PURCHASE */
 .plan-item{display:flex;align-items:center;justify-content:space-between;background:#f8f8f8;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
-.plan-item:hover,.plan-item.popular{border-color:var(--gold);background:#fffce8}
+.plan-item.popular{border-color:var(--gold);background:#fffce8}
 .plan-jp{font-size:1.1rem;font-weight:900}
 .plan-bonus{font-size:.7rem;color:var(--green);font-weight:700;margin-top:1px}
 .plan-badge{background:var(--red);color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:2px;margin-left:6px}
 .plan-price{font-size:.95rem;font-weight:900;color:var(--text);text-align:right}
-.plan-per{font-size:.65rem;color:var(--text3);margin-top:1px}
 
-/* REVEAL */
-.reveal-screen{position:fixed;inset:0;z-index:300;background:#08080f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s}
-.reveal-screen.show{opacity:1;pointer-events:all}
-.rv-title{font-size:1rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-align:center}
-.rv-cards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:440px;padding:0 12px}
-.rv-card{width:100px;height:140px;perspective:500px;cursor:pointer;flex-shrink:0}
-.rv-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1);border-radius:9px}
-.rv-card.done .rv-inner{transform:rotateY(180deg)}
-.rv-back,.rv-front{position:absolute;inset:0;backface-visibility:hidden;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.rv-back{background:linear-gradient(145deg,#14142a,#0a0a1e);border:1.5px solid rgba(232,168,0,.3);font-size:2.6rem;box-shadow:0 4px 18px rgba(0,0,0,.5)}
-.rv-back::before{content:'';position:absolute;inset:5px;border:1px solid rgba(232,168,0,.1);border-radius:6px}
-.rv-front{border-width:2px;border-style:solid;transform:rotateY(180deg)}
-.rv-emoji{font-size:1.8rem;z-index:1}
-.rv-name{font-size:.52rem;font-weight:900;text-align:center;padding:0 4px;z-index:1;line-height:1.3}
-.rv-tier{font-size:.48rem;z-index:1;opacity:.7}
+/* ═══════════════════════════════════════
+   DOPA風ガチャ演出
+═══════════════════════════════════════ */
+.gacha-screen{
+  position:fixed;inset:0;z-index:500;
+  background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:.3s;
+  overflow:hidden;
+}
+.gacha-screen.show{opacity:1;pointer-events:all}
+
+/* 背景パーティクル */
+.gacha-bg{position:absolute;inset:0;z-index:0}
+.gacha-bg-circle{
+  position:absolute;border-radius:50%;
+  animation:bg-pulse 2s ease-in-out infinite;
+}
+@keyframes bg-pulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.1);opacity:.6}}
+
+/* メイン演出ステージ */
+.gacha-stage{
+  position:relative;z-index:10;
+  width:280px;height:280px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* パック（メインオブジェクト） */
+.gacha-pack{
+  width:160px;height:200px;
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:5rem;
+  position:relative;
+  transition:all .3s;
+  box-shadow:0 0 40px currentColor;
+}
+.gacha-pack.col-white{background:linear-gradient(145deg,#e0e0e0,#fff);color:#ccc;box-shadow:0 0 20px rgba(200,200,200,.3)}
+.gacha-pack.col-blue{background:linear-gradient(145deg,#0044aa,#0066ff);color:#4488ff;box-shadow:0 0 30px rgba(68,136,255,.5)}
+.gacha-pack.col-green{background:linear-gradient(145deg,#005500,#00aa00);color:#00cc44;box-shadow:0 0 30px rgba(0,200,60,.5)}
+.gacha-pack.col-red{background:linear-gradient(145deg,#880000,#cc0000);color:#ff4444;box-shadow:0 0 40px rgba(255,60,60,.6)}
+.gacha-pack.col-gold{background:linear-gradient(145deg,#664400,#cc8800);color:#ffcc00;box-shadow:0 0 50px rgba(255,200,0,.7)}
+.gacha-pack.col-rainbow{
+  background:linear-gradient(145deg,#330066,#660099,#0044cc,#006600,#cc8800,#cc0000);
+  color:#fff;
+  box-shadow:0 0 60px rgba(255,255,255,.5);
+  animation:rainbow-glow 1s infinite;
+}
+@keyframes rainbow-glow{
+  0%{box-shadow:0 0 60px rgba(255,0,0,.7)}
+  25%{box-shadow:0 0 60px rgba(255,200,0,.7)}
+  50%{box-shadow:0 0 60px rgba(0,255,100,.7)}
+  75%{box-shadow:0 0 60px rgba(0,100,255,.7)}
+  100%{box-shadow:0 0 60px rgba(255,0,255,.7)}
+}
+
+/* プチュン演出 */
+.puchun-wrap{
+  position:absolute;inset:0;z-index:20;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.puchun-heart{
+  font-size:4rem;
+  animation:puchun-anim .6s ease-out forwards;
+  opacity:0;
+}
+@keyframes puchun-anim{
+  0%{transform:scale(0) translateY(0);opacity:1}
+  50%{transform:scale(1.4) translateY(-20px);opacity:1}
+  100%{transform:scale(1) translateY(-60px);opacity:0}
+}
+
+/* ドックン演出 */
+.dokkun-wrap{
+  position:absolute;inset:0;z-index:25;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;pointer-events:none;
+}
+.dokkun-char{font-size:5rem;animation:dokkun .4s ease-out}
+@keyframes dokkun{0%{transform:scale(1)}30%{transform:scale(1.3)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+.dokkun-text{
+  font-size:1.4rem;font-weight:900;color:#fff;
+  text-shadow:0 0 20px rgba(255,200,0,.8);
+  animation:dokkun-text-in .3s ease-out;
+}
+@keyframes dokkun-text-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* 巻き戻し演出 */
+.rewind-overlay{
+  position:absolute;inset:0;z-index:30;
+  background:rgba(0,0,0,.9);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;
+}
+.rewind-text{
+  font-size:1.2rem;font-weight:900;color:#fff;
+  letter-spacing:.15em;
+  animation:glitch .1s infinite;
+}
+@keyframes glitch{
+  0%{transform:translateX(0);color:#fff}
+  25%{transform:translateX(-3px);color:#ff0044}
+  50%{transform:translateX(3px);color:#00ffaa}
+  75%{transform:translateX(-2px);color:#ffcc00}
+  100%{transform:translateX(0);color:#fff}
+}
+.rewind-bar{
+  width:200px;height:4px;background:#333;border-radius:999px;overflow:hidden;
+}
+.rewind-fill{
+  height:100%;background:linear-gradient(90deg,#ff0044,#ffcc00,#00ffaa);
+  animation:rewind-progress .8s ease-out forwards;
+}
+@keyframes rewind-progress{from{width:100%}to{width:0%}}
+
+/* 役物演出（剣落下） */
+.yakumono{
+  position:absolute;top:-100px;
+  font-size:4rem;z-index:35;
+  animation:yakumono-fall .5s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes yakumono-fall{
+  from{top:-100px;transform:rotate(0deg)}
+  to{top:50px;transform:rotate(360deg)}
+}
+
+/* 演出テキスト */
+.gacha-label{
+  position:relative;z-index:10;
+  text-align:center;padding:0 16px;
+}
+.gacha-label-main{
+  font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.5);
+  letter-spacing:.1em;margin-bottom:4px;
+}
+.gacha-label-sub{
+  font-size:.8rem;color:rgba(255,255,255,.3);
+  letter-spacing:.05em;
+}
+
+/* 演出カラーインジケーター */
+.color-indicator{
+  display:flex;gap:6px;position:relative;z-index:10;
+}
+.ci-dot{
+  width:10px;height:10px;border-radius:50%;
+  opacity:.3;transition:.3s;
+}
+.ci-dot.active{opacity:1;transform:scale(1.3)}
+.ci-white{background:#ddd}
+.ci-blue{background:#4488ff}
+.ci-green{background:#00cc44}
+.ci-red{background:#ff4444}
+.ci-gold{background:#ffcc00}
+.ci-rainbow{background:linear-gradient(90deg,#ff0000,#ffcc00,#00ff88,#0088ff,#ff00ff)}
+
+/* 結果画面 */
+.result-screen{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,.95);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;
+  opacity:0;pointer-events:none;transition:.3s;
+}
+.result-screen.show{opacity:1;pointer-events:all}
+.result-title{font-size:1rem;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:.15em}
+.result-cards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:440px;padding:0 12px}
+.rc{width:100px;height:140px;perspective:500px;cursor:pointer;flex-shrink:0}
+.rc-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1);border-radius:9px}
+.rc.done .rc-inner{transform:rotateY(180deg)}
+.rc-back,.rc-front{position:absolute;inset:0;backface-visibility:hidden;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.rc-back{background:linear-gradient(145deg,#14142a,#0a0a1e);border:1.5px solid rgba(232,168,0,.3);font-size:2.6rem;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.rc-back::before{content:'';position:absolute;inset:5px;border:1px solid rgba(232,168,0,.1);border-radius:6px}
+.rc-front{border-width:2px;border-style:solid;transform:rotateY(180deg)}
+.rc-emoji{font-size:1.8rem;z-index:1}
+.rc-name{font-size:.52rem;font-weight:900;text-align:center;padding:0 4px;z-index:1;line-height:1.3}
+.rc-tier{font-size:.48rem;z-index:1;opacity:.7}
 .rf-sar{background:linear-gradient(145deg,#1c1600,#2e2400);border-color:#e8a800;box-shadow:0 0 28px rgba(232,168,0,.4)}
-.rf-sar .rv-emoji,.rf-sar .rv-name{color:#e8a800}
+.rf-sar .rc-emoji,.rf-sar .rc-name{color:#e8a800}
 .rf-sr{background:linear-gradient(145deg,#0e0020,#1a0035);border-color:#b066ff;box-shadow:0 0 22px rgba(176,102,255,.35)}
-.rf-sr .rv-emoji,.rf-sr .rv-name{color:#cc88ff}
+.rf-sr .rc-emoji,.rf-sr .rc-name{color:#cc88ff}
 .rf-rr{background:linear-gradient(145deg,#001626,#002040);border-color:#0088cc}
-.rf-rr .rv-emoji,.rf-rr .rv-name{color:#44ccee}
+.rf-rr .rc-emoji,.rf-rr .rc-name{color:#44ccee}
 .rf-r{background:linear-gradient(145deg,#0a1020,#101830);border-color:#446699}
-.rf-r .rv-emoji,.rf-r .rv-name{color:#8899cc}
+.rf-r .rc-emoji,.rf-r .rc-name{color:#8899cc}
 .rf-c{background:linear-gradient(145deg,#101012,#181818);border-color:#383840}
-.rf-c .rv-emoji,.rf-c .rv-name{color:#666680}
-.rv-done-btn{background:linear-gradient(160deg,#f5c800,#e0a000);color:#fff;font-size:.95rem;font-weight:900;padding:13px 48px;border-radius:12px;box-shadow:0 4px 16px rgba(200,140,0,.35);display:none}
-.rv-done-btn.show{display:block;animation:pop .3s ease-out}
+.rf-c .rc-emoji,.rf-c .rc-name{color:#666680}
+.result-done-btn{background:linear-gradient(160deg,#f5c800,#e0a000);color:#fff;font-size:.95rem;font-weight:900;padding:13px 48px;border-radius:12px;box-shadow:0 4px 16px rgba(200,140,0,.35);display:none}
+.result-done-btn.show{display:block;animation:pop .3s ease-out}
 @keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+.result-hint{font-size:.72rem;color:rgba(255,255,255,.25);font-weight:700}
 
-/* SAR FLASH */
-.sar-flash{position:fixed;inset:0;z-index:500;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,200,0,.55) 0%,transparent 65%)}
-.sar-flash.go{animation:sarflash .9s ease-out forwards}
-@keyframes sarflash{0%{opacity:1}100%{opacity:0;transform:scale(1.07)}}
+/* SAR大当たり演出 */
+.jackpot-overlay{
+  position:fixed;inset:0;z-index:700;
+  background:radial-gradient(ellipse at 50% 50%,rgba(255,200,0,.15) 0%,#000 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;
+  opacity:0;pointer-events:none;transition:.3s;
+}
+.jackpot-overlay.show{opacity:1;pointer-events:all}
+.jackpot-text{
+  font-size:2.5rem;font-weight:900;
+  background:linear-gradient(135deg,#fff,#ffcc00,#fff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:jackpot-shine 1s infinite;
+  text-align:center;letter-spacing:.1em;
+}
+@keyframes jackpot-shine{
+  0%,100%{filter:drop-shadow(0 0 10px rgba(255,200,0,.5))}
+  50%{filter:drop-shadow(0 0 30px rgba(255,200,0,1))}
+}
+.jackpot-card-name{
+  font-size:1.2rem;font-weight:900;color:#ffcc44;
+  text-align:center;
+  animation:jackpot-shake .1s infinite;
+}
+@keyframes jackpot-shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-3px)}
+  75%{transform:translateX(3px)}
+}
+.jackpot-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.jp-particle{
+  position:absolute;font-size:1.5rem;
+  animation:jp-fall linear forwards;
+}
+@keyframes jp-fall{
+  from{transform:translateY(-50px) rotate(0deg);opacity:1}
+  to{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
+.jackpot-btn{
+  background:linear-gradient(135deg,#ffcc00,#e8a800);
+  color:#0a0a0a;font-weight:900;font-size:1rem;
+  padding:14px 48px;border-radius:12px;
+  box-shadow:0 4px 20px rgba(255,200,0,.4);
+  margin-top:10px;
+}
 
-/* MYPAGE */
+/* ガチャスキップボタン */
+.gacha-skip{
+  position:absolute;bottom:30px;right:20px;z-index:50;
+  background:rgba(255,255,255,.15);
+  color:rgba(255,255,255,.6);
+  font-size:.75rem;font-weight:700;
+  padding:6px 14px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.2);
+}
+
+/* マイページ */
 .mypage{padding:16px}
 .mp-user-card{background:linear-gradient(135deg,#1a1000,#2a1800,#3a2800);border-radius:14px;padding:18px;margin-bottom:14px;color:#fff;position:relative;overflow:hidden}
 .mp-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:10px}
@@ -223,8 +409,6 @@ input{font-family:inherit;outline:none}
 .mp-menu-item:active{background:#f5f5f5}
 .mp-menu-icon{font-size:1.2rem;width:28px;text-align:center}
 .mp-menu-arrow{margin-left:auto;color:var(--text3)}
-
-/* HISTORY */
 .history-page{padding:8px}
 .hist-empty{text-align:center;padding:48px 16px;color:var(--text3)}
 .hist-card{background:#fff;border-radius:10px;border:1px solid var(--border);padding:12px 14px;margin-bottom:7px;box-shadow:0 1px 5px rgba(0,0,0,.05)}
@@ -239,14 +423,10 @@ input{font-family:inherit;outline:none}
 .hc-r{background:#f5f5f5;color:#555;border:1px solid #ddd}
 .hc-c{background:#f0f0f0;color:#999;border:1px solid #e0e0e0}
 .hist-cost{font-size:.72rem;color:var(--text3);margin-top:5px}
-
-/* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:150;box-shadow:0 -3px 20px rgba(0,0,0,.08)}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 9px;gap:2px;background:none;color:var(--text3);font-size:.58rem;font-weight:700;transition:.15s}
 .bnav-btn.active{color:var(--gold)}
 .bnav-icon{font-size:1.3rem;line-height:1}
-
-/* PAGE */
 .page{display:none}
 .page.active{display:block}
 </style>
@@ -255,34 +435,20 @@ input{font-family:inherit;outline:none}
 
 <div id="toast"></div>
 
-<!-- SUPABASE初期化 -->
 <script>
 const SUPABASE_URL = 'https://puspoyandexokjtsmajc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// アプリ状態
 const state = {
-  user: null,
-  session: null,
-  jp: 0,
-  coin: 500,
-  dp: 0,
-  rank: 'ブロンズIV',
-  totalSpent: 0,
-  currentCat: 'all',
-  currentSort: 'new',
-  activePack: null,
-  drawCount: 1,
-  drawFlipped: 0,
-  drawTotal: 0,
-  sessions: [],
-  packs: [],
+  user:null,session:null,jp:0,coin:500,dp:0,
+  rank:'ブロンズIV',totalSpent:0,
+  currentCat:'all',currentSort:'new',
+  activePack:null,drawCount:1,drawCurrency:'coin',
+  sessions:[],packs:[],
 };
 </script>
 
-<!-- HEADER -->
 <header class="header">
   <div class="h-logo">オリパMAX<span class="logo-mark">MAX</span></div>
   <div class="h-currencies">
@@ -291,7 +457,7 @@ const state = {
       <span class="cur-val" id="h-jp">0</span>
     </div>
     <div class="h-cur" onclick="openPurchase()">
-      <span class="cur-icon">🪙</span>
+      <span style="font-size:1rem">🪙</span>
       <span class="cur-val" id="h-coin">500</span>
       <button class="h-add-btn" onclick="event.stopPropagation();openPurchase()">＋</button>
     </div>
@@ -299,7 +465,6 @@ const state = {
   <button class="h-notif" onclick="showToast('通知はありません')">🔔<span class="h-notif-dot"></span></button>
 </header>
 
-<!-- PAGE: ガチャ -->
 <div id="page-gacha" class="page active">
   <div class="cat-bar" id="cat-bar">
     <button class="cat-tab active" data-cat="all">すべて</button>
@@ -321,7 +486,6 @@ const state = {
   </div>
 </div>
 
-<!-- PAGE: 獲得商品 -->
 <div id="page-items" class="page">
   <div style="padding:48px 16px;text-align:center;color:var(--text3)">
     <div style="font-size:2.5rem;margin-bottom:12px">📦</div>
@@ -330,18 +494,15 @@ const state = {
   </div>
 </div>
 
-<!-- PAGE: 当選履歴 -->
 <div id="page-history" class="page">
   <div class="history-page" id="history-list">
     <div class="hist-empty">
       <div style="font-size:2.5rem;margin-bottom:12px">🕐</div>
       <div style="font-weight:700;margin-bottom:6px">当選履歴はありません</div>
-      <div style="font-size:.82rem">オリパを引くとここに記録されます</div>
     </div>
   </div>
 </div>
 
-<!-- PAGE: 当選報告 -->
 <div id="page-report" class="page">
   <div style="padding:16px">
     <div style="font-size:.95rem;font-weight:900;margin-bottom:12px">📢 みんなの当選報告</div>
@@ -349,12 +510,10 @@ const state = {
   </div>
 </div>
 
-<!-- PAGE: マイページ -->
 <div id="page-mypage" class="page">
   <div class="mypage" id="mypage-content"></div>
 </div>
 
-<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <button class="bnav-btn active" data-page="gacha"><span class="bnav-icon">🎴</span>オリパガチャ</button>
   <button class="bnav-btn" data-page="items"><span class="bnav-icon">📦</span>獲得商品</button>
@@ -419,7 +578,6 @@ const state = {
     <div class="bs-drag"></div>
     <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
       <div style="font-size:1.05rem;font-weight:900">💎 JPポイントをチャージ</div>
-      <div style="font-size:.75rem;color:var(--text3);margin-top:2px">1JP = 1円相当</div>
     </div>
     <div style="padding:12px 16px" id="purchase-plans"></div>
     <div style="padding:0 16px">
@@ -428,264 +586,491 @@ const state = {
   </div>
 </div>
 
-<!-- REVEAL -->
-<div class="reveal-screen" id="reveal-screen">
-  <div class="rv-title" id="rv-title">カードをタップして開封！</div>
-  <div class="rv-cards" id="rv-cards"></div>
-  <div style="font-size:.72rem;color:rgba(255,255,255,.25);font-weight:700" id="rv-hint">タップしてめくってください</div>
-  <button class="rv-done-btn" id="rv-done" onclick="closeReveal()">✅ 結果を確認する</button>
+<!-- DOPA風ガチャ演出画面 -->
+<div class="gacha-screen" id="gacha-screen">
+  <div class="gacha-bg" id="gacha-bg"></div>
+  <div class="gacha-label">
+    <div class="gacha-label-main" id="gacha-label-main">抽選中...</div>
+    <div class="gacha-label-sub" id="gacha-label-sub">運命の瞬間</div>
+  </div>
+  <div class="gacha-stage" id="gacha-stage">
+    <div class="gacha-pack col-white" id="gacha-pack">🎴</div>
+    <div class="puchun-wrap" id="puchun-wrap"></div>
+    <div class="dokkun-wrap" id="dokkun-wrap" style="display:none"></div>
+    <div class="rewind-overlay" id="rewind-overlay" style="display:none">
+      <div class="rewind-text">REWIND...</div>
+      <div class="rewind-bar"><div class="rewind-fill"></div></div>
+    </div>
+  </div>
+  <div class="color-indicator" id="color-indicator">
+    <div class="ci-dot ci-white active" data-col="white"></div>
+    <div class="ci-dot ci-blue" data-col="blue"></div>
+    <div class="ci-dot ci-green" data-col="green"></div>
+    <div class="ci-dot ci-red" data-col="red"></div>
+    <div class="ci-dot ci-gold" data-col="gold"></div>
+    <div class="ci-dot ci-rainbow" data-col="rainbow"></div>
+  </div>
+  <button class="gacha-skip" onclick="skipGacha()">スキップ ▶</button>
 </div>
 
-<div class="sar-flash" id="sar-flash"></div>
+<!-- 結果画面 -->
+<div class="result-screen" id="result-screen">
+  <div class="result-title" id="result-title">カードをタップして開封！</div>
+  <div class="result-cards" id="result-cards"></div>
+  <div class="result-hint" id="result-hint">タップしてめくってください</div>
+  <button class="result-done-btn" id="result-done" onclick="closeResult()">✅ 結果を確認する</button>
+</div>
+
+<!-- SAR大当たり演出 -->
+<div class="jackpot-overlay" id="jackpot-overlay">
+  <div class="jackpot-particles" id="jackpot-particles"></div>
+  <div style="font-size:4rem">🎊</div>
+  <div class="jackpot-text">S賞当選！！</div>
+  <div class="jackpot-card-name" id="jackpot-card-name"></div>
+  <button class="jackpot-btn" onclick="closeJackpot()">開封する！</button>
+</div>
 
 <script>
 /* ══════════════════════════════════════
-   SUPABASE 関数
+   SUPABASE
 ══════════════════════════════════════ */
-
-// パック一覧をDBから取得
-async function fetchPacks() {
-  const { data, error } = await db
-    .from('packs')
-    .select('*, prizes(*)')
-    .eq('is_active', true)
-    .order('sort_order');
-  if (error) { console.error(error); return []; }
-  return data || [];
+async function fetchPacks(){
+  const{data,error}=await db.from('packs').select('*, prizes(*)').eq('is_active',true).order('sort_order');
+  if(error){console.error(error);return[];}
+  return data||[];
 }
-
-// 当選速報をDBから取得
-async function fetchRecentWins() {
-  const { data, error } = await db
-    .from('draw_results')
-    .select('*, prizes(tier, tier_label, name), users(username)')
-    .in('prizes.tier', ['sar', 'sr'])
-    .order('created_at', { ascending: false })
-    .limit(10);
-  if (error) return [];
-  return data || [];
-}
-
-// ユーザー情報をDBから取得
-async function fetchUserProfile(userId) {
-  const { data, error } = await db
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .single();
-  if (error) return null;
+async function fetchUserProfile(userId){
+  const{data,error}=await db.from('users').select('*').eq('id',userId).single();
+  if(error)return null;
   return data;
 }
-
-// 抽選実行（サーバーサイドロジック）
-async function saveDrawSession(packId, results, totalCost, currency) {
-  const serverSeed = generateSeed();
-
-  // セッション保存
-  const { data: session, error: sessionError } = await db
-    .from('draw_sessions')
-    .insert({
-      user_id: state.user.id,
-      pack_id: packId,
-      draw_count: results.length,
-      total_cost: totalCost,
-      currency: currency,
-      server_seed: serverSeed,
-    })
-    .select()
-    .single();
-
-  if (sessionError) { console.error(sessionError); return null; }
-
-  // 結果保存
-  const resultRows = results.map((r, i) => ({
-    session_id: session.id,
-    user_id: state.user.id,
-    pack_id: packId,
-    prize_id: r.prize.id,
-    result_hash: generateSeed(),
+async function saveDrawSession(packId,results,totalCost,currency){
+  const serverSeed=generateSeed();
+  const{data:session,error:sessionError}=await db.from('draw_sessions').insert({
+    user_id:state.user.id,pack_id:packId,draw_count:results.length,
+    total_cost:totalCost,currency,server_seed:serverSeed,
+  }).select().single();
+  if(sessionError){console.error(sessionError);return null;}
+  const resultRows=results.map(r=>({
+    session_id:session.id,user_id:state.user.id,
+    pack_id:packId,prize_id:r.prize.id,result_hash:generateSeed(),
   }));
-
-  const { error: resultError } = await db
-    .from('draw_results')
-    .insert(resultRows);
-
-  if (resultError) console.error(resultError);
-
-  // ポイント消費をDBに反映
-  const updateField = currency === 'coin' ? 'coin_points' : 'jp_points';
-  await db
-    .from('users')
-    .update({
-      [updateField]: state[currency === 'coin' ? 'coin' : 'jp'] - totalCost,
-      dp_points: state.dp + Math.floor(totalCost * 0.05),
-      total_spent: state.totalSpent + totalCost,
-    })
-    .eq('id', state.user.id);
-
-  // 取引履歴
+  await db.from('draw_results').insert(resultRows);
+  const updateField=currency==='coin'?'coin_points':'jp_points';
+  await db.from('users').update({
+    [updateField]:state[currency==='coin'?'coin':'jp']-totalCost,
+    dp_points:state.dp+Math.floor(totalCost*0.05),
+    total_spent:state.totalSpent+totalCost,
+  }).eq('id',state.user.id);
   await db.from('transactions').insert({
-    user_id: state.user.id,
-    type: 'draw',
-    amount: -totalCost,
-    currency: currency,
-    description: `${state.activePack.name} × ${results.length}回`,
+    user_id:state.user.id,type:'draw',amount:-totalCost,currency,
+    description:`${state.activePack.name} × ${results.length}回`,
   });
-
   return session;
 }
-
-// 履歴をDBから取得
-async function fetchHistory() {
-  if (!state.user) return [];
-  const { data, error } = await db
-    .from('draw_sessions')
-    .select('*, packs(name), draw_results(*, prizes(tier, name))')
-    .eq('user_id', state.user.id)
-    .order('created_at', { ascending: false })
-    .limit(30);
-  if (error) return [];
-  return data || [];
+async function checkSession(){
+  const{data:{session}}=await db.auth.getSession();
+  if(session){state.session=session;await loadUserProfile(session.user.id);}
+}
+async function loadUserProfile(userId){
+  const profile=await fetchUserProfile(userId);
+  if(!profile)return;
+  state.user=profile;state.jp=profile.jp_points;state.coin=profile.coin_points;
+  state.dp=profile.dp_points;state.rank=profile.rank;state.totalSpent=profile.total_spent;
+  updateHeaderPts();
+}
+async function doLogin(){
+  const email=document.getElementById('login-email').value;
+  const pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showToast('⚠️ 入力してください');return;}
+  showToast('ログイン中...');
+  const{data,error}=await db.auth.signInWithPassword({email,password:pass});
+  if(error){showToast('⚠️ '+error.message);return;}
+  state.session=data.session;await loadUserProfile(data.user.id);
+  closeAllModals();showToast('✅ ログインしました！');
+}
+async function doRegister(){
+  const name=document.getElementById('reg-name').value;
+  const email=document.getElementById('reg-email').value;
+  const pass=document.getElementById('reg-pass').value;
+  const birth=document.getElementById('reg-birth').value;
+  if(!name||!email||!pass||!birth){showToast('⚠️ 全項目を入力してください');return;}
+  const age=Math.floor((Date.now()-new Date(birth))/(365.25*24*3600*1000));
+  if(age<18){showToast('⚠️ 18歳未満は利用できません');return;}
+  showToast('登録中...');
+  const{data,error}=await db.auth.signUp({email,password:pass});
+  if(error){showToast('⚠️ '+error.message);return;}
+  await db.from('users').insert({
+    id:data.user.id,email,username:name,
+    password_hash:'managed_by_supabase_auth',coin_points:500,birth_date:birth,
+  });
+  state.session=data.session;await loadUserProfile(data.user.id);
+  closeAllModals();showToast('🎉 登録完了！500コインプレゼント！',3000);
+}
+async function doLogout(){
+  await db.auth.signOut();state.user=null;state.jp=0;state.coin=0;
+  updateHeaderPts();renderMyPage();showToast('ログアウトしました');
 }
 
 /* ══════════════════════════════════════
-   認証
+   DOPA風ガチャ演出エンジン
 ══════════════════════════════════════ */
-async function doLogin() {
-  const email = document.getElementById('login-email').value;
-  const pass  = document.getElementById('login-pass').value;
-  if (!email || !pass) { showToast('⚠️ 入力してください'); return; }
+const COLORS=['white','blue','green','red','gold','rainbow'];
+const COLOR_WEIGHTS={c:60,r:25,rr:10,sr:4,sar:1};
+const TIER_TO_COLOR={c:'white',r:'blue',rr:'green',sr:'red',sar:'gold'};
 
-  showToast('ログイン中...');
-  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
-  if (error) { showToast('⚠️ ' + error.message); return; }
+let gachaResults=[];
+let gachaSkipped=false;
 
-  state.session = data.session;
-  await loadUserProfile(data.user.id);
-  closeAllModals();
-  showToast('✅ ログインしました！');
+function getTierColor(tier){
+  // SARの場合は虹になることも
+  if(tier==='sar')return Math.random()<0.3?'rainbow':'gold';
+  return TIER_TO_COLOR[tier]||'white';
 }
 
-async function doRegister() {
-  const name  = document.getElementById('reg-name').value;
-  const email = document.getElementById('reg-email').value;
-  const pass  = document.getElementById('reg-pass').value;
-  const birth = document.getElementById('reg-birth').value;
-
-  if (!name || !email || !pass || !birth) { showToast('⚠️ 全項目を入力してください'); return; }
-  const age = Math.floor((Date.now() - new Date(birth)) / (365.25 * 24 * 3600 * 1000));
-  if (age < 18) { showToast('⚠️ 18歳未満は利用できません'); return; }
-
-  showToast('登録中...');
-
-  // Supabase Auth でアカウント作成
-  const { data, error } = await db.auth.signUp({ email, password: pass });
-  if (error) { showToast('⚠️ ' + error.message); return; }
-
-  // usersテーブルにプロフィール保存
-  await db.from('users').insert({
-    id: data.user.id,
-    email,
-    username: name,
-    password_hash: 'managed_by_supabase_auth',
-    coin_points: 500,
-    birth_date: birth,
-  });
-
-  state.session = data.session;
-  await loadUserProfile(data.user.id);
-  closeAllModals();
-  showToast('🎉 登録完了！500コインプレゼント！', 3000);
+function startGachaAnimation(results,pack){
+  gachaResults=results;
+  gachaSkipped=false;
+  const topTier=results.reduce((best,r)=>{
+    const order={c:0,r:1,rr:2,sr:3,sar:4};
+    return(order[r.prize.tier]||0)>(order[best]||0)?r.prize.tier:best;
+  },'c');
+  const finalColor=getTierColor(topTier);
+  document.getElementById('gacha-screen').classList.add('show');
+  runColorSequence(finalColor,topTier,results,pack);
 }
 
-async function loadUserProfile(userId) {
-  const profile = await fetchUserProfile(userId);
-  if (!profile) return;
-  state.user = profile;
-  state.jp   = profile.jp_points;
-  state.coin = profile.coin_points;
-  state.dp   = profile.dp_points;
-  state.rank = profile.rank;
-  state.totalSpent = profile.total_spent;
-  updateHeaderPts();
-}
-
-async function doLogout() {
-  await db.auth.signOut();
-  state.user = null; state.jp = 0; state.coin = 0;
-  updateHeaderPts();
-  renderMyPage();
-  showToast('ログアウトしました');
-}
-
-// ページ読み込み時にセッション確認
-async function checkSession() {
-  const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    state.session = session;
-    await loadUserProfile(session.user.id);
+async function runColorSequence(finalColor,topTier,results,pack){
+  const pack_el=document.getElementById('gacha-pack');
+  const label=document.getElementById('gacha-label-main');
+  const sub=document.getElementById('gacha-label-sub');
+  pack_el.textContent=state.activePack?.emoji||'🎴';
+  // 初期色（白）
+  setPackColor('white');
+  label.textContent='抽選中...';
+  sub.textContent='運命の瞬間';
+  await sleep(600);
+  // 演出タイプをランダム選択
+  const演出type=Math.random();
+  if(演出type<0.3){
+    // プチュン演出
+    await puchunSequence(finalColor,topTier,pack_el,label,sub);
+  } else if(演出type<0.5&&['sr','sar'].includes(topTier)){
+    // 巻き戻し演出（レア限定）
+    await rewindSequence(finalColor,topTier,pack_el,label,sub);
+  } else {
+    // 通常カラー変化演出
+    await normalSequence(finalColor,topTier,pack_el,label,sub);
   }
+  // 演出終了→結果へ
+  if(!gachaSkipped){
+    await sleep(500);
+    showGachaResult(results,pack,topTier);
+  }
+}
+
+async function normalSequence(finalColor,topTier,pack_el,label,sub){
+  const colorOrder=['white','blue','green','red','gold','rainbow'];
+  const finalIdx=colorOrder.indexOf(finalColor);
+  // 白から最終色まで段階的に変化
+  for(let i=0;i<=finalIdx;i++){
+    if(gachaSkipped)return;
+    setPackColor(colorOrder[i]);
+    label.textContent=getColorLabel(colorOrder[i]);
+    sub.textContent='期待度上昇中...';
+    await sleep(i===finalIdx?800:400);
+    if(i<finalIdx&&Math.random()<0.3){
+      // たまに一段下がってから上がる（ドキドキ演出）
+      setPackColor(colorOrder[Math.max(0,i-1)]);
+      await sleep(200);
+    }
+  }
+}
+
+async function puchunSequence(finalColor,topTier,pack_el,label,sub){
+  label.textContent='プチュン...';
+  sub.textContent='💓';
+  setPackColor('white');
+  await sleep(400);
+  // プチュン発生
+  const pw=document.getElementById('puchun-wrap');
+  pw.innerHTML='<div class="puchun-heart">💓</div>';
+  await sleep(300);
+  pw.innerHTML='';
+  // ドックン演出
+  const dw=document.getElementById('dokkun-wrap');
+  dw.style.display='flex';
+  const dokkun_count=['sr','sar'].includes(topTier)?2:1;
+  label.textContent='ドックン！';
+  for(let i=0;i<dokkun_count;i++){
+    if(gachaSkipped)break;
+    dw.innerHTML=`<div class="dokkun-char">💗</div><div class="dokkun-text">ドックン${i+1}回目！</div>`;
+    await sleep(600);
+  }
+  dw.style.display='none';
+  // 最終色へ
+  setPackColor(finalColor);
+  label.textContent=getColorLabel(finalColor);
+  sub.textContent=dokkun_count>=2?'🎊 大チャンス！':'期待度アップ！';
+  await sleep(800);
+}
+
+async function rewindSequence(finalColor,topTier,pack_el,label,sub){
+  // 一度ハズレ演出
+  setPackColor('white');
+  label.textContent='残念...';
+  sub.textContent='ハズレ？';
+  await sleep(600);
+  if(gachaSkipped)return;
+  // 巻き戻し発動！
+  const ro=document.getElementById('rewind-overlay');
+  ro.style.display='flex';
+  label.textContent='REWIND!!';
+  sub.textContent='逆転演出！';
+  await sleep(900);
+  ro.style.display='none';
+  // 最終色へ一気に変化
+  setPackColor(finalColor);
+  label.textContent='🔥 復活！'+getColorLabel(finalColor);
+  sub.textContent='逆転大当たり！！';
+  await sleep(800);
+}
+
+function setPackColor(color){
+  const pack_el=document.getElementById('gacha-pack');
+  pack_el.className='gacha-pack col-'+color;
+  // インジケーター更新
+  document.querySelectorAll('.ci-dot').forEach(d=>{
+    d.classList.toggle('active',d.dataset.col===color);
+  });
+}
+
+function getColorLabel(color){
+  const labels={white:'白…',blue:'青！期待！',green:'緑！チャンス！',red:'赤！激アツ！',gold:'金！大当たり！',rainbow:'虹！！！最高演出！！！'};
+  return labels[color]||'';
+}
+
+function showGachaResult(results,pack,topTier){
+  document.getElementById('gacha-screen').classList.remove('show');
+  // SARなら大当たり演出
+  if(topTier==='sar'){
+    showJackpot(results[0].prize.name,()=>showResultCards(results,pack));
+  } else {
+    showResultCards(results,pack);
+  }
+}
+
+async function skipGacha(){
+  gachaSkipped=true;
+  document.getElementById('gacha-screen').classList.remove('show');
+  if(gachaResults.length){
+    const topTier=gachaResults.reduce((best,r)=>{
+      const order={c:0,r:1,rr:2,sr:3,sar:4};
+      return(order[r.prize.tier]||0)>(order[best]||0)?r.prize.tier:best;
+    },'c');
+    showGachaResult(gachaResults,state.activePack,topTier);
+  }
+}
+
+/* ══════════════════════════════════════
+   SAR大当たり演出
+══════════════════════════════════════ */
+function showJackpot(cardName,callback){
+  document.getElementById('jackpot-card-name').textContent=cardName;
+  // パーティクル生成
+  const pp=document.getElementById('jackpot-particles');
+  pp.innerHTML='';
+  const emojis=['✨','🌟','💫','⭐','🎊','🎉','💎','👑'];
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');
+    p.className='jp-particle';
+    p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=(1+Math.random()*2)+'s';
+    p.style.animationDelay=Math.random()*1+'s';
+    pp.appendChild(p);
+  }
+  document.getElementById('jackpot-overlay').classList.add('show');
+  window._jackpotCallback=callback;
+}
+function closeJackpot(){
+  document.getElementById('jackpot-overlay').classList.remove('show');
+  if(window._jackpotCallback)window._jackpotCallback();
+}
+
+/* ══════════════════════════════════════
+   結果カード
+══════════════════════════════════════ */
+const rfClass={sar:'rf-sar',sr:'rf-sr',rr:'rf-rr',r:'rf-r',c:'rf-c'};
+const rarLabel={sar:'SAR ✨',sr:'SR 💜',rr:'RR 💙',r:'R',c:'C'};
+let resultFlipped=0,resultTotal=0;
+
+function showResultCards(results,pack){
+  resultFlipped=0;resultTotal=results.length;
+  document.getElementById('result-title').textContent='カードをタップして開封！';
+  document.getElementById('result-hint').style.display='block';
+  document.getElementById('result-done').classList.remove('show');
+  document.getElementById('result-cards').innerHTML=results.map((r,i)=>`
+    <div class="rc" id="rc-${i}" onclick="flipResultCard(${i},'${r.prize.tier}')">
+      <div class="rc-inner">
+        <div class="rc-back">🎴</div>
+        <div class="rc-front ${rfClass[r.prize.tier]||'rf-c'}">
+          <span class="rc-emoji">${pack?.emoji||'🎴'}</span>
+          <span class="rc-name">${r.prize.name}</span>
+          <span class="rc-tier">${rarLabel[r.prize.tier]||r.prize.tier}</span>
+        </div>
+      </div>
+    </div>`).join('');
+  document.getElementById('result-screen').classList.add('show');
+}
+
+function flipResultCard(i,tier){
+  const card=document.getElementById(`rc-${i}`);
+  if(card.classList.contains('done'))return;
+  card.classList.add('done');
+  resultFlipped++;
+  if(resultFlipped===resultTotal){
+    document.getElementById('result-title').textContent='🎊 開封完了！';
+    document.getElementById('result-hint').style.display='none';
+    document.getElementById('result-done').classList.add('show');
+    renderHistory();
+  }
+}
+
+function closeResult(){
+  document.getElementById('result-screen').classList.remove('show');
+}
+
+/* ══════════════════════════════════════
+   抽選
+══════════════════════════════════════ */
+const tierPillClass={sar:'tp-s',sr:'tp-a',rr:'tp-b',r:'tp-c',c:'tp-c'};
+const ribbonClass={hot:'ribbon-hot',new:'ribbon-new',limit:'ribbon-limit'};
+
+function generateSeed(){return Math.random().toString(36).slice(2).repeat(3)}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function pickPrize(prizes,rng){
+  const total=prizes.reduce((s,p)=>s+p.weight,0);
+  let t=rng*total;
+  for(const p of prizes){t-=p.weight;if(t<=0)return p;}
+  return prizes[prizes.length-1];
+}
+
+function openDrawModal(packId,defaultCount){
+  const pack=state.packs.find(p=>p.id===packId);
+  if(!pack)return;
+  state.activePack=pack;state.drawCount=defaultCount;
+  document.getElementById('bs-icon').textContent=pack.emoji||'🎴';
+  document.getElementById('bs-name').textContent=pack.name;
+  document.getElementById('bs-series').textContent=pack.series||'';
+  document.getElementById('bs-prizes').innerHTML=(pack.prizes||[]).map(pr=>`
+    <div class="bs-prize">
+      <span class="bsp-tier bsp-${pr.tier==='sar'?'s':pr.tier==='sr'?'a':pr.tier==='rr'?'b':'c'}">${pr.tier_label}</span>
+      <span class="bsp-name">${pr.name}</span>
+      <span class="bsp-cnt">×${pr.quantity}枚</span>
+    </div>`).join('');
+  document.getElementById('count-opts').innerHTML=[
+    {n:1,bonus:null},{n:5,bonus:'5連割引'},{n:10,bonus:'確定アド'}
+  ].map(o=>`
+    <div class="count-opt ${o.n===defaultCount?'sel':''}" onclick="pickDrawCount(this,${o.n})">
+      <div class="co-num">${o.n}</div>
+      <div class="co-price">${(pack.price*o.n).toLocaleString()}${pack.currency==='coin'?'コイン':'JP'}</div>
+      ${o.bonus?`<div class="co-bonus">${o.bonus}</div>`:''}
+    </div>`).join('');
+  document.getElementById('draw-modal').classList.add('show');
+}
+
+function closeDrawModal(){document.getElementById('draw-modal').classList.remove('show')}
+function pickDrawCount(el,n){
+  document.querySelectorAll('.count-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');state.drawCount=n;
+}
+
+async function executeDraw(){
+  const pack=state.activePack;
+  if(!pack)return;
+  if(!state.user){
+    closeDrawModal();
+    document.getElementById('auth-modal').classList.add('show');
+    showToast('ガチャを引くにはログインが必要です');
+    return;
+  }
+  const cost=pack.price*state.drawCount;
+  const balance=pack.currency==='coin'?state.coin:state.jp;
+  if(balance<cost){
+    showToast('💎 ポイントが不足しています');
+    closeDrawModal();openPurchase();return;
+  }
+  if(pack.currency==='coin')state.coin-=cost;
+  else state.jp-=cost;
+  updateHeaderPts();
+  closeDrawModal();
+  const prizes=pack.prizes||[];
+  const results=Array.from({length:state.drawCount},()=>({prize:pickPrize(prizes,Math.random())}));
+  await saveDrawSession(pack.id,results,cost,pack.currency);
+  state.dp+=Math.floor(cost*0.05);state.totalSpent+=cost;
+  state.sessions.unshift({
+    packName:pack.name,results,cost,
+    currency:pack.currency,date:new Date().toLocaleString('ja-JP'),
+  });
+  // DOPA風演出スタート
+  startGachaAnimation(results,pack);
 }
 
 /* ══════════════════════════════════════
    パック表示
 ══════════════════════════════════════ */
-const rfClass = { sar:'rf-sar', sr:'rf-sr', rr:'rf-rr', r:'rf-r', c:'rf-c' };
-const rarLabel = { sar:'SAR ✨', sr:'SR 💜', rr:'RR 💙', r:'R', c:'C' };
-const tierPillClass = { sar:'tp-s', sr:'tp-a', rr:'tp-b', r:'tp-c', c:'tp-c' };
-const ribbonClass = { hot:'ribbon-hot', new:'ribbon-new', limit:'ribbon-limit' };
-
-async function loadAndRenderPacks() {
-  const packs = await fetchPacks();
-  state.packs = packs;
-  renderPacks();
+async function loadAndRenderPacks(){
+  const packs=await fetchPacks();
+  state.packs=packs;renderPacks();
 }
 
-function getFilteredPacks() {
-  let list = state.currentCat === 'all' ? state.packs : state.packs.filter(p => p.category === state.currentCat);
-  if (state.currentSort === 'hot')   list = [...list].sort((a, b) => (b.is_hot ? 1 : 0) - (a.is_hot ? 1 : 0));
-  if (state.currentSort === 'cheap') list = [...list].sort((a, b) => a.price - b.price);
-  if (state.currentSort === 'ad')    list = list.filter(p => p.is_ad_confirm);
+function getFilteredPacks(){
+  let list=state.currentCat==='all'?state.packs:state.packs.filter(p=>p.category===state.currentCat);
+  if(state.currentSort==='hot')list=[...list].sort((a,b)=>(b.is_hot?1:0)-(a.is_hot?1:0));
+  if(state.currentSort==='cheap')list=[...list].sort((a,b)=>a.price-b.price);
+  if(state.currentSort==='ad')list=list.filter(p=>p.is_ad_confirm);
   return list;
 }
 
-function renderPacks() {
-  const list = getFilteredPacks();
-  if (!list.length) {
-    document.getElementById('packs-list').innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">🎴</div>このカテゴリのオリパはありません</div>`;
+function renderPacks(){
+  const list=getFilteredPacks();
+  if(!list.length){
+    document.getElementById('packs-list').innerHTML=`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">🎴</div>このカテゴリのオリパはありません</div>`;
     return;
   }
-  document.getElementById('packs-list').innerHTML = list.map(p => {
-    const pct = Math.round((p.remaining / p.total_slots) * 100);
-    const barClass = pct < 10 ? 'danger' : pct < 30 ? 'warn' : '';
-    const prizes = (p.prizes || []).filter(pr => ['sar','sr','rr'].includes(pr.tier));
-    const tiers = prizes.map(pr => `<span class="tier-pill ${tierPillClass[pr.tier]}">${pr.tier_label} ${pr.quantity}枚</span>`).join('');
+  document.getElementById('packs-list').innerHTML=list.map(p=>{
+    const pct=Math.round((p.remaining/p.total_slots)*100);
+    const barClass=pct<10?'danger':pct<30?'warn':'';
+    const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
+    const tiers=prizes.map(pr=>`<span class="tier-pill ${tierPillClass[pr.tier]}">${pr.tier_label} ${pr.quantity}枚</span>`).join('');
     return `
     <div class="pack-card" onclick="openDrawModal('${p.id}',1)">
       <div class="pc-banner">
-        <div class="pcb-bg" style="background:${p.bg_style || 'linear-gradient(135deg,#333,#111)'}"></div>
+        <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(135deg,#333,#111)'}"></div>
         <div class="pcb-shine"></div>
-        <div class="pcb-char">${p.emoji || '🎴'}</div>
+        <div class="pcb-char">${p.emoji||'🎴'}</div>
         <div class="pcb-content">
-          <span class="pcb-ribbon ${ribbonClass[p.ribbon_type] || 'ribbon-hot'}">${p.ribbon_text || 'HOT'}</span>
+          <span class="pcb-ribbon ${ribbonClass[p.ribbon_type]||'ribbon-hot'}">${p.ribbon_text||'HOT'}</span>
           <div class="pcb-top-row">
             <div>
               <div class="pcb-name">${p.name}</div>
-              <div class="pcb-series">${p.series || ''}</div>
+              <div class="pcb-series">${p.series||''}</div>
             </div>
             <div class="pcb-rate">
               <span class="pcb-rate-label">総還元率</span>
-              <span class="pcb-rate-num">${p.return_rate || '-'}</span>
+              <span class="pcb-rate-num">${p.return_rate||'-'}</span>
               <span class="pcb-rate-unit">%</span>
             </div>
           </div>
-          ${p.odds_text ? `<div class="pcb-chips"><div class="pcb-chip"><span>${p.odds_text}</span></div></div>` : ''}
+          ${p.odds_text?`<div class="pcb-chips"><div class="pcb-chip"><span>${p.odds_text}</span></div></div>`:''}
           <div class="pcb-tiers">${tiers}</div>
         </div>
       </div>
       <div class="pc-bottom">
         <div class="pc-meta">
-          <div><span class="pc-price">${p.currency === 'coin' ? '🪙' : '💎'} ${p.price.toLocaleString()}</span><span class="pc-price-unit">/1回</span></div>
+          <div><span class="pc-price">${p.currency==='coin'?'🪙':'💎'} ${p.price.toLocaleString()}</span><span class="pc-price-unit">/1回</span></div>
           <span class="pc-remain">残り<b>${p.remaining.toLocaleString()}</b>/${p.total_slots.toLocaleString()}口</span>
         </div>
         <div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
@@ -699,203 +1084,50 @@ function renderPacks() {
 }
 
 /* ══════════════════════════════════════
-   抽選
-══════════════════════════════════════ */
-function openDrawModal(packId, defaultCount) {
-  const pack = state.packs.find(p => p.id === packId);
-  if (!pack) return;
-  state.activePack = pack;
-  state.drawCount  = defaultCount;
-  document.getElementById('bs-icon').textContent   = pack.emoji || '🎴';
-  document.getElementById('bs-name').textContent   = pack.name;
-  document.getElementById('bs-series').textContent = pack.series || '';
-  document.getElementById('bs-prizes').innerHTML = (pack.prizes || []).map(pr => `
-    <div class="bs-prize">
-      <span class="bsp-tier bsp-${pr.tier === 'sar' ? 's' : pr.tier === 'sr' ? 'a' : pr.tier === 'rr' ? 'b' : 'c'}">${pr.tier_label}</span>
-      <span class="bsp-name">${pr.name}</span>
-      <span class="bsp-cnt">×${pr.quantity}枚</span>
-    </div>`).join('');
-  document.getElementById('count-opts').innerHTML = [
-    { n:1, bonus:null },
-    { n:5, bonus:'5連割引' },
-    { n:10, bonus:'確定アド' }
-  ].map(o => `
-    <div class="count-opt ${o.n === defaultCount ? 'sel' : ''}" onclick="pickDrawCount(this,${o.n})">
-      <div class="co-num">${o.n}</div>
-      <div class="co-price">${(pack.price * o.n).toLocaleString()}${pack.currency === 'coin' ? 'コイン' : 'JP'}</div>
-      ${o.bonus ? `<div class="co-bonus">${o.bonus}</div>` : ''}
-    </div>`).join('');
-  document.getElementById('draw-modal').classList.add('show');
-}
-
-function closeDrawModal() { document.getElementById('draw-modal').classList.remove('show'); }
-function pickDrawCount(el, n) {
-  document.querySelectorAll('.count-opt').forEach(o => o.classList.remove('sel'));
-  el.classList.add('sel');
-  state.drawCount = n;
-}
-
-function pickPrize(prizes, rng) {
-  const total = prizes.reduce((s, p) => s + p.weight, 0);
-  let t = rng * total;
-  for (const p of prizes) { t -= p.weight; if (t <= 0) return p; }
-  return prizes[prizes.length - 1];
-}
-
-function generateSeed() { return Math.random().toString(36).slice(2).repeat(3); }
-
-async function executeDraw() {
-  const pack = state.activePack;
-  if (!pack) return;
-
-  // ログインチェック
-  if (!state.user) {
-    closeDrawModal();
-    document.getElementById('auth-modal').classList.add('show');
-    showToast('ガチャを引くにはログインが必要です');
-    return;
-  }
-
-  const cost = pack.price * state.drawCount;
-  const balance = pack.currency === 'coin' ? state.coin : state.jp;
-  if (balance < cost) {
-    showToast('💎 ポイントが不足しています');
-    closeDrawModal();
-    openPurchase();
-    return;
-  }
-
-  // ポイント消費（先に画面更新）
-  if (pack.currency === 'coin') state.coin -= cost;
-  else state.jp -= cost;
-  updateHeaderPts();
-  closeDrawModal();
-
-  // 抽選
-  const prizes = pack.prizes || [];
-  const results = Array.from({ length: state.drawCount }, () => {
-    const rng = Math.random();
-    return { prize: pickPrize(prizes, rng) };
-  });
-
-  // DBに保存
-  await saveDrawSession(pack.id, results, cost, pack.currency);
-
-  // DP更新
-  state.dp += Math.floor(cost * 0.05);
-  state.totalSpent += cost;
-
-  // 開封画面
-  showReveal(results, pack);
-
-  // 履歴に追加
-  state.sessions.unshift({
-    packName: pack.name,
-    results,
-    cost,
-    currency: pack.currency,
-    date: new Date().toLocaleString('ja-JP'),
-  });
-}
-
-/* ══════════════════════════════════════
-   開封演出
-══════════════════════════════════════ */
-function showReveal(results, pack) {
-  state.drawFlipped = 0;
-  state.drawTotal   = results.length;
-  document.getElementById('rv-title').textContent = 'カードをタップして開封！';
-  document.getElementById('rv-hint').style.display = 'block';
-  document.getElementById('rv-done').classList.remove('show');
-  document.getElementById('rv-cards').innerHTML = results.map((r, i) => `
-    <div class="rv-card" id="rvc-${i}" onclick="flipCard(${i},'${r.prize.tier}')">
-      <div class="rv-inner">
-        <div class="rv-back">🎴</div>
-        <div class="rv-front ${rfClass[r.prize.tier] || 'rf-c'}">
-          <span class="rv-emoji">${pack.emoji || '🎴'}</span>
-          <span class="rv-name">${r.prize.name}</span>
-          <span class="rv-tier">${rarLabel[r.prize.tier] || r.prize.tier}</span>
-        </div>
-      </div>
-    </div>`).join('');
-  document.getElementById('reveal-screen').classList.add('show');
-}
-
-function flipCard(i, tier) {
-  const card = document.getElementById(`rvc-${i}`);
-  if (card.classList.contains('done')) return;
-  card.classList.add('done');
-  state.drawFlipped++;
-  if (tier === 'sar') {
-    const f = document.getElementById('sar-flash');
-    f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
-    showToast('🎊 SAR当選！おめでとうございます！', 3000);
-  }
-  if (state.drawFlipped === state.drawTotal) {
-    document.getElementById('rv-title').textContent = '🎊 開封完了！';
-    document.getElementById('rv-hint').style.display = 'none';
-    document.getElementById('rv-done').classList.add('show');
-    renderHistory();
-  }
-}
-
-function closeReveal() { document.getElementById('reveal-screen').classList.remove('show'); }
-
-/* ══════════════════════════════════════
    チャージ
 ══════════════════════════════════════ */
-const PLANS = [
-  { id:'p100',  jpy:110,   jp:100,   bonus:0    },
-  { id:'p500',  jpy:550,   jp:500,   bonus:50   },
-  { id:'p1000', jpy:1100,  jp:1000,  bonus:150, popular:true },
-  { id:'p3000', jpy:3300,  jp:3000,  bonus:600  },
-  { id:'p5000', jpy:5500,  jp:5000,  bonus:1250 },
-  { id:'p10000',jpy:11000, jp:10000, bonus:3000 },
+const PLANS=[
+  {id:'p100',jpy:110,jp:100,bonus:0},
+  {id:'p500',jpy:550,jp:500,bonus:50},
+  {id:'p1000',jpy:1100,jp:1000,bonus:150,popular:true},
+  {id:'p3000',jpy:3300,jp:3000,bonus:600},
+  {id:'p5000',jpy:5500,jp:5000,bonus:1250},
+  {id:'p10000',jpy:11000,jp:10000,bonus:3000},
 ];
-
-function openPurchase() {
-  document.getElementById('purchase-plans').innerHTML = PLANS.map(p => `
-    <div class="plan-item ${p.popular ? 'popular' : ''}" onclick="doPurchase('${p.id}')">
+function openPurchase(){
+  document.getElementById('purchase-plans').innerHTML=PLANS.map(p=>`
+    <div class="plan-item ${p.popular?'popular':''}" onclick="doPurchase('${p.id}')">
       <div>
-        ${p.popular ? '<div style="font-size:.62rem;font-weight:900;color:var(--gold2);margin-bottom:2px">⭐ 人気No.1</div>' : ''}
-        <div class="plan-jp">💎 ${p.jp.toLocaleString()} JP${p.bonus ? `<span class="plan-badge">+${p.bonus}</span>` : ''}</div>
-        ${p.bonus ? `<div class="plan-bonus">+${p.bonus}JPボーナス付き！</div>` : ''}
+        ${p.popular?'<div style="font-size:.62rem;font-weight:900;color:var(--gold2);margin-bottom:2px">⭐ 人気No.1</div>':''}
+        <div class="plan-jp">💎 ${p.jp.toLocaleString()} JP${p.bonus?`<span class="plan-badge">+${p.bonus}</span>`:''}</div>
+        ${p.bonus?`<div class="plan-bonus">+${p.bonus}JPボーナス付き！</div>`:''}
       </div>
       <div><div class="plan-price">¥${p.jpy.toLocaleString()}</div></div>
     </div>`).join('');
   document.getElementById('purchase-modal').classList.add('show');
 }
-
-function closePurchase() { document.getElementById('purchase-modal').classList.remove('show'); }
-
-async function doPurchase(planId) {
-  const plan = PLANS.find(p => p.id === planId);
-  if (!plan) return;
-  // 本番: Stripe決済へ飛ばす
-  // 今はデモとして直接付与
-  state.jp += plan.jp + plan.bonus;
-  if (state.user) {
-    await db.from('users').update({ jp_points: state.jp }).eq('id', state.user.id);
+function closePurchase(){document.getElementById('purchase-modal').classList.remove('show')}
+async function doPurchase(planId){
+  const plan=PLANS.find(p=>p.id===planId);if(!plan)return;
+  state.jp+=plan.jp+plan.bonus;
+  if(state.user){
+    await db.from('users').update({jp_points:state.jp}).eq('id',state.user.id);
     await db.from('point_purchases').insert({
-      user_id: state.user.id,
-      amount_jpy: plan.jpy,
-      jp_points: plan.jp,
-      bonus_points: plan.bonus,
-      status: 'completed',
+      user_id:state.user.id,amount_jpy:plan.jpy,
+      jp_points:plan.jp,bonus_points:plan.bonus,status:'completed',
     });
   }
-  updateHeaderPts();
-  closePurchase();
-  showToast(`💎 ${(plan.jp + plan.bonus).toLocaleString()}JP チャージしました！`);
+  updateHeaderPts();closePurchase();
+  showToast(`💎 ${(plan.jp+plan.bonus).toLocaleString()}JP チャージしました！`);
 }
 
 /* ══════════════════════════════════════
-   マイページ
+   マイページ・履歴
 ══════════════════════════════════════ */
-function renderMyPage() {
-  const content = document.getElementById('mypage-content');
-  if (!state.user) {
-    content.innerHTML = `
+function renderMyPage(){
+  const content=document.getElementById('mypage-content');
+  if(!state.user){
+    content.innerHTML=`
       <div style="text-align:center;padding:40px 0">
         <div style="font-size:3rem;margin-bottom:12px">🎴</div>
         <div style="font-size:1rem;font-weight:900;margin-bottom:6px">ログインして始めよう</div>
@@ -907,7 +1139,7 @@ function renderMyPage() {
       </div>`;
     return;
   }
-  content.innerHTML = `
+  content.innerHTML=`
     <div class="mp-user-card">
       <div class="mp-avatar">👤</div>
       <div class="mp-username">${state.user.username}</div>
@@ -926,129 +1158,105 @@ function renderMyPage() {
     </div>`;
 }
 
-/* ══════════════════════════════════════
-   履歴
-══════════════════════════════════════ */
-function renderHistory() {
-  const list = document.getElementById('history-list');
-  if (!state.sessions.length) {
-    list.innerHTML = `<div class="hist-empty"><div style="font-size:2.5rem;margin-bottom:12px">🕐</div><div style="font-weight:700">当選履歴はありません</div></div>`;
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  if(!state.sessions.length){
+    list.innerHTML=`<div class="hist-empty"><div style="font-size:2.5rem;margin-bottom:12px">🕐</div><div style="font-weight:700">当選履歴はありません</div></div>`;
     return;
   }
-  list.innerHTML = state.sessions.map(s => `
+  list.innerHTML=state.sessions.map(s=>`
     <div class="hist-card">
       <div class="hist-top"><span class="hist-pack">${s.packName}</span><span class="hist-time">${s.date}</span></div>
-      <div class="hist-results">${s.results.map(r => `<span class="hist-chip hc-${r.prize.tier}">${r.prize.name}</span>`).join('')}</div>
-      <div class="hist-cost">消費: ${s.cost.toLocaleString()} ${s.currency === 'coin' ? 'コイン' : 'JP'}</div>
+      <div class="hist-results">${s.results.map(r=>`<span class="hist-chip hc-${r.prize.tier}">${r.prize.name}</span>`).join('')}</div>
+      <div class="hist-cost">消費: ${s.cost.toLocaleString()} ${s.currency==='coin'?'コイン':'JP'}</div>
     </div>`).join('');
 }
 
-/* ══════════════════════════════════════
-   当選報告
-══════════════════════════════════════ */
-async function renderReportPage() {
-  const wins = await fetchRecentWins();
-  const fallback = [
-    { username:'ゆず***', prize:{ tier:'sar', name:'リザードン ex SAR' }, emoji:'🦎', time:'たった今' },
-    { username:'たか***', prize:{ tier:'sar', name:'マックピカチュウ SAR' }, emoji:'⚡', time:'3分前' },
-    { username:'みく***', prize:{ tier:'sr',  name:'ピカチュウ SR' }, emoji:'⭐', time:'5分前' },
-  ];
-  const data = wins.length ? wins : fallback;
-  document.getElementById('report-list').innerHTML = data.map(w => `
+async function renderReportPage(){
+  document.getElementById('report-list').innerHTML=[
+    {user:'ゆず***',r:'sar',card:'リザードン ex SAR',e:'🦎',time:'たった今'},
+    {user:'たか***',r:'sar',card:'マックピカチュウ SAR',e:'⚡',time:'3分前'},
+    {user:'みく***',r:'sr',card:'ピカチュウ SR',e:'⭐',time:'5分前'},
+    {user:'そう***',r:'sar',card:'PSA10 リーリエ',e:'🏆',time:'8分前'},
+  ].map(w=>`
     <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px">
-      <span style="font-size:1.8rem">${w.emoji || '🎴'}</span>
+      <span style="font-size:1.8rem">${w.e}</span>
       <div style="flex:1">
-        <div style="font-size:.82rem;font-weight:900">${w.username || (w.users?.username?.slice(0,3) + '***')} さん</div>
-        <div style="font-size:.75rem;color:var(--text2)">${w.prize?.name || (w.prizes?.name)} を当てました🎊</div>
+        <div style="font-size:.82rem;font-weight:900">${w.user} さん</div>
+        <div style="font-size:.75rem;color:var(--text2)">${w.card} を当てました🎊</div>
       </div>
+      <span style="font-size:.65rem;color:var(--text3)">${w.time}</span>
     </div>`).join('');
 }
 
-/* ══════════════════════════════════════
-   当選ティッカー
-══════════════════════════════════════ */
-function renderTicker() {
-  const wins = [
-    { r:'sar', user:'ゆず***', card:'リザードン ex SAR' },
-    { r:'sar', user:'たか***', card:'マックピカチュウ SAR' },
-    { r:'sr',  user:'みく***', card:'ピカチュウ SR' },
-    { r:'sar', user:'そう***', card:'PSA10 リーリエ' },
-    { r:'sr',  user:'はる***', card:'ブラッキー SR' },
+function renderTicker(){
+  const wins=[
+    {r:'sar',user:'ゆず***',card:'リザードン ex SAR'},
+    {r:'sar',user:'たか***',card:'マックピカチュウ SAR'},
+    {r:'sr',user:'みく***',card:'ピカチュウ SR'},
+    {r:'sar',user:'そう***',card:'PSA10 リーリエ'},
+    {r:'sr',user:'はる***',card:'ブラッキー SR'},
   ];
-  const items = [...wins, ...wins].map(w =>
+  const items=[...wins,...wins].map(w=>
     `<span class="wins-item"><span class="wi-badge wi-${w.r}">${w.r.toUpperCase()}</span>${w.user} さんが「${w.card}」を当てました！🎉</span>`
   ).join('');
-  document.getElementById('wins-track').innerHTML = items;
+  document.getElementById('wins-track').innerHTML=items;
 }
 
 /* ══════════════════════════════════════
    ユーティリティ
 ══════════════════════════════════════ */
-function showToast(msg, dur = 2200) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), dur);
+function showToast(msg,dur=2200){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
 }
-
-function updateHeaderPts() {
-  document.getElementById('h-jp').textContent   = state.jp.toLocaleString();
-  document.getElementById('h-coin').textContent = state.coin.toLocaleString();
+function updateHeaderPts(){
+  document.getElementById('h-jp').textContent=state.jp.toLocaleString();
+  document.getElementById('h-coin').textContent=state.coin.toLocaleString();
 }
-
-function switchAuth(mode) {
-  document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i === 0) === (mode === 'login')));
-  document.getElementById('auth-form-login').style.display    = mode === 'login'    ? 'block' : 'none';
-  document.getElementById('auth-form-register').style.display = mode === 'register' ? 'block' : 'none';
+function switchAuth(mode){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0)===(mode==='login')));
+  document.getElementById('auth-form-login').style.display=mode==='login'?'block':'none';
+  document.getElementById('auth-form-register').style.display=mode==='register'?'block':'none';
 }
-
-function closeAllModals() {
-  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+function closeAllModals(){
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('show'));
 }
-
-// ナビゲーション
-document.querySelectorAll('.bnav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.querySelectorAll('.bnav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
-    const page = btn.dataset.page;
+    const page=btn.dataset.page;
     document.getElementById(`page-${page}`)?.classList.add('active');
-    if (page === 'mypage') renderMyPage();
-    if (page === 'report') renderReportPage();
-    if (page === 'history') renderHistory();
+    if(page==='mypage')renderMyPage();
+    if(page==='report')renderReportPage();
+    if(page==='history')renderHistory();
   });
 });
-
-// カテゴリタブ
-document.querySelectorAll('.cat-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+document.querySelectorAll('.cat-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
     tab.classList.add('active');
-    state.currentCat = tab.dataset.cat;
-    renderPacks();
+    state.currentCat=tab.dataset.cat;renderPacks();
   });
 });
-
-// ソート
-document.querySelectorAll('.sort-chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
+document.querySelectorAll('.sort-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    document.querySelectorAll('.sort-chip').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
-    state.currentSort = chip.dataset.sort;
-    renderPacks();
+    state.currentSort=chip.dataset.sort;renderPacks();
   });
 });
-
-// モーダル背景タップで閉じる
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('show');});
 });
 
 /* ══════════════════════════════════════
    起動
 ══════════════════════════════════════ */
-(async () => {
+(async()=>{
   renderTicker();
   await checkSession();
   await loadAndRenderPacks();
