@@ -9,262 +9,272 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow-x:hidden}
-body{background:#f2f2f2;color:#1a1a1a;font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:68px}
+:root{
+  --bg:#07080f;--bg2:#0d0f1c;--bg3:#131628;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:#f5e090;--gold-dark:#7a5c1e;
+  --red:#c0392b;--red2:#e74c3c;
+  --border:rgba(201,168,76,.12);--border2:rgba(201,168,76,.25);
+  --text:#f0eadc;--text2:rgba(240,234,220,.6);--text3:rgba(240,234,220,.3);
+}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:68px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 10%,rgba(201,168,76,.03) 0%,transparent 50%),radial-gradient(ellipse at 80% 90%,rgba(192,57,43,.03) 0%,transparent 50%);pointer-events:none;z-index:0}
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
 input,select,textarea{font-family:inherit;outline:none}
 ::-webkit-scrollbar{display:none}
-:root{--gold:#e8a800;--gold2:#c88000;--red:#e82020;--red2:#c00000;--green:#00b050;--border:#e8e8e8;--text:#1a1a1a;--text2:#555;--text3:#999}
 
 /* TOAST */
-#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(13,15,28,.95);color:var(--gold2);padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap;border:1px solid var(--border2);box-shadow:0 4px 20px rgba(0,0,0,.5)}
 #toast.show{opacity:1}
 
 /* MAX COIN */
-.max-coin{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(145deg,#ffd700,#e8a800,#c88000);box-shadow:0 2px 6px rgba(200,140,0,.4),inset 0 1px 0 rgba(255,255,255,.3);position:relative;flex-shrink:0}
-.max-coin::before{content:'';position:absolute;inset:2px;border-radius:50%;border:1px solid rgba(255,255,255,.3)}
-.max-coin-text{font-size:.38rem;font-weight:900;color:#fff;letter-spacing:-.02em;text-shadow:0 1px 2px rgba(0,0,0,.3);position:relative;z-index:1;line-height:1}
+.max-coin{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(145deg,var(--gold3),var(--gold),var(--gold-dark));box-shadow:0 2px 8px rgba(201,168,76,.4),inset 0 1px 0 rgba(255,255,255,.3);position:relative;flex-shrink:0}
+.max-coin::before{content:'';position:absolute;inset:2px;border-radius:50%;border:1px solid rgba(255,255,255,.25)}
+.max-coin-text{font-size:.38rem;font-weight:900;color:#1a0a00;position:relative;z-index:1;line-height:1}
 
 /* HEADER */
-.header{position:sticky;top:0;z-index:100;background:#fff;height:56px;display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.06)}
-.h-logo{font-size:1.45rem;font-weight:900;color:var(--gold);flex:1;display:flex;align-items:center;gap:4px}
-.h-logo .logo-mark{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:.65rem;font-weight:900;padding:2px 6px;border-radius:4px}
-.h-currencies{display:flex;align-items:center;gap:6px}
-.h-cur{display:flex;align-items:center;gap:4px;background:#f5f5f5;border-radius:999px;padding:4px 10px;cursor:pointer;border:1px solid var(--border)}
-.h-cur .cur-val{font-size:.85rem;font-weight:900;color:var(--text)}
-.h-cur .cur-label{background:linear-gradient(135deg,#cc0000,#ff2222);color:#fff;font-size:.5rem;font-weight:900;padding:1px 4px;border-radius:3px}
-.h-add-btn{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;width:22px;height:22px;border-radius:50%;font-size:.9rem;font-weight:900;display:flex;align-items:center;justify-content:center}
-.h-notif{position:relative;background:none;padding:6px;color:var(--text3);font-size:1.25rem}
-.h-notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid #fff}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,rgba(7,8,15,.98),rgba(13,15,28,.96));border-bottom:1px solid var(--border2);height:58px;display:flex;align-items:center;padding:0 12px;gap:8px;backdrop-filter:blur(20px)}
+.h-logo{font-size:1.4rem;font-weight:900;flex:1;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold3),var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.04em}
+.h-logo .logo-mark{background:linear-gradient(135deg,var(--gold),var(--gold-dark));-webkit-background-clip:unset;-webkit-text-fill-color:unset;color:#0a0a0a;font-size:.6rem;font-weight:900;padding:2px 6px;border-radius:3px;letter-spacing:.06em}
+.h-cur{display:flex;align-items:center;gap:4px;background:rgba(201,168,76,.07);border-radius:999px;padding:5px 11px;cursor:pointer;border:1px solid var(--border2)}
+.h-cur .cur-val{font-size:.85rem;font-weight:900;color:var(--gold2)}
+.h-add-btn{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;width:20px;height:20px;border-radius:50%;font-size:.85rem;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(192,57,43,.4)}
+.h-notif{position:relative;background:none;padding:6px;color:var(--text3);font-size:1.2rem}
+.h-notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--red2);border-radius:50%;border:1.5px solid var(--bg)}
+
+/* BANNER */
+.banners-wrap{overflow:hidden;position:relative}
+.banners-track{display:flex;transition:transform .4s ease}
+.banner-slide{flex-shrink:0;width:100%;min-height:100px;display:flex;align-items:center;padding:16px 18px;position:relative;overflow:hidden;cursor:pointer}
+.banner-slide::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.3),transparent)}
+.banner-content{position:relative;z-index:1}
+.banner-tag{font-size:.6rem;font-weight:900;color:var(--gold2);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase}
+.banner-title{font-size:1.1rem;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5);line-height:1.2}
+.banner-sub{font-size:.75rem;color:rgba(255,255,255,.7);margin-top:3px}
+.banner-dots{display:flex;justify-content:center;gap:5px;padding:6px 0;background:rgba(0,0,0,.3)}
+.banner-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);transition:.2s}
+.banner-dot.active{background:var(--gold);width:14px;border-radius:3px}
 
 /* CAT TABS */
-.cat-bar{position:sticky;top:56px;z-index:99;background:#fff;display:flex;border-bottom:2px solid var(--border);overflow-x:auto;height:44px}
-.cat-tab{flex-shrink:0;padding:0 16px;height:100%;display:flex;align-items:center;font-size:.88rem;font-weight:700;color:var(--text3);background:none;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:.15s}
-.cat-tab.active{color:var(--gold);border-color:var(--gold)}
+.cat-bar{position:sticky;top:58px;z-index:99;background:rgba(7,8,15,.96);backdrop-filter:blur(20px);display:flex;border-bottom:1px solid var(--border);overflow-x:auto;height:44px}
+.cat-tab{flex-shrink:0;padding:0 16px;height:100%;display:flex;align-items:center;font-size:.85rem;font-weight:700;color:var(--text3);background:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:.15s;letter-spacing:.02em}
+.cat-tab.active{color:var(--gold2);border-color:var(--gold)}
 
 /* ALERT */
-.alert-bar{background:linear-gradient(90deg,#dd1100,#ff4400,#ff6600);color:#fff;padding:7px 12px;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:5px}
+.alert-bar{background:linear-gradient(90deg,#1a0800,#2a1200,#1a0800);border-bottom:1px solid rgba(201,168,76,.2);padding:7px 12px;font-size:.78rem;font-weight:700;color:var(--gold2);display:flex;align-items:center;gap:5px}
 
-/* LOGIN BONUS BANNER */
-.login-bonus-bar{background:linear-gradient(90deg,#005500,#00aa00);color:#fff;padding:8px 14px;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.lb-btn{background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:.72rem;font-weight:900;color:#fff}
-
-/* SORT */
-.sort-bar{background:#fff;padding:8px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border)}
-.sort-chip{flex-shrink:0;padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:700;background:#f5f5f5;color:var(--text2);border:1px solid var(--border);transition:.15s}
-.sort-chip.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border-color:transparent}
+/* LOGIN BONUS */
+.login-bonus-bar{background:linear-gradient(90deg,#001a00,#003300,#001a00);border-bottom:1px solid rgba(0,200,80,.2);padding:8px 14px;font-size:.8rem;font-weight:700;color:#4ade80;display:flex;align-items:center;justify-content:space-between;cursor:pointer;display:none}
+.lb-btn{background:rgba(0,200,80,.15);border:1px solid rgba(0,200,80,.3);border-radius:999px;padding:3px 12px;font-size:.72rem;font-weight:900;color:#4ade80}
 
 /* WINS TICKER */
-.wins-bar{background:#fff8e0;border-bottom:1px solid #f0e0a0;padding:6px 0;overflow:hidden}
+.wins-bar{background:rgba(201,168,76,.03);border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden}
 .wins-track{display:flex;animation:winscroll 22s linear infinite;white-space:nowrap}
-.wins-item{display:inline-flex;align-items:center;gap:6px;padding:0 20px;font-size:.75rem;font-weight:700;color:#665500}
-.wi-badge{font-size:.6rem;font-weight:900;padding:1px 5px;border-radius:2px}
-.wi-sar{background:#e8a800;color:#fff}.wi-sr{background:#8800cc;color:#fff}.wi-rr{background:#0066cc;color:#fff}
+.wins-item{display:inline-flex;align-items:center;gap:6px;padding:0 20px;font-size:.73rem;font-weight:700;color:rgba(201,168,76,.65)}
+.wi-badge{font-size:.58rem;font-weight:900;padding:1px 5px;border-radius:2px}
+.wi-sar{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#0a0a0a}
+.wi-sr{background:#6b21a8;color:#e9d5ff}
+.wi-rr{background:#1e3a5f;color:#93c5fd}
 @keyframes winscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
+/* SORT */
+.sort-bar{background:rgba(13,15,28,.8);padding:8px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border)}
+.sort-chip{flex-shrink:0;padding:5px 13px;border-radius:999px;font-size:.73rem;font-weight:700;background:rgba(201,168,76,.05);color:var(--text3);border:1px solid var(--border);transition:.15s}
+.sort-chip.active{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#0a0a0a;border-color:transparent;box-shadow:0 2px 10px rgba(201,168,76,.25)}
+
 /* PACK CARD */
-.packs-list{padding:8px}
-.pack-card{background:#fff;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1px solid var(--border);cursor:pointer;transition:transform .12s}
+.packs-list{padding:10px}
+.pack-card{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.4);cursor:pointer;transition:transform .12s;position:relative}
+.pack-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.02) 0%,transparent 60%);pointer-events:none;z-index:1}
 .pack-card:active{transform:scale(.99)}
-.pc-banner{width:100%;min-height:210px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.pc-banner{width:100%;min-height:215px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
 .pcb-bg{position:absolute;inset:0;z-index:0}
-.pcb-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(transparent,rgba(0,0,0,.55))}
-.pcb-shine{position:absolute;inset:0;z-index:1;background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 50%,rgba(255,255,255,.04) 100%)}
-.pcb-char{position:absolute;right:12px;bottom:48px;z-index:3;font-size:6rem;line-height:1;filter:drop-shadow(2px 6px 14px rgba(0,0,0,.5));animation:flt 3.5s ease-in-out infinite}
+.pcb-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:65%;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.pcb-shine{position:absolute;inset:0;z-index:1;background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,transparent 50%)}
+.pcb-char{position:absolute;right:14px;bottom:50px;z-index:3;font-size:6rem;line-height:1;filter:drop-shadow(2px 8px 18px rgba(0,0,0,.6));animation:flt 3.5s ease-in-out infinite}
 @keyframes flt{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
 .pcb-content{position:relative;z-index:4;padding:12px 14px 10px;display:flex;flex-direction:column;gap:5px}
-.pcb-ribbon{display:inline-flex;align-items:center;font-size:.65rem;font-weight:900;letter-spacing:.07em;padding:3px 16px 3px 8px;border-radius:3px;align-self:flex-start;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 50%,calc(100% - 5px) 100%,0 100%)}
-.ribbon-hot{background:linear-gradient(90deg,#cc0000,#ff3300);color:#ffe}
-.ribbon-new{background:linear-gradient(90deg,#0055cc,#0088ff);color:#fff}
-.ribbon-limit{background:linear-gradient(90deg,#660099,#aa00ee);color:#fff}
+.pcb-ribbon{display:inline-flex;align-items:center;font-size:.62rem;font-weight:900;letter-spacing:.08em;padding:3px 16px 3px 8px;border-radius:2px;align-self:flex-start;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 50%,calc(100% - 6px) 100%,0 100%)}
+.ribbon-hot{background:linear-gradient(90deg,#7a0000,#c0392b);color:#ffe0e0}
+.ribbon-new{background:linear-gradient(90deg,#003366,#0066cc);color:#e0f0ff}
+.ribbon-limit{background:linear-gradient(90deg,#3d0066,#7b00cc);color:#f0e0ff}
 .pcb-top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.pcb-name{font-size:1.5rem;font-weight:900;color:#fff;line-height:1.15;text-shadow:1px 2px 6px rgba(0,0,0,.5)}
-.pcb-series{font-size:.72rem;font-weight:700;color:rgba(255,255,240,.75);margin-top:2px}
-.pcb-rate{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,220,80,.5);border-radius:8px;padding:4px 8px;flex-shrink:0;backdrop-filter:blur(4px);min-width:60px}
-.pcb-rate-label{font-size:.52rem;color:rgba(255,220,80,.8);font-weight:700}
-.pcb-rate-num{font-size:1.55rem;font-weight:900;line-height:1;color:#ffe566}
-.pcb-rate-unit{font-size:.58rem;color:rgba(255,210,80,.8);font-weight:700}
+.pcb-name{font-size:1.5rem;font-weight:900;color:#fff;line-height:1.15;text-shadow:1px 2px 8px rgba(0,0,0,.6)}
+.pcb-series{font-size:.7rem;color:rgba(255,245,220,.6);margin-top:2px}
+.pcb-rate{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,.5);border:1.5px solid rgba(201,168,76,.45);border-radius:8px;padding:5px 10px;flex-shrink:0;backdrop-filter:blur(8px);min-width:62px}
+.pcb-rate-label{font-size:.5rem;color:rgba(201,168,76,.8);font-weight:700;letter-spacing:.06em}
+.pcb-rate-num{font-size:1.55rem;font-weight:900;line-height:1;color:var(--gold2);text-shadow:0 0 12px rgba(201,168,76,.4)}
+.pcb-rate-unit{font-size:.55rem;color:rgba(201,168,76,.7);font-weight:700}
 .pcb-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
-.pcb-chip{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 9px}
-.pcb-chip span{font-size:.67rem;font-weight:700;color:rgba(255,255,220,.9)}
-.pcb-tiers{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
-.tier-pill{font-size:.6rem;font-weight:900;padding:2px 7px;border-radius:3px}
-.tp-s{background:rgba(255,200,0,.2);color:#ffe08a;border:1px solid rgba(255,200,0,.35)}
-.tp-a{background:rgba(180,80,255,.2);color:#dda8ff;border:1px solid rgba(180,80,255,.35)}
-.tp-b{background:rgba(0,170,255,.15);color:#88ddff;border:1px solid rgba(0,170,255,.3)}
-.tp-c{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15)}
-
-/* 天井インジケーター */
-.tenjo-bar{background:#f0f0f0;border-radius:999px;height:4px;margin:4px 0;overflow:hidden;position:relative}
-.tenjo-fill{height:100%;background:linear-gradient(90deg,#0066cc,#00ccff);border-radius:999px;transition:.3s}
-.tenjo-label{font-size:.6rem;color:var(--text3);display:flex;justify-content:space-between;margin-bottom:2px}
-
-.pc-bottom{padding:10px 12px 12px}
-.pc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.pc-price{font-size:1.2rem;font-weight:900;color:var(--text)}
-.pc-price-unit{font-size:.7rem;color:var(--text3);font-weight:700}
-.pc-remain{font-size:.78rem;font-weight:700;color:var(--text2)}
-.pc-remain b{color:var(--red)}
-.progress-bg{background:#eaeaea;border-radius:999px;height:7px;overflow:hidden;margin-bottom:10px;position:relative}
-.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#00bb44,#00ee66);position:relative;overflow:hidden;transition:.5s}
-.progress-fill.warn{background:linear-gradient(90deg,#ee8800,#ffaa00)}
-.progress-fill.danger{background:linear-gradient(90deg,#dd0000,#ff3300)}
-.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 1.8s infinite}
+.pcb-chip{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.4);border:1px solid rgba(201,168,76,.2);border-radius:999px;padding:3px 10px;backdrop-filter:blur(4px)}
+.pcb-chip span{font-size:.65rem;font-weight:700;color:rgba(255,240,200,.85)}
+.pcb-tiers{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.tier-pill{font-size:.58rem;font-weight:900;padding:2px 8px;border-radius:2px}
+.tp-s{background:rgba(201,168,76,.15);color:var(--gold2);border:1px solid rgba(201,168,76,.3)}
+.tp-a{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
+.tp-b{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
+.tp-c{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid rgba(255,255,255,.1)}
+.pc-bottom{padding:10px 14px 14px}
+.pc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.pc-price{font-size:1.2rem;font-weight:900;color:var(--gold2)}
+.pc-price-unit{font-size:.68rem;color:var(--text3);font-weight:700}
+.pc-remain{font-size:.75rem;font-weight:700;color:var(--text2)}
+.pc-remain b{color:var(--red2)}
+.progress-bg{background:rgba(255,255,255,.06);border-radius:999px;height:5px;overflow:hidden;margin-bottom:11px}
+.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold2));position:relative;overflow:hidden;transition:.5s}
+.progress-fill.warn{background:linear-gradient(90deg,#7a3300,#cc5500)}
+.progress-fill.danger{background:linear-gradient(90deg,#7a0000,#c0392b)}
+.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:shimmer 2s infinite}
 @keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(200%)}}
-.pc-btns{display:flex;gap:7px}
-.pc-btn-1{flex:1;padding:12px 6px;border-radius:10px;font-size:.95rem;font-weight:900;background:linear-gradient(160deg,#f5c800,#e0a000);color:#fff;box-shadow:0 3px 10px rgba(200,140,0,.3),inset 0 1px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.2);position:relative;overflow:hidden;transition:.1s}
+.pc-btns{display:flex;gap:8px}
+.pc-btn-1{flex:1;padding:13px 6px;border-radius:10px;font-size:.95rem;font-weight:900;background:linear-gradient(160deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;box-shadow:0 4px 16px rgba(201,168,76,.25),inset 0 1px 0 rgba(255,255,255,.2);letter-spacing:.02em;transition:.1s;position:relative;overflow:hidden}
 .pc-btn-1::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15) 0%,transparent 55%)}
 .pc-btn-1:active{transform:scale(.97)}
-.pc-btn-5{flex:1;padding:12px 6px;border-radius:10px;font-size:.95rem;font-weight:900;background:linear-gradient(160deg,#ff3333,#cc0000);color:#fff;box-shadow:0 3px 10px rgba(200,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2);text-shadow:0 1px 2px rgba(0,0,0,.2);position:relative;overflow:hidden;transition:.1s}
-.pc-btn-5::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,transparent 55%)}
+.pc-btn-5{flex:1;padding:13px 6px;border-radius:10px;font-size:.95rem;font-weight:900;background:linear-gradient(160deg,#e74c3c,#c0392b,#922b21);color:#fff;box-shadow:0 4px 16px rgba(192,57,43,.25),inset 0 1px 0 rgba(255,255,255,.12);letter-spacing:.02em;transition:.1s;position:relative;overflow:hidden}
+.pc-btn-5::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.1) 0%,transparent 55%)}
 .pc-btn-5:active{transform:scale(.97)}
 
+/* LOADING */
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:16px}
-.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(232,168,0,.2);border-top-color:var(--gold);animation:spin .8s linear infinite}
+.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(201,168,76,.15);border-top-color:var(--gold);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal-overlay.show{opacity:1;pointer-events:all}
-.bottom-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:0 0 28px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:92vh;overflow-y:auto}
+.bottom-sheet{background:linear-gradient(180deg,var(--bg3),var(--bg2));border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:0 0 28px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:92vh;overflow-y:auto;border-top:1px solid var(--border2)}
 .modal-overlay.show .bottom-sheet{transform:translateY(0)}
-.bs-drag{width:40px;height:4px;background:#ddd;border-radius:2px;margin:14px auto 0}
+.bs-drag{width:40px;height:4px;background:rgba(201,168,76,.2);border-radius:2px;margin:14px auto 0}
 .bs-hero{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
 .bs-hero-icon{font-size:2.4rem}
-.bs-pack-name{font-size:1.05rem;font-weight:900}
+.bs-pack-name{font-size:1.05rem;font-weight:900;color:var(--text)}
 .bs-pack-series{font-size:.74rem;color:var(--text3);margin-top:2px}
-.bs-section-label{padding:12px 16px 6px;font-size:.68rem;font-weight:900;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
+.bs-section-label{padding:12px 16px 6px;font-size:.65rem;font-weight:900;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
 .bs-prizes{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px;border-bottom:1px solid var(--border)}
-.bs-prize{background:#f8f8f8;border:1px solid #ebebeb;border-radius:7px;padding:5px 10px;display:flex;align-items:center;gap:6px}
+.bs-prize{background:rgba(201,168,76,.05);border:1px solid var(--border);border-radius:7px;padding:5px 10px;display:flex;align-items:center;gap:6px}
 .bsp-tier{font-size:.58rem;font-weight:900;padding:1px 5px;border-radius:2px}
-.bsp-s{background:#fff3cc;color:#9a6000;border:1px solid #e8c040}
-.bsp-a{background:#f0e8ff;color:#660099;border:1px solid #c080ff}
-.bsp-b{background:#e0f0ff;color:#004488;border:1px solid #80b8ff}
-.bsp-c{background:#f0f0f0;color:#888;border:1px solid #ddd}
-.bsp-name{font-size:.76rem;font-weight:700}
+.bsp-s{background:rgba(201,168,76,.2);color:var(--gold2);border:1px solid rgba(201,168,76,.3)}
+.bsp-a{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
+.bsp-b{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
+.bsp-c{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border)}
+.bsp-name{font-size:.76rem;font-weight:700;color:var(--text)}
 .bsp-cnt{font-size:.65rem;color:var(--text3)}
 .count-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:8px 16px 12px;border-bottom:1px solid var(--border)}
-.count-opt{background:#f8f8f8;border:1.5px solid #e0e0e0;border-radius:10px;padding:10px 5px;text-align:center;cursor:pointer;transition:.15s}
-.count-opt.sel{border-color:var(--gold);background:#fffbee}
-.co-num{font-size:1.6rem;font-weight:900;color:var(--gold);line-height:1}
+.count-opt{background:rgba(201,168,76,.04);border:1.5px solid var(--border);border-radius:10px;padding:10px 5px;text-align:center;cursor:pointer;transition:.15s}
+.count-opt.sel{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.co-num{font-size:1.6rem;font-weight:900;color:var(--gold2);line-height:1}
 .co-price{font-size:.7rem;color:var(--text2);margin-top:2px;font-weight:700}
-.co-bonus{font-size:.58rem;color:var(--green);font-weight:800;margin-top:1px}
-.bs-draw-btn{margin:10px 16px 0;width:calc(100% - 32px);background:linear-gradient(160deg,#ff3333,#cc0000);color:#fff;font-size:1rem;font-weight:900;padding:14px;border-radius:12px;box-shadow:0 4px 16px rgba(200,0,0,.25);letter-spacing:.02em;transition:.1s}
+.co-bonus{font-size:.58rem;color:#4ade80;font-weight:800;margin-top:1px}
+.bs-draw-btn{margin:10px 16px 0;width:calc(100% - 32px);background:linear-gradient(160deg,#e74c3c,#c0392b);color:#fff;font-size:1rem;font-weight:900;padding:14px;border-radius:12px;box-shadow:0 4px 16px rgba(192,57,43,.3);letter-spacing:.02em;transition:.1s}
 .bs-draw-btn:active{transform:scale(.98)}
 .bs-cancel-btn{width:100%;padding:12px;margin-top:6px;background:none;color:var(--text3);font-size:.85rem;font-weight:700}
 
-/* 天井インジケーター（モーダル内） */
-.tenjo-modal{background:#e8f4ff;border:1px solid #b0d4ff;border-radius:8px;padding:10px 14px;margin:8px 16px;font-size:.78rem}
-.tenjo-modal-label{font-weight:900;color:#0055aa;margin-bottom:4px}
-.tenjo-modal-bar{background:#cce0ff;border-radius:999px;height:6px;overflow:hidden;margin-bottom:4px}
-.tenjo-modal-fill{height:100%;background:linear-gradient(90deg,#0066cc,#00aaff);border-radius:999px;transition:.3s}
-.tenjo-modal-sub{font-size:.7rem;color:#0055aa}
+/* 天井 */
+.tenjo-modal{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px 14px;margin:8px 16px;font-size:.78rem}
+.tenjo-modal-label{font-weight:900;color:#93c5fd;margin-bottom:4px}
+.tenjo-modal-bar{background:rgba(59,130,246,.1);border-radius:999px;height:5px;overflow:hidden;margin-bottom:4px}
+.tenjo-modal-fill{height:100%;background:linear-gradient(90deg,#1e40af,#3b82f6);border-radius:999px;transition:.3s}
+.tenjo-modal-sub{font-size:.7rem;color:#93c5fd}
 
 /* AUTH */
-.auth-sheet{max-height:85vh}
-.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:0}
+.auth-sheet{max-height:88vh}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border)}
 .auth-tab{flex:1;padding:12px;text-align:center;font-size:.9rem;font-weight:700;color:var(--text3);background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
-.auth-tab.active{color:var(--gold);border-color:var(--gold)}
+.auth-tab.active{color:var(--gold2);border-color:var(--gold)}
 .auth-form{padding:16px}
-.auth-label{font-size:.75rem;font-weight:700;color:var(--text2);margin-bottom:4px;display:block}
-.auth-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;color:var(--text);transition:.2s;margin-bottom:12px}
+.auth-label{font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:4px;display:block;letter-spacing:.05em}
+.auth-input{width:100%;padding:11px 14px;border:1.5px solid var(--border2);border-radius:10px;font-size:.9rem;color:var(--text);background:rgba(201,168,76,.04);transition:.2s;margin-bottom:12px}
 .auth-input:focus{border-color:var(--gold)}
-.auth-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:.95rem;font-weight:900;margin-top:4px;transition:.1s}
+.auth-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.95rem;font-weight:900;margin-top:4px;transition:.1s;box-shadow:0 4px 16px rgba(201,168,76,.25)}
 .auth-submit:active{transform:scale(.98)}
 .auth-forgot{text-align:center;margin-top:10px;font-size:.78rem;color:var(--text3);cursor:pointer;text-decoration:underline}
-.auth-sns{display:flex;gap:8px;margin-top:12px}
-.auth-sns-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px}
 
 /* PURCHASE */
-.plan-item{display:flex;align-items:center;justify-content:space-between;background:#f8f8f8;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
-.plan-item.popular{border-color:var(--gold);background:#fffce8}
-.plan-jp{font-size:1.1rem;font-weight:900}
-.plan-bonus{font-size:.7rem;color:var(--green);font-weight:700;margin-top:1px}
-.plan-badge{background:var(--red);color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:2px;margin-left:6px}
-.plan-price{font-size:.95rem;font-weight:900;color:var(--text);text-align:right}
+.plan-item{display:flex;align-items:center;justify-content:space-between;background:rgba(201,168,76,.04);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.plan-item.popular{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.plan-jp{font-size:1.1rem;font-weight:900;color:var(--text)}
+.plan-bonus{font-size:.7rem;color:#4ade80;font-weight:700;margin-top:1px}
+.plan-badge{background:var(--red2);color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:2px;margin-left:6px}
+.plan-price{font-size:.95rem;font-weight:900;color:var(--gold2);text-align:right}
 
 /* GACHA SCREEN */
 .gacha-screen{position:fixed;inset:0;z-index:500;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s;overflow:hidden}
 .gacha-screen.show{opacity:1;pointer-events:all}
 .gacha-stage{position:relative;z-index:10;width:280px;height:280px;display:flex;align-items:center;justify-content:center}
 .gacha-pack{width:160px;height:200px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;transition:all .3s}
-.gacha-pack.col-white{background:linear-gradient(145deg,#e0e0e0,#fff);color:#ccc;box-shadow:0 0 20px rgba(200,200,200,.3)}
-.gacha-pack.col-blue{background:linear-gradient(145deg,#0044aa,#0066ff);color:#4488ff;box-shadow:0 0 30px rgba(68,136,255,.5)}
-.gacha-pack.col-green{background:linear-gradient(145deg,#005500,#00aa00);color:#00cc44;box-shadow:0 0 30px rgba(0,200,60,.5)}
-.gacha-pack.col-red{background:linear-gradient(145deg,#880000,#cc0000);color:#ff4444;box-shadow:0 0 40px rgba(255,60,60,.6)}
-.gacha-pack.col-gold{background:linear-gradient(145deg,#664400,#cc8800);color:#ffcc00;box-shadow:0 0 50px rgba(255,200,0,.7)}
-.gacha-pack.col-rainbow{background:linear-gradient(145deg,#330066,#660099,#0044cc,#006600,#cc8800,#cc0000);color:#fff;animation:rainbow-glow 1s infinite}
-@keyframes rainbow-glow{0%{box-shadow:0 0 60px rgba(255,0,0,.7)}25%{box-shadow:0 0 60px rgba(255,200,0,.7)}50%{box-shadow:0 0 60px rgba(0,255,100,.7)}75%{box-shadow:0 0 60px rgba(0,100,255,.7)}100%{box-shadow:0 0 60px rgba(255,0,255,.7)}}
+.gacha-video-wrap{position:absolute;inset:0;z-index:5;display:none}
+.gacha-video-wrap video{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.gacha-pack.col-white{background:linear-gradient(145deg,#1a1a2e,#2a2a40);color:rgba(255,255,255,.3);box-shadow:0 0 20px rgba(200,200,200,.1)}
+.gacha-pack.col-blue{background:linear-gradient(145deg,#0a1a3a,#0a2a6a);color:#4488ff;box-shadow:0 0 30px rgba(68,136,255,.4)}
+.gacha-pack.col-green{background:linear-gradient(145deg,#0a2a0a,#0a5a0a);color:#00cc44;box-shadow:0 0 30px rgba(0,200,60,.4)}
+.gacha-pack.col-red{background:linear-gradient(145deg,#2a0a0a,#5a0a0a);color:#ff4444;box-shadow:0 0 40px rgba(255,60,60,.5)}
+.gacha-pack.col-gold{background:linear-gradient(145deg,#2a1a00,#5a3a00);color:var(--gold2);box-shadow:0 0 50px rgba(201,168,76,.6)}
+.gacha-pack.col-rainbow{background:linear-gradient(145deg,#1a0040,#400010,#002040,#004020,#402000);color:#fff;animation:rainbow-glow 1s infinite}
+@keyframes rainbow-glow{0%{box-shadow:0 0 60px rgba(255,0,0,.6)}25%{box-shadow:0 0 60px rgba(201,168,76,.6)}50%{box-shadow:0 0 60px rgba(0,255,100,.6)}75%{box-shadow:0 0 60px rgba(0,100,255,.6)}100%{box-shadow:0 0 60px rgba(255,0,255,.6)}}
 .puchun-wrap{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .puchun-heart{font-size:4rem;animation:puchun-anim .6s ease-out forwards;opacity:0}
 @keyframes puchun-anim{0%{transform:scale(0) translateY(0);opacity:1}50%{transform:scale(1.4) translateY(-20px);opacity:1}100%{transform:scale(1) translateY(-60px);opacity:0}}
 .dokkun-wrap{position:absolute;inset:0;z-index:25;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none}
 .dokkun-char{font-size:5rem;animation:dokkun .4s ease-out}
 @keyframes dokkun{0%{transform:scale(1)}30%{transform:scale(1.3)}60%{transform:scale(.9)}100%{transform:scale(1)}}
-.dokkun-text{font-size:1.4rem;font-weight:900;color:#fff;text-shadow:0 0 20px rgba(255,200,0,.8);animation:dokkun-text-in .3s ease-out}
+.dokkun-text{font-size:1.4rem;font-weight:900;color:var(--gold2);text-shadow:0 0 20px rgba(201,168,76,.8);animation:dokkun-text-in .3s ease-out}
 @keyframes dokkun-text-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.rewind-overlay{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.rewind-overlay{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 .rewind-text{font-size:1.2rem;font-weight:900;color:#fff;letter-spacing:.15em;animation:glitch .1s infinite}
-@keyframes glitch{0%{transform:translateX(0);color:#fff}25%{transform:translateX(-3px);color:#ff0044}50%{transform:translateX(3px);color:#00ffaa}75%{transform:translateX(-2px);color:#ffcc00}100%{transform:translateX(0);color:#fff}}
-.rewind-bar{width:200px;height:4px;background:#333;border-radius:999px;overflow:hidden}
-.rewind-fill{height:100%;background:linear-gradient(90deg,#ff0044,#ffcc00,#00ffaa);animation:rewind-progress .8s ease-out forwards}
+@keyframes glitch{0%{transform:translateX(0);color:#fff}25%{transform:translateX(-3px);color:var(--red2)}50%{transform:translateX(3px);color:#00ffaa}75%{transform:translateX(-2px);color:var(--gold2)}100%{transform:translateX(0);color:#fff}}
+.rewind-bar{width:200px;height:4px;background:#1a1a2e;border-radius:999px;overflow:hidden}
+.rewind-fill{height:100%;background:linear-gradient(90deg,var(--red2),var(--gold2),#00ffaa);animation:rewind-progress .8s ease-out forwards}
 @keyframes rewind-progress{from{width:100%}to{width:0%}}
 .gacha-label{position:relative;z-index:10;text-align:center;padding:0 16px}
-.gacha-label-main{font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.5);letter-spacing:.1em;margin-bottom:4px}
-.gacha-label-sub{font-size:.8rem;color:rgba(255,255,255,.3)}
+.gacha-label-main{font-size:1.1rem;font-weight:900;color:rgba(201,168,76,.5);letter-spacing:.1em;margin-bottom:4px}
+.gacha-label-sub{font-size:.8rem;color:rgba(201,168,76,.3)}
 .color-indicator{display:flex;gap:6px;position:relative;z-index:10}
-.ci-dot{width:10px;height:10px;border-radius:50%;opacity:.3;transition:.3s}
+.ci-dot{width:10px;height:10px;border-radius:50%;opacity:.25;transition:.3s}
 .ci-dot.active{opacity:1;transform:scale(1.3)}
-.ci-white{background:#ddd}.ci-blue{background:#4488ff}.ci-green{background:#00cc44}.ci-red{background:#ff4444}.ci-gold{background:#ffcc00}.ci-rainbow{background:linear-gradient(90deg,#f00,#ff0,#0f0,#00f,#f0f)}
-.gacha-skip{position:absolute;bottom:30px;right:20px;z-index:50;background:rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2)}
+.ci-white{background:rgba(255,255,255,.4)}.ci-blue{background:#4488ff}.ci-green{background:#00cc44}.ci-red{background:#ff4444}.ci-gold{background:var(--gold2)}.ci-rainbow{background:linear-gradient(90deg,#f00,#ff0,#0f0,#00f,#f0f)}
+.gacha-skip{position:absolute;bottom:30px;right:20px;z-index:50;background:rgba(201,168,76,.1);color:rgba(201,168,76,.5);font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:999px;border:1px solid rgba(201,168,76,.2)}
 
 /* RESULT */
-.result-screen{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s}
+.result-screen{position:fixed;inset:0;z-index:600;background:rgba(7,8,15,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s}
 .result-screen.show{opacity:1;pointer-events:all}
-.result-title{font-size:1rem;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:.15em}
+.result-title{font-size:1rem;font-weight:900;color:rgba(201,168,76,.4);letter-spacing:.15em}
 .result-cards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:440px;padding:0 12px}
 .rc{width:100px;height:140px;perspective:500px;cursor:pointer;flex-shrink:0}
 .rc-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1);border-radius:9px}
 .rc.done .rc-inner{transform:rotateY(180deg)}
 .rc-back,.rc-front{position:absolute;inset:0;backface-visibility:hidden;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.rc-back{background:linear-gradient(145deg,#14142a,#0a0a1e);border:1.5px solid rgba(232,168,0,.3);font-size:2.6rem;box-shadow:0 4px 18px rgba(0,0,0,.5)}
-.rc-back::before{content:'';position:absolute;inset:5px;border:1px solid rgba(232,168,0,.1);border-radius:6px}
+.rc-back{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1.5px solid var(--border2);font-size:2.6rem;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.rc-back::before{content:'';position:absolute;inset:5px;border:1px solid var(--border);border-radius:6px}
 .rc-front{border-width:2px;border-style:solid;transform:rotateY(180deg)}
 .rc-emoji{font-size:1.8rem;z-index:1}
 .rc-name{font-size:.52rem;font-weight:900;text-align:center;padding:0 4px;z-index:1;line-height:1.3}
 .rc-tier{font-size:.48rem;z-index:1;opacity:.7}
-.rf-sar{background:linear-gradient(145deg,#1c1600,#2e2400);border-color:#e8a800;box-shadow:0 0 28px rgba(232,168,0,.4)}
-.rf-sar .rc-emoji,.rf-sar .rc-name{color:#e8a800}
-.rf-sr{background:linear-gradient(145deg,#0e0020,#1a0035);border-color:#b066ff;box-shadow:0 0 22px rgba(176,102,255,.35)}
-.rf-sr .rc-emoji,.rf-sr .rc-name{color:#cc88ff}
-.rf-rr{background:linear-gradient(145deg,#001626,#002040);border-color:#0088cc}
-.rf-rr .rc-emoji,.rf-rr .rc-name{color:#44ccee}
-.rf-r{background:linear-gradient(145deg,#0a1020,#101830);border-color:#446699}
-.rf-r .rc-emoji,.rf-r .rc-name{color:#8899cc}
-.rf-c{background:linear-gradient(145deg,#101012,#181818);border-color:#383840}
-.rf-c .rc-emoji,.rf-c .rc-name{color:#666680}
-.result-hint{font-size:.72rem;color:rgba(255,255,255,.25);font-weight:700}
-.result-done-btn{background:linear-gradient(160deg,#f5c800,#e0a000);color:#fff;font-size:.95rem;font-weight:900;padding:13px 48px;border-radius:12px;box-shadow:0 4px 16px rgba(200,140,0,.35);display:none}
+.rf-sar{background:linear-gradient(145deg,#1c1200,#2e1e00);border-color:var(--gold);box-shadow:0 0 28px rgba(201,168,76,.35)}
+.rf-sar .rc-emoji,.rf-sar .rc-name{color:var(--gold2)}
+.rf-sr{background:linear-gradient(145deg,#0e0020,#1a0035);border-color:#7c3aed}
+.rf-sr .rc-emoji,.rf-sr .rc-name{color:#c4b5fd}
+.rf-rr{background:linear-gradient(145deg,#001626,#002040);border-color:#1d4ed8}
+.rf-rr .rc-emoji,.rf-rr .rc-name{color:#93c5fd}
+.rf-r{background:linear-gradient(145deg,#0a1020,#101830);border-color:#334155}
+.rf-r .rc-emoji,.rf-r .rc-name{color:#94a3b8}
+.rf-c{background:linear-gradient(145deg,#0f1015,#15161e);border-color:#1e2030}
+.rf-c .rc-emoji,.rf-c .rc-name{color:#4a4a5a}
+.result-hint{font-size:.72rem;color:rgba(201,168,76,.25);font-weight:700}
+.result-done-btn{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.95rem;font-weight:900;padding:13px 48px;border-radius:12px;box-shadow:0 4px 16px rgba(201,168,76,.3);display:none}
 .result-done-btn.show{display:block;animation:pop .3s ease-out}
-
-/* ポイント還元ボタン */
-.convert-btn{background:linear-gradient(135deg,#0066cc,#0099ff);color:#fff;font-size:.75rem;font-weight:900;padding:5px 12px;border-radius:6px;margin-top:4px}
-.convert-all-btn{width:calc(100% - 32px);margin:0 16px;background:linear-gradient(135deg,#0066cc,#0099ff);color:#fff;font-size:.85rem;font-weight:900;padding:11px;border-radius:10px;box-shadow:0 3px 10px rgba(0,100,200,.25)}
-
+.convert-btn{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;font-size:.72rem;font-weight:900;padding:4px 10px;border-radius:5px;margin-top:3px}
 @keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 
 /* JACKPOT */
-.jackpot-overlay{position:fixed;inset:0;z-index:700;background:radial-gradient(ellipse at 50% 50%,rgba(255,200,0,.15) 0%,#000 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:.3s}
+.jackpot-overlay{position:fixed;inset:0;z-index:700;background:radial-gradient(ellipse at 50% 50%,rgba(201,168,76,.1) 0%,var(--bg) 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:.3s}
 .jackpot-overlay.show{opacity:1;pointer-events:all}
-.jackpot-text{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,#fff,#ffcc00,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:jackpot-shine 1s infinite;text-align:center;letter-spacing:.1em}
-@keyframes jackpot-shine{0%,100%{filter:drop-shadow(0 0 10px rgba(255,200,0,.5))}50%{filter:drop-shadow(0 0 30px rgba(255,200,0,1))}}
-.jackpot-card-name{font-size:1.2rem;font-weight:900;color:#ffcc44;text-align:center}
+.jackpot-text{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:jackpot-shine 1s infinite;text-align:center;letter-spacing:.1em}
+@keyframes jackpot-shine{0%,100%{filter:drop-shadow(0 0 10px rgba(201,168,76,.4))}50%{filter:drop-shadow(0 0 30px rgba(201,168,76,.9))}}
+.jackpot-card-name{font-size:1.2rem;font-weight:900;color:var(--gold2);text-align:center}
 .jackpot-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .jp-particle{position:absolute;font-size:1.5rem;animation:jp-fall linear forwards}
 @keyframes jp-fall{from{transform:translateY(-50px) rotate(0deg);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
-.jackpot-btn{background:linear-gradient(135deg,#ffcc00,#e8a800);color:#0a0a0a;font-weight:900;font-size:1rem;padding:14px 48px;border-radius:12px;box-shadow:0 4px 20px rgba(255,200,0,.4)}
-
-/* SAR FLASH */
-.sar-flash{position:fixed;inset:0;z-index:500;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,200,0,.55) 0%,transparent 65%)}
+.jackpot-btn{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-weight:900;font-size:1rem;padding:14px 48px;border-radius:12px;box-shadow:0 4px 20px rgba(201,168,76,.35)}
+.sar-flash{position:fixed;inset:0;z-index:500;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 45%,rgba(201,168,76,.4) 0%,transparent 65%)}
 .sar-flash.go{animation:sarflash .9s ease-out forwards}
 @keyframes sarflash{0%{opacity:1}100%{opacity:0;transform:scale(1.07)}}
 
@@ -274,90 +284,77 @@ input,select,textarea{font-family:inherit;outline:none}
 
 /* MYPAGE */
 .mypage{padding:16px}
-.mp-user-card{background:linear-gradient(135deg,#1a1000,#2a1800,#3a2800);border-radius:14px;padding:18px;margin-bottom:14px;color:#fff;position:relative;overflow:hidden}
-.mp-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:10px}
-.mp-username{font-size:1.1rem;font-weight:900;margin-bottom:3px}
-.mp-rank{font-size:.72rem;color:rgba(255,200,80,.8);font-weight:700}
-.mp-pts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
-.mp-pt{background:rgba(0,0,0,.25);border-radius:8px;padding:8px;text-align:center}
-.mp-pt-label{font-size:.6rem;color:rgba(255,255,255,.5);font-weight:700;margin-bottom:2px}
-.mp-pt-val{font-size:1.05rem;font-weight:900;color:#ffd740}
-.mp-rank-wrap{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)}
-.mp-rank-title{font-size:.82rem;font-weight:900;margin-bottom:8px}
-.mp-rank-bar-wrap{background:#eee;border-radius:999px;height:8px;overflow:hidden;margin-bottom:5px}
-.mp-rank-fill{height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:999px}
+.mp-user-card{background:linear-gradient(135deg,#0a0800,#1a1200,#2a2000);border:1px solid var(--border2);border-radius:14px;padding:18px;margin-bottom:14px;color:var(--text);position:relative;overflow:hidden}
+.mp-user-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(201,168,76,.08),transparent);border-radius:50%}
+.mp-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:10px;box-shadow:0 4px 16px rgba(201,168,76,.25)}
+.mp-username{font-size:1.1rem;font-weight:900;margin-bottom:3px;color:var(--text)}
+.mp-rank{font-size:.72rem;color:var(--gold2);font-weight:700}
+.mp-pts-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.mp-pt{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.mp-pt-label{font-size:.6rem;color:var(--text3);font-weight:700;margin-bottom:3px;letter-spacing:.05em}
+.mp-pt-val{font-size:1.1rem;font-weight:900;color:var(--gold2)}
+.mp-rank-wrap{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.mp-rank-title{font-size:.82rem;font-weight:900;margin-bottom:8px;color:var(--text)}
+.mp-rank-bar-wrap{background:rgba(255,255,255,.05);border-radius:999px;height:6px;overflow:hidden;margin-bottom:5px}
+.mp-rank-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold2));border-radius:999px}
 .mp-rank-labels{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text3)}
-.mp-menu{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06);border:1px solid var(--border)}
-.mp-menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);font-size:.88rem;font-weight:700;cursor:pointer;transition:.15s}
+.mp-menu{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:10px}
+.mp-menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);font-size:.88rem;font-weight:700;cursor:pointer;transition:.15s;color:var(--text2)}
 .mp-menu-item:last-child{border:none}
-.mp-menu-item:active{background:#f5f5f5}
+.mp-menu-item:active{background:rgba(201,168,76,.05)}
 .mp-menu-icon{font-size:1.2rem;width:28px;text-align:center}
 .mp-menu-arrow{margin-left:auto;color:var(--text3)}
+.referral-section{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px}
+.ref-code-box{background:rgba(201,168,76,.05);border:2px dashed var(--border2);border-radius:10px;padding:14px;text-align:center;margin:10px 0}
+.ref-code{font-size:1.5rem;font-weight:900;color:var(--gold2);letter-spacing:.15em}
+.ref-copy-btn{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.82rem;font-weight:900;padding:8px 20px;border-radius:8px;margin-top:8px}
 
 /* HISTORY */
 .history-page{padding:8px}
-.hist-empty{text-align:center;padding:48px 16px;color:var(--text3)}
-.hist-card{background:#fff;border-radius:10px;border:1px solid var(--border);padding:12px 14px;margin-bottom:7px;box-shadow:0 1px 5px rgba(0,0,0,.05)}
+.hist-card{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:7px}
 .hist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.hist-pack{font-size:.82rem;font-weight:900}
+.hist-pack{font-size:.82rem;font-weight:900;color:var(--text)}
 .hist-time{font-size:.68rem;color:var(--text3)}
 .hist-results{display:flex;gap:5px;flex-wrap:wrap}
-.hist-chip{font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:3px;cursor:pointer;position:relative}
-.hc-sar{background:#fff3cc;color:#9a6000;border:1px solid #e8c040}
-.hc-sr{background:#f0e8ff;color:#660099;border:1px solid #c080ff}
-.hc-rr{background:#e0f0ff;color:#004488;border:1px solid #80b8ff}
-.hc-r{background:#f5f5f5;color:#555;border:1px solid #ddd}
-.hc-c{background:#f0f0f0;color:#999;border:1px solid #e0e0e0}
-.hc-converted{opacity:.5;text-decoration:line-through}
+.hist-chip{font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:3px;cursor:pointer}
+.hc-sar{background:rgba(201,168,76,.15);color:var(--gold2);border:1px solid rgba(201,168,76,.3)}
+.hc-sr{background:rgba(124,58,237,.15);color:#c4b5fd;border:1px solid rgba(124,58,237,.3)}
+.hc-rr{background:rgba(29,78,216,.1);color:#93c5fd;border:1px solid rgba(29,78,216,.25)}
+.hc-r{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border)}
+.hc-c{background:rgba(255,255,255,.03);color:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.06)}
+.hc-converted{opacity:.4;text-decoration:line-through}
 .hist-cost{font-size:.72rem;color:var(--text3);margin-top:5px}
-.hist-convert-btn{margin-top:8px;background:linear-gradient(135deg,#0066cc,#0099ff);color:#fff;font-size:.75rem;font-weight:900;padding:6px 14px;border-radius:6px;width:100%}
+.hist-action-btns{display:flex;gap:6px;margin-top:8px}
+.hist-btn{flex:1;padding:8px;border-radius:8px;font-size:.75rem;font-weight:900;text-align:center}
+.hist-btn-convert{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff}
+.hist-btn-ship{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a}
 
 /* NOTICES */
-.notice-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
-.notice-type{font-size:.62rem;font-weight:900;padding:2px 7px;border-radius:3px;margin-bottom:6px;display:inline-block}
-.nt-info{background:#e8f4ff;color:#0055aa;border:1px solid #b0d4ff}
-.nt-campaign{background:#fff3e0;color:#aa5500;border:1px solid #ffcc80}
-.nt-system{background:#f0f0f0;color:#555;border:1px solid #ddd}
-.notice-title{font-size:.88rem;font-weight:900;margin-bottom:4px}
+.notice-item{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.notice-type{font-size:.62rem;font-weight:900;padding:2px 7px;border-radius:3px;margin-bottom:6px;display:inline-block;letter-spacing:.05em}
+.nt-info{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+.nt-campaign{background:rgba(201,168,76,.1);color:var(--gold2);border:1px solid var(--border2)}
+.nt-system{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border)}
+.notice-title{font-size:.88rem;font-weight:900;margin-bottom:4px;color:var(--text)}
 .notice-body{font-size:.78rem;color:var(--text2);line-height:1.6}
 .notice-time{font-size:.68rem;color:var(--text3);margin-top:6px}
 
-/* SHIPPING FORM */
+/* SHIP FORM */
 .ship-form{padding:16px}
-.ship-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.9rem;color:var(--text);margin-bottom:10px}
+.ship-input{width:100%;padding:11px 14px;border:1.5px solid var(--border2);border-radius:10px;font-size:.9rem;color:var(--text);background:rgba(201,168,76,.04);margin-bottom:10px}
 .ship-input:focus{border-color:var(--gold);outline:none}
-.ship-label{font-size:.75rem;font-weight:700;color:var(--text2);margin-bottom:4px;display:block}
-.ship-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:.95rem;font-weight:900;margin-top:4px}
-
-/* REFERRAL */
-.referral-section{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--border)}
-.ref-code-box{background:#f8f8f8;border:2px dashed var(--gold);border-radius:10px;padding:14px;text-align:center;margin:10px 0}
-.ref-code{font-size:1.4rem;font-weight:900;color:var(--gold);letter-spacing:.1em}
-.ref-bonus{font-size:.75rem;color:var(--text3);margin-top:4px}
-.ref-copy-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;font-size:.82rem;font-weight:900;padding:8px 20px;border-radius:8px;margin-top:8px}
-
-/* RANKING */
-.ranking-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
-.rank-num{font-size:1.2rem;font-weight:900;width:28px;text-align:center;color:var(--text3)}
-.rank-num.gold{color:#e8a800}
-.rank-num.silver{color:#aaa}
-.rank-num.bronze{color:#cc6600}
-.rank-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
-.rank-info{flex:1}
-.rank-name{font-size:.88rem;font-weight:900}
-.rank-sub{font-size:.72rem;color:var(--text3)}
-.rank-val{font-size:.88rem;font-weight:900;color:var(--gold)}
+.ship-label{font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:4px;display:block;letter-spacing:.05em}
+.ship-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.95rem;font-weight:900;margin-top:4px;box-shadow:0 4px 16px rgba(201,168,76,.25)}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:150;box-shadow:0 -3px 20px rgba(0,0,0,.08)}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 9px;gap:2px;background:none;color:var(--text3);font-size:.58rem;font-weight:700;transition:.15s;position:relative}
-.bnav-btn.active{color:var(--gold)}
-.bnav-icon{font-size:1.3rem;line-height:1}
-.bnav-badge{position:absolute;top:5px;right:calc(50% - 16px);background:var(--red);color:#fff;font-size:.5rem;font-weight:900;padding:1px 5px;border-radius:999px;min-width:14px;text-align:center}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(180deg,rgba(7,8,15,.95),rgba(13,15,28,.98));border-top:1px solid var(--border2);display:flex;z-index:150;backdrop-filter:blur(20px)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 10px;gap:2px;background:none;color:var(--text3);font-size:.56rem;font-weight:700;transition:.15s;position:relative;letter-spacing:.03em}
+.bnav-btn.active{color:var(--gold2)}
+.bnav-icon{font-size:1.25rem;line-height:1}
+.bnav-badge{position:absolute;top:5px;right:calc(50% - 16px);background:var(--red2);color:#fff;font-size:.5rem;font-weight:900;padding:1px 5px;border-radius:999px;min-width:14px;text-align:center}
 </style>
 </head>
 <body>
-
 <div id="toast"></div>
 
 <script>
@@ -365,79 +362,57 @@ const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
 const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
 const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
-
 const state={
   user:null,session:null,
-  jp:0,coin:500,dp:0,
+  coin:500,dp:0,
   rank:'ブロンズIV',totalSpent:0,
   currentCat:'all',currentSort:'new',
   activePack:null,drawCount:1,
-  sessions:[],packs:[],
-  notices:[],
-  tenjoCount:{}, // packId -> 引いた回数
-  referralCode:null,
-  loginBonusClaimed:false,
+  sessions:[],packs:[],notices:[],banners:[],videos:[],
+  tenjoCount:{},
 };
-
-// ランク定義
 const RANKS=[
-  {name:'ブロンズIV',min:0,max:1000},
-  {name:'ブロンズIII',min:1000,max:3000},
-  {name:'ブロンズII',min:3000,max:6000},
-  {name:'ブロンズI',min:6000,max:10000},
-  {name:'シルバーIV',min:10000,max:20000},
-  {name:'シルバーIII',min:20000,max:35000},
-  {name:'シルバーII',min:35000,max:55000},
-  {name:'シルバーI',min:55000,max:80000},
-  {name:'ゴールドIV',min:80000,max:120000},
-  {name:'ゴールドI',min:120000,max:200000},
-  {name:'プラチナI',min:200000,max:500000},
-  {name:'ダイヤI',min:500000,max:Infinity},
+  {name:'ブロンズIV',min:0,max:1000},{name:'ブロンズIII',min:1000,max:3000},
+  {name:'ブロンズII',min:3000,max:6000},{name:'ブロンズI',min:6000,max:10000},
+  {name:'シルバーIV',min:10000,max:20000},{name:'シルバーIII',min:20000,max:35000},
+  {name:'シルバーII',min:35000,max:55000},{name:'シルバーI',min:55000,max:80000},
+  {name:'ゴールドIV',min:80000,max:120000},{name:'ゴールドI',min:120000,max:200000},
+  {name:'プラチナI',min:200000,max:500000},{name:'ダイヤI',min:500000,max:Infinity},
 ];
-
 function getRankInfo(spent){
-  for(let i=RANKS.length-1;i>=0;i--){
-    if(spent>=RANKS[i].min)return{rank:RANKS[i],idx:i};
-  }
+  for(let i=RANKS.length-1;i>=0;i--)if(spent>=RANKS[i].min)return{rank:RANKS[i],idx:i};
   return{rank:RANKS[0],idx:0};
 }
+try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 </script>
 
 <!-- HEADER -->
 <header class="header">
   <div class="h-logo">オリパMAX<span class="logo-mark">MAX</span></div>
-  <div class="h-currencies">
-    <div class="h-cur" onclick="openPurchase()">
-      <span class="cur-label">JP</span>
-      <span class="cur-val" id="h-jp">0</span>
-    </div>
-    <div class="h-cur" onclick="openPurchase()">
-      <div class="max-coin"><span class="max-coin-text">MAX</span></div>
-      <span class="cur-val" id="h-coin">500</span>
-      <button class="h-add-btn" onclick="event.stopPropagation();openPurchase()">＋</button>
-    </div>
+  <div class="h-cur" onclick="openPurchase()">
+    <div class="max-coin"><span class="max-coin-text">MAX</span></div>
+    <span class="cur-val" id="h-coin">500</span>
+    <button class="h-add-btn" onclick="event.stopPropagation();openPurchase()">＋</button>
   </div>
-  <button class="h-notif" id="notif-btn" onclick="showPage('notices',document.querySelector('[data-page=notices]'))">
+  <button class="h-notif" onclick="showPage('notices',document.querySelector('[data-page=notices]'))">
     🔔<span class="h-notif-dot" id="notif-dot" style="display:none"></span>
   </button>
 </header>
 
 <!-- PAGE: ガチャ -->
 <div id="page-gacha" class="page active">
-  <div class="cat-bar" id="cat-bar">
-    <button class="cat-tab active" data-cat="all">すべて</button>
-    <button class="cat-tab" data-cat="pokemon">ポケモン</button>
-    <button class="cat-tab" data-cat="onepiece">ワンピース</button>
-    <button class="cat-tab" data-cat="yugioh">遊戯王</button>
-    <button class="cat-tab" data-cat="labubu">ラブブ</button>
-  </div>
-  <div class="alert-bar"><span>⚠️</span>登録後限定！今だけ引ける超お得なオリパ<span>⚠️</span></div>
-  <div id="login-bonus-wrap" style="display:none">
-    <div class="login-bonus-bar" onclick="claimLoginBonus()">
-      🎁 本日のログインボーナスを受け取る！<span class="lb-btn">受け取る</span>
+  <!-- BANNERS -->
+  <div id="banners-section" style="display:none">
+    <div class="banners-wrap" id="banners-wrap">
+      <div class="banners-track" id="banners-track"></div>
     </div>
+    <div class="banner-dots" id="banner-dots"></div>
   </div>
-  <div class="wins-bar"><div class="wins-track" id="wins-track"></div></div>
+
+  <div class="alert-bar">✦ 登録後限定！今だけ引ける超お得なオリパ ✦</div>
+  <div class="login-bonus-bar" id="login-bonus-wrap" onclick="claimLoginBonus()">
+    🎁 本日のログインボーナスを受け取る！<span class="lb-btn">受け取る</span>
+  </div>
   <div class="sort-bar">
     <button class="sort-chip active" data-sort="new">🆕 新着順</button>
     <button class="sort-chip" data-sort="hot">🔥 人気順</button>
@@ -455,8 +430,7 @@ function getRankInfo(spent){
   <div style="padding:16px" id="items-content">
     <div style="text-align:center;padding:48px 16px;color:var(--text3)">
       <div style="font-size:2.5rem;margin-bottom:12px">📦</div>
-      <div style="font-weight:700;margin-bottom:6px">獲得商品はありません</div>
-      <div style="font-size:.82rem">オリパを引くとここに表示されます</div>
+      <div style="font-weight:700;margin-bottom:6px;color:var(--text2)">獲得商品はありません</div>
     </div>
   </div>
 </div>
@@ -464,9 +438,9 @@ function getRankInfo(spent){
 <!-- PAGE: 当選履歴 -->
 <div id="page-history" class="page">
   <div class="history-page" id="history-list">
-    <div class="hist-empty">
-      <div style="font-size:2.5rem;margin-bottom:12px">🕐</div>
-      <div style="font-weight:700;margin-bottom:6px">当選履歴はありません</div>
+    <div style="text-align:center;padding:48px;color:var(--text3)">
+      <div style="font-size:2rem;margin-bottom:10px">🕐</div>
+      <div style="font-weight:700;color:var(--text2)">当選履歴はありません</div>
     </div>
   </div>
 </div>
@@ -474,7 +448,7 @@ function getRankInfo(spent){
 <!-- PAGE: お知らせ -->
 <div id="page-notices" class="page">
   <div style="padding:16px">
-    <div style="font-size:.95rem;font-weight:900;margin-bottom:12px">🔔 お知らせ</div>
+    <div style="font-size:.95rem;font-weight:900;margin-bottom:12px;color:var(--text)">🔔 お知らせ</div>
     <div id="notices-list"></div>
   </div>
 </div>
@@ -516,7 +490,7 @@ function getRankInfo(spent){
   <div class="bottom-sheet auth-sheet">
     <div class="bs-drag"></div>
     <div style="padding:14px 16px 0;text-align:center">
-      <div style="font-size:1.2rem;font-weight:900">🎴 オリパMAXへようこそ</div>
+      <div style="font-size:1.2rem;font-weight:900;color:var(--text)">🎴 オリパMAXへようこそ</div>
       <div style="font-size:.78rem;color:var(--text3);margin-top:4px">登録で500コイン無料プレゼント！</div>
     </div>
     <div class="auth-tabs">
@@ -529,10 +503,7 @@ function getRankInfo(spent){
       <label class="auth-label">パスワード</label>
       <input type="password" class="auth-input" id="login-pass" placeholder="パスワード">
       <button class="auth-submit" onclick="doLogin()">ログイン</button>
-      <div class="auth-forgot" onclick="doForgotPassword()">パスワードをお忘れの方はこちら</div>
-      <div class="auth-sns">
-        <button class="auth-sns-btn" onclick="doSNSLogin('google')"><span>G</span>Googleでログイン</button>
-      </div>
+      <div class="auth-forgot" onclick="doForgotPassword()">パスワードをお忘れの方</div>
     </div>
     <div id="auth-form-register" class="auth-form" style="display:none">
       <label class="auth-label">ユーザー名</label>
@@ -541,7 +512,7 @@ function getRankInfo(spent){
       <input type="email" class="auth-input" id="reg-email" placeholder="example@mail.com">
       <label class="auth-label">パスワード（8文字以上）</label>
       <input type="password" class="auth-input" id="reg-pass" placeholder="パスワード">
-      <label class="auth-label">生年月日 <span style="color:var(--red);font-size:.7rem">※18歳以上のみ</span></label>
+      <label class="auth-label">生年月日 <span style="color:var(--red2);font-size:.7rem">※18歳以上のみ</span></label>
       <input type="date" class="auth-input" id="reg-birth">
       <label class="auth-label">紹介コード（任意）</label>
       <input type="text" class="auth-input" id="reg-referral" placeholder="紹介コードがあれば入力（+300コイン）">
@@ -555,12 +526,12 @@ function getRankInfo(spent){
   <div class="bottom-sheet">
     <div class="bs-drag"></div>
     <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
-      <div style="font-size:1.05rem;font-weight:900">💎 JPポイントをチャージ</div>
-      <div style="font-size:.75rem;color:var(--text3);margin-top:2px">1JP = 1円相当・初回最大90%オフ</div>
+      <div style="font-size:1.05rem;font-weight:900;color:var(--text)">🪙 コインをチャージ</div>
+      <div style="font-size:.75rem;color:var(--text3);margin-top:2px">1コイン = 1円相当</div>
     </div>
     <div style="padding:12px 16px" id="purchase-plans"></div>
     <div style="padding:0 16px">
-      <button onclick="closePurchase()" style="width:100%;padding:11px;background:#f5f5f5;border-radius:10px;color:var(--text2);font-weight:700;font-size:.85rem">閉じる</button>
+      <button onclick="closePurchase()" style="width:100%;padding:11px;background:rgba(255,255,255,.05);border-radius:10px;color:var(--text3);font-weight:700;font-size:.85rem;border:1px solid var(--border)">閉じる</button>
     </div>
   </div>
 </div>
@@ -570,7 +541,7 @@ function getRankInfo(spent){
   <div class="bottom-sheet">
     <div class="bs-drag"></div>
     <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
-      <div style="font-size:1.05rem;font-weight:900">📦 発送依頼</div>
+      <div style="font-size:1.05rem;font-weight:900;color:var(--text)">📦 発送依頼</div>
       <div style="font-size:.78rem;color:var(--text3);margin-top:2px">送料無料・最短翌日発送</div>
     </div>
     <div class="ship-form">
@@ -578,10 +549,10 @@ function getRankInfo(spent){
       <label class="ship-label">お名前 *</label>
       <input type="text" class="ship-input" id="ship-name" placeholder="山田 太郎">
       <label class="ship-label">郵便番号 *</label>
-      <input type="text" class="ship-input" id="ship-zip" placeholder="123-4567" maxlength="8">
+      <input type="text" class="ship-input" id="ship-zip" placeholder="123-4567">
       <label class="ship-label">都道府県 *</label>
       <select class="ship-input" id="ship-pref">
-        <option value="">選択してください</option>
+        <option value="">選択</option>
         <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option><option>秋田県</option><option>山形県</option><option>福島県</option><option>茨城県</option><option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option><option>新潟県</option><option>富山県</option><option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option><option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option><option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option><option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option><option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option><option>福岡県</option><option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option><option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
       </select>
       <label class="ship-label">市区町村・番地 *</label>
@@ -602,8 +573,9 @@ function getRankInfo(spent){
     <div class="gacha-label-main" id="gacha-label-main">抽選中...</div>
     <div class="gacha-label-sub" id="gacha-label-sub">運命の瞬間</div>
   </div>
-  <div class="gacha-stage" id="gacha-stage">
+  <div class="gacha-stage">
     <div class="gacha-pack col-white" id="gacha-pack">🎴</div>
+    <div class="gacha-video-wrap" id="gacha-video-wrap"><video id="gacha-video" playsinline muted></video></div>
     <div class="puchun-wrap" id="puchun-wrap"></div>
     <div class="dokkun-wrap" id="dokkun-wrap" style="display:none"></div>
     <div class="rewind-overlay" id="rewind-overlay" style="display:none">
@@ -611,7 +583,7 @@ function getRankInfo(spent){
       <div class="rewind-bar"><div class="rewind-fill"></div></div>
     </div>
   </div>
-  <div class="color-indicator" id="color-indicator">
+  <div class="color-indicator">
     <div class="ci-dot ci-white active" data-col="white"></div>
     <div class="ci-dot ci-blue" data-col="blue"></div>
     <div class="ci-dot ci-green" data-col="green"></div>
@@ -638,31 +610,34 @@ function getRankInfo(spent){
   <div class="jackpot-card-name" id="jackpot-card-name"></div>
   <button class="jackpot-btn" onclick="closeJackpot()">開封する！</button>
 </div>
-
 <div class="sar-flash" id="sar-flash"></div>
 
 <script>
-/* ══════════════════════════════════════
-   SUPABASE 関数
-══════════════════════════════════════ */
+/* ══ SUPABASE ══ */
 async function fetchPacks(){
-  const{data,error}=await db.from('packs').select('*, prizes(*)').eq('is_active',true).order('sort_order');
-  if(error){console.error(error);return[];}
+  const{data}=await db.from('packs').select('*,prizes(*)').eq('is_active',true).order('sort_order');
   return data||[];
 }
-async function fetchUserProfile(userId){
-  const{data}=await db.from('users').select('*').eq('id',userId).single();
-  return data;
+async function fetchBanners(){
+  const{data}=await db.from('banners').select('*').eq('is_active',true).order('sort_order');
+  return data||[];
+}
+async function fetchNotices(){
+  const{data}=await db.from('notices').select('*').eq('is_active',true).order('created_at',{ascending:false});
+  return data||[];
+}
+async function fetchVideos(){
+  const{data}=await db.from('gacha_videos').select('*').eq('is_active',true);
+  return data||[];
 }
 async function checkSession(){
   const{data:{session}}=await db.auth.getSession();
   if(session){state.session=session;await loadUserProfile(session.user.id);}
 }
 async function loadUserProfile(userId){
-  const profile=await fetchUserProfile(userId);
+  const{data:profile}=await db.from('users').select('*').eq('id',userId).single();
   if(!profile)return;
   state.user=profile;
-  state.jp=profile.jp_points||0;
   state.coin=profile.coin_points||0;
   state.dp=profile.dp_points||0;
   state.totalSpent=profile.total_spent||0;
@@ -670,12 +645,14 @@ async function loadUserProfile(userId){
   state.rank=rank.name;
   updateHeaderPts();
   checkLoginBonus();
-  generateReferralCode();
+  if(!state.user.referral_code){
+    const code=generateCode();
+    await db.from('users').update({referral_code:code}).eq('id',userId);
+    state.user.referral_code=code;
+  }
 }
 
-/* ══════════════════════════════════════
-   AUTH
-══════════════════════════════════════ */
+/* ══ AUTH ══ */
 async function doLogin(){
   const email=document.getElementById('login-email').value;
   const pass=document.getElementById('login-pass').value;
@@ -687,7 +664,6 @@ async function doLogin(){
   await loadUserProfile(data.user.id);
   closeAllModals();showToast('✅ ログインしました！');
 }
-
 async function doRegister(){
   const name=document.getElementById('reg-name').value;
   const email=document.getElementById('reg-email').value;
@@ -700,129 +676,135 @@ async function doRegister(){
   showToast('登録中...');
   const{data,error}=await db.auth.signUp({email,password:pass});
   if(error){showToast('⚠️ '+error.message);return;}
-
-  // 紹介コード処理
   let bonusCoin=500;
   if(referral){
-    const{data:refUser}=await db.from('users').select('id').eq('referral_code',referral).single();
+    const{data:refUser}=await db.from('users').select('id,coin_points').eq('referral_code',referral).single();
     if(refUser){
       bonusCoin+=300;
-      // 紹介者にもボーナス
-      await db.from('users').update({coin_points:db.rpc('increment',{x:500})}).eq('id',refUser.id);
-      showToast('🎉 紹介コード適用！+300コインボーナス！',3000);
+      await db.from('users').update({coin_points:(refUser.coin_points||0)+500}).eq('id',refUser.id);
     }
   }
-
   const refCode=generateCode();
   await db.from('users').insert({
     id:data.user.id,email,username:name,
-    password_hash:'supabase_auth',
-    coin_points:bonusCoin,
-    birth_date:birth,
-    referral_code:refCode,
+    password_hash:'supabase_auth',coin_points:bonusCoin,
+    birth_date:birth,referral_code:refCode,
   });
   state.session=data.session;
   await loadUserProfile(data.user.id);
   closeAllModals();
   showToast(`🎉 登録完了！${bonusCoin}コインプレゼント！`,3000);
 }
-
 async function doForgotPassword(){
-  const email=prompt('登録済みのメールアドレスを入力してください:');
+  const email=prompt('登録済みのメールアドレスを入力:');
   if(!email)return;
-  const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
-  if(error){showToast('⚠️ '+error.message);}
-  else{showToast('📧 パスワードリセットメールを送信しました',3000);}
+  await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+  showToast('📧 パスワードリセットメールを送信しました',3000);
 }
-
-async function doSNSLogin(provider){
-  const{error}=await db.auth.signInWithOAuth({provider,options:{redirectTo:window.location.href}});
-  if(error)showToast('⚠️ '+error.message);
-}
-
 async function doLogout(){
   await db.auth.signOut();
-  state.user=null;state.jp=0;state.coin=0;state.dp=0;
+  state.user=null;state.coin=0;state.dp=0;
   updateHeaderPts();renderMyPage();showToast('ログアウトしました');
 }
 
-/* ══════════════════════════════════════
-   ログインボーナス
-══════════════════════════════════════ */
+/* ══ BANNERS ══ */
+let bannerIdx=0,bannerTimer=null;
+async function loadBanners(){
+  const banners=await fetchBanners();
+  state.banners=banners;
+  if(!banners.length)return;
+  document.getElementById('banners-section').style.display='block';
+  const track=document.getElementById('banners-track');
+  const dots=document.getElementById('banner-dots');
+  track.innerHTML=banners.map(b=>`
+    <div class="banner-slide" style="background:${b.bg_style||'linear-gradient(135deg,#1a0040,#0a0020)'}" onclick="location.href='${b.link_url||'#'}'">
+      <div class="banner-content">
+        ${b.tag_text?`<div class="banner-tag">${b.tag_text}</div>`:''}
+        <div class="banner-title">${b.title||''}</div>
+        ${b.sub_text?`<div class="banner-sub">${b.sub_text}</div>`:''}
+      </div>
+    </div>`).join('');
+  dots.innerHTML=banners.map((_,i)=>`<div class="banner-dot ${i===0?'active':''}" onclick="goBanner(${i})"></div>`).join('');
+  if(banners.length>1){
+    bannerTimer=setInterval(()=>goBanner((bannerIdx+1)%banners.length),4000);
+  }
+}
+function goBanner(idx){
+  bannerIdx=idx;
+  document.getElementById('banners-track').style.transform=`translateX(-${idx*100}%)`;
+  document.querySelectorAll('.banner-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+/* ══ NOTICES ══ */
+async function loadNotices(){
+  const notices=await fetchNotices();
+  state.notices=notices;
+  if(notices.length>0){
+    const seen=localStorage.getItem('notices_seen');
+    if(seen!==notices[0]?.id){
+      document.getElementById('notice-badge').style.display='block';
+      document.getElementById('notice-badge').textContent=notices.length;
+      document.getElementById('notif-dot').style.display='block';
+    }
+  }
+}
+function renderNotices(){
+  const notices=state.notices;
+  const list=document.getElementById('notices-list');
+  if(!notices.length){
+    list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">お知らせはありません</div>';
+    return;
+  }
+  list.innerHTML=notices.map(n=>`
+    <div class="notice-item">
+      <span class="notice-type nt-${n.type||'info'}">${n.type==='campaign'?'キャンペーン':n.type==='system'?'システム':'お知らせ'}</span>
+      <div class="notice-title">${n.title||''}</div>
+      <div class="notice-body">${n.body||''}</div>
+      <div class="notice-time">${new Date(n.created_at).toLocaleDateString('ja-JP')}</div>
+    </div>`).join('');
+  if(notices.length>0)localStorage.setItem('notices_seen',notices[0].id);
+  document.getElementById('notice-badge').style.display='none';
+  document.getElementById('notif-dot').style.display='none';
+}
+
+/* ══ VIDEOS ══ */
+async function loadVideos(){
+  const videos=await fetchVideos();
+  state.videos=videos;
+}
+function getVideoForTier(tier){
+  const v=state.videos.find(v=>v.tier===tier&&v.is_default&&v.video_url);
+  if(!v)state.videos.find(v=>v.tier==='all'&&v.video_url);
+  return v?.video_url||null;
+}
+
+/* ══ LOGIN BONUS ══ */
 async function checkLoginBonus(){
   if(!state.user)return;
   const today=new Date().toDateString();
-  const lastBonus=localStorage.getItem(`lb_${state.user.id}`);
-  if(lastBonus!==today){
-    document.getElementById('login-bonus-wrap').style.display='block';
-  }
+  const last=localStorage.getItem(`lb_${state.user.id}`);
+  if(last!==today)document.getElementById('login-bonus-wrap').style.display='flex';
 }
-
 async function claimLoginBonus(){
-  if(!state.user){
-    document.getElementById('auth-modal').classList.add('show');
-    return;
-  }
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
   const today=new Date().toDateString();
-  const lastBonus=localStorage.getItem(`lb_${state.user.id}`);
-  if(lastBonus===today){showToast('本日はすでに受け取り済みです');return;}
-
-  // ボーナス付与（100コイン）
+  if(localStorage.getItem(`lb_${state.user.id}`)===today){showToast('本日はすでに受け取り済みです');return;}
   state.coin+=100;
   await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-  await db.from('transactions').insert({
-    user_id:state.user.id,type:'bonus',amount:100,
-    currency:'coin',description:'ログインボーナス',
-  });
+  await db.from('transactions').insert({user_id:state.user.id,type:'bonus',amount:100,currency:'coin',description:'ログインボーナス'}).catch(()=>{});
   localStorage.setItem(`lb_${state.user.id}`,today);
   document.getElementById('login-bonus-wrap').style.display='none';
   updateHeaderPts();
   showToast('🎁 ログインボーナス！100コインを受け取りました！',3000);
 }
 
-/* ══════════════════════════════════════
-   紹介コード
-══════════════════════════════════════ */
-function generateCode(){
-  return Math.random().toString(36).slice(2,8).toUpperCase();
-}
-
-function generateReferralCode(){
-  if(state.user&&!state.user.referral_code){
-    const code=generateCode();
-    db.from('users').update({referral_code:code}).eq('id',state.user.id);
-    state.user.referral_code=code;
-  }
-}
-
-/* ══════════════════════════════════════
-   天井システム
-══════════════════════════════════════ */
-function getTenjoCount(packId){
-  return state.tenjoCount[packId]||0;
-}
-
-function updateTenjoCount(packId,count){
-  state.tenjoCount[packId]=(state.tenjoCount[packId]||0)+count;
-  localStorage.setItem('tenjo',JSON.stringify(state.tenjoCount));
-}
-
-function checkTenjo(pack){
-  if(!pack.tenjo_limit)return false;
-  return getTenjoCount(pack.id)>=pack.tenjo_limit;
-}
-
-/* ══════════════════════════════════════
-   GACHA 演出
-══════════════════════════════════════ */
+/* ══ GACHA 演出 ══ */
 const rfClass={sar:'rf-sar',sr:'rf-sr',rr:'rf-rr',r:'rf-r',c:'rf-c'};
 const rarLabel={sar:'SAR ✨',sr:'SR 💜',rr:'RR 💙',r:'R',c:'C'};
 const tierPillClass={sar:'tp-s',sr:'tp-a',rr:'tp-b',r:'tp-c',c:'tp-c'};
 const ribbonClass={hot:'ribbon-hot',new:'ribbon-new',limit:'ribbon-limit'};
 const TIER_TO_COLOR={c:'white',r:'blue',rr:'green',sr:'red',sar:'gold'};
-
-let gachaResults=[];
-let gachaSkipped=false;
+let gachaResults=[],gachaSkipped=false;
 
 function getTierColor(tier){
   if(tier==='sar')return Math.random()<0.3?'rainbow':'gold';
@@ -836,26 +818,46 @@ function startGachaAnimation(results,pack){
     return(order[r.prize.tier]||0)>(order[best]||0)?r.prize.tier:best;
   },'c');
   const finalColor=getTierColor(topTier);
+  const videoUrl=getVideoForTier(topTier);
   document.getElementById('gacha-screen').classList.add('show');
-  runColorSequence(finalColor,topTier,results,pack);
+  if(videoUrl){
+    runVideoSequence(videoUrl,results,pack,topTier);
+  } else {
+    runColorSequence(finalColor,topTier,results,pack);
+  }
+}
+
+async function runVideoSequence(videoUrl,results,pack,topTier){
+  const vw=document.getElementById('gacha-video-wrap');
+  const vid=document.getElementById('gacha-video');
+  const packEl=document.getElementById('gacha-pack');
+  vid.src=videoUrl;
+  vw.style.display='block';
+  packEl.style.display='none';
+  document.getElementById('gacha-label-main').textContent='開封中...';
+  vid.play().catch(()=>{});
+  vid.onended=()=>{
+    vw.style.display='none';
+    packEl.style.display='flex';
+    if(!gachaSkipped)showGachaResult(results,pack,topTier);
+  };
 }
 
 async function runColorSequence(finalColor,topTier,results,pack){
-  const pack_el=document.getElementById('gacha-pack');
   const label=document.getElementById('gacha-label-main');
   const sub=document.getElementById('gacha-label-sub');
-  pack_el.textContent=state.activePack?.emoji||'🎴';
+  document.getElementById('gacha-pack').textContent=state.activePack?.emoji||'🎴';
   setPackColor('white');
   label.textContent='抽選中...';sub.textContent='運命の瞬間';
   await sleep(600);
-  const演出type=Math.random();
-  if(演出type<0.3)await puchunSequence(finalColor,topTier,pack_el,label,sub);
-  else if(演出type<0.5&&['sr','sar'].includes(topTier))await rewindSequence(finalColor,topTier,pack_el,label,sub);
-  else await normalSequence(finalColor,topTier,pack_el,label,sub);
+  const t=Math.random();
+  if(t<0.3)await puchunSequence(finalColor,topTier,label,sub);
+  else if(t<0.5&&['sr','sar'].includes(topTier))await rewindSequence(finalColor,topTier,label,sub);
+  else await normalSequence(finalColor,topTier,label,sub);
   if(!gachaSkipped){await sleep(500);showGachaResult(results,pack,topTier);}
 }
 
-async function normalSequence(finalColor,topTier,pack_el,label,sub){
+async function normalSequence(finalColor,topTier,label,sub){
   const colorOrder=['white','blue','green','red','gold','rainbow'];
   const finalIdx=colorOrder.indexOf(finalColor);
   for(let i=0;i<=finalIdx;i++){
@@ -868,7 +870,7 @@ async function normalSequence(finalColor,topTier,pack_el,label,sub){
   }
 }
 
-async function puchunSequence(finalColor,topTier,pack_el,label,sub){
+async function puchunSequence(finalColor,topTier,label,sub){
   label.textContent='プチュン...';sub.textContent='💓';
   setPackColor('white');await sleep(400);
   const pw=document.getElementById('puchun-wrap');
@@ -876,9 +878,9 @@ async function puchunSequence(finalColor,topTier,pack_el,label,sub){
   await sleep(300);pw.innerHTML='';
   const dw=document.getElementById('dokkun-wrap');
   dw.style.display='flex';
-  const dokkun_count=['sr','sar'].includes(topTier)?2:1;
+  const cnt=['sr','sar'].includes(topTier)?2:1;
   label.textContent='ドックン！';
-  for(let i=0;i<dokkun_count;i++){
+  for(let i=0;i<cnt;i++){
     if(gachaSkipped)break;
     dw.innerHTML=`<div class="dokkun-char">💗</div><div class="dokkun-text">ドックン${i+1}回目！</div>`;
     await sleep(600);
@@ -886,11 +888,11 @@ async function puchunSequence(finalColor,topTier,pack_el,label,sub){
   dw.style.display='none';
   setPackColor(finalColor);
   label.textContent=getColorLabel(finalColor);
-  sub.textContent=dokkun_count>=2?'🎊 大チャンス！':'期待度アップ！';
+  sub.textContent=cnt>=2?'🎊 大チャンス！':'期待度アップ！';
   await sleep(800);
 }
 
-async function rewindSequence(finalColor,topTier,pack_el,label,sub){
+async function rewindSequence(finalColor,topTier,label,sub){
   setPackColor('white');label.textContent='残念...';sub.textContent='ハズレ？';
   await sleep(600);if(gachaSkipped)return;
   const ro=document.getElementById('rewind-overlay');
@@ -905,21 +907,23 @@ function setPackColor(color){
   document.getElementById('gacha-pack').className='gacha-pack col-'+color;
   document.querySelectorAll('.ci-dot').forEach(d=>d.classList.toggle('active',d.dataset.col===color));
 }
-
 function getColorLabel(color){
-  const labels={white:'白…',blue:'青！期待！',green:'緑！チャンス！',red:'赤！激アツ！',gold:'金！大当たり！',rainbow:'虹！！！最高演出！！！'};
-  return labels[color]||'';
+  return{white:'白…',blue:'青！期待！',green:'緑！チャンス！',red:'赤！激アツ！',gold:'金！大当たり！',rainbow:'虹！！！最高演出！！！'}[color]||'';
 }
-
 function showGachaResult(results,pack,topTier){
   document.getElementById('gacha-screen').classList.remove('show');
+  document.getElementById('gacha-video-wrap').style.display='none';
+  document.getElementById('gacha-pack').style.display='flex';
   if(topTier==='sar')showJackpot(results[0].prize.name,()=>showResultCards(results,pack));
   else showResultCards(results,pack);
 }
-
 async function skipGacha(){
   gachaSkipped=true;
+  const vid=document.getElementById('gacha-video');
+  vid.pause();
   document.getElementById('gacha-screen').classList.remove('show');
+  document.getElementById('gacha-video-wrap').style.display='none';
+  document.getElementById('gacha-pack').style.display='flex';
   if(gachaResults.length){
     const topTier=gachaResults.reduce((best,r)=>{
       const order={c:0,r:1,rr:2,sr:3,sar:4};
@@ -929,9 +933,7 @@ async function skipGacha(){
   }
 }
 
-/* ══════════════════════════════════════
-   JACKPOT
-══════════════════════════════════════ */
+/* ══ JACKPOT ══ */
 function showJackpot(cardName,callback){
   document.getElementById('jackpot-card-name').textContent=cardName;
   const pp=document.getElementById('jackpot-particles');
@@ -954,14 +956,9 @@ function closeJackpot(){
   if(window._jackpotCallback)window._jackpotCallback();
 }
 
-/* ══════════════════════════════════════
-   結果カード
-══════════════════════════════════════ */
+/* ══ RESULT ══ */
 let resultFlipped=0,resultTotal=0;
-let currentResults=[];
-
 function showResultCards(results,pack){
-  currentResults=results;
   resultFlipped=0;resultTotal=results.length;
   document.getElementById('result-title').textContent='カードをタップして開封！';
   document.getElementById('result-hint').style.display='block';
@@ -979,7 +976,6 @@ function showResultCards(results,pack){
     </div>`).join('');
   document.getElementById('result-screen').classList.add('show');
 }
-
 function flipResultCard(i,tier){
   const card=document.getElementById(`rc-${i}`);
   if(card.classList.contains('done'))return;
@@ -996,23 +992,18 @@ function flipResultCard(i,tier){
     renderHistory();renderItemsPage();
   }
 }
+function closeResult(){document.getElementById('result-screen').classList.remove('show');}
 
-function closeResult(){
-  document.getElementById('result-screen').classList.remove('show');
-}
-
-/* ══════════════════════════════════════
-   抽選ロジック
-══════════════════════════════════════ */
+/* ══ 抽選 ══ */
 function generateSeed(){return Math.random().toString(36).slice(2).repeat(3)}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function generateCode(){return Math.random().toString(36).slice(2,8).toUpperCase()}
 
 function pickPrize(prizes,rng){
-  // 天井チェック
-  const tenjoCount=getTenjoCount(state.activePack?.id||'');
+  const packId=state.activePack?.id||'';
+  const tenjoCount=state.tenjoCount[packId]||0;
   const tenjoLimit=state.activePack?.tenjo_limit||0;
   if(tenjoLimit>0&&tenjoCount>=tenjoLimit-1){
-    // 天井到達→SAR確定
     const sarPrizes=prizes.filter(p=>p.tier==='sar');
     if(sarPrizes.length)return sarPrizes[0];
   }
@@ -1023,15 +1014,12 @@ function pickPrize(prizes,rng){
 }
 
 function openDrawModal(packId,defaultCount){
-  const pack=state.packs.find(p=>p.id===packId);
-  if(!pack)return;
+  const pack=state.packs.find(p=>p.id===packId);if(!pack)return;
   state.activePack=pack;state.drawCount=defaultCount;
   document.getElementById('bs-icon').textContent=pack.emoji||'🎴';
   document.getElementById('bs-name').textContent=pack.name;
   document.getElementById('bs-series').textContent=pack.series||'';
-
-  // 天井表示
-  const tenjoCount=getTenjoCount(pack.id);
+  const tenjoCount=state.tenjoCount[pack.id]||0;
   const tenjoLimit=pack.tenjo_limit||0;
   const tenjoSection=document.getElementById('tenjo-modal-section');
   if(tenjoLimit>0){
@@ -1040,12 +1028,11 @@ function openDrawModal(packId,defaultCount){
       <div class="tenjo-modal">
         <div class="tenjo-modal-label">🏆 天井まで あと ${tenjoLimit-tenjoCount}回</div>
         <div class="tenjo-modal-bar"><div class="tenjo-modal-fill" style="width:${pct}%"></div></div>
-        <div class="tenjo-modal-sub">${tenjoCount}/${tenjoLimit}回引くとSAR確定！</div>
+        <div class="tenjo-modal-sub">${tenjoCount}/${tenjoLimit}回でSAR確定！</div>
       </div>`;
   } else {
     tenjoSection.innerHTML='';
   }
-
   document.getElementById('bs-prizes').innerHTML=(pack.prizes||[]).map(pr=>`
     <div class="bs-prize">
       <span class="bsp-tier bsp-${pr.tier==='sar'?'s':pr.tier==='sr'?'a':pr.tier==='rr'?'b':'c'}">${pr.tier_label}</span>
@@ -1057,7 +1044,7 @@ function openDrawModal(packId,defaultCount){
   ].map(o=>`
     <div class="count-opt ${o.n===defaultCount?'sel':''}" onclick="pickDrawCount(this,${o.n})">
       <div class="co-num">${o.n}</div>
-      <div class="co-price">${(pack.price*o.n).toLocaleString()}${pack.currency==='coin'?'コイン':'JP'}</div>
+      <div class="co-price">${(pack.price*o.n).toLocaleString()}コイン</div>
       ${o.bonus?`<div class="co-bonus">${o.bonus}</div>`:''}
     </div>`).join('');
   document.getElementById('draw-modal').classList.add('show');
@@ -1070,58 +1057,42 @@ function pickDrawCount(el,n){
 }
 
 async function executeDraw(){
-  const pack=state.activePack;
-  if(!pack)return;
+  const pack=state.activePack;if(!pack)return;
   if(!state.user){
     closeDrawModal();
     document.getElementById('auth-modal').classList.add('show');
-    showToast('ガチャを引くにはログインが必要です');
-    return;
+    showToast('ガチャを引くにはログインが必要です');return;
   }
   const cost=pack.price*state.drawCount;
-  const balance=pack.currency==='coin'?state.coin:state.jp;
-  if(balance<cost){
-    showToast('💎 ポイントが不足しています');
+  if(state.coin<cost){
+    showToast('🪙 コインが不足しています');
     closeDrawModal();openPurchase();return;
   }
-  if(pack.currency==='coin')state.coin-=cost;
-  else state.jp-=cost;
+  state.coin-=cost;
   updateHeaderPts();closeDrawModal();
-
   const prizes=pack.prizes||[];
   const results=Array.from({length:state.drawCount},()=>({prize:pickPrize(prizes,Math.random())}));
-
-  // 天井カウント更新
-  updateTenjoCount(pack.id,state.drawCount);
-
-  // DB保存
-  await saveDrawSession(pack.id,results,cost,pack.currency);
-  state.dp+=Math.floor(cost*0.05);state.totalSpent+=cost;
-
-  // ランク更新
+  state.tenjoCount[pack.id]=(state.tenjoCount[pack.id]||0)+state.drawCount;
+  localStorage.setItem('tenjo',JSON.stringify(state.tenjoCount));
+  await saveDrawSession(pack.id,results,cost);
+  state.dp+=Math.floor(cost*0.05);
+  state.totalSpent+=cost;
   const{rank}=getRankInfo(state.totalSpent);
   state.rank=rank.name;
-  await db.from('users').update({
-    rank:state.rank,dp_points:state.dp,total_spent:state.totalSpent
-  }).eq('id',state.user.id);
-
+  await db.from('users').update({rank:state.rank,dp_points:state.dp,total_spent:state.totalSpent,coin_points:state.coin}).eq('id',state.user.id);
   state.sessions.unshift({
     id:generateSeed().slice(0,8),
     packId:pack.id,packName:pack.name,
-    results,cost,currency:pack.currency,
-    date:new Date().toLocaleString('ja-JP'),
-    shipped:false,
+    results,cost,date:new Date().toLocaleString('ja-JP'),shipped:false,
   });
-
   startGachaAnimation(results,pack);
 }
 
-async function saveDrawSession(packId,results,totalCost,currency){
-  const serverSeed=generateSeed();
+async function saveDrawSession(packId,results,totalCost){
   const{data:session}=await db.from('draw_sessions').insert({
     user_id:state.user.id,pack_id:packId,
     draw_count:results.length,total_cost:totalCost,
-    currency,server_seed:serverSeed,
+    currency:'coin',server_seed:generateSeed(),
   }).select().single();
   if(!session)return;
   const resultRows=results.map(r=>({
@@ -1130,31 +1101,20 @@ async function saveDrawSession(packId,results,totalCost,currency){
     result_hash:generateSeed(),
   }));
   await db.from('draw_results').insert(resultRows).catch(()=>{});
-  const field=currency==='coin'?'coin_points':'jp_points';
-  await db.from('users').update({[field]:state[currency==='coin'?'coin':'jp']}).eq('id',state.user.id);
   await db.from('transactions').insert({
     user_id:state.user.id,type:'draw',amount:-totalCost,
-    currency,description:`${state.activePack?.name} × ${results.length}回`,
+    currency:'coin',description:`${state.activePack?.name} × ${results.length}回`,
   }).catch(()=>{});
 }
 
-/* ══════════════════════════════════════
-   ポイント還元
-══════════════════════════════════════ */
+/* ══ ポイント還元 ══ */
 async function convertToPoints(sessionIdx,resultIdx){
-  const session=state.sessions[sessionIdx];
-  if(!session||session.shipped)return;
+  const session=state.sessions[sessionIdx];if(!session||session.shipped)return;
   const result=session.results[resultIdx];
   if(result.converted){showToast('すでに還元済みです');return;}
-
-  // 参考価格からコイン付与（tier別）
   const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
   const points=tierValue[result.prize.tier]||50;
-
-  result.converted=true;
-  state.coin+=points;
-  updateHeaderPts();
-
+  result.converted=true;state.coin+=points;updateHeaderPts();
   if(state.user){
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
     await db.from('transactions').insert({
@@ -1165,46 +1125,31 @@ async function convertToPoints(sessionIdx,resultIdx){
   renderHistory();renderItemsPage();
   showToast(`💰 ${points}コインに還元しました！`,2500);
 }
-
 async function convertAllToPoints(sessionIdx){
-  const session=state.sessions[sessionIdx];
-  if(!session)return;
-  let total=0;
+  const session=state.sessions[sessionIdx];if(!session)return;
   const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
-  session.results.forEach(r=>{
-    if(!r.converted){r.converted=true;total+=tierValue[r.prize.tier]||50;}
-  });
+  let total=0;
+  session.results.forEach(r=>{if(!r.converted){r.converted=true;total+=tierValue[r.prize.tier]||50;}});
   if(total===0){showToast('還元できるカードがありません');return;}
   state.coin+=total;updateHeaderPts();
-  if(state.user){
-    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-  }
+  if(state.user)await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
   renderHistory();renderItemsPage();
   showToast(`💰 ${total}コインに一括還元しました！`,2500);
 }
 
-/* ══════════════════════════════════════
-   発送依頼
-══════════════════════════════════════ */
+/* ══ 発送 ══ */
 let shippingSessionIdx=-1;
-
 function openShippingModal(sessionIdx){
-  if(!state.user){
-    document.getElementById('auth-modal').classList.add('show');
-    return;
-  }
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
   shippingSessionIdx=sessionIdx;
   const session=state.sessions[sessionIdx];
   const unconverted=session.results.filter(r=>!r.converted);
-
   document.getElementById('ship-items-list').innerHTML=`
-    <div style="font-size:.82rem;font-weight:900;margin-bottom:8px">📦 発送するカード（${unconverted.length}点）</div>
-    ${unconverted.map(r=>`<div style="font-size:.78rem;background:#f8f8f8;border-radius:6px;padding:6px 10px;margin-bottom:4px">${r.prize.name}</div>`).join('')}
-    ${unconverted.length===0?'<div style="color:var(--text3);font-size:.78rem">発送するカードがありません（全て還元済み）</div>':''}`;
-
+    <div style="font-size:.82rem;font-weight:900;margin-bottom:8px;color:var(--text)">📦 発送するカード（${unconverted.length}点）</div>
+    ${unconverted.map(r=>`<div style="font-size:.78rem;background:rgba(201,168,76,.05);border:1px solid var(--border);border-radius:6px;padding:6px 10px;margin-bottom:4px;color:var(--text2)">${r.prize.name}</div>`).join('')}
+    ${!unconverted.length?'<div style="color:var(--text3);font-size:.78rem">発送するカードがありません</div>':''}`;
   document.getElementById('shipping-modal').classList.add('show');
 }
-
 async function submitShipping(){
   const name=document.getElementById('ship-name').value;
   const zip=document.getElementById('ship-zip').value;
@@ -1212,45 +1157,35 @@ async function submitShipping(){
   const city=document.getElementById('ship-city').value;
   const tel=document.getElementById('ship-tel').value;
   if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
-
   const session=state.sessions[shippingSessionIdx];
   const unconverted=session.results.filter(r=>!r.converted).map(r=>r.prize.name);
-  if(unconverted.length===0){showToast('発送するカードがありません');return;}
-
+  if(!unconverted.length){showToast('発送するカードがありません');return;}
   const address={name,zip,prefecture:pref,city,building:document.getElementById('ship-building').value,tel};
-
   if(state.user){
-    await db.from('shipping_requests').insert({
-      user_id:state.user.id,
-      result_ids:unconverted,
-      address,status:'pending',
-    }).catch(()=>{});
+    await db.from('shipping_requests').insert({user_id:state.user.id,result_ids:unconverted,address,status:'pending'}).catch(()=>{});
   }
-
   session.shipped=true;
   closeModal('shipping-modal');
-  showToast('📦 発送依頼を受け付けました！最短翌日発送します。',3000);
+  showToast('📦 発送依頼を受け付けました！',3000);
   renderHistory();
 }
 
-/* ══════════════════════════════════════
-   チャージ
-══════════════════════════════════════ */
+/* ══ チャージ ══ */
 const PLANS=[
-  {id:'p100',jpy:110,jp:100,bonus:0},
-  {id:'p500',jpy:550,jp:500,bonus:50},
-  {id:'p1000',jpy:1100,jp:1000,bonus:150,popular:true},
-  {id:'p3000',jpy:3300,jp:3000,bonus:600},
-  {id:'p5000',jpy:5500,jp:5000,bonus:1250},
-  {id:'p10000',jpy:11000,jp:10000,bonus:3000},
+  {id:'p100',jpy:110,coin:100,bonus:0},
+  {id:'p500',jpy:550,coin:500,bonus:50},
+  {id:'p1000',jpy:1100,coin:1000,bonus:150,popular:true},
+  {id:'p3000',jpy:3300,coin:3000,bonus:600},
+  {id:'p5000',jpy:5500,coin:5000,bonus:1250},
+  {id:'p10000',jpy:11000,coin:10000,bonus:3000},
 ];
 function openPurchase(){
   document.getElementById('purchase-plans').innerHTML=PLANS.map(p=>`
     <div class="plan-item ${p.popular?'popular':''}" onclick="doPurchase('${p.id}')">
       <div>
         ${p.popular?'<div style="font-size:.62rem;font-weight:900;color:var(--gold2);margin-bottom:2px">⭐ 人気No.1</div>':''}
-        <div class="plan-jp">💎 ${p.jp.toLocaleString()} JP${p.bonus?`<span class="plan-badge">+${p.bonus}</span>`:''}</div>
-        ${p.bonus?`<div class="plan-bonus">+${p.bonus}JPボーナス付き！</div>`:''}
+        <div class="plan-jp">🪙 ${p.coin.toLocaleString()} コイン${p.bonus?`<span class="plan-badge">+${p.bonus}</span>`:''}</div>
+        ${p.bonus?`<div class="plan-bonus">+${p.bonus}ボーナス付き！</div>`:''}
       </div>
       <div><div class="plan-price">¥${p.jpy.toLocaleString()}</div></div>
     </div>`).join('');
@@ -1259,27 +1194,20 @@ function openPurchase(){
 function closePurchase(){document.getElementById('purchase-modal').classList.remove('show')}
 async function doPurchase(planId){
   const plan=PLANS.find(p=>p.id===planId);if(!plan)return;
-  // 本番：Stripe決済へ
-  state.jp+=plan.jp+plan.bonus;
+  state.coin+=plan.coin+plan.bonus;
   if(state.user){
-    await db.from('users').update({jp_points:state.jp}).eq('id',state.user.id);
-    await db.from('point_purchases').insert({
-      user_id:state.user.id,amount_jpy:plan.jpy,
-      jp_points:plan.jp,bonus_points:plan.bonus,status:'completed',
-    }).catch(()=>{});
+    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    await db.from('point_purchases').insert({user_id:state.user.id,amount_jpy:plan.jpy,jp_points:plan.coin,bonus_points:plan.bonus,status:'completed'}).catch(()=>{});
   }
   updateHeaderPts();closePurchase();
-  showToast(`💎 ${(plan.jp+plan.bonus).toLocaleString()}JP チャージしました！`);
+  showToast(`🪙 ${(plan.coin+plan.bonus).toLocaleString()}コイン チャージしました！`);
 }
 
-/* ══════════════════════════════════════
-   パック表示
-══════════════════════════════════════ */
+/* ══ パック表示 ══ */
 async function loadAndRenderPacks(){
   const packs=await fetchPacks();
   state.packs=packs;renderPacks();
 }
-
 function getFilteredPacks(){
   let list=state.currentCat==='all'?state.packs:state.packs.filter(p=>p.category===state.currentCat);
   if(state.currentSort==='hot')list=[...list].sort((a,b)=>(b.is_hot?1:0)-(a.is_hot?1:0));
@@ -1288,7 +1216,6 @@ function getFilteredPacks(){
   if(state.currentSort==='rate')list=[...list].sort((a,b)=>(b.return_rate||0)-(a.return_rate||0));
   return list;
 }
-
 function renderPacks(){
   const list=getFilteredPacks();
   if(!list.length){
@@ -1296,16 +1223,16 @@ function renderPacks(){
     return;
   }
   document.getElementById('packs-list').innerHTML=list.map(p=>{
-    const pct=Math.round((p.remaining/p.total_slots)*100);
+    const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     const barClass=pct<10?'danger':pct<30?'warn':'';
     const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
     const tiers=prizes.map(pr=>`<span class="tier-pill ${tierPillClass[pr.tier]}">${pr.tier_label} ${pr.quantity}枚</span>`).join('');
-    const tenjoCount=getTenjoCount(p.id);
+    const tenjoCount=state.tenjoCount[p.id]||0;
     const tenjoLimit=p.tenjo_limit||0;
     return `
     <div class="pack-card" onclick="openDrawModal('${p.id}',1)">
       <div class="pc-banner">
-        <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(135deg,#333,#111)'}"></div>
+        <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(145deg,#0a0a1a,#1a1a2e)'}"></div>
         <div class="pcb-shine"></div>
         <div class="pcb-char">${p.emoji||'🎴'}</div>
         <div class="pcb-content">
@@ -1323,13 +1250,13 @@ function renderPacks(){
           </div>
           ${p.odds_text?`<div class="pcb-chips"><div class="pcb-chip"><span>${p.odds_text}</span></div></div>`:''}
           <div class="pcb-tiers">${tiers}</div>
-          ${tenjoLimit>0?`<div style="margin-top:4px"><div class="tenjo-label"><span>天井まで ${tenjoLimit-tenjoCount}回</span><span>${tenjoCount}/${tenjoLimit}</span></div><div class="tenjo-bar"><div class="tenjo-fill" style="width:${Math.round((tenjoCount/tenjoLimit)*100)}%"></div></div></div>`:''}
+          ${tenjoLimit>0?`<div style="margin-top:4px"><div style="display:flex;justify-content:space-between;font-size:.58rem;color:rgba(147,197,253,.6);margin-bottom:2px"><span>天井まで ${tenjoLimit-tenjoCount}回</span><span>${tenjoCount}/${tenjoLimit}</span></div><div style="background:rgba(59,130,246,.1);border-radius:999px;height:4px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,#1d4ed8,#3b82f6);width:${Math.round((tenjoCount/tenjoLimit)*100)}%"></div></div></div>`:''}
         </div>
       </div>
       <div class="pc-bottom">
         <div class="pc-meta">
-          <div><span class="pc-price">${p.currency==='coin'?'🪙':'💎'} ${p.price.toLocaleString()}</span><span class="pc-price-unit">/1回</span></div>
-          <span class="pc-remain">残り<b>${p.remaining.toLocaleString()}</b>/${p.total_slots.toLocaleString()}口</span>
+          <div><span class="pc-price">🪙 ${p.price.toLocaleString()}</span><span class="pc-price-unit">/1回</span></div>
+          <span class="pc-remain">残り<b>${(p.remaining||0).toLocaleString()}</b>/${(p.total_slots||0).toLocaleString()}口</span>
         </div>
         <div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
         <div class="pc-btns">
@@ -1341,43 +1268,39 @@ function renderPacks(){
   }).join('');
 }
 
-/* ══════════════════════════════════════
-   獲得商品ページ
-══════════════════════════════════════ */
+/* ══ 獲得商品 ══ */
 function renderItemsPage(){
   const allItems=state.sessions.flatMap((s,si)=>
     s.results.filter(r=>!r.converted).map((r,ri)=>({...r,sessionIdx:si,resultIdx:ri,sessionName:s.packName,date:s.date}))
   );
   const content=document.getElementById('items-content');
   if(!allItems.length){
-    content.innerHTML=`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">📦</div><div style="font-weight:700;margin-bottom:6px">獲得商品はありません</div><div style="font-size:.82rem">オリパを引くとここに表示されます</div></div>`;
+    content.innerHTML=`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">📦</div><div style="font-weight:700;color:var(--text2)">獲得商品はありません</div></div>`;
     return;
   }
   content.innerHTML=`
-    <div style="padding:12px 12px 0;font-size:.82rem;font-weight:900">📦 獲得商品（${allItems.length}点）</div>
+    <div style="padding:12px 12px 0;font-size:.82rem;font-weight:900;color:var(--text)">📦 獲得商品（${allItems.length}点）</div>
     <div style="padding:8px">
     ${allItems.map(item=>`
-      <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
-        <div style="font-size:1.8rem">${state.sessions[item.sessionIdx]?.packId?state.packs.find(p=>p.id===state.sessions[item.sessionIdx]?.packId)?.emoji||'🎴':'🎴'}</div>
+      <div style="background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+        <div style="font-size:1.8rem">${state.packs.find(p=>p.id===state.sessions[item.sessionIdx]?.packId)?.emoji||'🎴'}</div>
         <div style="flex:1">
-          <div style="font-size:.85rem;font-weight:900">${item.prize.name}</div>
+          <div style="font-size:.85rem;font-weight:900;color:var(--text)">${item.prize.name}</div>
           <div style="font-size:.72rem;color:var(--text3)">${item.sessionName} · ${item.date}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
           <button class="convert-btn" onclick="convertToPoints(${item.sessionIdx},${item.resultIdx})">💰 還元</button>
-          <button style="background:#f5f5f5;color:var(--text2);font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:6px" onclick="openShippingModal(${item.sessionIdx})">📦 発送</button>
+          <button style="background:rgba(201,168,76,.1);color:var(--gold2);font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:5px;border:1px solid var(--border2)" onclick="openShippingModal(${item.sessionIdx})">📦 発送</button>
         </div>
       </div>`).join('')}
     </div>`;
 }
 
-/* ══════════════════════════════════════
-   履歴
-══════════════════════════════════════ */
+/* ══ 履歴 ══ */
 function renderHistory(){
   const list=document.getElementById('history-list');
   if(!state.sessions.length){
-    list.innerHTML=`<div class="hist-empty"><div style="font-size:2.5rem;margin-bottom:12px">🕐</div><div style="font-weight:700">当選履歴はありません</div></div>`;
+    list.innerHTML=`<div style="text-align:center;padding:48px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">🕐</div><div style="font-weight:700;color:var(--text2)">当選履歴はありません</div></div>`;
     return;
   }
   list.innerHTML=state.sessions.map((s,si)=>`
@@ -1385,74 +1308,48 @@ function renderHistory(){
       <div class="hist-top"><span class="hist-pack">${s.packName}</span><span class="hist-time">${s.date}</span></div>
       <div class="hist-results">
         ${s.results.map((r,ri)=>`
-          <span class="hist-chip hc-${r.prize.tier} ${r.converted?'hc-converted':''}" onclick="convertToPoints(${si},${ri})" title="${r.converted?'還元済み':'タップでポイント還元'}">
-            ${r.prize.name}${r.converted?'（還元済）':''}
+          <span class="hist-chip hc-${r.prize.tier} ${r.converted?'hc-converted':''}" onclick="convertToPoints(${si},${ri})">
+            ${r.prize.name}${r.converted?'（済）':''}
           </span>`).join('')}
       </div>
-      <div class="hist-cost">消費: ${s.cost.toLocaleString()} ${s.currency==='coin'?'コイン':'JP'}</div>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        ${!s.shipped?`<button class="hist-convert-btn" onclick="convertAllToPoints(${si})" style="flex:1;background:linear-gradient(135deg,#0066cc,#0099ff)">💰 全てポイント還元</button><button class="hist-convert-btn" onclick="openShippingModal(${si})" style="flex:1;background:linear-gradient(135deg,var(--gold),var(--gold2))">📦 発送依頼</button>`:'<span style="font-size:.72rem;color:var(--text3)">📦 発送依頼済み</span>'}
+      <div class="hist-cost">消費: ${s.cost.toLocaleString()} コイン</div>
+      <div class="hist-action-btns">
+        ${!s.shipped?`
+          <button class="hist-btn hist-btn-convert" onclick="convertAllToPoints(${si})">💰 一括還元</button>
+          <button class="hist-btn hist-btn-ship" onclick="openShippingModal(${si})">📦 発送依頼</button>
+        `:'<span style="font-size:.72rem;color:var(--text3)">📦 発送依頼済み</span>'}
       </div>
     </div>`).join('');
 }
 
-/* ══════════════════════════════════════
-   お知らせ
-══════════════════════════════════════ */
-const DEFAULT_NOTICES=[
-  {type:'info',title:'オリパMAXへようこそ！',body:'オリパMAXをご利用いただきありがとうございます。毎日ログインボーナスを受け取って、お得にガチャを楽しみましょう！',time:'たった今'},
-  {type:'campaign',title:'【期間限定】新規登録キャンペーン',body:'新規会員登録で500コイン無料プレゼント中！さらに紹介コードを使って登録すると+300コインのボーナスがもらえます。',time:'本日'},
-];
-
-function renderNotices(){
-  const list=document.getElementById('notices-list');
-  const notices=[...DEFAULT_NOTICES,...state.notices];
-  if(!notices.length){
-    list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">お知らせはありません</div>';
-    return;
-  }
-  list.innerHTML=notices.map(n=>`
-    <div class="notice-item">
-      <span class="notice-type nt-${n.type}">${n.type==='campaign'?'キャンペーン':n.type==='system'?'システム':'お知らせ'}</span>
-      <div class="notice-title">${n.title}</div>
-      <div class="notice-body">${n.body}</div>
-      <div class="notice-time">${n.time}</div>
-    </div>`).join('');
-}
-
-/* ══════════════════════════════════════
-   マイページ
-══════════════════════════════════════ */
+/* ══ マイページ ══ */
 function renderMyPage(){
   const content=document.getElementById('mypage-content');
   if(!state.user){
     content.innerHTML=`
       <div style="text-align:center;padding:40px 0">
         <div style="font-size:3rem;margin-bottom:12px">🎴</div>
-        <div style="font-size:1rem;font-weight:900;margin-bottom:6px">ログインして始めよう</div>
+        <div style="font-size:1rem;font-weight:900;margin-bottom:6px;color:var(--text)">ログインして始めよう</div>
         <div style="font-size:.82rem;color:var(--text3);margin-bottom:20px">新規登録で500コイン無料！</div>
         <button onclick="document.getElementById('auth-modal').classList.add('show')"
-          style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;padding:13px 40px;border-radius:12px;font-weight:900;font-size:.95rem">
+          style="background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;padding:13px 40px;border-radius:12px;font-weight:900;font-size:.95rem;box-shadow:0 4px 16px rgba(201,168,76,.25)">
           ログイン / 無料登録
         </button>
       </div>`;
     return;
   }
-
   const{rank:currentRank,idx:rankIdx}=getRankInfo(state.totalSpent);
   const nextRank=RANKS[Math.min(rankIdx+1,RANKS.length-1)];
   const progress=state.totalSpent-currentRank.min;
   const needed=nextRank.min-currentRank.min;
   const pct=Math.min(100,Math.round((progress/needed)*100));
-  const refCode=state.user.referral_code||generateCode();
-
+  const refCode=state.user.referral_code||'—';
   content.innerHTML=`
     <div class="mp-user-card">
       <div class="mp-avatar">👤</div>
       <div class="mp-username">${state.user.username}</div>
       <div class="mp-rank">🏅 ${state.rank}</div>
       <div class="mp-pts-row">
-        <div class="mp-pt"><div class="mp-pt-label">💎 JP</div><div class="mp-pt-val">${state.jp.toLocaleString()}</div></div>
         <div class="mp-pt"><div class="mp-pt-label">🪙 コイン</div><div class="mp-pt-val">${state.coin.toLocaleString()}</div></div>
         <div class="mp-pt"><div class="mp-pt-label">🔷 DP</div><div class="mp-pt-val">${state.dp.toLocaleString()}</div></div>
       </div>
@@ -1460,40 +1357,35 @@ function renderMyPage(){
     <div class="mp-rank-wrap">
       <div class="mp-rank-title">🏆 ランク進捗</div>
       <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.75rem">
-        <span style="font-weight:900;color:var(--gold)">${currentRank.name}</span>
+        <span style="font-weight:900;color:var(--gold2)">${currentRank.name}</span>
         <span style="color:var(--text3)">▶ ${nextRank.name}</span>
       </div>
       <div class="mp-rank-bar-wrap"><div class="mp-rank-fill" style="width:${pct}%"></div></div>
-      <div class="mp-rank-labels"><span>${state.totalSpent.toLocaleString()} pt使用</span><span>あと ${(nextRank.min-state.totalSpent).toLocaleString()} pt</span></div>
+      <div class="mp-rank-labels"><span>${state.totalSpent.toLocaleString()} コイン使用</span><span>あと ${(nextRank.min-state.totalSpent).toLocaleString()} コイン</span></div>
     </div>
     <div class="referral-section">
-      <div style="font-size:.88rem;font-weight:900;margin-bottom:4px">🔗 友達紹介コード</div>
+      <div style="font-size:.88rem;font-weight:900;margin-bottom:4px;color:var(--text)">🔗 友達紹介コード</div>
       <div style="font-size:.75rem;color:var(--text3);margin-bottom:8px">友達が登録すると双方に300コインプレゼント！</div>
       <div class="ref-code-box">
         <div class="ref-code">${refCode}</div>
-        <div class="ref-bonus">紹介成功で +300コイン</div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:4px">紹介成功で +300コイン</div>
       </div>
-      <button class="ref-copy-btn" onclick="copyReferralCode('${refCode}')">📋 コードをコピー</button>
+      <button class="ref-copy-btn" onclick="copyCode('${refCode}')">📋 コードをコピー</button>
     </div>
     <div class="mp-menu">
-      <div class="mp-menu-item" onclick="openPurchase()"><span class="mp-menu-icon">💎</span>JPポイントをチャージ<span class="mp-menu-arrow">›</span></div>
+      <div class="mp-menu-item" onclick="openPurchase()"><span class="mp-menu-icon">🪙</span>コインをチャージ<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="showPage('items',document.querySelector('[data-page=items]'))"><span class="mp-menu-icon">📦</span>獲得商品・発送依頼<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="showPage('ranking',document.querySelector('[data-page=ranking]'))"><span class="mp-menu-icon">🏆</span>ランキング<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="doForgotPassword()"><span class="mp-menu-icon">🔑</span>パスワードリセット<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="showToast('準備中')"><span class="mp-menu-icon">📋</span>特定商取引法に基づく表記<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="showToast('準備中')"><span class="mp-menu-icon">🔒</span>プライバシーポリシー<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="doLogout()"><span class="mp-menu-icon">🚪</span>ログアウト<span class="mp-menu-arrow">›</span></div>
     </div>`;
 }
 
-function copyReferralCode(code){
+function copyCode(code){
   navigator.clipboard.writeText(code).catch(()=>{});
   showToast('📋 コードをコピーしました！');
 }
 
-/* ══════════════════════════════════════
-   当選速報ティッカー
-══════════════════════════════════════ */
+/* ══ TICKER ══ */
 function renderTicker(){
   const wins=[
     {r:'sar',user:'ゆず***',card:'リザードン ex SAR'},
@@ -1502,30 +1394,23 @@ function renderTicker(){
     {r:'sar',user:'そう***',card:'PSA10 リーリエ'},
     {r:'sr',user:'はる***',card:'ブラッキー SR'},
   ];
-  const items=[...wins,...wins].map(w=>
+  document.getElementById('wins-track').innerHTML=[...wins,...wins].map(w=>
     `<span class="wins-item"><span class="wi-badge wi-${w.r}">${w.r.toUpperCase()}</span>${w.user} さんが「${w.card}」を当てました！🎉</span>`
   ).join('');
-  document.getElementById('wins-track').innerHTML=items;
 }
 
-/* ══════════════════════════════════════
-   ナビゲーション
-══════════════════════════════════════ */
+/* ══ ナビ ══ */
 function showPage(name,el){
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   if(el)el.classList.add('active');
-  else{
-    const btn=document.querySelector(`[data-page="${name}"]`);
-    if(btn)btn.classList.add('active');
-  }
+  else{const btn=document.querySelector(`[data-page="${name}"]`);if(btn)btn.classList.add('active');}
   document.getElementById(`page-${name}`)?.classList.add('active');
   if(name==='mypage')renderMyPage();
-  if(name==='notices'){renderNotices();document.getElementById('notice-badge').style.display='none';document.getElementById('notif-dot').style.display='none';}
+  if(name==='notices')renderNotices();
   if(name==='history')renderHistory();
   if(name==='items')renderItemsPage();
 }
-
 document.querySelectorAll('.bnav-btn').forEach(btn=>{
   btn.addEventListener('click',()=>showPage(btn.dataset.page,btn));
 });
@@ -1545,16 +1430,13 @@ document.querySelectorAll('.modal-overlay').forEach(overlay=>{
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('show');});
 });
 
-/* ══════════════════════════════════════
-   ユーティリティ
-══════════════════════════════════════ */
+/* ══ UTILS ══ */
 function showToast(msg,dur=2200){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),dur);
 }
 function updateHeaderPts(){
-  document.getElementById('h-jp').textContent=state.jp.toLocaleString();
   document.getElementById('h-coin').textContent=state.coin.toLocaleString();
 }
 function switchAuth(mode){
@@ -1562,29 +1444,19 @@ function switchAuth(mode){
   document.getElementById('auth-form-login').style.display=mode==='login'?'block':'none';
   document.getElementById('auth-form-register').style.display=mode==='register'?'block':'none';
 }
-function closeAllModals(){
-  document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('show'));
-}
-function closeModal(id){document.getElementById(id).classList.remove('show')}
+function closeAllModals(){document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('show'));}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
 
-// 天井データ読み込み
-try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
-
-/* ══════════════════════════════════════
-   起動
-══════════════════════════════════════ */
+/* ══ INIT ══ */
 (async()=>{
   renderTicker();
   await checkSession();
-  await loadAndRenderPacks();
-  // お知らせバッジ
-  setTimeout(()=>{
-    if(!localStorage.getItem('notices_read')){
-      document.getElementById('notice-badge').style.display='block';
-      document.getElementById('notice-badge').textContent='2';
-      document.getElementById('notif-dot').style.display='block';
-    }
-  },1000);
+  await Promise.all([
+    loadAndRenderPacks(),
+    loadBanners(),
+    loadNotices(),
+    loadVideos(),
+  ]);
 })();
 </script>
 </body>
