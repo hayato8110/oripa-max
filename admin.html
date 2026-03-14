@@ -14,6 +14,8 @@ input,select,textarea{font-family:inherit}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:#13141c}
 ::-webkit-scrollbar-thumb{background:#2a2b3a;border-radius:2px}
+
+/* LOGIN */
 .login-wrap{position:fixed;inset:0;background:#0f1117;display:flex;align-items:center;justify-content:center;z-index:1000}
 .login-box{background:#13141c;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:32px;width:360px}
 .login-logo{font-size:1.4rem;font-weight:900;color:#e8a800;margin-bottom:6px}
@@ -22,6 +24,8 @@ input,select,textarea{font-family:inherit}
 .login-input:focus{outline:none;border-color:#e8a800}
 .login-btn{width:100%;background:linear-gradient(135deg,#e8a800,#c88000);color:#0f1117;font-weight:900;font-size:.95rem;padding:12px;border-radius:8px;margin-top:4px}
 .login-error{color:#ff6060;font-size:.78rem;margin-top:8px;display:none}
+
+/* SIDEBAR */
 .sidebar{width:220px;flex-shrink:0;background:#13141c;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:50}
 .sb-logo{padding:18px 16px;font-size:1.1rem;font-weight:900;color:#e8a800;border-bottom:1px solid rgba(255,255,255,.06)}
 .sb-logo span{color:rgba(255,255,255,.25);font-size:.65rem;display:block;font-weight:400;margin-top:2px}
@@ -32,6 +36,8 @@ input,select,textarea{font-family:inherit}
 .sb-item.active{color:#e8a800;border-color:#e8a800;background:rgba(232,168,0,.06)}
 .sb-icon{font-size:.95rem;width:18px;text-align:center}
 .sb-badge{margin-left:auto;background:#e82020;color:#fff;font-size:.55rem;font-weight:900;padding:1px 6px;border-radius:999px}
+
+/* MAIN */
 .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:#13141c;border-bottom:1px solid rgba(255,255,255,.06);padding:12px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
 .topbar-title{font-size:.95rem;font-weight:900}
@@ -40,43 +46,53 @@ input,select,textarea{font-family:inherit}
 .content{padding:20px;flex:1}
 .admin-page{display:none}
 .admin-page.active{display:block}
+
+/* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
 .stat-card{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px}
 .stat-label{font-size:.68rem;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
 .stat-val{font-size:1.7rem;font-weight:900;line-height:1}
-.stat-sub{font-size:.68rem;color:rgba(255,255,255,.25);margin-top:4px}
 .stat-gold .stat-val{color:#e8a800}
 .stat-green .stat-val{color:#00e676}
 .stat-red .stat-val{color:#ff4060}
 .stat-blue .stat-val{color:#4488ff}
+
+/* TABLE */
 .table-card{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden;margin-bottom:18px}
 .table-head{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.table-title{font-size:.88rem;font-weight:900;display:flex;align-items:center;gap:7px}
+.table-title{font-size:.88rem;font-weight:900}
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{padding:9px 14px;text-align:left;font-size:.65rem;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:.08em;text-transform:uppercase;background:#14151e;white-space:nowrap}
 .tbl td{padding:11px 14px;font-size:.8rem;border-top:1px solid rgba(255,255,255,.04);vertical-align:middle}
 .tbl tr:hover td{background:rgba(255,255,255,.02)}
 .td-bold{font-weight:700}
 .td-sub{font-size:.7rem;color:rgba(255,255,255,.3);margin-top:2px}
-.badge{font-size:.58rem;font-weight:900;padding:2px 7px;border-radius:3px;letter-spacing:.04em;display:inline-block}
+
+/* BADGES */
+.badge{font-size:.58rem;font-weight:900;padding:2px 7px;border-radius:3px;display:inline-block}
 .badge-active{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
 .badge-pause{background:rgba(255,200,0,.1);color:#e8a800;border:1px solid rgba(255,200,0,.2)}
-.badge-hot{background:rgba(255,64,96,.12);color:#ff8080;border:1px solid rgba(255,64,96,.25)}
 .badge-pending{background:rgba(255,200,0,.1);color:#e8a800;border:1px solid rgba(255,200,0,.2)}
 .badge-shipped{background:rgba(0,180,255,.1);color:#44aaff;border:1px solid rgba(0,180,255,.2)}
 .badge-gold{background:rgba(232,168,0,.12);color:#e8a800;border:1px solid rgba(232,168,0,.2)}
+.badge-hot{background:rgba(255,64,96,.12);color:#ff8080;border:1px solid rgba(255,64,96,.25)}
+
+/* BUTTONS */
 .btn{padding:5px 11px;border-radius:5px;font-size:.72rem;font-weight:700;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:4px}
 .btn-primary{background:linear-gradient(135deg,#e8a800,#c88000);color:#0f1117}
-.btn-primary:hover{opacity:.9}
 .btn-edit{background:rgba(68,136,255,.12);color:#6699ff;border:1px solid rgba(68,136,255,.22)}
 .btn-danger{background:rgba(255,64,96,.1);color:#ff6680;border:1px solid rgba(255,64,96,.22)}
 .btn-success{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
 .btn-secondary{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1)}
 .btn-lg{padding:10px 20px;font-size:.85rem;border-radius:8px}
-.prog{background:rgba(255,255,255,.08);border-radius:999px;height:4px;width:100px;overflow:hidden;display:inline-block;vertical-align:middle}
+
+/* PROGRESS */
+.prog{background:rgba(255,255,255,.08);border-radius:999px;height:4px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle}
 .prog-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#00bb44,#00ee66)}
 .prog-fill.warn{background:linear-gradient(90deg,#ee8800,#ffaa00)}
 .prog-fill.danger{background:linear-gradient(90deg,#dd0000,#ff3300)}
+
+/* FORM */
 .form-section{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;margin-bottom:14px}
 .form-section-title{font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:12px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -89,6 +105,8 @@ input,select,textarea{font-family:inherit}
 .form-check{display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer}
 .form-check input{accent-color:#e8a800;width:14px;height:14px}
 .form-actions{display:flex;gap:8px;margin-top:14px}
+
+/* MODAL */
 .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
 .modal-overlay.show{opacity:1;pointer-events:all}
 .modal{background:#1a1b25;border:1px solid rgba(255,255,255,.08);border-radius:14px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;transform:scale(.96);transition:.2s}
@@ -98,8 +116,11 @@ input,select,textarea{font-family:inherit}
 .modal-close{background:none;color:rgba(255,255,255,.3);font-size:1.2rem;cursor:pointer}
 .modal-body{padding:16px 18px}
 .modal-footer{padding:12px 18px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:8px;justify-content:flex-end}
-#admin-toast{position:fixed;bottom:24px;right:24px;background:#1a1b25;border:1px solid rgba(232,168,0,.3);color:#e8a800;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+
+/* TOAST */
+#admin-toast{position:fixed;bottom:24px;right:24px;background:#1a1b25;border:1px solid rgba(232,168,0,.3);color:#e8a800;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s}
 #admin-toast.show{opacity:1}
+
 .win-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid rgba(255,255,255,.04);font-size:.78rem}
 .wr-tier{width:36px;font-size:.62rem;font-weight:900;text-align:center;flex-shrink:0}
 .wr-sar{color:#e8a800}.wr-sr{color:#bb88ff}.wr-rr{color:#44ccee}
@@ -108,13 +129,6 @@ input,select,textarea{font-family:inherit}
 .wr-time{width:60px;text-align:right;color:rgba(255,255,255,.2);font-size:.68rem}
 .search-input{background:#111219;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:6px 11px;color:#e8e8f0;font-size:.78rem;width:180px}
 .search-input:focus{outline:none;border-color:#e8a800}
-.banner-preview{width:120px;height:50px;border-radius:6px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#fff;font-weight:700}
-.toggle{position:relative;width:36px;height:20px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;inset:0;background:#2a2b3a;border-radius:999px;cursor:pointer;transition:.2s}
-.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-.toggle input:checked+.toggle-slider{background:#e8a800}
-.toggle input:checked+.toggle-slider::before{transform:translateX(16px)}
 </style>
 </head>
 <body>
@@ -125,7 +139,7 @@ input,select,textarea{font-family:inherit}
   <div class="login-box">
     <div class="login-logo">⚡ オリパMAX</div>
     <div class="login-sub">管理者ログイン</div>
-    <input type="email" class="login-input" id="admin-email" placeholder="管理者メールアドレス">
+    <input type="email" class="login-input" id="admin-email" placeholder="メールアドレス">
     <input type="password" class="login-input" id="admin-pass" placeholder="パスワード">
     <button class="login-btn" onclick="adminLogin()">ログイン</button>
     <div class="login-error" id="login-error">ログインに失敗しました</div>
@@ -134,7 +148,7 @@ input,select,textarea{font-family:inherit}
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <div class="sb-logo">⚡ ORIPA MAX<span>Admin Panel v2.0</span></div>
+  <div class="sb-logo">⚡ ORIPA MAX<span>Admin Panel v3.0</span></div>
   <nav class="sb-nav">
     <div class="sb-section">メイン</div>
     <div class="sb-item active" onclick="showPage('dashboard',this)"><span class="sb-icon">📊</span>ダッシュボード</div>
@@ -183,14 +197,14 @@ input,select,textarea{font-family:inherit}
           <div id="dash-wins"></div>
         </div>
         <div class="table-card">
-          <div class="table-head"><span class="table-title">📋 最近の発送依頼</span></div>
+          <div class="table-head"><span class="table-title">📦 最近の発送依頼</span></div>
           <div id="dash-shipping"></div>
         </div>
       </div>
       <div class="table-card">
         <div class="table-head">
           <span class="table-title">🎴 アクティブパック</span>
-          <button class="btn btn-primary" onclick="showPage('packs',document.querySelector('[onclick*=packs]'))">＋ 追加</button>
+          <button class="btn btn-primary" onclick="showPage('packs',document.querySelector('[onclick*=packs]'));openPackModal()">＋ 追加</button>
         </div>
         <table class="tbl"><thead><tr><th>パック名</th><th>残り/全口数</th><th>進捗</th><th>価格</th><th>状態</th></tr></thead>
         <tbody id="dash-packs-body"></tbody></table>
@@ -220,7 +234,7 @@ input,select,textarea{font-family:inherit}
         <button class="btn btn-primary btn-lg" onclick="openBannerModal()">＋ バナー追加</button>
       </div>
       <div class="table-card">
-        <table class="tbl"><thead><tr><th>プレビュー</th><th>タイトル</th><th>リンク先</th><th>順序</th><th>状態</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>タイトル</th><th>リンク先</th><th>順序</th><th>状態</th><th>操作</th></tr></thead>
         <tbody id="banners-tbl-body"></tbody></table>
       </div>
     </div>
@@ -232,7 +246,7 @@ input,select,textarea{font-family:inherit}
         <button class="btn btn-primary btn-lg" onclick="openVideoModal()">＋ 動画追加</button>
       </div>
       <div style="background:rgba(232,168,0,.08);border:1px solid rgba(232,168,0,.2);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:.8rem;color:#e8a800">
-        💡 レア度ごとに演出動画を設定できます。SupabaseのStorage→「videos」バケットにmp4をアップロードしてURLを貼り付けてください。
+        💡 Supabase → Storage → 「videos」バケット（Public）を作成してmp4をアップロードし、URLを貼り付けてください。
       </div>
       <div class="table-card">
         <table class="tbl"><thead><tr><th>レア度</th><th>動画名</th><th>デフォルト</th><th>状態</th><th>操作</th></tr></thead>
@@ -244,14 +258,13 @@ input,select,textarea{font-family:inherit}
     <div class="admin-page" id="page-users">
       <div class="stats-grid" style="margin-bottom:14px">
         <div class="stat-card stat-blue"><div class="stat-label">総会員数</div><div class="stat-val" id="u-total">0</div></div>
-        <div class="stat-card stat-gold"><div class="stat-label">課金会員</div><div class="stat-val" id="u-paid">—</div></div>
       </div>
       <div class="table-card">
         <div class="table-head">
           <span class="table-title">👥 ユーザー一覧</span>
           <input class="search-input" placeholder="🔍 名前・メール検索" oninput="filterUsers(this.value)">
         </div>
-        <table class="tbl"><thead><tr><th>ユーザー名</th><th>メール</th><th>JP</th><th>コイン</th><th>ランク</th><th>紹介コード</th><th>登録日</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>ユーザー名</th><th>メール</th><th>JP</th><th>コイン</th><th>ランク</th><th>登録日</th><th>操作</th></tr></thead>
         <tbody id="users-tbl-body"></tbody></table>
       </div>
     </div>
@@ -270,14 +283,6 @@ input,select,textarea{font-family:inherit}
           <div class="form-group"><label class="form-label">理由</label><input type="text" class="form-input" id="pt-reason" placeholder="キャンペーン当選"></div>
         </div>
         <div class="form-actions"><button class="btn btn-primary btn-lg" onclick="grantPoints()">付与する</button></div>
-      </div>
-      <div class="form-section">
-        <div class="form-section-title">⏰ ポイント有効期限設定</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">JP有効期限（月）</label><input type="number" class="form-input" id="jp-expiry" value="6"></div>
-          <div class="form-group"><label class="form-label">コイン有効期限（月）</label><input type="number" class="form-input" id="coin-expiry" value="3"></div>
-        </div>
-        <div class="form-actions"><button class="btn btn-primary btn-lg" onclick="saveExpiry()">保存</button></div>
       </div>
     </div>
 
@@ -305,7 +310,7 @@ input,select,textarea{font-family:inherit}
     <div class="admin-page" id="page-history">
       <div class="table-card">
         <div class="table-head">
-          <span class="table-title">📋 当選履歴（全ユーザー）</span>
+          <span class="table-title">📋 当選履歴</span>
           <button class="btn btn-secondary" onclick="exportHistory()">📥 CSV出力</button>
         </div>
         <table class="tbl"><thead><tr><th>日時</th><th>ユーザー</th><th>パック</th><th>カード</th><th>レア度</th><th>消費PT</th></tr></thead>
@@ -317,10 +322,10 @@ input,select,textarea{font-family:inherit}
     <div class="admin-page" id="page-notices">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <span style="font-size:.95rem;font-weight:900">🔔 お知らせ管理</span>
-        <button class="btn btn-primary btn-lg" onclick="openNoticeModal()">＋ お知らせ作成</button>
+        <button class="btn btn-primary btn-lg" onclick="openNoticeModal()">＋ 作成</button>
       </div>
       <div class="table-card">
-        <table class="tbl"><thead><tr><th>タイトル</th><th>種別</th><th>対象</th><th>作成日</th><th>状態</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>タイトル</th><th>種別</th><th>作成日</th><th>状態</th><th>操作</th></tr></thead>
         <tbody id="notices-tbl-body"></tbody></table>
       </div>
     </div>
@@ -334,7 +339,7 @@ input,select,textarea{font-family:inherit}
       </div>
       <div class="table-card" style="margin-top:14px">
         <div class="table-head"><span class="table-title">💰 パック別売上</span></div>
-        <table class="tbl"><thead><tr><th>パック名</th><th>開封数</th><th>売上</th></tr></thead>
+        <table class="tbl"><thead><tr><th>パック名</th><th>販売数</th><th>売上</th></tr></thead>
         <tbody id="revenue-tbl-body"></tbody></table>
       </div>
     </div>
@@ -342,25 +347,17 @@ input,select,textarea{font-family:inherit}
     <!-- SETTINGS -->
     <div class="admin-page" id="page-settings">
       <div class="form-section">
-        <div class="form-section-title">🌐 サイト基本設定</div>
+        <div class="form-section-title">🌐 基本設定</div>
         <div class="form-grid">
           <div class="form-group"><label class="form-label">サイト名</label><input class="form-input" id="s-name" value="オリパMAX"></div>
-          <div class="form-group"><label class="form-label">問い合わせメール</label><input class="form-input" id="s-email" placeholder="support@example.jp"></div>
-          <div class="form-group"><label class="form-label">古物商許可番号</label><input class="form-input" id="s-license" placeholder="神奈川県公安委員会 第XXXXXX号"></div>
-          <div class="form-group"><label class="form-label">運営者名</label><input class="form-input" id="s-owner" placeholder="氏名または法人名"></div>
-          <div class="form-group form-full"><label class="form-label">住所（特商法）</label><input class="form-input" id="s-address" placeholder="〒XXX-XXXX ..."></div>
-          <div class="form-group"><label class="form-label">電話番号</label><input class="form-input" id="s-tel" placeholder="03-XXXX-XXXX"></div>
-          <div class="form-group"><label class="form-label">送料</label><input class="form-input" id="s-ship" value="無料"></div>
+          <div class="form-group"><label class="form-label">問い合わせメール</label><input class="form-input" id="s-email"></div>
+          <div class="form-group"><label class="form-label">古物商許可番号</label><input class="form-input" id="s-license"></div>
+          <div class="form-group"><label class="form-label">運営者名</label><input class="form-input" id="s-owner"></div>
+          <div class="form-group form-full"><label class="form-label">住所</label><input class="form-input" id="s-address"></div>
+          <div class="form-group"><label class="form-label">電話番号</label><input class="form-input" id="s-tel"></div>
         </div>
       </div>
-      <div class="form-section">
-        <div class="form-section-title">💳 Stripe設定</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">Publishable Key</label><input class="form-input" id="s-stripe-pub" type="password" placeholder="pk_live_..."></div>
-          <div class="form-group"><label class="form-label">Webhook Secret</label><input class="form-input" id="s-stripe-wh" type="password" placeholder="whsec_..."></div>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-lg" onclick="saveSettings()">✅ 設定を保存</button>
+      <button class="btn btn-primary btn-lg" onclick="saveSettings()">✅ 保存</button>
     </div>
 
   </div>
@@ -376,27 +373,27 @@ input,select,textarea{font-family:inherit}
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group form-full"><label class="form-label">パック名 *</label><input class="form-input" id="pm-name" placeholder="例: リザードン伝説オリパ"></div>
-        <div class="form-group"><label class="form-label">カテゴリ *</label>
+        <div class="form-group"><label class="form-label">カテゴリ</label>
           <select class="form-select" id="pm-cat"><option value="pokemon">ポケモン</option><option value="onepiece">ワンピース</option><option value="yugioh">遊戯王</option><option value="labubu">ラブブ</option><option value="hobby">ホビー</option></select>
         </div>
-        <div class="form-group"><label class="form-label">シリーズ名</label><input class="form-input" id="pm-series" placeholder="例: シャイニートレジャーex"></div>
+        <div class="form-group"><label class="form-label">シリーズ名</label><input class="form-input" id="pm-series"></div>
         <div class="form-group"><label class="form-label">絵文字</label><input class="form-input" id="pm-emoji" placeholder="🔥" maxlength="2"></div>
         <div class="form-group"><label class="form-label">価格 *</label><input type="number" class="form-input" id="pm-price" placeholder="3000"></div>
         <div class="form-group"><label class="form-label">通貨</label>
           <select class="form-select" id="pm-currency"><option value="jp">JP（有償）</option><option value="coin">コイン</option></select>
         </div>
         <div class="form-group"><label class="form-label">全口数 *</label><input type="number" class="form-input" id="pm-total" placeholder="500"></div>
-        <div class="form-group"><label class="form-label">総還元率（%）</label><input type="number" class="form-input" id="pm-rate" placeholder="98"></div>
-        <div class="form-group"><label class="form-label">確率テキスト</label><input class="form-input" id="pm-odds" placeholder="例: 1/3でアド確定"></div>
-        <div class="form-group"><label class="form-label">天井回数（0=なし）</label><input type="number" class="form-input" id="pm-tenjo" placeholder="0" value="0"></div>
-        <div class="form-group"><label class="form-label">リボンテキスト</label><input class="form-input" id="pm-ribbon" placeholder="例: 人気No.1"></div>
+        <div class="form-group"><label class="form-label">還元率（%）</label><input type="number" class="form-input" id="pm-rate" placeholder="98"></div>
+        <div class="form-group"><label class="form-label">確率テキスト</label><input class="form-input" id="pm-odds" placeholder="1/3でアド確定"></div>
+        <div class="form-group"><label class="form-label">天井回数（0=なし）</label><input type="number" class="form-input" id="pm-tenjo" value="0"></div>
+        <div class="form-group"><label class="form-label">リボンテキスト</label><input class="form-input" id="pm-ribbon" placeholder="人気No.1"></div>
         <div class="form-group"><label class="form-label">リボンタイプ</label>
-          <select class="form-select" id="pm-ribbon-type"><option value="hot">🔥 HOT（赤）</option><option value="new">✨ NEW（青）</option><option value="limit">⏳ 残りわずか（紫）</option></select>
+          <select class="form-select" id="pm-ribbon-type"><option value="hot">🔥 HOT</option><option value="new">✨ NEW</option><option value="limit">⏳ LIMIT</option></select>
         </div>
-        <div class="form-group form-full"><label class="form-label">背景グラデーション（CSS）</label><input class="form-input" id="pm-bg" placeholder="radial-gradient(120% 120% at 30% 80%, #cc3300 0%, #1a0000 100%)"></div>
+        <div class="form-group form-full"><label class="form-label">背景CSS</label><input class="form-input" id="pm-bg" placeholder="radial-gradient(...)"></div>
         <div class="form-group"><label class="form-label">表示順</label><input type="number" class="form-input" id="pm-order" value="0"></div>
       </div>
-      <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap">
+      <div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">
         <label class="form-check"><input type="checkbox" id="pm-hot"> 🔥 HOT</label>
         <label class="form-check"><input type="checkbox" id="pm-new"> ✨ NEW</label>
         <label class="form-check"><input type="checkbox" id="pm-ad"> ✅ アド確定</label>
@@ -404,13 +401,13 @@ input,select,textarea{font-family:inherit}
         <label class="form-check"><input type="checkbox" id="pm-active" checked> 🟢 公開</label>
       </div>
       <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
-        <div style="font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:10px">🏆 賞品設定</div>
-        <div style="display:grid;grid-template-columns:80px 1fr 70px 70px 80px 30px;gap:4px;margin-bottom:6px">
-          <span style="font-size:.62rem;color:rgba(255,255,255,.3);padding:0 4px">レア度</span>
-          <span style="font-size:.62rem;color:rgba(255,255,255,.3)">賞品名</span>
-          <span style="font-size:.62rem;color:rgba(255,255,255,.3)">枚数</span>
-          <span style="font-size:.62rem;color:rgba(255,255,255,.3)">重み</span>
-          <span style="font-size:.62rem;color:rgba(255,255,255,.3)">参考価格</span>
+        <div style="font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:8px">🏆 賞品設定</div>
+        <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 70px 28px;gap:4px;margin-bottom:4px">
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">レア度</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">賞品名</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">枚数</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">重み</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">参考価格</span>
           <span></span>
         </div>
         <div id="prizes-list"></div>
@@ -419,7 +416,7 @@ input,select,textarea{font-family:inherit}
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('pack-modal')">キャンセル</button>
-      <button class="btn btn-primary btn-lg" onclick="savePack()">✅ 保存して公開</button>
+      <button class="btn btn-primary btn-lg" onclick="savePack()">✅ 保存</button>
     </div>
   </div>
 </div>
@@ -432,9 +429,9 @@ input,select,textarea{font-family:inherit}
       <button class="modal-close" onclick="closeModal('banner-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="bn-title" placeholder="3周年記念キャンペーン"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub" placeholder="還元率120%超えオリパ解放！"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">リンク先URL</label><input class="form-input" id="bn-link" placeholder="https://..."></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="bn-title"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">リンク先URL</label><input class="form-input" id="bn-link"></div>
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">背景グラデーション</label><input class="form-input" id="bn-bg" placeholder="linear-gradient(135deg,#1a0040,#cc00ff)"></div>
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">タグテキスト</label><input class="form-input" id="bn-tag" placeholder="🎊 期間限定"></div>
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">表示順</label><input type="number" class="form-input" id="bn-order" value="0"></div>
@@ -455,17 +452,12 @@ input,select,textarea{font-family:inherit}
       <button class="modal-close" onclick="closeModal('video-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">動画名</label><input class="form-input" id="vd-name" placeholder="プチュン演出_金"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">対応レア度</label>
-        <select class="form-select" id="vd-tier">
-          <option value="sar">SAR（最高レア）</option><option value="sr">SR</option><option value="rr">RR</option><option value="r">R</option><option value="c">C（ハズレ）</option><option value="all">全レア度共通</option>
-        </select>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">動画名</label><input class="form-input" id="vd-name"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">レア度</label>
+        <select class="form-select" id="vd-tier"><option value="sar">SAR</option><option value="sr">SR</option><option value="rr">RR</option><option value="r">R</option><option value="c">C</option><option value="all">共通</option></select>
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">動画URL（Supabase Storage）</label><input class="form-input" id="vd-url" placeholder="https://...supabase.co/storage/v1/object/public/videos/..."></div>
-      <div style="background:rgba(255,200,0,.06);border:1px solid rgba(255,200,0,.15);border-radius:6px;padding:10px 12px;font-size:.75rem;color:rgba(255,200,80,.7);margin-bottom:10px">
-        💡 Supabase → Storage → 「New bucket: videos（Public）」を作成してmp4をアップロードし、URLをコピーしてください。
-      </div>
-      <label class="form-check"><input type="checkbox" id="vd-default"> このレア度のデフォルト演出にする</label>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">動画URL</label><input class="form-input" id="vd-url" placeholder="https://..."></div>
+      <label class="form-check"><input type="checkbox" id="vd-default"> デフォルト演出にする</label>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('video-modal')">キャンセル</button>
@@ -478,18 +470,15 @@ input,select,textarea{font-family:inherit}
 <div class="modal-overlay" id="notice-modal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title" id="notice-modal-title">🔔 お知らせ作成</span>
+      <span class="modal-title" id="notice-modal-title">🔔 お知らせ</span>
       <button class="modal-close" onclick="closeModal('notice-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="nc-title" placeholder="メンテナンスのお知らせ"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="nc-title"></div>
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">種別</label>
         <select class="form-select" id="nc-type"><option value="info">お知らせ</option><option value="campaign">キャンペーン</option><option value="system">システム</option></select>
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">対象</label>
-        <select class="form-select" id="nc-target"><option value="all">全ユーザー</option></select>
-      </div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">本文</label><textarea class="form-textarea" id="nc-body" placeholder="お知らせの内容を入力..."></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">本文</label><textarea class="form-textarea" id="nc-body"></textarea></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('notice-modal')">キャンセル</button>
@@ -519,34 +508,48 @@ const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
 const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let currentUser=null;
+// ★ 管理者メールアドレスをここに設定
+const ADMIN_EMAILS=['csoplayer8110@yahoo.co.jp'];
+
 let allPacks=[],allUsers=[],allShipping=[],allHistory=[],allBanners=[],allVideos=[],allNotices=[];
 let editingPackId=null,editingUserId=null,editingBannerId=null,editingVideoId=null,editingNoticeId=null;
 
 /* ══ AUTH ══ */
 async function adminLogin(){
-  const email=document.getElementById('admin-email').value;
+  const email=document.getElementById('admin-email').value.trim();
   const pass=document.getElementById('admin-pass').value;
   if(!email||!pass){showErr('入力してください');return;}
+
+  // 管理者メールチェック
+  if(!ADMIN_EMAILS.includes(email)){
+    showErr('管理者権限がありません');return;
+  }
+
   const{data,error}=await db.auth.signInWithPassword({email,password:pass});
-  if(error){showErr('ログインに失敗しました');return;}
-  const{data:profile}=await db.from('users').select('is_admin,username').eq('id',data.user.id).single();
-  if(!profile?.is_admin){await db.auth.signOut();showErr('管理者権限がありません');return;}
-  currentUser={...data.user,username:profile.username};
+  if(error){showErr('メールアドレスまたはパスワードが違います');return;}
+
   document.getElementById('login-wrap').style.display='none';
   document.getElementById('main-area').style.display='flex';
-  document.getElementById('admin-user-name').textContent=profile.username||email;
+  document.getElementById('admin-user-name').textContent=email;
   initDashboard();
 }
-function showErr(msg){const e=document.getElementById('login-error');e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',3000);}
-async function adminLogout(){await db.auth.signOut();location.reload();}
+
+function showErr(msg){
+  const e=document.getElementById('login-error');
+  e.textContent=msg;e.style.display='block';
+  setTimeout(()=>e.style.display='none',3000);
+}
+
+async function adminLogout(){
+  await db.auth.signOut();location.reload();
+}
 
 /* ══ NAV ══ */
 function showPage(name,el){
   document.querySelectorAll('.admin-page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   document.getElementById(`page-${name}`)?.classList.add('active');
-  el?.classList.add('active');
+  if(el)el.classList.add('active');
   const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',shipping:'📦 発送管理',history:'📋 当選履歴',notices:'🔔 お知らせ管理',revenue:'💰 売上・収益',settings:'⚙️ サイト設定'};
   document.getElementById('page-title').textContent=titles[name]||name;
   const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices};
@@ -601,12 +604,11 @@ async function loadDashShipping(){
 async function loadDashPacks(){
   const{data}=await db.from('packs').select('name,remaining,total_slots,price,currency,is_active').eq('is_active',true).order('sort_order').limit(10);
   document.getElementById('dash-packs-body').innerHTML=(data||[]).map(p=>{
-    const pct=Math.round((p.remaining/p.total_slots)*100);
-    const bc=pct<10?'danger':pct<30?'warn':'';
+    const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     return`<tr>
       <td class="td-bold">${p.name}</td>
       <td>${(p.remaining||0).toLocaleString()} / ${(p.total_slots||0).toLocaleString()}</td>
-      <td><span class="prog"><span class="prog-fill ${bc}" style="width:${pct}%"></span></span> <span style="font-size:.65rem;color:rgba(255,255,255,.25)">${pct}%</span></td>
+      <td><span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span> <span style="font-size:.65rem;color:rgba(255,255,255,.25)">${pct}%</span></td>
       <td>${(p.price||0).toLocaleString()} ${p.currency==='coin'?'🪙':'💎'}</td>
       <td><span class="badge badge-active">公開中</span></td>
     </tr>`;
@@ -621,13 +623,13 @@ async function loadPacks(){
 
 function renderPacks(packs){
   document.getElementById('packs-tbl-body').innerHTML=packs.map(p=>{
-    const pct=Math.round((p.remaining/p.total_slots)*100);
+    const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     return`<tr>
       <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}</div></td>
       <td>${p.category||'—'}</td>
       <td>${(p.price||0).toLocaleString()} ${p.currency==='coin'?'🪙':'💎'}</td>
       <td>${(p.remaining||0).toLocaleString()} / ${(p.total_slots||0).toLocaleString()}<br>
-        <span class="prog" style="width:80px"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span>
+        <span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span>
       </td>
       <td>${p.return_rate||'—'}%</td>
       <td><span class="badge ${p.is_active?'badge-active':'badge-pause'}">${p.is_active?'公開中':'停止中'}</span></td>
@@ -642,21 +644,19 @@ function renderPacks(packs){
 
 function filterPacks(q){renderPacks(allPacks.filter(p=>p.name.includes(q)||(p.series||'').includes(q)));}
 
-function openPackModal(packId){
-  editingPackId=packId||null;
-  document.getElementById('pack-modal-title').textContent=packId?'🎴 オリパ編集':'🎴 新規オリパ作成';
+function openPackModal(){
+  editingPackId=null;
+  document.getElementById('pack-modal-title').textContent='🎴 新規オリパ作成';
   document.getElementById('prizes-list').innerHTML='';
-  if(!packId){
-    ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-rate','pm-odds','pm-ribbon','pm-bg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    document.getElementById('pm-cat').value='pokemon';
-    document.getElementById('pm-currency').value='jp';
-    document.getElementById('pm-ribbon-type').value='hot';
-    document.getElementById('pm-tenjo').value='0';
-    document.getElementById('pm-order').value='0';
-    ['pm-hot','pm-new','pm-ad','pm-limit'].forEach(id=>document.getElementById(id).checked=false);
-    document.getElementById('pm-active').checked=true;
-    addPrizeRow();addPrizeRow();addPrizeRow();
-  }
+  ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-rate','pm-odds','pm-ribbon','pm-bg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('pm-cat').value='pokemon';
+  document.getElementById('pm-currency').value='jp';
+  document.getElementById('pm-ribbon-type').value='hot';
+  document.getElementById('pm-tenjo').value='0';
+  document.getElementById('pm-order').value='0';
+  ['pm-hot','pm-new','pm-ad','pm-limit'].forEach(id=>document.getElementById(id).checked=false);
+  document.getElementById('pm-active').checked=true;
+  addPrizeRow();addPrizeRow();addPrizeRow();
   document.getElementById('pack-modal').classList.add('show');
 }
 
@@ -690,19 +690,19 @@ async function editPack(id){
 
 function addPrizeRow(prize){
   const div=document.createElement('div');
-  div.style.cssText='display:grid;grid-template-columns:80px 1fr 70px 70px 80px 30px;gap:4px;margin-bottom:6px;align-items:center';
+  div.style.cssText='display:grid;grid-template-columns:80px 1fr 60px 60px 70px 28px;gap:4px;margin-bottom:6px;align-items:center';
   div.innerHTML=`
     <select class="form-select" style="padding:6px 8px;font-size:.75rem">
       <option value="sar" ${prize?.tier==='sar'?'selected':''}>SAR(S賞)</option>
-      <option value="sr"  ${prize?.tier==='sr' ?'selected':''}>SR(A賞)</option>
-      <option value="rr"  ${prize?.tier==='rr' ?'selected':''}>RR(B賞)</option>
-      <option value="r"   ${prize?.tier==='r'  ?'selected':''}>R(C賞)</option>
-      <option value="c"   ${prize?.tier==='c'  ?'selected':''}>C(D賞)</option>
+      <option value="sr"  ${prize?.tier==='sr'?'selected':''}>SR(A賞)</option>
+      <option value="rr"  ${prize?.tier==='rr'?'selected':''}>RR(B賞)</option>
+      <option value="r"   ${prize?.tier==='r'?'selected':''}>R(C賞)</option>
+      <option value="c"   ${prize?.tier==='c'?'selected':''}>C(D賞)</option>
     </select>
     <input class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="賞品名" value="${prize?.name||''}">
     <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="枚数" value="${prize?.quantity||''}">
     <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="重み" value="${prize?.weight||'100'}">
-    <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="参考価格" value="${prize?.value_jp||''}">
+    <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="価格" value="${prize?.value_jp||''}">
     <button onclick="this.parentElement.remove()" style="background:rgba(255,60,60,.15);color:#ff6060;border:1px solid rgba(255,60,60,.2);border-radius:4px;padding:4px 6px;font-size:.7rem;cursor:pointer">✕</button>`;
   document.getElementById('prizes-list').appendChild(div);
 }
@@ -712,8 +712,7 @@ async function savePack(){
   if(!name){showToast('⚠️ パック名を入力してください');return;}
   const total=parseInt(document.getElementById('pm-total').value)||0;
   const packData={
-    name,
-    series:document.getElementById('pm-series').value,
+    name,series:document.getElementById('pm-series').value,
     emoji:document.getElementById('pm-emoji').value||'🎴',
     category:document.getElementById('pm-cat').value,
     price:parseInt(document.getElementById('pm-price').value)||0,
@@ -767,8 +766,9 @@ async function togglePack(id,current){
 async function deletePack(id){
   if(!confirm('このオリパを削除しますか？'))return;
   await db.from('prizes').delete().eq('pack_id',id);
-  await db.from('packs').delete().eq('id',id);
-  showToast('🗑️ 削除しました');loadPacks();
+  const{error}=await db.from('packs').delete().eq('id',id);
+  if(error){showToast('⚠️ 削除失敗: '+error.message);return;}
+  showToast('🗑️ 削除しました');loadPacks();loadDashPacks();
 }
 
 /* ══ BANNERS ══ */
@@ -777,7 +777,6 @@ async function loadBanners(){
   allBanners=data||[];
   document.getElementById('banners-tbl-body').innerHTML=allBanners.map(b=>`
     <tr>
-      <td><div class="banner-preview" style="background:${b.bg_style||'#333'}">${b.title||''}</div></td>
       <td class="td-bold">${b.title||'—'}</td>
       <td style="font-size:.72rem">${b.link_url||'—'}</td>
       <td>${b.sort_order||0}</td>
@@ -789,10 +788,12 @@ async function loadBanners(){
     </tr>`).join('');
 }
 
-function openBannerModal(id){
-  editingBannerId=id||null;
-  document.getElementById('banner-modal-title').textContent=id?'🖼️ バナー編集':'🖼️ バナー追加';
-  if(!id){['bn-title','bn-sub','bn-link','bn-bg','bn-tag'].forEach(i=>document.getElementById(i).value='');document.getElementById('bn-order').value='0';document.getElementById('bn-active').checked=true;}
+function openBannerModal(){
+  editingBannerId=null;
+  document.getElementById('banner-modal-title').textContent='🖼️ バナー追加';
+  ['bn-title','bn-sub','bn-link','bn-bg','bn-tag'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('bn-order').value='0';
+  document.getElementById('bn-active').checked=true;
   document.getElementById('banner-modal').classList.add('show');
 }
 
@@ -811,17 +812,9 @@ function editBanner(id){
 }
 
 async function saveBanner(){
-  const bannerData={
-    title:document.getElementById('bn-title').value,
-    sub_text:document.getElementById('bn-sub').value,
-    link_url:document.getElementById('bn-link').value,
-    bg_style:document.getElementById('bn-bg').value,
-    tag_text:document.getElementById('bn-tag').value,
-    sort_order:parseInt(document.getElementById('bn-order').value)||0,
-    is_active:document.getElementById('bn-active').checked,
-  };
-  if(editingBannerId){await db.from('banners').update(bannerData).eq('id',editingBannerId);}
-  else{await db.from('banners').insert(bannerData);}
+  const bannerData={title:document.getElementById('bn-title').value,sub_text:document.getElementById('bn-sub').value,link_url:document.getElementById('bn-link').value,bg_style:document.getElementById('bn-bg').value,tag_text:document.getElementById('bn-tag').value,sort_order:parseInt(document.getElementById('bn-order').value)||0,is_active:document.getElementById('bn-active').checked};
+  if(editingBannerId)await db.from('banners').update(bannerData).eq('id',editingBannerId);
+  else await db.from('banners').insert(bannerData);
   closeModal('banner-modal');showToast('✅ バナーを保存しました');loadBanners();
 }
 
@@ -835,10 +828,10 @@ async function deleteBanner(id){
 async function loadVideos(){
   const{data}=await db.from('gacha_videos').select('*').order('created_at');
   allVideos=data||[];
-  const tierLabel={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C(ハズレ)',all:'共通'};
+  const tierLabel={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C',all:'共通'};
   document.getElementById('videos-tbl-body').innerHTML=allVideos.map(v=>`
     <tr>
-      <td><span class="badge ${v.tier==='sar'?'badge-gold':v.tier==='sr'?'badge-hot':'badge-pause'}">${tierLabel[v.tier]||v.tier}</span></td>
+      <td><span class="badge ${v.tier==='sar'?'badge-gold':'badge-pause'}">${tierLabel[v.tier]||v.tier}</span></td>
       <td class="td-bold">${v.name||'—'}</td>
       <td>${v.is_default?'<span class="badge badge-active">デフォルト</span>':'—'}</td>
       <td><span class="badge ${v.video_url?'badge-active':'badge-pause'}">${v.video_url?'設定済み':'未設定'}</span></td>
@@ -849,10 +842,12 @@ async function loadVideos(){
     </tr>`).join('');
 }
 
-function openVideoModal(id){
-  editingVideoId=id||null;
-  document.getElementById('video-modal-title').textContent=id?'🎬 動画編集':'🎬 動画追加';
-  if(!id){['vd-name','vd-url'].forEach(i=>document.getElementById(i).value='');document.getElementById('vd-tier').value='sar';document.getElementById('vd-default').checked=false;}
+function openVideoModal(){
+  editingVideoId=null;
+  document.getElementById('video-modal-title').textContent='🎬 動画追加';
+  ['vd-name','vd-url'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('vd-tier').value='sar';
+  document.getElementById('vd-default').checked=false;
   document.getElementById('video-modal').classList.add('show');
 }
 
@@ -868,15 +863,10 @@ function editVideo(id){
 }
 
 async function saveVideo(){
-  const videoData={
-    name:document.getElementById('vd-name').value,
-    tier:document.getElementById('vd-tier').value,
-    video_url:document.getElementById('vd-url').value,
-    is_default:document.getElementById('vd-default').checked,
-  };
-  if(editingVideoId){await db.from('gacha_videos').update(videoData).eq('id',editingVideoId);}
-  else{await db.from('gacha_videos').insert(videoData);}
-  closeModal('video-modal');showToast('✅ 動画設定を保存しました');loadVideos();
+  const videoData={name:document.getElementById('vd-name').value,tier:document.getElementById('vd-tier').value,video_url:document.getElementById('vd-url').value,is_default:document.getElementById('vd-default').checked};
+  if(editingVideoId)await db.from('gacha_videos').update(videoData).eq('id',editingVideoId);
+  else await db.from('gacha_videos').insert(videoData);
+  closeModal('video-modal');showToast('✅ 保存しました');loadVideos();
 }
 
 async function deleteVideo(id){
@@ -901,12 +891,8 @@ function renderUsers(users){
       <td>${(u.jp_points||0).toLocaleString()}</td>
       <td>${(u.coin_points||0).toLocaleString()}</td>
       <td><span class="badge badge-gold">${u.rank||'ブロンズIV'}</span></td>
-      <td style="font-size:.72rem">${u.referral_code||'—'}</td>
       <td style="font-size:.72rem">${new Date(u.created_at).toLocaleDateString('ja-JP')}</td>
-      <td>
-        <button class="btn btn-edit" onclick="openUserModal('${u.id}')">編集</button>
-        ${u.is_admin?'<span class="badge badge-gold" style="margin-left:4px">管理者</span>':''}
-      </td>
+      <td><button class="btn btn-edit" onclick="openUserModal('${u.id}')">編集</button></td>
     </tr>`).join('');
 }
 
@@ -924,21 +910,13 @@ function openUserModal(id){
       <div class="form-group"><label class="form-label">JP</label><input type="number" class="form-input" id="um-jp" value="${u.jp_points||0}"></div>
       <div class="form-group"><label class="form-label">コイン</label><input type="number" class="form-input" id="um-coin" value="${u.coin_points||0}"></div>
       <div class="form-group"><label class="form-label">DP</label><input type="number" class="form-input" id="um-dp" value="${u.dp_points||0}"></div>
-      <div class="form-group form-full"><label class="form-check"><input type="checkbox" id="um-admin" ${u.is_admin?'checked':''}> 管理者権限</label></div>
     </div>`;
   document.getElementById('user-modal').classList.add('show');
 }
 
 async function saveUser(){
   if(!editingUserId)return;
-  await db.from('users').update({
-    username:document.getElementById('um-name').value,
-    rank:document.getElementById('um-rank').value,
-    jp_points:parseInt(document.getElementById('um-jp').value)||0,
-    coin_points:parseInt(document.getElementById('um-coin').value)||0,
-    dp_points:parseInt(document.getElementById('um-dp').value)||0,
-    is_admin:document.getElementById('um-admin').checked,
-  }).eq('id',editingUserId);
+  await db.from('users').update({username:document.getElementById('um-name').value,rank:document.getElementById('um-rank').value,jp_points:parseInt(document.getElementById('um-jp').value)||0,coin_points:parseInt(document.getElementById('um-coin').value)||0,dp_points:parseInt(document.getElementById('um-dp').value)||0}).eq('id',editingUserId);
   closeModal('user-modal');showToast('✅ 更新しました');loadUsers();
 }
 
@@ -949,15 +927,13 @@ async function grantPoints(){
   const amount=parseInt(document.getElementById('pt-amount').value);
   const reason=document.getElementById('pt-reason').value;
   if(!userInput||!amount){showToast('⚠️ 入力してください');return;}
-  const{data:user}=await db.from('users').select('id,jp_points,coin_points,dp_points').or(`email.eq.${userInput},id.eq.${userInput}`).single();
+  const{data:user}=await db.from('users').select('id,jp_points,coin_points,dp_points').eq('email',userInput).single();
   if(!user){showToast('⚠️ ユーザーが見つかりません');return;}
   const field=type==='jp'?'jp_points':type==='coin'?'coin_points':'dp_points';
   await db.from('users').update({[field]:(user[field]||0)+amount}).eq('id',user.id);
   await db.from('transactions').insert({user_id:user.id,type:'bonus',amount,currency:type,description:reason||'管理者付与'}).catch(()=>{});
   showToast(`✅ ${amount.toLocaleString()} ${type.toUpperCase()}を付与しました`);
 }
-
-function saveExpiry(){showToast('✅ 有効期限設定を保存しました');}
 
 /* ══ SHIPPING ══ */
 async function loadShipping(status='all'){
@@ -1012,14 +988,12 @@ async function loadHistory(){
       <td style="font-size:.72rem">${r.packs?.name||'—'}</td>
       <td class="td-bold">${r.prizes?.name||'—'}</td>
       <td><span style="color:${tc[r.prizes?.tier]||'#fff'};font-weight:900;font-size:.72rem">${r.prizes?.tier_label||'—'}</span></td>
-      <td style="font-size:.72rem">${(r.draw_sessions?.total_cost||0).toLocaleString()} ${r.draw_sessions?.currency||''}</td>
+      <td style="font-size:.72rem">${(r.draw_sessions?.total_cost||0).toLocaleString()}</td>
     </tr>`).join('');
 }
 
 function exportHistory(){
-  const csv=['日時,ユーザー,パック,カード,レア度,消費PT'].concat(
-    allHistory.map(r=>`${new Date(r.created_at).toLocaleString('ja-JP')},${r.users?.username||''},${r.packs?.name||''},${r.prizes?.name||''},${r.prizes?.tier_label||''},${r.draw_sessions?.total_cost||''}`)
-  ).join('\n');
+  const csv=['日時,ユーザー,パック,カード,レア度,消費PT'].concat(allHistory.map(r=>`${new Date(r.created_at).toLocaleString('ja-JP')},${r.users?.username||''},${r.packs?.name||''},${r.prizes?.name||''},${r.prizes?.tier_label||''},${r.draw_sessions?.total_cost||''}`)).join('\n');
   const blob=new Blob(['\ufeff'+csv],{type:'text/csv'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -1034,8 +1008,7 @@ async function loadNotices(){
   document.getElementById('notices-tbl-body').innerHTML=allNotices.map(n=>`
     <tr>
       <td class="td-bold">${n.title||'—'}</td>
-      <td><span class="badge ${n.type==='campaign'?'badge-hot':n.type==='system'?'badge-pause':'badge-active'}">${n.type||'info'}</span></td>
-      <td>${n.target==='all'?'全員':'個人'}</td>
+      <td><span class="badge ${n.type==='campaign'?'badge-hot':'badge-active'}">${n.type||'info'}</span></td>
       <td style="font-size:.72rem">${new Date(n.created_at).toLocaleDateString('ja-JP')}</td>
       <td><span class="badge ${n.is_active?'badge-active':'badge-pause'}">${n.is_active?'公開':'非公開'}</span></td>
       <td>
@@ -1050,7 +1023,6 @@ function openNoticeModal(){
   document.getElementById('notice-modal-title').textContent='🔔 お知らせ作成';
   ['nc-title','nc-body'].forEach(i=>document.getElementById(i).value='');
   document.getElementById('nc-type').value='info';
-  document.getElementById('nc-target').value='all';
   document.getElementById('notice-modal').classList.add('show');
 }
 
@@ -1061,21 +1033,14 @@ function editNotice(id){
   document.getElementById('nc-title').value=n.title||'';
   document.getElementById('nc-body').value=n.body||'';
   document.getElementById('nc-type').value=n.type||'info';
-  document.getElementById('nc-target').value=n.target||'all';
   document.getElementById('notice-modal').classList.add('show');
 }
 
 async function saveNotice(){
-  const noticeData={
-    title:document.getElementById('nc-title').value,
-    body:document.getElementById('nc-body').value,
-    type:document.getElementById('nc-type').value,
-    target:document.getElementById('nc-target').value,
-    is_active:true,
-  };
-  if(editingNoticeId){await db.from('notices').update(noticeData).eq('id',editingNoticeId);}
-  else{await db.from('notices').insert(noticeData);}
-  closeModal('notice-modal');showToast('✅ お知らせを保存しました');loadNotices();
+  const noticeData={title:document.getElementById('nc-title').value,body:document.getElementById('nc-body').value,type:document.getElementById('nc-type').value,is_active:true};
+  if(editingNoticeId)await db.from('notices').update(noticeData).eq('id',editingNoticeId);
+  else await db.from('notices').insert(noticeData);
+  closeModal('notice-modal');showToast('✅ 保存しました');loadNotices();
 }
 
 async function deleteNotice(id){
@@ -1086,11 +1051,10 @@ async function deleteNotice(id){
 
 /* ══ REVENUE ══ */
 async function loadRevenue(){
-  const{data:packs}=await db.from('packs').select('name,price,total_slots,remaining,currency');
+  const{data:packs}=await db.from('packs').select('name,price,total_slots,remaining');
   document.getElementById('revenue-tbl-body').innerHTML=(packs||[]).map(p=>{
     const sold=(p.total_slots||0)-(p.remaining||0);
-    const revenue=sold*(p.price||0);
-    return`<tr><td class="td-bold">${p.name}</td><td>${sold.toLocaleString()}</td><td>¥${revenue.toLocaleString()}</td></tr>`;
+    return`<tr><td class="td-bold">${p.name}</td><td>${sold.toLocaleString()}</td><td>¥${(sold*(p.price||0)).toLocaleString()}</td></tr>`;
   }).join('');
 }
 
@@ -1117,18 +1081,14 @@ function timeAgo(dateStr){
   return`${Math.floor(h/24)}日前`;
 }
 
-/* ══ AUTO LOGIN ══ */
+/* ══ AUTO LOGIN CHECK ══ */
 (async()=>{
   const{data:{session}}=await db.auth.getSession();
-  if(session){
-    const{data:profile}=await db.from('users').select('is_admin,username').eq('id',session.user.id).single();
-    if(profile?.is_admin){
-      currentUser={...session.user,username:profile.username};
-      document.getElementById('login-wrap').style.display='none';
-      document.getElementById('main-area').style.display='flex';
-      document.getElementById('admin-user-name').textContent=profile.username||session.user.email;
-      initDashboard();
-    }
+  if(session&&ADMIN_EMAILS.includes(session.user.email)){
+    document.getElementById('login-wrap').style.display='none';
+    document.getElementById('main-area').style.display='flex';
+    document.getElementById('admin-user-name').textContent=session.user.email;
+    initDashboard();
   }
 })();
 </script>
