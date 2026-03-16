@@ -476,6 +476,7 @@ input,select,textarea{font-family:inherit}
         <div class="form-group"><label class="form-label">還元率（%）</label><input type="number" class="form-input" id="pm-rate" placeholder="98"></div>
         <div class="form-group"><label class="form-label">確率テキスト</label><input class="form-input" id="pm-odds" placeholder="1/3でアド確定"></div>
         <div class="form-group"><label class="form-label">天井回数（0=なし）</label><input type="number" class="form-input" id="pm-tenjo" value="0"></div>
+        <div class="form-group"><label class="form-label">最低保証（コイン・0=なし）</label><input type="number" class="form-input" id="pm-min-guarantee" value="0" placeholder="例: 1000"></div>
         <div class="form-group"><label class="form-label">リボンテキスト</label><input class="form-input" id="pm-ribbon" placeholder="人気No.1"></div>
         <div class="form-group"><label class="form-label">リボンタイプ</label>
           <select class="form-select" id="pm-ribbon-type"><option value="hot">🔥 HOT</option><option value="new">✨ NEW</option><option value="limit">⏳ LIMIT</option></select>
@@ -488,6 +489,9 @@ input,select,textarea{font-family:inherit}
         <label class="form-check"><input type="checkbox" id="pm-new"> ✨ NEW</label>
         <label class="form-check"><input type="checkbox" id="pm-ad"> ✅ アド確定</label>
         <label class="form-check"><input type="checkbox" id="pm-limit"> ⏳ 残りわずか</label>
+        <label class="form-check"><input type="checkbox" id="pm-loop"> 🔄 ループオリパ</label>
+        <label class="form-check"><input type="checkbox" id="pm-new-user"> 🆕 新規限定</label>
+        <label class="form-check"><input type="checkbox" id="pm-100x"> 💯 100倍アド確定</label>
         <label class="form-check"><input type="checkbox" id="pm-active" checked> 🟢 公開</label>
       </div>
       <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
@@ -751,7 +755,7 @@ function renderPacks(packs){
   document.getElementById('packs-tbl-body').innerHTML=packs.map(p=>{
     const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     return`<tr>
-      <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}</div></td>
+      <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}${p.is_loop?'<span class="badge badge-active" style="margin-left:4px">ループ</span>':''}${p.is_new_user_only?'<span class="badge badge-gold" style="margin-left:4px">新規限定</span>':''}${p.is_100x_ad?'<span class="badge badge-hot" style="margin-left:4px">100倍アド</span>':''}</div></td>
       <td>${p.category||'—'}</td>
       <td>${(p.price||0).toLocaleString()}🪙</td>
       <td>${(p.remaining||0).toLocaleString()}/${(p.total_slots||0).toLocaleString()}<br><span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span></td>
@@ -776,7 +780,7 @@ function openPackModal(){
   document.getElementById('pm-ribbon-type').value='hot';
   document.getElementById('pm-tenjo').value='0';
   document.getElementById('pm-order').value='0';
-  ['pm-hot','pm-new','pm-ad','pm-limit'].forEach(id=>document.getElementById(id).checked=false);
+  ['pm-hot','pm-new','pm-ad','pm-limit','pm-loop','pm-new-user','pm-100x'].forEach(id=>document.getElementById(id).checked=false);
   document.getElementById('pm-active').checked=true;
   addPrizeRow();addPrizeRow();addPrizeRow();
   document.getElementById('pack-modal').classList.add('show');
@@ -794,6 +798,7 @@ async function editPack(id){
   document.getElementById('pm-rate').value=pack.return_rate||'';
   document.getElementById('pm-odds').value=pack.odds_text||'';
   document.getElementById('pm-tenjo').value=pack.tenjo_limit||'0';
+  document.getElementById('pm-min-guarantee').value=pack.min_guarantee||'0';
   document.getElementById('pm-ribbon').value=pack.ribbon_text||'';
   document.getElementById('pm-bg').value=pack.bg_style||'';
   document.getElementById('pm-cat').value=pack.category||'pokemon';
@@ -803,6 +808,9 @@ async function editPack(id){
   document.getElementById('pm-new').checked=pack.is_new||false;
   document.getElementById('pm-ad').checked=pack.is_ad_confirm||false;
   document.getElementById('pm-limit').checked=pack.is_limited||false;
+  document.getElementById('pm-loop').checked=pack.is_loop||false;
+  document.getElementById('pm-new-user').checked=pack.is_new_user_only||false;
+  document.getElementById('pm-100x').checked=pack.is_100x_ad||false;
   document.getElementById('pm-active').checked=pack.is_active!==false;
   document.getElementById('prizes-list').innerHTML='';
   (pack.prizes||[]).forEach(pr=>addPrizeRow(pr));
@@ -832,7 +840,7 @@ async function savePack(){
   const name=document.getElementById('pm-name').value;
   if(!name){showToast('⚠️ パック名を入力してください');return;}
   const total=parseInt(document.getElementById('pm-total').value)||0;
-  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,return_rate:parseFloat(document.getElementById('pm-rate').value)||null,odds_text:document.getElementById('pm-odds').value,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,ribbon_text:document.getElementById('pm-ribbon').value,ribbon_type:document.getElementById('pm-ribbon-type').value,bg_style:document.getElementById('pm-bg').value,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_hot:document.getElementById('pm-hot').checked,is_new:document.getElementById('pm-new').checked,is_ad_confirm:document.getElementById('pm-ad').checked,is_limited:document.getElementById('pm-limit').checked,is_active:document.getElementById('pm-active').checked};
+  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,return_rate:parseFloat(document.getElementById('pm-rate').value)||null,odds_text:document.getElementById('pm-odds').value,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,min_guarantee:parseInt(document.getElementById('pm-min-guarantee').value)||0,ribbon_text:document.getElementById('pm-ribbon').value,ribbon_type:document.getElementById('pm-ribbon-type').value,bg_style:document.getElementById('pm-bg').value,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_hot:document.getElementById('pm-hot').checked,is_new:document.getElementById('pm-new').checked,is_ad_confirm:document.getElementById('pm-ad').checked,is_limited:document.getElementById('pm-limit').checked,is_loop:document.getElementById('pm-loop').checked,is_new_user_only:document.getElementById('pm-new-user').checked,is_100x_ad:document.getElementById('pm-100x').checked,is_active:document.getElementById('pm-active').checked};
   if(!editingPackId)packData.remaining=total;
   let packId=editingPackId;
   if(editingPackId){
