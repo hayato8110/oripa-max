@@ -1275,28 +1275,45 @@ async function executeDraw(){
 
 async function saveDrawSession(packId,results,totalCost){
   try{
-    const{data:session,error:sessionError}=await db.from('draw_sessions').insert({
-      user_id:state.user.id,pack_id:packId,
-      draw_count:results.length,total_cost:totalCost,
-      currency:'coin',server_seed:generateSeed(),
-    }).select().single();
-    if(sessionError){showToast('⚠️ セッション保存エラー: '+sessionError.message,4000);console.error('session error:',sessionError);return;}
-    if(!session){showToast('⚠️ セッションが返りませんでした',4000);return;}
+    const insertData={
+      user_id:state.user.id,
+      pack_id:packId,
+      draw_count:results.length,
+      total_cost:totalCost,
+      currency:'coin',
+      server_seed:generateSeed(),
+    };
+    const{data:session,error:sessionError}=await db.from('draw_sessions').insert(insertData).select('id').single();
+    if(sessionError){
+      showToast('⚠️ エラー: '+sessionError.message,4000);
+      return;
+    }
+    if(!session?.id){
+      showToast('⚠️ セッションID取得失敗',4000);
+      return;
+    }
     const resultRows=results.map(r=>({
-      session_id:session.id,user_id:state.user.id,
-      pack_id:packId,prize_id:r.prize.id||null,
-      prize_name:r.prize.name,prize_tier:r.prize.tier,
-      result_hash:generateSeed(),is_converted:false,
+      session_id:session.id,
+      user_id:state.user.id,
+      pack_id:packId,
+      prize_name:r.prize.name,
+      prize_tier:r.prize.tier,
+      is_converted:false,
+      is_shipped:false,
     }));
     const{error:resultError}=await db.from('draw_results').insert(resultRows);
-    if(resultError){showToast('⚠️ 結果保存エラー: '+resultError.message,4000);console.error('result error:',resultError);}
+    if(resultError){
+      showToast('⚠️ 結果保存エラー: '+resultError.message,4000);
+    }
     await db.from('transactions').insert({
-      user_id:state.user.id,type:'draw',amount:-totalCost,
-      currency:'coin',description:`${state.activePack?.name} × ${results.length}回`,
-    }).catch(e=>console.error('tx error:',e));
+      user_id:state.user.id,
+      type:'draw',
+      amount:-totalCost,
+      currency:'coin',
+      description:`${state.activePack?.name} × ${results.length}回`,
+    }).catch(()=>{});
   }catch(e){
     showToast('⚠️ 保存エラー: '+e.message,4000);
-    console.error('saveDrawSession error:',e);
   }
 }
 
