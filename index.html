@@ -789,10 +789,7 @@ async function loadUserProfile(userId){
   if(!profile)return;
   state.user=profile;
   state.coin=profile.coin_points||0;
-  state.dp=profile.dp_points||0;
   state.totalSpent=profile.total_spent||0;
-  const{rank}=getRankInfo(state.totalSpent);
-  state.rank=rank.name;
   updateHeaderPts();
   checkLoginBonus();
   if(!state.user.referral_code){
