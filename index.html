@@ -1275,36 +1275,23 @@ async function executeDraw(){
 
 async function saveDrawSession(packId,results,totalCost){
   try{
-    const insertData={
+    // 結果をJSONBで一緒に保存（シンプル方式）
+    const{data:session,error}=await db.from('draw_sessions').insert({
       user_id:state.user.id,
       pack_id:packId,
       draw_count:results.length,
       total_cost:totalCost,
       currency:'coin',
       server_seed:generateSeed(),
-    };
-    const{data:session,error:sessionError}=await db.from('draw_sessions').insert(insertData).select('id').single();
-    if(sessionError){
-      showToast('⚠️ エラー: '+sessionError.message,4000);
-      return;
-    }
-    if(!session?.id){
-      showToast('⚠️ セッションID取得失敗',4000);
-      return;
-    }
-    const resultRows=results.map(r=>({
-      session_id:session.id,
-      user_id:state.user.id,
-      pack_id:packId,
-      prize_name:r.prize.name,
-      prize_tier:r.prize.tier,
-      is_converted:false,
-      is_shipped:false,
-    }));
-    const{error:resultError}=await db.from('draw_results').insert(resultRows);
-    if(resultError){
-      showToast('⚠️ 結果保存エラー: '+resultError.message,4000);
-    }
+      results:results.map(r=>({
+        prize_name:r.prize.name,
+        prize_tier:r.prize.tier,
+        is_converted:false,
+        is_shipped:false,
+      })),
+    }).select('id').single();
+    if(error){showToast('⚠️ 保存エラー: '+error.message,4000);return;}
+    // transactionsに記録
     await db.from('transactions').insert({
       user_id:state.user.id,
       type:'draw',
@@ -1313,7 +1300,7 @@ async function saveDrawSession(packId,results,totalCost){
       description:`${state.activePack?.name} × ${results.length}回`,
     }).catch(()=>{});
   }catch(e){
-    showToast('⚠️ 保存エラー: '+e.message,4000);
+    showToast('⚠️ エラー: '+e.message,4000);
   }
 }
 
@@ -1345,9 +1332,8 @@ async function loadTenjoFromDB(){
 async function loadHistoryFromDB(){
   if(!state.user)return;
   const{data}=await db.from('draw_sessions').select(`
-    id,pack_id,draw_count,total_cost,created_at,
-    packs(name,emoji),
-    draw_results(id,prize_name,prize_tier,is_converted,is_shipped)
+    id,pack_id,draw_count,total_cost,created_at,results,
+    packs(name,emoji)
   `).eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
   if(!data)return;
   state.sessions=data.map(s=>({
@@ -1358,11 +1344,14 @@ async function loadHistoryFromDB(){
     cost:s.total_cost,
     currency:'coin',
     date:new Date(s.created_at).toLocaleString('ja-JP'),
-    shipped:s.draw_results?.some(r=>r.is_shipped)||false,
-    results:(s.draw_results||[]).map(r=>({
-      dbId:r.id,
+    shipped:(s.results||[]).some(r=>r.is_shipped)||false,
+    results:(s.results||[]).map((r,i)=>({
+      dbId:s.id+'_'+i,
+      sessionId:s.id,
+      resultIndex:i,
       prize:{name:r.prize_name||'—',tier:r.prize_tier||'c'},
       converted:r.is_converted||false,
+      shipped:r.is_shipped||false,
     })),
   }));
 }
@@ -1378,40 +1367,42 @@ async function convertToPoints(sessionIdx,resultIdx){
   if(state.user){
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
     if(result.dbId){
-      await db.from('draw_results').update({is_converted:true}).eq('id',result.dbId);
+      // JSONB方式でDBを更新
+      if(result.sessionId){
+        const{data:sess}=await db.from('draw_sessions').select('results').eq('id',result.sessionId).single();
+        if(sess?.results){
+          const newResults=[...sess.results];
+          if(newResults[result.resultIndex])newResults[result.resultIndex].is_converted=true;
+          await db.from('draw_sessions').update({results:newResults}).eq('id',result.sessionId);
+        }
+      }
+      await db.from('transactions').insert({
+        user_id:state.user.id,type:'convert',amount:points,
+        currency:'coin',description:`${result.prize.name} をポイント還元`,
+      }).catch(()=>{});
     }
-    await db.from('transactions').insert({
-      user_id:state.user.id,type:'convert',amount:points,
-      currency:'coin',description:`${result.prize.name} をポイント還元`,
-    }).catch(()=>{});
+    renderHistory();renderItemsPage();
+    showToast(`💰 ${points}コインに還元しました！`,2500);
   }
-  renderHistory();renderItemsPage();
-  showToast(`💰 ${points}コインに還元しました！`,2500);
-}
-
-async function convertAllToPoints(sessionIdx){
-  const session=state.sessions[sessionIdx];if(!session)return;
-  const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
-  let total=0;
-  const dbIds=[];
-  session.results.forEach(r=>{
-    if(!r.converted){
-      r.converted=true;
-      total+=tierValue[r.prize.tier]||50;
-      if(r.dbId)dbIds.push(r.dbId);
+  
+  async function convertAllToPoints(sessionIdx){
+    const session=state.sessions[sessionIdx];if(!session)return;
+    const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
+    let total=0;
+    session.results.forEach(r=>{
+      if(!r.converted){r.converted=true;total+=tierValue[r.prize.tier]||50;}
+    });
+    if(total===0){showToast('還元できるカードがありません');return;}
+    state.coin+=total;updateHeaderPts();
+    if(state.user){
+      await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+      // JSONB方式でDBを更新
+      const newResults=session.results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:true,is_shipped:r.shipped||false}));
+      await db.from('draw_sessions').update({results:newResults}).eq('id',session.id);
     }
-  });
-  if(total===0){showToast('還元できるカードがありません');return;}
-  state.coin+=total;updateHeaderPts();
-  if(state.user){
-    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-    if(dbIds.length){
-      await db.from('draw_results').update({is_converted:true}).in('id',dbIds);
-    }
+    renderHistory();renderItemsPage();
+    showToast(`💰 ${total}コインに一括還元しました！`,2500);
   }
-  renderHistory();renderItemsPage();
-  showToast(`💰 ${total}コインに一括還元しました！`,2500);
-}
 
 /* ══ 発送 ══ */
 let shippingSessionIdx=-1;
@@ -1439,8 +1430,9 @@ async function submitShipping(){
   const address={name,zip,prefecture:pref,city,building:document.getElementById('ship-building').value,tel};
   if(state.user){
     await db.from('shipping_requests').insert({user_id:state.user.id,result_ids:unconvertedResults.map(r=>r.prize.name),address,status:'pending'}).catch(()=>{});
-    const dbIds=unconvertedResults.filter(r=>r.dbId).map(r=>r.dbId);
-    if(dbIds.length)await db.from('draw_results').update({is_shipped:true}).in('id',dbIds).catch(()=>{});
+    // JSONB方式でDBを更新
+    const newResults=session.results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:r.converted||false,is_shipped:!r.converted}));
+    await db.from('draw_sessions').update({results:newResults}).eq('id',session.id).catch(()=>{});
   }
   session.shipped=true;
   closeModal('shipping-modal');
