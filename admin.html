@@ -6,6 +6,7 @@
 <title>オリパMAX 管理画面</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:#0f1117;color:#e8e8f0;font-family:'Noto Sans JP',sans-serif;display:flex;min-height:100vh}
@@ -14,8 +15,6 @@ input,select,textarea{font-family:inherit}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:#13141c}
 ::-webkit-scrollbar-thumb{background:#2a2b3a;border-radius:2px}
-
-/* LOGIN */
 .login-wrap{position:fixed;inset:0;background:#0f1117;display:flex;align-items:center;justify-content:center;z-index:1000}
 .login-box{background:#13141c;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:32px;width:360px}
 .login-logo{font-size:1.4rem;font-weight:900;color:#e8a800;margin-bottom:6px}
@@ -24,20 +23,16 @@ input,select,textarea{font-family:inherit}
 .login-input:focus{outline:none;border-color:#e8a800}
 .login-btn{width:100%;background:linear-gradient(135deg,#e8a800,#c88000);color:#0f1117;font-weight:900;font-size:.95rem;padding:12px;border-radius:8px;margin-top:4px}
 .login-error{color:#ff6060;font-size:.78rem;margin-top:8px;display:none}
-
-/* SIDEBAR */
-.sidebar{width:220px;flex-shrink:0;background:#13141c;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:50}
-.sb-logo{padding:18px 16px;font-size:1.1rem;font-weight:900;color:#e8a800;border-bottom:1px solid rgba(255,255,255,.06)}
+.sidebar{width:220px;flex-shrink:0;background:#13141c;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:50;overflow-y:auto}
+.sb-logo{padding:18px 16px;font-size:1.1rem;font-weight:900;color:#e8a800;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
 .sb-logo span{color:rgba(255,255,255,.25);font-size:.65rem;display:block;font-weight:400;margin-top:2px}
-.sb-nav{flex:1;padding:8px 0;overflow-y:auto}
+.sb-nav{flex:1;padding:8px 0}
 .sb-section{padding:14px 16px 4px;font-size:.6rem;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.2);text-transform:uppercase}
 .sb-item{display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:.83rem;font-weight:700;color:rgba(255,255,255,.4);cursor:pointer;border-left:3px solid transparent;transition:.15s;margin:1px 0}
 .sb-item:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.03)}
 .sb-item.active{color:#e8a800;border-color:#e8a800;background:rgba(232,168,0,.06)}
 .sb-icon{font-size:.95rem;width:18px;text-align:center}
 .sb-badge{margin-left:auto;background:#e82020;color:#fff;font-size:.55rem;font-weight:900;padding:1px 6px;border-radius:999px}
-
-/* MAIN */
 .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:#13141c;border-bottom:1px solid rgba(255,255,255,.06);padding:12px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
 .topbar-title{font-size:.95rem;font-weight:900}
@@ -46,18 +41,16 @@ input,select,textarea{font-family:inherit}
 .content{padding:20px;flex:1}
 .admin-page{display:none}
 .admin-page.active{display:block}
-
-/* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
 .stat-card{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px}
 .stat-label{font-size:.68rem;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
 .stat-val{font-size:1.7rem;font-weight:900;line-height:1}
+.stat-sub{font-size:.68rem;color:rgba(255,255,255,.25);margin-top:4px}
 .stat-gold .stat-val{color:#e8a800}
 .stat-green .stat-val{color:#00e676}
 .stat-red .stat-val{color:#ff4060}
 .stat-blue .stat-val{color:#4488ff}
-
-/* TABLE */
+.stat-purple .stat-val{color:#bb88ff}
 .table-card{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden;margin-bottom:18px}
 .table-head{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .table-title{font-size:.88rem;font-weight:900}
@@ -67,32 +60,26 @@ input,select,textarea{font-family:inherit}
 .tbl tr:hover td{background:rgba(255,255,255,.02)}
 .td-bold{font-weight:700}
 .td-sub{font-size:.7rem;color:rgba(255,255,255,.3);margin-top:2px}
-
-/* BADGES */
 .badge{font-size:.58rem;font-weight:900;padding:2px 7px;border-radius:3px;display:inline-block}
 .badge-active{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
 .badge-pause{background:rgba(255,200,0,.1);color:#e8a800;border:1px solid rgba(255,200,0,.2)}
 .badge-pending{background:rgba(255,200,0,.1);color:#e8a800;border:1px solid rgba(255,200,0,.2)}
 .badge-shipped{background:rgba(0,180,255,.1);color:#44aaff;border:1px solid rgba(0,180,255,.2)}
 .badge-gold{background:rgba(232,168,0,.12);color:#e8a800;border:1px solid rgba(232,168,0,.2)}
-.badge-hot{background:rgba(255,64,96,.12);color:#ff8080;border:1px solid rgba(255,64,96,.25)}
-
-/* BUTTONS */
+.badge-open{background:rgba(255,64,96,.1);color:#ff6680;border:1px solid rgba(255,64,96,.22)}
+.badge-closed{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
 .btn{padding:5px 11px;border-radius:5px;font-size:.72rem;font-weight:700;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:4px}
 .btn-primary{background:linear-gradient(135deg,#e8a800,#c88000);color:#0f1117}
 .btn-edit{background:rgba(68,136,255,.12);color:#6699ff;border:1px solid rgba(68,136,255,.22)}
 .btn-danger{background:rgba(255,64,96,.1);color:#ff6680;border:1px solid rgba(255,64,96,.22)}
 .btn-success{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
 .btn-secondary{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1)}
+.btn-purple{background:rgba(187,136,255,.1);color:#bb88ff;border:1px solid rgba(187,136,255,.22)}
 .btn-lg{padding:10px 20px;font-size:.85rem;border-radius:8px}
-
-/* PROGRESS */
 .prog{background:rgba(255,255,255,.08);border-radius:999px;height:4px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle}
 .prog-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#00bb44,#00ee66)}
 .prog-fill.warn{background:linear-gradient(90deg,#ee8800,#ffaa00)}
 .prog-fill.danger{background:linear-gradient(90deg,#dd0000,#ff3300)}
-
-/* FORM */
 .form-section{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;margin-bottom:14px}
 .form-section-title{font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:12px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -105,8 +92,6 @@ input,select,textarea{font-family:inherit}
 .form-check{display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer}
 .form-check input{accent-color:#e8a800;width:14px;height:14px}
 .form-actions{display:flex;gap:8px;margin-top:14px}
-
-/* MODAL */
 .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
 .modal-overlay.show{opacity:1;pointer-events:all}
 .modal{background:#1a1b25;border:1px solid rgba(255,255,255,.08);border-radius:14px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;transform:scale(.96);transition:.2s}
@@ -116,19 +101,28 @@ input,select,textarea{font-family:inherit}
 .modal-close{background:none;color:rgba(255,255,255,.3);font-size:1.2rem;cursor:pointer}
 .modal-body{padding:16px 18px}
 .modal-footer{padding:12px 18px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:8px;justify-content:flex-end}
-
-/* TOAST */
-#admin-toast{position:fixed;bottom:24px;right:24px;background:#1a1b25;border:1px solid rgba(232,168,0,.3);color:#e8a800;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s}
+#admin-toast{position:fixed;bottom:24px;right:24px;background:#1a1b25;border:1px solid rgba(232,168,0,.3);color:#e8a800;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
 #admin-toast.show{opacity:1}
-
 .win-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid rgba(255,255,255,.04);font-size:.78rem}
-.wr-tier{width:36px;font-size:.62rem;font-weight:900;text-align:center;flex-shrink:0}
-.wr-sar{color:#e8a800}.wr-sr{color:#bb88ff}.wr-rr{color:#44ccee}
-.wr-card{flex:1;font-weight:700}
-.wr-user{width:80px;color:rgba(255,255,255,.3);font-size:.7rem}
-.wr-time{width:60px;text-align:right;color:rgba(255,255,255,.2);font-size:.68rem}
 .search-input{background:#111219;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:6px 11px;color:#e8e8f0;font-size:.78rem;width:180px}
 .search-input:focus{outline:none;border-color:#e8a800}
+.chart-wrap{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;margin-bottom:18px}
+.chart-title{font-size:.88rem;font-weight:900;margin-bottom:12px}
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.04)}
+.rank-num{width:28px;font-size:.85rem;font-weight:900;text-align:center;color:var(--c,rgba(255,255,255,.3))}
+.rank-1{--c:#e8a800}
+.rank-2{--c:#aaaaaa}
+.rank-3{--c:#cc8844}
+.rank-name{flex:1;font-size:.82rem;font-weight:700}
+.rank-val{font-size:.82rem;font-weight:900;color:#e8a800}
+.inquiry-item{background:#111219;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px;margin-bottom:8px}
+.inq-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.inq-subject{font-size:.85rem;font-weight:900}
+.inq-body{font-size:.78rem;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:8px}
+.inq-meta{font-size:.7rem;color:rgba(255,255,255,.3)}
+.reply-area{background:#0f1117;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:8px;margin-top:8px}
+.reply-label{font-size:.65rem;font-weight:700;color:#e8a800;margin-bottom:4px}
+.reply-text{font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6}
 </style>
 </head>
 <body>
@@ -159,13 +153,19 @@ input,select,textarea{font-family:inherit}
     <div class="sb-section">ユーザー</div>
     <div class="sb-item" onclick="showPage('users',this)"><span class="sb-icon">👥</span>ユーザー管理</div>
     <div class="sb-item" onclick="showPage('points',this)"><span class="sb-icon">💎</span>ポイント管理</div>
+    <div class="sb-item" onclick="showPage('ranking',this)"><span class="sb-icon">🏆</span>ランキング</div>
     <div class="sb-section">注文・発送</div>
     <div class="sb-item" onclick="showPage('shipping',this)"><span class="sb-icon">📦</span>発送管理<span class="sb-badge" id="ship-badge">0</span></div>
     <div class="sb-item" onclick="showPage('history',this)"><span class="sb-icon">📋</span>当選履歴</div>
-    <div class="sb-section">コミュニケーション</div>
-    <div class="sb-item" onclick="showPage('notices',this)"><span class="sb-icon">🔔</span>お知らせ管理</div>
+    <div class="sb-section">マーケティング</div>
+    <div class="sb-item" onclick="showPage('coupons',this)"><span class="sb-icon">🎟️</span>クーポン管理</div>
+    <div class="sb-item" onclick="showPage('push',this)"><span class="sb-icon">🔔</span>プッシュ通知</div>
+    <div class="sb-item" onclick="showPage('notices',this)"><span class="sb-icon">📢</span>お知らせ管理</div>
+    <div class="sb-section">サポート</div>
+    <div class="sb-item" onclick="showPage('inquiries',this)"><span class="sb-icon">💬</span>お問い合わせ<span class="sb-badge" id="inq-badge" style="display:none">0</span></div>
     <div class="sb-section">分析</div>
     <div class="sb-item" onclick="showPage('revenue',this)"><span class="sb-icon">💰</span>売上・収益</div>
+    <div class="sb-item" onclick="showPage('analytics',this)"><span class="sb-icon">📈</span>アクセス解析</div>
     <div class="sb-section">設定</div>
     <div class="sb-item" onclick="showPage('settings',this)"><span class="sb-icon">⚙️</span>サイト設定</div>
     <div class="sb-item" onclick="adminLogout()"><span class="sb-icon">🚪</span>ログアウト</div>
@@ -186,10 +186,16 @@ input,select,textarea{font-family:inherit}
     <!-- DASHBOARD -->
     <div class="admin-page active" id="page-dashboard">
       <div class="stats-grid">
-        <div class="stat-card stat-gold"><div class="stat-label">累計売上</div><div class="stat-val" id="stat-sales">¥0</div></div>
+        <div class="stat-card stat-gold"><div class="stat-label">累計売上</div><div class="stat-val" id="stat-sales">¥0</div><div class="stat-sub">今月: <span id="stat-sales-month">¥0</span></div></div>
         <div class="stat-card stat-green"><div class="stat-label">累計開封数</div><div class="stat-val" id="stat-draws">0</div></div>
-        <div class="stat-card stat-blue"><div class="stat-label">累計会員数</div><div class="stat-val" id="stat-users">0</div></div>
+        <div class="stat-card stat-blue"><div class="stat-label">累計会員数</div><div class="stat-val" id="stat-users">0</div><div class="stat-sub">今月新規: <span id="stat-new-users">0</span></div></div>
         <div class="stat-card stat-red"><div class="stat-label">発送待ち</div><div class="stat-val" id="stat-ship">0</div></div>
+        <div class="stat-card stat-purple"><div class="stat-label">クーポン使用数</div><div class="stat-val" id="stat-coupon">0</div></div>
+        <div class="stat-card"><div class="stat-label">お問い合わせ</div><div class="stat-val" id="stat-inq" style="color:#ff8888">0</div><div class="stat-sub">未対応</div></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">📈 日別売上グラフ（直近14日）</div>
+        <canvas id="sales-chart" height="80"></canvas>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
         <div class="table-card">
@@ -201,21 +207,16 @@ input,select,textarea{font-family:inherit}
           <div id="dash-shipping"></div>
         </div>
       </div>
-      <div class="table-card">
-        <div class="table-head">
-          <span class="table-title">🎴 アクティブパック</span>
-          <button class="btn btn-primary" onclick="showPage('packs',document.querySelector('[onclick*=packs]'));openPackModal()">＋ 追加</button>
-        </div>
-        <table class="tbl"><thead><tr><th>パック名</th><th>残り/全口数</th><th>進捗</th><th>価格</th><th>状態</th></tr></thead>
-        <tbody id="dash-packs-body"></tbody></table>
-      </div>
     </div>
 
     <!-- PACKS -->
     <div class="admin-page" id="page-packs">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
         <span style="font-size:.95rem;font-weight:900">🎴 オリパ管理</span>
-        <button class="btn btn-primary btn-lg" onclick="openPackModal()">＋ 新規オリパ作成</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" onclick="exportCSV('packs')">📥 CSV出力</button>
+          <button class="btn btn-primary btn-lg" onclick="openPackModal()">＋ 新規オリパ作成</button>
+        </div>
       </div>
       <div class="table-card">
         <div class="table-head">
@@ -258,13 +259,18 @@ input,select,textarea{font-family:inherit}
     <div class="admin-page" id="page-users">
       <div class="stats-grid" style="margin-bottom:14px">
         <div class="stat-card stat-blue"><div class="stat-label">総会員数</div><div class="stat-val" id="u-total">0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">今月新規</div><div class="stat-val" id="u-new">0</div></div>
+        <div class="stat-card stat-gold"><div class="stat-label">総売上貢献</div><div class="stat-val" id="u-sales">¥0</div></div>
       </div>
       <div class="table-card">
         <div class="table-head">
           <span class="table-title">👥 ユーザー一覧</span>
-          <input class="search-input" placeholder="🔍 名前・メール検索" oninput="filterUsers(this.value)">
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" onclick="exportCSV('users')">📥 CSV出力</button>
+            <input class="search-input" placeholder="🔍 名前・メール検索" oninput="filterUsers(this.value)">
+          </div>
         </div>
-        <table class="tbl"><thead><tr><th>ユーザー名</th><th>メール</th><th>JP</th><th>コイン</th><th>ランク</th><th>登録日</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>ユーザー名</th><th>メール</th><th>コイン</th><th>ランク</th><th>累計消費</th><th>登録日</th><th>操作</th></tr></thead>
         <tbody id="users-tbl-body"></tbody></table>
       </div>
     </div>
@@ -277,12 +283,25 @@ input,select,textarea{font-family:inherit}
         <div class="form-grid">
           <div class="form-group"><label class="form-label">メールアドレス</label><input type="text" class="form-input" id="pt-user" placeholder="user@example.com"></div>
           <div class="form-group"><label class="form-label">種別</label>
-            <select class="form-select" id="pt-type"><option value="jp">JP</option><option value="coin">コイン</option><option value="dp">DP</option></select>
+            <select class="form-select" id="pt-type"><option value="coin">コイン</option><option value="dp">DP</option></select>
           </div>
           <div class="form-group"><label class="form-label">量（マイナスで減算）</label><input type="number" class="form-input" id="pt-amount" placeholder="1000"></div>
           <div class="form-group"><label class="form-label">理由</label><input type="text" class="form-input" id="pt-reason" placeholder="キャンペーン当選"></div>
         </div>
         <div class="form-actions"><button class="btn btn-primary btn-lg" onclick="grantPoints()">付与する</button></div>
+      </div>
+    </div>
+
+    <!-- RANKING -->
+    <div class="admin-page" id="page-ranking">
+      <span style="font-size:.95rem;font-weight:900;display:block;margin-bottom:14px">🏆 ランキング</span>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-primary" onclick="loadRanking('spent')">💰 累計消費</button>
+        <button class="btn btn-secondary" onclick="loadRanking('draws')">🎴 ガチャ回数</button>
+      </div>
+      <div class="table-card">
+        <div class="table-head"><span class="table-title" id="ranking-title">💰 累計消費ランキング</span></div>
+        <div id="ranking-list"></div>
       </div>
     </div>
 
@@ -295,10 +314,11 @@ input,select,textarea{font-family:inherit}
       <div class="table-card">
         <div class="table-head">
           <span class="table-title">📦 発送依頼一覧</span>
-          <div style="display:flex;gap:6px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="btn btn-secondary" onclick="loadShipping('all')">すべて</button>
             <button class="btn btn-secondary" onclick="loadShipping('pending')">未処理</button>
             <button class="btn btn-secondary" onclick="loadShipping('shipped')">発送済み</button>
+            <button class="btn btn-secondary" onclick="exportCSV('shipping')">📥 CSV</button>
           </div>
         </div>
         <table class="tbl"><thead><tr><th>ID</th><th>ユーザー</th><th>カード数</th><th>住所</th><th>依頼日</th><th>状態</th><th>操作</th></tr></thead>
@@ -311,17 +331,47 @@ input,select,textarea{font-family:inherit}
       <div class="table-card">
         <div class="table-head">
           <span class="table-title">📋 当選履歴</span>
-          <button class="btn btn-secondary" onclick="exportHistory()">📥 CSV出力</button>
+          <div style="display:flex;gap:8px">
+            <input class="search-input" placeholder="🔍 ユーザー名検索" oninput="filterHistory(this.value)">
+            <button class="btn btn-secondary" onclick="exportCSV('history')">📥 CSV出力</button>
+          </div>
         </div>
         <table class="tbl"><thead><tr><th>日時</th><th>ユーザー</th><th>パック</th><th>カード</th><th>レア度</th><th>消費PT</th></tr></thead>
         <tbody id="history-tbl-body"></tbody></table>
       </div>
     </div>
 
+    <!-- COUPONS -->
+    <div class="admin-page" id="page-coupons">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:900">🎟️ クーポン管理</span>
+        <button class="btn btn-primary btn-lg" onclick="openCouponModal()">＋ クーポン作成</button>
+      </div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>コード</th><th>割引</th><th>使用数/上限</th><th>有効期限</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="coupons-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PUSH -->
+    <div class="admin-page" id="page-push">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:900">🔔 プッシュ通知</span>
+        <button class="btn btn-primary btn-lg" onclick="openPushModal()">＋ 通知作成</button>
+      </div>
+      <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:.8rem;color:#93c5fd">
+        💡 プッシュ通知はお知らせとして登録されます。PWA対応後に実際のプッシュ通知も送信できます。
+      </div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>タイトル</th><th>対象</th><th>送信日時</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="push-tbl-body"></tbody></table>
+      </div>
+    </div>
+
     <!-- NOTICES -->
     <div class="admin-page" id="page-notices">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <span style="font-size:.95rem;font-weight:900">🔔 お知らせ管理</span>
+        <span style="font-size:.95rem;font-weight:900">📢 お知らせ管理</span>
         <button class="btn btn-primary btn-lg" onclick="openNoticeModal()">＋ 作成</button>
       </div>
       <div class="table-card">
@@ -330,17 +380,58 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
 
+    <!-- INQUIRIES -->
+    <div class="admin-page" id="page-inquiries">
+      <div class="stats-grid" style="margin-bottom:14px">
+        <div class="stat-card stat-red"><div class="stat-label">未対応</div><div class="stat-val" id="inq-open">0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">対応済み</div><div class="stat-val" id="inq-closed">0</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-secondary" onclick="loadInquiries('all')">すべて</button>
+        <button class="btn btn-danger" onclick="loadInquiries('open')">未対応</button>
+        <button class="btn btn-success" onclick="loadInquiries('closed')">対応済み</button>
+      </div>
+      <div id="inquiries-list"></div>
+    </div>
+
     <!-- REVENUE -->
     <div class="admin-page" id="page-revenue">
       <div class="stats-grid">
         <div class="stat-card stat-gold"><div class="stat-label">累計売上</div><div class="stat-val" id="rev-total">¥0</div></div>
-        <div class="stat-card stat-green"><div class="stat-label">推定粗利(10%)</div><div class="stat-val" id="rev-profit">¥0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">今月売上</div><div class="stat-val" id="rev-month">¥0</div></div>
         <div class="stat-card"><div class="stat-label">Stripe手数料(3.6%)</div><div class="stat-val" id="rev-fee">¥0</div></div>
+        <div class="stat-card stat-purple"><div class="stat-label">推定粗利(10%)</div><div class="stat-val" id="rev-profit">¥0</div></div>
+      </div>
+      <div class="chart-wrap" style="margin-top:14px">
+        <div class="chart-title">📊 月別売上グラフ</div>
+        <canvas id="revenue-chart" height="80"></canvas>
       </div>
       <div class="table-card" style="margin-top:14px">
-        <div class="table-head"><span class="table-title">💰 パック別売上</span></div>
+        <div class="table-head">
+          <span class="table-title">💰 パック別売上</span>
+          <button class="btn btn-secondary" onclick="exportCSV('revenue')">📥 CSV出力</button>
+        </div>
         <table class="tbl"><thead><tr><th>パック名</th><th>販売数</th><th>売上</th></tr></thead>
         <tbody id="revenue-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="admin-page" id="page-analytics">
+      <span style="font-size:.95rem;font-weight:900;display:block;margin-bottom:14px">📈 アクセス解析</span>
+      <div class="stats-grid">
+        <div class="stat-card stat-blue"><div class="stat-label">今日のアクセス</div><div class="stat-val" id="ana-today">0</div></div>
+        <div class="stat-card"><div class="stat-label">今月のアクセス</div><div class="stat-val" id="ana-month">0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">ユニークユーザー</div><div class="stat-val" id="ana-unique">0</div></div>
+      </div>
+      <div class="chart-wrap" style="margin-top:14px">
+        <div class="chart-title">📈 日別アクセス数（直近14日）</div>
+        <canvas id="analytics-chart" height="80"></canvas>
+      </div>
+      <div class="table-card" style="margin-top:14px">
+        <div class="table-head"><span class="table-title">🔍 よく見られるページ</span></div>
+        <table class="tbl"><thead><tr><th>ページ</th><th>アクセス数</th></tr></thead>
+        <tbody id="analytics-tbl-body"></tbody></table>
       </div>
     </div>
 
@@ -350,11 +441,13 @@ input,select,textarea{font-family:inherit}
         <div class="form-section-title">🌐 基本設定</div>
         <div class="form-grid">
           <div class="form-group"><label class="form-label">サイト名</label><input class="form-input" id="s-name" value="オリパMAX"></div>
-          <div class="form-group"><label class="form-label">問い合わせメール</label><input class="form-input" id="s-email"></div>
-          <div class="form-group"><label class="form-label">古物商許可番号</label><input class="form-input" id="s-license"></div>
-          <div class="form-group"><label class="form-label">運営者名</label><input class="form-input" id="s-owner"></div>
-          <div class="form-group form-full"><label class="form-label">住所</label><input class="form-input" id="s-address"></div>
+          <div class="form-group"><label class="form-label">問い合わせメール</label><input class="form-input" id="s-email" value="oripamax8110@gmail.com"></div>
+          <div class="form-group"><label class="form-label">古物商許可番号</label><input class="form-input" id="s-license" placeholder="○○県公安委員会 第XXXXXX号"></div>
+          <div class="form-group"><label class="form-label">運営者名</label><input class="form-input" id="s-owner" value="片山駿斗"></div>
+          <div class="form-group form-full"><label class="form-label">住所（特商法）</label><input class="form-input" id="s-address" value="香川県高松市"></div>
           <div class="form-group"><label class="form-label">電話番号</label><input class="form-input" id="s-tel"></div>
+          <div class="form-group"><label class="form-label">ログインボーナス（コイン）</label><input type="number" class="form-input" id="s-login-bonus" value="100"></div>
+          <div class="form-group"><label class="form-label">新規登録ボーナス（コイン）</label><input type="number" class="form-input" id="s-register-bonus" value="500"></div>
         </div>
       </div>
       <button class="btn btn-primary btn-lg" onclick="saveSettings()">✅ 保存</button>
@@ -366,10 +459,7 @@ input,select,textarea{font-family:inherit}
 <!-- PACK MODAL -->
 <div class="modal-overlay" id="pack-modal">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="pack-modal-title">🎴 オリパ作成</span>
-      <button class="modal-close" onclick="closeModal('pack-modal')">✕</button>
-    </div>
+    <div class="modal-header"><span class="modal-title" id="pack-modal-title">🎴 オリパ作成</span><button class="modal-close" onclick="closeModal('pack-modal')">✕</button></div>
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group form-full"><label class="form-label">パック名 *</label><input class="form-input" id="pm-name" placeholder="例: リザードン伝説オリパ"></div>
@@ -380,7 +470,7 @@ input,select,textarea{font-family:inherit}
         <div class="form-group"><label class="form-label">絵文字</label><input class="form-input" id="pm-emoji" placeholder="🔥" maxlength="2"></div>
         <div class="form-group"><label class="form-label">価格 *</label><input type="number" class="form-input" id="pm-price" placeholder="3000"></div>
         <div class="form-group"><label class="form-label">通貨</label>
-          <select class="form-select" id="pm-currency"><option value="jp">JP（有償）</option><option value="coin">コイン</option></select>
+          <select class="form-select" id="pm-currency"><option value="coin">コイン</option></select>
         </div>
         <div class="form-group"><label class="form-label">全口数 *</label><input type="number" class="form-input" id="pm-total" placeholder="500"></div>
         <div class="form-group"><label class="form-label">還元率（%）</label><input type="number" class="form-input" id="pm-rate" placeholder="98"></div>
@@ -403,12 +493,7 @@ input,select,textarea{font-family:inherit}
       <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
         <div style="font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:8px">🏆 賞品設定</div>
         <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 70px 28px;gap:4px;margin-bottom:4px">
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">レア度</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">賞品名</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">枚数</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">重み</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">参考価格</span>
-          <span></span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">レア度</span><span style="font-size:.6rem;color:rgba(255,255,255,.3)">賞品名</span><span style="font-size:.6rem;color:rgba(255,255,255,.3)">枚数</span><span style="font-size:.6rem;color:rgba(255,255,255,.3)">重み</span><span style="font-size:.6rem;color:rgba(255,255,255,.3)">参考価格</span><span></span>
         </div>
         <div id="prizes-list"></div>
         <button class="btn btn-secondary" style="margin-top:8px" onclick="addPrizeRow()">＋ 賞品追加</button>
@@ -424,10 +509,7 @@ input,select,textarea{font-family:inherit}
 <!-- BANNER MODAL -->
 <div class="modal-overlay" id="banner-modal">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="banner-modal-title">🖼️ バナー設定</span>
-      <button class="modal-close" onclick="closeModal('banner-modal')">✕</button>
-    </div>
+    <div class="modal-header"><span class="modal-title" id="banner-modal-title">🖼️ バナー設定</span><button class="modal-close" onclick="closeModal('banner-modal')">✕</button></div>
     <div class="modal-body">
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="bn-title"></div>
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub"></div>
@@ -447,10 +529,7 @@ input,select,textarea{font-family:inherit}
 <!-- VIDEO MODAL -->
 <div class="modal-overlay" id="video-modal">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="video-modal-title">🎬 演出動画設定</span>
-      <button class="modal-close" onclick="closeModal('video-modal')">✕</button>
-    </div>
+    <div class="modal-header"><span class="modal-title" id="video-modal-title">🎬 演出動画設定</span><button class="modal-close" onclick="closeModal('video-modal')">✕</button></div>
     <div class="modal-body">
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">動画名</label><input class="form-input" id="vd-name"></div>
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">レア度</label>
@@ -466,13 +545,56 @@ input,select,textarea{font-family:inherit}
   </div>
 </div>
 
+<!-- COUPON MODAL -->
+<div class="modal-overlay" id="coupon-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="coupon-modal-title">🎟️ クーポン作成</span><button class="modal-close" onclick="closeModal('coupon-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-full"><label class="form-label">クーポンコード *</label>
+          <div style="display:flex;gap:8px">
+            <input class="form-input" id="cp-code" placeholder="SUMMER2026" style="flex:1">
+            <button class="btn btn-secondary" onclick="generateCouponCode()">自動生成</button>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">割引種別</label>
+          <select class="form-select" id="cp-type"><option value="coin">コイン付与</option><option value="percent">割引%</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">割引量</label><input type="number" class="form-input" id="cp-amount" placeholder="500"></div>
+        <div class="form-group"><label class="form-label">最大使用回数</label><input type="number" class="form-input" id="cp-max" value="100"></div>
+        <div class="form-group"><label class="form-label">有効期限</label><input type="datetime-local" class="form-input" id="cp-expires"></div>
+      </div>
+      <div style="margin-top:10px"><label class="form-check"><input type="checkbox" id="cp-active" checked> 有効にする</label></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('coupon-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="saveCoupon()">作成</button>
+    </div>
+  </div>
+</div>
+
+<!-- PUSH MODAL -->
+<div class="modal-overlay" id="push-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">🔔 プッシュ通知作成</span><button class="modal-close" onclick="closeModal('push-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="pn-title"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">本文</label><textarea class="form-textarea" id="pn-body"></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">送信対象</label>
+        <select class="form-select" id="pn-target"><option value="all">全ユーザー</option><option value="gold">ゴールド以上</option><option value="new">新規ユーザー</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('push-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="savePush()">送信</button>
+    </div>
+  </div>
+</div>
+
 <!-- NOTICE MODAL -->
 <div class="modal-overlay" id="notice-modal">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="notice-modal-title">🔔 お知らせ</span>
-      <button class="modal-close" onclick="closeModal('notice-modal')">✕</button>
-    </div>
+    <div class="modal-header"><span class="modal-title" id="notice-modal-title">📢 お知らせ</span><button class="modal-close" onclick="closeModal('notice-modal')">✕</button></div>
     <div class="modal-body">
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="nc-title"></div>
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">種別</label>
@@ -490,10 +612,7 @@ input,select,textarea{font-family:inherit}
 <!-- USER MODAL -->
 <div class="modal-overlay" id="user-modal">
   <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">👤 ユーザー編集</span>
-      <button class="modal-close" onclick="closeModal('user-modal')">✕</button>
-    </div>
+    <div class="modal-header"><span class="modal-title">👤 ユーザー詳細・編集</span><button class="modal-close" onclick="closeModal('user-modal')">✕</button></div>
     <div class="modal-body" id="user-modal-body"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('user-modal')">閉じる</button>
@@ -502,47 +621,43 @@ input,select,textarea{font-family:inherit}
   </div>
 </div>
 
+<!-- INQUIRY MODAL -->
+<div class="modal-overlay" id="inquiry-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">💬 お問い合わせ返信</span><button class="modal-close" onclick="closeModal('inquiry-modal')">✕</button></div>
+    <div class="modal-body" id="inquiry-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('inquiry-modal')">閉じる</button>
+      <button class="btn btn-primary btn-lg" onclick="saveInquiryReply()">返信する</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
 const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
+const ADMIN_EMAILS=['csoplayer8110@yahoo.co.jp'];
 const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
-// ★ 管理者メールアドレスをここに設定
-const ADMIN_EMAILS=['csoplayer8110@yahoo.co.jp'];
-
-let allPacks=[],allUsers=[],allShipping=[],allHistory=[],allBanners=[],allVideos=[],allNotices=[];
-let editingPackId=null,editingUserId=null,editingBannerId=null,editingVideoId=null,editingNoticeId=null;
+let allPacks=[],allUsers=[],allShipping=[],allHistory=[],allBanners=[],allVideos=[],allNotices=[],allCoupons=[],allInquiries=[],allPush=[];
+let editingPackId=null,editingUserId=null,editingBannerId=null,editingVideoId=null,editingNoticeId=null,editingCouponId=null,editingInquiryId=null;
 
 /* ══ AUTH ══ */
 async function adminLogin(){
   const email=document.getElementById('admin-email').value.trim();
   const pass=document.getElementById('admin-pass').value;
   if(!email||!pass){showErr('入力してください');return;}
-
-  // 管理者メールチェック
-  if(!ADMIN_EMAILS.includes(email)){
-    showErr('管理者権限がありません');return;
-  }
-
+  if(!ADMIN_EMAILS.includes(email)){showErr('管理者権限がありません');return;}
   const{data,error}=await db.auth.signInWithPassword({email,password:pass});
   if(error){showErr('メールアドレスまたはパスワードが違います');return;}
-
   document.getElementById('login-wrap').style.display='none';
   document.getElementById('main-area').style.display='flex';
   document.getElementById('admin-user-name').textContent=email;
   initDashboard();
 }
-
-function showErr(msg){
-  const e=document.getElementById('login-error');
-  e.textContent=msg;e.style.display='block';
-  setTimeout(()=>e.style.display='none',3000);
-}
-
-async function adminLogout(){
-  await db.auth.signOut();location.reload();
-}
+function showErr(msg){const e=document.getElementById('login-error');e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',3000);}
+async function adminLogout(){await db.auth.signOut();location.reload();}
 
 /* ══ NAV ══ */
 function showPage(name,el){
@@ -550,44 +665,70 @@ function showPage(name,el){
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   document.getElementById(`page-${name}`)?.classList.add('active');
   if(el)el.classList.add('active');
-  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',shipping:'📦 発送管理',history:'📋 当選履歴',notices:'🔔 お知らせ管理',revenue:'💰 売上・収益',settings:'⚙️ サイト設定'};
+  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',ranking:'🏆 ランキング',shipping:'📦 発送管理',history:'📋 当選履歴',coupons:'🎟️ クーポン管理',push:'🔔 プッシュ通知',notices:'📢 お知らせ管理',inquiries:'💬 お問い合わせ',revenue:'💰 売上・収益',analytics:'📈 アクセス解析',settings:'⚙️ サイト設定'};
   document.getElementById('page-title').textContent=titles[name]||name;
-  const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices};
+  const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices,coupons:loadCoupons,inquiries:()=>loadInquiries('all'),push:loadPush,ranking:()=>loadRanking('spent'),analytics:loadAnalytics};
   if(loaders[name])loaders[name]();
 }
 
 /* ══ DASHBOARD ══ */
 async function initDashboard(){
-  const[{count:userCount},{count:drawCount},{count:shipCount}]=await Promise.all([
+  const now=new Date();
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
+  const[{count:userCount},{count:drawCount},{count:shipCount},{count:newUsers},{count:couponCount},{count:inqCount}]=await Promise.all([
     db.from('users').select('*',{count:'exact',head:true}),
     db.from('draw_sessions').select('*',{count:'exact',head:true}),
     db.from('shipping_requests').select('*',{count:'exact',head:true}).eq('status','pending'),
+    db.from('users').select('*',{count:'exact',head:true}).gte('created_at',monthStart),
+    db.from('coupons').select('*',{count:'exact',head:true}),
+    db.from('inquiries').select('*',{count:'exact',head:true}).eq('status','open'),
   ]);
   document.getElementById('stat-users').textContent=(userCount||0).toLocaleString();
   document.getElementById('stat-draws').textContent=(drawCount||0).toLocaleString();
   document.getElementById('stat-ship').textContent=(shipCount||0).toLocaleString();
+  document.getElementById('stat-coupon').textContent=(couponCount||0).toLocaleString();
+  document.getElementById('stat-inq').textContent=(inqCount||0).toLocaleString();
+  document.getElementById('stat-new-users').textContent=(newUsers||0).toLocaleString();
   document.getElementById('ship-badge').textContent=shipCount||0;
   document.getElementById('u-total').textContent=(userCount||0).toLocaleString();
+  document.getElementById('u-new').textContent=(newUsers||0).toLocaleString();
+  if(inqCount>0){document.getElementById('inq-badge').style.display='block';document.getElementById('inq-badge').textContent=inqCount;}
 
-  const{data:txData}=await db.from('transactions').select('amount').eq('type','purchase_jp');
+  const{data:txData}=await db.from('transactions').select('amount,created_at').eq('type','purchase_coin');
   const total=(txData||[]).reduce((s,t)=>s+Math.abs(t.amount||0),0);
+  const monthTotal=(txData||[]).filter(t=>t.created_at>=monthStart).reduce((s,t)=>s+Math.abs(t.amount||0),0);
   document.getElementById('stat-sales').textContent=`¥${total.toLocaleString()}`;
+  document.getElementById('stat-sales-month').textContent=`¥${monthTotal.toLocaleString()}`;
   document.getElementById('rev-total').textContent=`¥${total.toLocaleString()}`;
+  document.getElementById('rev-month').textContent=`¥${monthTotal.toLocaleString()}`;
   document.getElementById('rev-profit').textContent=`¥${Math.round(total*.1).toLocaleString()}`;
   document.getElementById('rev-fee').textContent=`¥${Math.round(total*.036).toLocaleString()}`;
+  document.getElementById('u-sales').textContent=`¥${total.toLocaleString()}`;
 
-  loadDashWins();loadDashShipping();loadDashPacks();
+  // 日別グラフ
+  const days=14;
+  const labels=[];const salesData=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    labels.push(`${d.getMonth()+1}/${d.getDate()}`);
+    const dayStart=new Date(d.getFullYear(),d.getMonth(),d.getDate()).toISOString();
+    const dayEnd=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).toISOString();
+    const dayTotal=(txData||[]).filter(t=>t.created_at>=dayStart&&t.created_at<dayEnd).reduce((s,t)=>s+Math.abs(t.amount||0),0);
+    salesData.push(dayTotal);
+  }
+  new Chart(document.getElementById('sales-chart'),{type:'bar',data:{labels,datasets:[{label:'売上',data:salesData,backgroundColor:'rgba(232,168,0,.3)',borderColor:'rgba(232,168,0,.8)',borderWidth:1}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}}},y:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+
+  loadDashWins();loadDashShipping();
 }
 
 async function loadDashWins(){
-  const{data}=await db.from('draw_results').select('created_at,prizes(tier,tier_label,name),users(username)').order('created_at',{ascending:false}).limit(8);
-  const tc={sar:'wr-sar',sr:'wr-sr',rr:'wr-rr'};
+  const{data}=await db.from('draw_results').select('created_at,prize_name,prize_tier,users(username)').order('created_at',{ascending:false}).limit(8);
+  const tc={sar:'color:#e8a800',sr:'color:#bb88ff',rr:'color:#44ccee'};
   document.getElementById('dash-wins').innerHTML=(data||[]).map(w=>`
     <div class="win-row">
-      <span class="wr-tier ${tc[w.prizes?.tier]||''}">${w.prizes?.tier_label||'—'}</span>
-      <span class="wr-card">${w.prizes?.name||'—'}</span>
-      <span class="wr-user">${(w.users?.username||'???').slice(0,4)}***</span>
-      <span class="wr-time">${timeAgo(w.created_at)}</span>
+      <span style="font-size:.62rem;font-weight:900;width:36px;text-align:center;${tc[w.prize_tier]||''}">${(w.prize_tier||'').toUpperCase()}</span>
+      <span style="flex:1;font-weight:700;font-size:.78rem">${w.prize_name||'—'}</span>
+      <span style="color:rgba(255,255,255,.3);font-size:.7rem">${(w.users?.username||'???').slice(0,4)}***</span>
     </div>`).join('')||'<div style="padding:20px;text-align:center;color:rgba(255,255,255,.2);font-size:.8rem">データなし</div>';
 }
 
@@ -596,23 +737,9 @@ async function loadDashShipping(){
   document.getElementById('dash-shipping').innerHTML=(data||[]).map(s=>`
     <div class="win-row">
       <span style="font-size:.65rem;color:${s.status==='pending'?'#e8a800':'#00e676'}">${s.status==='pending'?'待ち':'済'}</span>
-      <span class="wr-card">${(s.users?.username||'—').slice(0,6)}</span>
-      <span class="wr-time">${timeAgo(s.created_at)}</span>
+      <span style="flex:1;font-weight:700;font-size:.78rem">${s.users?.username||'—'}</span>
+      <span style="color:rgba(255,255,255,.2);font-size:.68rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</span>
     </div>`).join('')||'<div style="padding:20px;text-align:center;color:rgba(255,255,255,.2);font-size:.8rem">データなし</div>';
-}
-
-async function loadDashPacks(){
-  const{data}=await db.from('packs').select('name,remaining,total_slots,price,currency,is_active').eq('is_active',true).order('sort_order').limit(10);
-  document.getElementById('dash-packs-body').innerHTML=(data||[]).map(p=>{
-    const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
-    return`<tr>
-      <td class="td-bold">${p.name}</td>
-      <td>${(p.remaining||0).toLocaleString()} / ${(p.total_slots||0).toLocaleString()}</td>
-      <td><span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span> <span style="font-size:.65rem;color:rgba(255,255,255,.25)">${pct}%</span></td>
-      <td>${(p.price||0).toLocaleString()} ${p.currency==='coin'?'🪙':'💎'}</td>
-      <td><span class="badge badge-active">公開中</span></td>
-    </tr>`;
-  }).join('');
 }
 
 /* ══ PACKS ══ */
@@ -620,17 +747,14 @@ async function loadPacks(){
   const{data}=await db.from('packs').select('*,prizes(*)').order('sort_order');
   allPacks=data||[];renderPacks(allPacks);
 }
-
 function renderPacks(packs){
   document.getElementById('packs-tbl-body').innerHTML=packs.map(p=>{
     const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     return`<tr>
       <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}</div></td>
       <td>${p.category||'—'}</td>
-      <td>${(p.price||0).toLocaleString()} ${p.currency==='coin'?'🪙':'💎'}</td>
-      <td>${(p.remaining||0).toLocaleString()} / ${(p.total_slots||0).toLocaleString()}<br>
-        <span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span>
-      </td>
+      <td>${(p.price||0).toLocaleString()}🪙</td>
+      <td>${(p.remaining||0).toLocaleString()}/${(p.total_slots||0).toLocaleString()}<br><span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span></td>
       <td>${p.return_rate||'—'}%</td>
       <td><span class="badge ${p.is_active?'badge-active':'badge-pause'}">${p.is_active?'公開中':'停止中'}</span></td>
       <td style="white-space:nowrap">
@@ -641,7 +765,6 @@ function renderPacks(packs){
     </tr>`;
   }).join('');
 }
-
 function filterPacks(q){renderPacks(allPacks.filter(p=>p.name.includes(q)||(p.series||'').includes(q)));}
 
 function openPackModal(){
@@ -650,7 +773,6 @@ function openPackModal(){
   document.getElementById('prizes-list').innerHTML='';
   ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-rate','pm-odds','pm-ribbon','pm-bg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('pm-cat').value='pokemon';
-  document.getElementById('pm-currency').value='jp';
   document.getElementById('pm-ribbon-type').value='hot';
   document.getElementById('pm-tenjo').value='0';
   document.getElementById('pm-order').value='0';
@@ -675,7 +797,6 @@ async function editPack(id){
   document.getElementById('pm-ribbon').value=pack.ribbon_text||'';
   document.getElementById('pm-bg').value=pack.bg_style||'';
   document.getElementById('pm-cat').value=pack.category||'pokemon';
-  document.getElementById('pm-currency').value=pack.currency||'jp';
   document.getElementById('pm-ribbon-type').value=pack.ribbon_type||'hot';
   document.getElementById('pm-order').value=pack.sort_order||'0';
   document.getElementById('pm-hot').checked=pack.is_hot||false;
@@ -711,28 +832,8 @@ async function savePack(){
   const name=document.getElementById('pm-name').value;
   if(!name){showToast('⚠️ パック名を入力してください');return;}
   const total=parseInt(document.getElementById('pm-total').value)||0;
-  const packData={
-    name,series:document.getElementById('pm-series').value,
-    emoji:document.getElementById('pm-emoji').value||'🎴',
-    category:document.getElementById('pm-cat').value,
-    price:parseInt(document.getElementById('pm-price').value)||0,
-    currency:document.getElementById('pm-currency').value,
-    total_slots:total,
-    return_rate:parseFloat(document.getElementById('pm-rate').value)||null,
-    odds_text:document.getElementById('pm-odds').value,
-    tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,
-    ribbon_text:document.getElementById('pm-ribbon').value,
-    ribbon_type:document.getElementById('pm-ribbon-type').value,
-    bg_style:document.getElementById('pm-bg').value,
-    sort_order:parseInt(document.getElementById('pm-order').value)||0,
-    is_hot:document.getElementById('pm-hot').checked,
-    is_new:document.getElementById('pm-new').checked,
-    is_ad_confirm:document.getElementById('pm-ad').checked,
-    is_limited:document.getElementById('pm-limit').checked,
-    is_active:document.getElementById('pm-active').checked,
-  };
+  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,return_rate:parseFloat(document.getElementById('pm-rate').value)||null,odds_text:document.getElementById('pm-odds').value,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,ribbon_text:document.getElementById('pm-ribbon').value,ribbon_type:document.getElementById('pm-ribbon-type').value,bg_style:document.getElementById('pm-bg').value,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_hot:document.getElementById('pm-hot').checked,is_new:document.getElementById('pm-new').checked,is_ad_confirm:document.getElementById('pm-ad').checked,is_limited:document.getElementById('pm-limit').checked,is_active:document.getElementById('pm-active').checked};
   if(!editingPackId)packData.remaining=total;
-
   let packId=editingPackId;
   if(editingPackId){
     const{error}=await db.from('packs').update(packData).eq('id',editingPackId);
@@ -742,7 +843,6 @@ async function savePack(){
     if(error){showToast('⚠️ 保存失敗: '+error.message);return;}
     packId=data.id;
   }
-
   const rows=document.getElementById('prizes-list').children;
   if(rows.length&&packId){
     if(editingPackId)await db.from('prizes').delete().eq('pack_id',packId);
@@ -753,22 +853,19 @@ async function savePack(){
     }).filter(p=>p.name);
     if(prizes.length)await db.from('prizes').insert(prizes);
   }
-  closeModal('pack-modal');showToast('✅ オリパを保存しました！');
-  loadPacks();loadDashPacks();
+  closeModal('pack-modal');showToast('✅ オリパを保存しました！');loadPacks();
 }
 
 async function togglePack(id,current){
   await db.from('packs').update({is_active:!current}).eq('id',id);
-  showToast(`${!current?'✅ 公開':'⏸ 停止'}しました`);
-  loadPacks();loadDashPacks();
+  showToast(`${!current?'✅ 公開':'⏸ 停止'}しました`);loadPacks();
 }
 
 async function deletePack(id){
   if(!confirm('このオリパを削除しますか？'))return;
   await db.from('prizes').delete().eq('pack_id',id);
-  const{error}=await db.from('packs').delete().eq('id',id);
-  if(error){showToast('⚠️ 削除失敗: '+error.message);return;}
-  showToast('🗑️ 削除しました');loadPacks();loadDashPacks();
+  await db.from('packs').delete().eq('id',id);
+  showToast('🗑️ 削除しました');loadPacks();
 }
 
 /* ══ BANNERS ══ */
@@ -788,41 +885,10 @@ async function loadBanners(){
     </tr>`).join('');
 }
 
-function openBannerModal(){
-  editingBannerId=null;
-  document.getElementById('banner-modal-title').textContent='🖼️ バナー追加';
-  ['bn-title','bn-sub','bn-link','bn-bg','bn-tag'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('bn-order').value='0';
-  document.getElementById('bn-active').checked=true;
-  document.getElementById('banner-modal').classList.add('show');
-}
-
-function editBanner(id){
-  const b=allBanners.find(x=>x.id===id);if(!b)return;
-  editingBannerId=id;
-  document.getElementById('banner-modal-title').textContent='🖼️ バナー編集';
-  document.getElementById('bn-title').value=b.title||'';
-  document.getElementById('bn-sub').value=b.sub_text||'';
-  document.getElementById('bn-link').value=b.link_url||'';
-  document.getElementById('bn-bg').value=b.bg_style||'';
-  document.getElementById('bn-tag').value=b.tag_text||'';
-  document.getElementById('bn-order').value=b.sort_order||0;
-  document.getElementById('bn-active').checked=b.is_active!==false;
-  document.getElementById('banner-modal').classList.add('show');
-}
-
-async function saveBanner(){
-  const bannerData={title:document.getElementById('bn-title').value,sub_text:document.getElementById('bn-sub').value,link_url:document.getElementById('bn-link').value,bg_style:document.getElementById('bn-bg').value,tag_text:document.getElementById('bn-tag').value,sort_order:parseInt(document.getElementById('bn-order').value)||0,is_active:document.getElementById('bn-active').checked};
-  if(editingBannerId)await db.from('banners').update(bannerData).eq('id',editingBannerId);
-  else await db.from('banners').insert(bannerData);
-  closeModal('banner-modal');showToast('✅ バナーを保存しました');loadBanners();
-}
-
-async function deleteBanner(id){
-  if(!confirm('削除しますか？'))return;
-  await db.from('banners').delete().eq('id',id);
-  showToast('🗑️ 削除しました');loadBanners();
-}
+function openBannerModal(){editingBannerId=null;document.getElementById('banner-modal-title').textContent='🖼️ バナー追加';['bn-title','bn-sub','bn-link','bn-bg','bn-tag'].forEach(i=>document.getElementById(i).value='');document.getElementById('bn-order').value='0';document.getElementById('bn-active').checked=true;document.getElementById('banner-modal').classList.add('show');}
+function editBanner(id){const b=allBanners.find(x=>x.id===id);if(!b)return;editingBannerId=id;document.getElementById('banner-modal-title').textContent='🖼️ バナー編集';document.getElementById('bn-title').value=b.title||'';document.getElementById('bn-sub').value=b.sub_text||'';document.getElementById('bn-link').value=b.link_url||'';document.getElementById('bn-bg').value=b.bg_style||'';document.getElementById('bn-tag').value=b.tag_text||'';document.getElementById('bn-order').value=b.sort_order||0;document.getElementById('bn-active').checked=b.is_active!==false;document.getElementById('banner-modal').classList.add('show');}
+async function saveBanner(){const bannerData={title:document.getElementById('bn-title').value,sub_text:document.getElementById('bn-sub').value,link_url:document.getElementById('bn-link').value,bg_style:document.getElementById('bn-bg').value,tag_text:document.getElementById('bn-tag').value,sort_order:parseInt(document.getElementById('bn-order').value)||0,is_active:document.getElementById('bn-active').checked};if(editingBannerId)await db.from('banners').update(bannerData).eq('id',editingBannerId);else await db.from('banners').insert(bannerData);closeModal('banner-modal');showToast('✅ バナーを保存しました');loadBanners();}
+async function deleteBanner(id){if(!confirm('削除しますか？'))return;await db.from('banners').delete().eq('id',id);showToast('🗑️ 削除しました');loadBanners();}
 
 /* ══ VIDEOS ══ */
 async function loadVideos(){
@@ -831,7 +897,7 @@ async function loadVideos(){
   const tierLabel={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C',all:'共通'};
   document.getElementById('videos-tbl-body').innerHTML=allVideos.map(v=>`
     <tr>
-      <td><span class="badge ${v.tier==='sar'?'badge-gold':'badge-pause'}">${tierLabel[v.tier]||v.tier}</span></td>
+      <td><span class="badge badge-gold">${tierLabel[v.tier]||v.tier}</span></td>
       <td class="td-bold">${v.name||'—'}</td>
       <td>${v.is_default?'<span class="badge badge-active">デフォルト</span>':'—'}</td>
       <td><span class="badge ${v.video_url?'badge-active':'badge-pause'}">${v.video_url?'設定済み':'未設定'}</span></td>
@@ -842,83 +908,63 @@ async function loadVideos(){
     </tr>`).join('');
 }
 
-function openVideoModal(){
-  editingVideoId=null;
-  document.getElementById('video-modal-title').textContent='🎬 動画追加';
-  ['vd-name','vd-url'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('vd-tier').value='sar';
-  document.getElementById('vd-default').checked=false;
-  document.getElementById('video-modal').classList.add('show');
-}
-
-function editVideo(id){
-  const v=allVideos.find(x=>x.id===id);if(!v)return;
-  editingVideoId=id;
-  document.getElementById('video-modal-title').textContent='🎬 動画編集';
-  document.getElementById('vd-name').value=v.name||'';
-  document.getElementById('vd-tier').value=v.tier||'sar';
-  document.getElementById('vd-url').value=v.video_url||'';
-  document.getElementById('vd-default').checked=v.is_default||false;
-  document.getElementById('video-modal').classList.add('show');
-}
-
-async function saveVideo(){
-  const videoData={name:document.getElementById('vd-name').value,tier:document.getElementById('vd-tier').value,video_url:document.getElementById('vd-url').value,is_default:document.getElementById('vd-default').checked};
-  if(editingVideoId)await db.from('gacha_videos').update(videoData).eq('id',editingVideoId);
-  else await db.from('gacha_videos').insert(videoData);
-  closeModal('video-modal');showToast('✅ 保存しました');loadVideos();
-}
-
-async function deleteVideo(id){
-  if(!confirm('削除しますか？'))return;
-  await db.from('gacha_videos').delete().eq('id',id);
-  showToast('🗑️ 削除しました');loadVideos();
-}
+function openVideoModal(){editingVideoId=null;document.getElementById('video-modal-title').textContent='🎬 動画追加';['vd-name','vd-url'].forEach(i=>document.getElementById(i).value='');document.getElementById('vd-tier').value='sar';document.getElementById('vd-default').checked=false;document.getElementById('video-modal').classList.add('show');}
+function editVideo(id){const v=allVideos.find(x=>x.id===id);if(!v)return;editingVideoId=id;document.getElementById('video-modal-title').textContent='🎬 動画編集';document.getElementById('vd-name').value=v.name||'';document.getElementById('vd-tier').value=v.tier||'sar';document.getElementById('vd-url').value=v.video_url||'';document.getElementById('vd-default').checked=v.is_default||false;document.getElementById('video-modal').classList.add('show');}
+async function saveVideo(){const videoData={name:document.getElementById('vd-name').value,tier:document.getElementById('vd-tier').value,video_url:document.getElementById('vd-url').value,is_default:document.getElementById('vd-default').checked};if(editingVideoId)await db.from('gacha_videos').update(videoData).eq('id',editingVideoId);else await db.from('gacha_videos').insert(videoData);closeModal('video-modal');showToast('✅ 保存しました');loadVideos();}
+async function deleteVideo(id){if(!confirm('削除しますか？'))return;await db.from('gacha_videos').delete().eq('id',id);showToast('🗑️ 削除しました');loadVideos();}
 
 /* ══ USERS ══ */
 async function loadUsers(){
   const{data}=await db.from('users').select('*').order('created_at',{ascending:false});
   allUsers=data||[];
   document.getElementById('u-total').textContent=allUsers.length.toLocaleString();
+  const now=new Date();const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
+  document.getElementById('u-new').textContent=allUsers.filter(u=>u.created_at>=monthStart).length.toLocaleString();
   renderUsers(allUsers);
 }
-
 function renderUsers(users){
   document.getElementById('users-tbl-body').innerHTML=users.map(u=>`
     <tr>
       <td class="td-bold">${u.username||'—'}</td>
       <td style="font-size:.72rem">${u.email||'—'}</td>
-      <td>${(u.jp_points||0).toLocaleString()}</td>
       <td>${(u.coin_points||0).toLocaleString()}</td>
       <td><span class="badge badge-gold">${u.rank||'ブロンズIV'}</span></td>
+      <td>¥${(u.total_spent||0).toLocaleString()}</td>
       <td style="font-size:.72rem">${new Date(u.created_at).toLocaleDateString('ja-JP')}</td>
-      <td><button class="btn btn-edit" onclick="openUserModal('${u.id}')">編集</button></td>
+      <td><button class="btn btn-edit" onclick="openUserModal('${u.id}')">詳細</button></td>
     </tr>`).join('');
 }
-
 function filterUsers(q){renderUsers(allUsers.filter(u=>(u.username||'').includes(q)||(u.email||'').includes(q)));}
 
 function openUserModal(id){
   editingUserId=id;
   const u=allUsers.find(x=>x.id===id);if(!u)return;
   document.getElementById('user-modal-body').innerHTML=`
+    <div style="background:rgba(232,168,0,.05);border:1px solid rgba(232,168,0,.1);border-radius:8px;padding:12px;margin-bottom:14px">
+      <div style="font-size:.82rem;font-weight:900;margin-bottom:6px">${u.username||'—'}</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4)">${u.email||'—'}</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:3px">登録日: ${new Date(u.created_at).toLocaleDateString('ja-JP')}</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:3px">紹介コード: ${u.referral_code||'—'}</div>
+    </div>
     <div class="form-grid">
       <div class="form-group"><label class="form-label">ユーザー名</label><input class="form-input" id="um-name" value="${u.username||''}"></div>
       <div class="form-group"><label class="form-label">ランク</label>
         <select class="form-select" id="um-rank">${['ブロンズIV','ブロンズIII','ブロンズII','ブロンズI','シルバーIV','シルバーIII','シルバーII','シルバーI','ゴールドIV','ゴールドI','プラチナI','ダイヤI'].map(r=>`<option value="${r}" ${u.rank===r?'selected':''}>${r}</option>`).join('')}</select>
       </div>
-      <div class="form-group"><label class="form-label">JP</label><input type="number" class="form-input" id="um-jp" value="${u.jp_points||0}"></div>
       <div class="form-group"><label class="form-label">コイン</label><input type="number" class="form-input" id="um-coin" value="${u.coin_points||0}"></div>
       <div class="form-group"><label class="form-label">DP</label><input type="number" class="form-input" id="um-dp" value="${u.dp_points||0}"></div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn btn-danger" onclick="banUser('${u.id}')">🚫 BANする</button>
     </div>`;
   document.getElementById('user-modal').classList.add('show');
 }
-
 async function saveUser(){
   if(!editingUserId)return;
-  await db.from('users').update({username:document.getElementById('um-name').value,rank:document.getElementById('um-rank').value,jp_points:parseInt(document.getElementById('um-jp').value)||0,coin_points:parseInt(document.getElementById('um-coin').value)||0,dp_points:parseInt(document.getElementById('um-dp').value)||0}).eq('id',editingUserId);
+  await db.from('users').update({username:document.getElementById('um-name').value,rank:document.getElementById('um-rank').value,coin_points:parseInt(document.getElementById('um-coin').value)||0,dp_points:parseInt(document.getElementById('um-dp').value)||0}).eq('id',editingUserId);
   closeModal('user-modal');showToast('✅ 更新しました');loadUsers();
 }
+async function banUser(id){if(!confirm('このユーザーをBANしますか？'))return;showToast('⚠️ BAN機能は準備中です');}
 
 /* ══ POINTS ══ */
 async function grantPoints(){
@@ -927,12 +973,33 @@ async function grantPoints(){
   const amount=parseInt(document.getElementById('pt-amount').value);
   const reason=document.getElementById('pt-reason').value;
   if(!userInput||!amount){showToast('⚠️ 入力してください');return;}
-  const{data:user}=await db.from('users').select('id,jp_points,coin_points,dp_points').eq('email',userInput).single();
+  const{data:user}=await db.from('users').select('id,coin_points,dp_points').eq('email',userInput).single();
   if(!user){showToast('⚠️ ユーザーが見つかりません');return;}
-  const field=type==='jp'?'jp_points':type==='coin'?'coin_points':'dp_points';
+  const field=type==='coin'?'coin_points':'dp_points';
   await db.from('users').update({[field]:(user[field]||0)+amount}).eq('id',user.id);
   await db.from('transactions').insert({user_id:user.id,type:'bonus',amount,currency:type,description:reason||'管理者付与'}).catch(()=>{});
   showToast(`✅ ${amount.toLocaleString()} ${type.toUpperCase()}を付与しました`);
+}
+
+/* ══ RANKING ══ */
+async function loadRanking(type='spent'){
+  document.getElementById('ranking-title').textContent=type==='spent'?'💰 累計消費ランキング':'🎴 ガチャ回数ランキング';
+  let data;
+  if(type==='spent'){
+    const{data:users}=await db.from('users').select('username,total_spent').order('total_spent',{ascending:false}).limit(20);
+    data=(users||[]).map(u=>({name:u.username,val:`¥${(u.total_spent||0).toLocaleString()}`}));
+  } else {
+    const{data:sessions}=await db.from('draw_sessions').select('user_id,users(username)').limit(1000);
+    const counts={};
+    (sessions||[]).forEach(s=>{const n=s.users?.username||'?';counts[n]=(counts[n]||0)+1;});
+    data=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,20).map(([name,val])=>({name,val:`${val}回`}));
+  }
+  document.getElementById('ranking-list').innerHTML=data.map((item,i)=>`
+    <div class="rank-row">
+      <div class="rank-num rank-${i+1}">${i+1}</div>
+      <div class="rank-name">${item.name}</div>
+      <div class="rank-val">${item.val}</div>
+    </div>`).join('');
 }
 
 /* ══ SHIPPING ══ */
@@ -963,43 +1030,83 @@ async function loadShipping(status='all'){
     </tr>`;
   }).join('');
 }
-
-async function shipOrder(id){
-  const tracking=prompt('追跡番号（任意）:')||'';
-  await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking,shipped_at:new Date().toISOString()}).eq('id',id);
-  showToast('✅ 発送処理完了');loadShipping('all');
-}
-
-function viewShipping(id){
-  const s=allShipping.find(x=>x.id===id);if(!s)return;
-  const a=s.address||{};
-  alert(`発送先\n名前: ${a.name||'—'}\n〒${a.zip||'—'}\n${a.prefecture||''}${a.city||''}\n${a.street||''}\n${a.building||''}\nTEL: ${a.tel||'—'}\n\nカード:\n${(s.result_ids||[]).join('\n')}`);
-}
+async function shipOrder(id){const tracking=prompt('追跡番号（任意）:')||'';await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking,shipped_at:new Date().toISOString()}).eq('id',id);showToast('✅ 発送処理完了');loadShipping('all');}
+function viewShipping(id){const s=allShipping.find(x=>x.id===id);if(!s)return;const a=s.address||{};alert(`発送先\n名前: ${a.name||'—'}\n〒${a.zip||'—'}\n${a.prefecture||''}${a.city||''}\n${a.street||''}\n${a.building||''}\nTEL: ${a.tel||'—'}\n\nカード:\n${(s.result_ids||[]).join('\n')}\n追跡番号: ${s.tracking_number||'未設定'}`);}
 
 /* ══ HISTORY ══ */
 async function loadHistory(){
-  const{data}=await db.from('draw_results').select('created_at,prizes(tier,tier_label,name),users(username),packs(name),draw_sessions(total_cost,currency)').order('created_at',{ascending:false}).limit(100);
-  allHistory=data||[];
+  const{data}=await db.from('draw_results').select('created_at,prize_name,prize_tier,users(username),packs(name),draw_sessions(total_cost)').order('created_at',{ascending:false}).limit(200);
+  allHistory=data||[];renderHistory(allHistory);
+}
+function renderHistory(data){
   const tc={sar:'#e8a800',sr:'#bb88ff',rr:'#44ccee',r:'#8899cc',c:'rgba(255,255,255,.3)'};
-  document.getElementById('history-tbl-body').innerHTML=allHistory.map(r=>`
+  document.getElementById('history-tbl-body').innerHTML=data.map(r=>`
     <tr>
       <td style="font-size:.7rem">${new Date(r.created_at).toLocaleString('ja-JP')}</td>
       <td>${(r.users?.username||'???').slice(0,4)}***</td>
       <td style="font-size:.72rem">${r.packs?.name||'—'}</td>
-      <td class="td-bold">${r.prizes?.name||'—'}</td>
-      <td><span style="color:${tc[r.prizes?.tier]||'#fff'};font-weight:900;font-size:.72rem">${r.prizes?.tier_label||'—'}</span></td>
+      <td class="td-bold">${r.prize_name||'—'}</td>
+      <td><span style="color:${tc[r.prize_tier]||'#fff'};font-weight:900;font-size:.72rem">${(r.prize_tier||'').toUpperCase()}</span></td>
       <td style="font-size:.72rem">${(r.draw_sessions?.total_cost||0).toLocaleString()}</td>
     </tr>`).join('');
 }
+function filterHistory(q){renderHistory(allHistory.filter(r=>(r.users?.username||'').includes(q)||(r.prize_name||'').includes(q)));}
 
-function exportHistory(){
-  const csv=['日時,ユーザー,パック,カード,レア度,消費PT'].concat(allHistory.map(r=>`${new Date(r.created_at).toLocaleString('ja-JP')},${r.users?.username||''},${r.packs?.name||''},${r.prizes?.name||''},${r.prizes?.tier_label||''},${r.draw_sessions?.total_cost||''}`)).join('\n');
-  const blob=new Blob(['\ufeff'+csv],{type:'text/csv'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`history_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
+/* ══ COUPONS ══ */
+async function loadCoupons(){
+  const{data}=await db.from('coupons').select('*').order('created_at',{ascending:false});
+  allCoupons=data||[];
+  document.getElementById('coupons-tbl-body').innerHTML=allCoupons.map(c=>`
+    <tr>
+      <td class="td-bold" style="font-family:monospace;letter-spacing:.08em">${c.code}</td>
+      <td>${c.discount_type==='coin'?`🪙 ${c.discount_amount}`:`${c.discount_amount}%OFF`}</td>
+      <td>${c.used_count||0} / ${c.max_uses||'∞'}</td>
+      <td style="font-size:.72rem">${c.expires_at?new Date(c.expires_at).toLocaleDateString('ja-JP'):'無期限'}</td>
+      <td><span class="badge ${c.is_active?'badge-active':'badge-pause'}">${c.is_active?'有効':'無効'}</span></td>
+      <td>
+        <button class="btn btn-edit" onclick="editCoupon('${c.id}')">編集</button>
+        <button class="btn btn-danger" onclick="deleteCoupon('${c.id}')" style="margin-left:4px">削除</button>
+      </td>
+    </tr>`).join('');
 }
+
+function openCouponModal(){editingCouponId=null;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン作成';document.getElementById('cp-code').value='';document.getElementById('cp-amount').value='';document.getElementById('cp-max').value='100';document.getElementById('cp-expires').value='';document.getElementById('cp-type').value='coin';document.getElementById('cp-active').checked=true;document.getElementById('coupon-modal').classList.add('show');}
+function generateCouponCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';for(let i=0;i<8;i++)code+=chars[Math.floor(Math.random()*chars.length)];document.getElementById('cp-code').value=code;}
+function editCoupon(id){const c=allCoupons.find(x=>x.id===id);if(!c)return;editingCouponId=id;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン編集';document.getElementById('cp-code').value=c.code||'';document.getElementById('cp-type').value=c.discount_type||'coin';document.getElementById('cp-amount').value=c.discount_amount||0;document.getElementById('cp-max').value=c.max_uses||100;document.getElementById('cp-expires').value=c.expires_at?new Date(c.expires_at).toISOString().slice(0,16):'';document.getElementById('cp-active').checked=c.is_active!==false;document.getElementById('coupon-modal').classList.add('show');}
+async function saveCoupon(){
+  const code=document.getElementById('cp-code').value.trim().toUpperCase();
+  if(!code){showToast('⚠️ コードを入力してください');return;}
+  const couponData={code,discount_type:document.getElementById('cp-type').value,discount_amount:parseInt(document.getElementById('cp-amount').value)||0,max_uses:parseInt(document.getElementById('cp-max').value)||100,expires_at:document.getElementById('cp-expires').value||null,is_active:document.getElementById('cp-active').checked};
+  if(editingCouponId)await db.from('coupons').update(couponData).eq('id',editingCouponId);
+  else await db.from('coupons').insert(couponData);
+  closeModal('coupon-modal');showToast('✅ クーポンを保存しました');loadCoupons();
+}
+async function deleteCoupon(id){if(!confirm('削除しますか？'))return;await db.from('coupons').delete().eq('id',id);showToast('🗑️ 削除しました');loadCoupons();}
+
+/* ══ PUSH ══ */
+async function loadPush(){
+  const{data}=await db.from('push_notifications').select('*').order('created_at',{ascending:false});
+  allPush=data||[];
+  document.getElementById('push-tbl-body').innerHTML=allPush.map(p=>`
+    <tr>
+      <td class="td-bold">${p.title||'—'}</td>
+      <td>${p.target==='all'?'全員':p.target}</td>
+      <td style="font-size:.72rem">${p.sent_at?new Date(p.sent_at).toLocaleString('ja-JP'):'—'}</td>
+      <td><span class="badge ${p.is_sent?'badge-active':'badge-pending'}">${p.is_sent?'送信済み':'未送信'}</span></td>
+      <td><button class="btn btn-danger" onclick="deletePush('${p.id}')">削除</button></td>
+    </tr>`).join('');
+}
+function openPushModal(){document.getElementById('pn-title').value='';document.getElementById('pn-body').value='';document.getElementById('pn-target').value='all';document.getElementById('push-modal').classList.add('show');}
+async function savePush(){
+  const title=document.getElementById('pn-title').value;
+  if(!title){showToast('⚠️ タイトルを入力してください');return;}
+  const pushData={title,body:document.getElementById('pn-body').value,target:document.getElementById('pn-target').value,is_sent:true,sent_at:new Date().toISOString()};
+  await db.from('push_notifications').insert(pushData);
+  // お知らせとしても登録
+  await db.from('notices').insert({title,body:document.getElementById('pn-body').value,type:'info',is_active:true}).catch(()=>{});
+  closeModal('push-modal');showToast('✅ 通知を送信しました');loadPush();
+}
+async function deletePush(id){if(!confirm('削除しますか？'))return;await db.from('push_notifications').delete().eq('id',id);showToast('🗑️ 削除しました');loadPush();}
 
 /* ══ NOTICES ══ */
 async function loadNotices(){
@@ -1008,7 +1115,7 @@ async function loadNotices(){
   document.getElementById('notices-tbl-body').innerHTML=allNotices.map(n=>`
     <tr>
       <td class="td-bold">${n.title||'—'}</td>
-      <td><span class="badge ${n.type==='campaign'?'badge-hot':'badge-active'}">${n.type||'info'}</span></td>
+      <td><span class="badge ${n.type==='campaign'?'badge-gold':'badge-active'}">${n.type||'info'}</span></td>
       <td style="font-size:.72rem">${new Date(n.created_at).toLocaleDateString('ja-JP')}</td>
       <td><span class="badge ${n.is_active?'badge-active':'badge-pause'}">${n.is_active?'公開':'非公開'}</span></td>
       <td>
@@ -1017,37 +1124,58 @@ async function loadNotices(){
       </td>
     </tr>`).join('');
 }
+function openNoticeModal(){editingNoticeId=null;document.getElementById('notice-modal-title').textContent='📢 お知らせ作成';['nc-title','nc-body'].forEach(i=>document.getElementById(i).value='');document.getElementById('nc-type').value='info';document.getElementById('notice-modal').classList.add('show');}
+function editNotice(id){const n=allNotices.find(x=>x.id===id);if(!n)return;editingNoticeId=id;document.getElementById('notice-modal-title').textContent='📢 お知らせ編集';document.getElementById('nc-title').value=n.title||'';document.getElementById('nc-body').value=n.body||'';document.getElementById('nc-type').value=n.type||'info';document.getElementById('notice-modal').classList.add('show');}
+async function saveNotice(){const noticeData={title:document.getElementById('nc-title').value,body:document.getElementById('nc-body').value,type:document.getElementById('nc-type').value,is_active:true};if(editingNoticeId)await db.from('notices').update(noticeData).eq('id',editingNoticeId);else await db.from('notices').insert(noticeData);closeModal('notice-modal');showToast('✅ 保存しました');loadNotices();}
+async function deleteNotice(id){if(!confirm('削除しますか？'))return;await db.from('notices').delete().eq('id',id);showToast('🗑️ 削除しました');loadNotices();}
 
-function openNoticeModal(){
-  editingNoticeId=null;
-  document.getElementById('notice-modal-title').textContent='🔔 お知らせ作成';
-  ['nc-title','nc-body'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('nc-type').value='info';
-  document.getElementById('notice-modal').classList.add('show');
+/* ══ INQUIRIES ══ */
+async function loadInquiries(status='all'){
+  let q=db.from('inquiries').select('*,users(username)').order('created_at',{ascending:false});
+  if(status!=='all')q=q.eq('status',status);
+  const{data}=await q;
+  allInquiries=data||[];
+  const open=allInquiries.filter(i=>i.status==='open').length;
+  const closed=allInquiries.filter(i=>i.status==='closed').length;
+  document.getElementById('inq-open').textContent=open;
+  document.getElementById('inq-closed').textContent=closed;
+  document.getElementById('stat-inq').textContent=open;
+  if(open>0){document.getElementById('inq-badge').style.display='block';document.getElementById('inq-badge').textContent=open;}
+  document.getElementById('inquiries-list').innerHTML=allInquiries.map(inq=>`
+    <div class="inquiry-item">
+      <div class="inq-header">
+        <div>
+          <span class="badge badge-${inq.status==='open'?'open':'closed'}" style="margin-right:6px">${inq.status==='open'?'未対応':'対応済み'}</span>
+          <span class="inq-subject">${inq.subject||'件名なし'}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          ${inq.status==='open'?`<button class="btn btn-success" onclick="replyInquiry('${inq.id}')">返信</button>`:''}
+          <button class="btn btn-secondary" onclick="closeInquiry('${inq.id}')">完了</button>
+        </div>
+      </div>
+      <div class="inq-body">${inq.body||'—'}</div>
+      <div class="inq-meta">${inq.users?.username||inq.email||'—'} · ${new Date(inq.created_at).toLocaleString('ja-JP')}</div>
+      ${inq.reply?`<div class="reply-area"><div class="reply-label">返信内容</div><div class="reply-text">${inq.reply}</div></div>`:''}
+    </div>`).join('');
 }
-
-function editNotice(id){
-  const n=allNotices.find(x=>x.id===id);if(!n)return;
-  editingNoticeId=id;
-  document.getElementById('notice-modal-title').textContent='🔔 お知らせ編集';
-  document.getElementById('nc-title').value=n.title||'';
-  document.getElementById('nc-body').value=n.body||'';
-  document.getElementById('nc-type').value=n.type||'info';
-  document.getElementById('notice-modal').classList.add('show');
+function replyInquiry(id){
+  editingInquiryId=id;
+  const inq=allInquiries.find(x=>x.id===id);
+  document.getElementById('inquiry-modal-body').innerHTML=`
+    <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:.82rem;font-weight:900;margin-bottom:4px">${inq?.subject||'件名なし'}</div>
+      <div style="font-size:.78rem;color:rgba(255,255,255,.5)">${inq?.body||'—'}</div>
+    </div>
+    <div class="form-group"><label class="form-label">返信内容</label><textarea class="form-textarea" id="inq-reply" style="min-height:100px"></textarea></div>`;
+  document.getElementById('inquiry-modal').classList.add('show');
 }
-
-async function saveNotice(){
-  const noticeData={title:document.getElementById('nc-title').value,body:document.getElementById('nc-body').value,type:document.getElementById('nc-type').value,is_active:true};
-  if(editingNoticeId)await db.from('notices').update(noticeData).eq('id',editingNoticeId);
-  else await db.from('notices').insert(noticeData);
-  closeModal('notice-modal');showToast('✅ 保存しました');loadNotices();
+async function saveInquiryReply(){
+  if(!editingInquiryId)return;
+  const reply=document.getElementById('inq-reply').value;
+  await db.from('inquiries').update({reply,status:'closed'}).eq('id',editingInquiryId);
+  closeModal('inquiry-modal');showToast('✅ 返信しました');loadInquiries('all');
 }
-
-async function deleteNotice(id){
-  if(!confirm('削除しますか？'))return;
-  await db.from('notices').delete().eq('id',id);
-  showToast('🗑️ 削除しました');loadNotices();
-}
+async function closeInquiry(id){await db.from('inquiries').update({status:'closed'}).eq('id',id);showToast('✅ 完了にしました');loadInquiries('all');}
 
 /* ══ REVENUE ══ */
 async function loadRevenue(){
@@ -1056,6 +1184,81 @@ async function loadRevenue(){
     const sold=(p.total_slots||0)-(p.remaining||0);
     return`<tr><td class="td-bold">${p.name}</td><td>${sold.toLocaleString()}</td><td>¥${(sold*(p.price||0)).toLocaleString()}</td></tr>`;
   }).join('');
+
+  // 月別グラフ
+  const{data:txData}=await db.from('transactions').select('amount,created_at').eq('type','purchase_coin');
+  const months=6;const labels=[];const data=[];
+  for(let i=months-1;i>=0;i--){
+    const d=new Date();d.setMonth(d.getMonth()-i);
+    const label=`${d.getFullYear()}/${d.getMonth()+1}`;
+    labels.push(label);
+    const ms=new Date(d.getFullYear(),d.getMonth(),1).toISOString();
+    const me=new Date(d.getFullYear(),d.getMonth()+1,1).toISOString();
+    const total=(txData||[]).filter(t=>t.created_at>=ms&&t.created_at<me).reduce((s,t)=>s+Math.abs(t.amount||0),0);
+    data.push(total);
+  }
+  const canvas=document.getElementById('revenue-chart');
+  if(canvas._chart)canvas._chart.destroy();
+  canvas._chart=new Chart(canvas,{type:'line',data:{labels,datasets:[{label:'売上',data,borderColor:'rgba(232,168,0,.8)',backgroundColor:'rgba(232,168,0,.1)',fill:true,tension:.4}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}}},y:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+}
+
+/* ══ ANALYTICS ══ */
+async function loadAnalytics(){
+  const{data:logs}=await db.from('access_logs').select('*').order('created_at',{ascending:false}).limit(1000);
+  const now=new Date();
+  const todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toISOString();
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
+  const todayLogs=(logs||[]).filter(l=>l.created_at>=todayStart);
+  const monthLogs=(logs||[]).filter(l=>l.created_at>=monthStart);
+  const uniqueUsers=new Set((logs||[]).map(l=>l.user_id).filter(Boolean)).size;
+  document.getElementById('ana-today').textContent=todayLogs.length.toLocaleString();
+  document.getElementById('ana-month').textContent=monthLogs.length.toLocaleString();
+  document.getElementById('ana-unique').textContent=uniqueUsers.toLocaleString();
+
+  // ページ別集計
+  const pageCounts={};
+  (logs||[]).forEach(l=>{if(l.page)pageCounts[l.page]=(pageCounts[l.page]||0)+1;});
+  document.getElementById('analytics-tbl-body').innerHTML=Object.entries(pageCounts).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([page,count])=>`<tr><td>${page}</td><td class="td-bold">${count.toLocaleString()}</td></tr>`).join('');
+
+  // 日別グラフ
+  const days=14;const labels=[];const data=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    labels.push(`${d.getMonth()+1}/${d.getDate()}`);
+    const ds=new Date(d.getFullYear(),d.getMonth(),d.getDate()).toISOString();
+    const de=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).toISOString();
+    data.push((logs||[]).filter(l=>l.created_at>=ds&&l.created_at<de).length);
+  }
+  const canvas=document.getElementById('analytics-chart');
+  if(canvas._chart)canvas._chart.destroy();
+  canvas._chart=new Chart(canvas,{type:'line',data:{labels,datasets:[{label:'アクセス数',data,borderColor:'rgba(68,136,255,.8)',backgroundColor:'rgba(68,136,255,.1)',fill:true,tension:.4}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}}},y:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+}
+
+/* ══ CSV EXPORT ══ */
+function exportCSV(type){
+  let csv='';let filename='';
+  if(type==='packs'){
+    csv=['パック名,カテゴリ,価格,全口数,残り,還元率,状態'].concat(allPacks.map(p=>`${p.name},${p.category},${p.price},${p.total_slots},${p.remaining},${p.return_rate||''},${p.is_active?'公開':'停止'}`)).join('\n');
+    filename='packs';
+  } else if(type==='users'){
+    csv=['ユーザー名,メール,コイン,ランク,累計消費,登録日'].concat(allUsers.map(u=>`${u.username||''},${u.email||''},${u.coin_points||0},${u.rank||''},${u.total_spent||0},${new Date(u.created_at).toLocaleDateString('ja-JP')}`)).join('\n');
+    filename='users';
+  } else if(type==='history'){
+    csv=['日時,ユーザー,パック,カード,レア度,消費PT'].concat(allHistory.map(r=>`${new Date(r.created_at).toLocaleString('ja-JP')},${r.users?.username||''},${r.packs?.name||''},${r.prize_name||''},${r.prize_tier||''},${r.draw_sessions?.total_cost||''}`)).join('\n');
+    filename='history';
+  } else if(type==='shipping'){
+    csv=['ID,ユーザー,カード数,都道府県,依頼日,状態'].concat(allShipping.map(s=>`${s.id.slice(0,8)},${s.users?.username||''},${(s.result_ids||[]).length},${s.address?.prefecture||''},${new Date(s.created_at).toLocaleDateString('ja-JP')},${s.status}`)).join('\n');
+    filename='shipping';
+  } else if(type==='revenue'){
+    filename='revenue';csv='パック名,販売数,売上';
+  }
+  if(!csv)return;
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${filename}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('📥 CSVをダウンロードしました');
 }
 
 /* ══ SETTINGS ══ */
@@ -1071,17 +1274,8 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 document.querySelectorAll('.modal-overlay').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('show');});
 });
-function timeAgo(dateStr){
-  const diff=Date.now()-new Date(dateStr);
-  const m=Math.floor(diff/60000);
-  if(m<1)return'たった今';
-  if(m<60)return`${m}分前`;
-  const h=Math.floor(m/60);
-  if(h<24)return`${h}時間前`;
-  return`${Math.floor(h/24)}日前`;
-}
 
-/* ══ AUTO LOGIN CHECK ══ */
+/* ══ AUTO LOGIN ══ */
 (async()=>{
   const{data:{session}}=await db.auth.getSession();
   if(session&&ADMIN_EMAILS.includes(session.user.email)){
