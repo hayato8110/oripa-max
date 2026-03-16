@@ -1,18 +1,18 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const PLANS = [
-  { id: 'p110',     jpy: 110,     coin: 100,    bonus: 0,    priceId: 'price_1TB2MOJoybCGBMPZspgLHy6t' },
-  { id: 'p550',     jpy: 550,     coin: 500,    bonus: 50,   priceId: 'price_1TB2RiJoybCGBMPZmSPJF7pP' },
-  { id: 'p1100',    jpy: 1100,    coin: 1000,   bonus: 150,  priceId: 'price_1TB2V7JoybCGBMPZXxUeY8Em' },
-  { id: 'p3300',    jpy: 3300,    coin: 3000,   bonus: 600,  priceId: 'price_1TB2WPJoybCGBMPZ0CKkXrBc' },
-  { id: 'p5500',    jpy: 5500,    coin: 5000,   bonus: 1250, priceId: 'price_1TB2XKJoybCGBMPZIGXiyX7f' },
-  { id: 'p11000',   jpy: 11000,   coin: 10000,  bonus: 3000, priceId: 'price_1TB2XVJoybCGBMPZTUlJeWLk' },
-  { id: 'p22000',   jpy: 22000,   coin: 20000,  bonus: 7000, priceId: 'price_1TB2XfJoybCGBMPZRcunJkax' },
-  { id: 'p50000',   jpy: 50000,   coin: 50000,  bonus: 20000,priceId: 'price_1TB2Y6JoybCGBMPZ3XUuyY7c' },
-  { id: 'p100000',  jpy: 100000,  coin: 100000, bonus: 50000,priceId: 'price_1TB2YMJoybCGBMPZz8eXdgDX' },
-  { id: 'p300000',  jpy: 300000,  coin: 300000, bonus: 180000,priceId: 'price_1TB2ZyJoybCGBMPZOrJxV50f' },
-  { id: 'p500000',  jpy: 500000,  coin: 500000, bonus: 350000,priceId: 'price_1TB2aCJoybCGBMPZ9pO94Yvb' },
-  { id: 'p1000000', jpy: 1000000, coin: 1000000,bonus: 800000,priceId: 'price_1TB2aWJoybCGBMPZdmgnA2x0' },
+  { id: 'p110',     jpy: 110,     coin: 110,     bonus: 0, priceId: 'price_1TBflZJoybCGBMPZnzyS8tbn' },
+  { id: 'p550',     jpy: 550,     coin: 550,     bonus: 0, priceId: 'price_1TBfoAJoybCGBMPZxEKMqDfL' },
+  { id: 'p1100',    jpy: 1100,    coin: 1100,    bonus: 0, priceId: 'price_1TBfoYJoybCGBMPZyyCmrmIn' },
+  { id: 'p3300',    jpy: 3300,    coin: 3300,    bonus: 0, priceId: 'price_1TBfojJoybCGBMPZGjDAaaXF' },
+  { id: 'p5500',    jpy: 5500,    coin: 5500,    bonus: 0, priceId: 'price_1TBfp1JoybCGBMPZ39H3qhvl' },
+  { id: 'p11000',   jpy: 11000,   coin: 11000,   bonus: 0, priceId: 'price_1TBfpBJoybCGBMPZY1bRMrsV' },
+  { id: 'p22000',   jpy: 22000,   coin: 22000,   bonus: 0, priceId: 'price_1TBfpVJoybCGBMPZLDQOm9mX' },
+  { id: 'p50000',   jpy: 50000,   coin: 50000,   bonus: 0, priceId: 'price_1TBfpuJoybCGBMPZSYCAP40V' },
+  { id: 'p100000',  jpy: 100000,  coin: 100000,  bonus: 0, priceId: 'price_1TBfqBJoybCGBMPZS6C3et2l' },
+  { id: 'p300000',  jpy: 300000,  coin: 300000,  bonus: 0, priceId: 'price_1TBfqSJoybCGBMPZ7om3MFdB' },
+  { id: 'p500000',  jpy: 500000,  coin: 500000,  bonus: 0, priceId: 'price_1TBfqjJoybCGBMPZGqPWuDNK' },
+  { id: 'p1000000', jpy: 1000000, coin: 1000000, bonus: 0, priceId: 'price_1TBfqwJoybCGBMPZikNm3yuw' },
 ];
 
 exports.handler = async (event) => {
