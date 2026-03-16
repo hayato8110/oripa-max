@@ -1366,43 +1366,40 @@ async function convertToPoints(sessionIdx,resultIdx){
   result.converted=true;state.coin+=points;updateHeaderPts();
   if(state.user){
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-    if(result.dbId){
-      // JSONB方式でDBを更新
-      if(result.sessionId){
-        const{data:sess}=await db.from('draw_sessions').select('results').eq('id',result.sessionId).single();
-        if(sess?.results){
-          const newResults=[...sess.results];
-          if(newResults[result.resultIndex])newResults[result.resultIndex].is_converted=true;
-          await db.from('draw_sessions').update({results:newResults}).eq('id',result.sessionId);
-        }
+    if(result.sessionId){
+      const{data:sess}=await db.from('draw_sessions').select('results').eq('id',result.sessionId).single();
+      if(sess?.results){
+        const newResults=[...sess.results];
+        if(newResults[result.resultIndex])newResults[result.resultIndex].is_converted=true;
+        await db.from('draw_sessions').update({results:newResults}).eq('id',result.sessionId);
       }
-      await db.from('transactions').insert({
-        user_id:state.user.id,type:'convert',amount:points,
-        currency:'coin',description:`${result.prize.name} をポイント還元`,
-      }).catch(()=>{});
     }
-    renderHistory();renderItemsPage();
-    showToast(`💰 ${points}コインに還元しました！`,2500);
+    await db.from('transactions').insert({
+      user_id:state.user.id,type:'convert',amount:points,
+      currency:'coin',description:`${result.prize.name} をポイント還元`,
+    }).catch(()=>{});
   }
-  
-  async function convertAllToPoints(sessionIdx){
-    const session=state.sessions[sessionIdx];if(!session)return;
-    const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
-    let total=0;
-    session.results.forEach(r=>{
-      if(!r.converted){r.converted=true;total+=tierValue[r.prize.tier]||50;}
-    });
-    if(total===0){showToast('還元できるカードがありません');return;}
-    state.coin+=total;updateHeaderPts();
-    if(state.user){
-      await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-      // JSONB方式でDBを更新
-      const newResults=session.results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:true,is_shipped:r.shipped||false}));
-      await db.from('draw_sessions').update({results:newResults}).eq('id',session.id);
-    }
-    renderHistory();renderItemsPage();
-    showToast(`💰 ${total}コインに一括還元しました！`,2500);
+  renderHistory();renderItemsPage();
+  showToast(`💰 ${points}コインに還元しました！`,2500);
+}
+
+async function convertAllToPoints(sessionIdx){
+  const session=state.sessions[sessionIdx];if(!session)return;
+  const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
+  let total=0;
+  session.results.forEach(r=>{
+    if(!r.converted){r.converted=true;total+=tierValue[r.prize.tier]||50;}
+  });
+  if(total===0){showToast('還元できるカードがありません');return;}
+  state.coin+=total;updateHeaderPts();
+  if(state.user){
+    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    const newResults=session.results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:true,is_shipped:r.shipped||false}));
+    await db.from('draw_sessions').update({results:newResults}).eq('id',session.id);
   }
+  renderHistory();renderItemsPage();
+  showToast(`💰 ${total}コインに一括還元しました！`,2500);
+}
 
 /* ══ 発送 ══ */
 let shippingSessionIdx=-1;
