@@ -1242,14 +1242,25 @@ async function submitShipping(){
 
 /* ══ チャージ ══ */
 const PLANS=[
-  {id:'p100',jpy:110,coin:100,bonus:0},
-  {id:'p500',jpy:550,coin:500,bonus:50},
-  {id:'p1000',jpy:1100,coin:1000,bonus:150,popular:true},
-  {id:'p3000',jpy:3300,coin:3000,bonus:600},
-  {id:'p5000',jpy:5500,coin:5000,bonus:1250},
-  {id:'p10000',jpy:11000,coin:10000,bonus:3000},
+  {id:'p110',jpy:110,coin:100,bonus:0},
+  {id:'p550',jpy:550,coin:500,bonus:50},
+  {id:'p1100',jpy:1100,coin:1000,bonus:150,popular:true},
+  {id:'p3300',jpy:3300,coin:3000,bonus:600},
+  {id:'p5500',jpy:5500,coin:5000,bonus:1250},
+  {id:'p11000',jpy:11000,coin:10000,bonus:3000},
+  {id:'p22000',jpy:22000,coin:20000,bonus:7000},
+  {id:'p50000',jpy:50000,coin:50000,bonus:20000},
+  {id:'p100000',jpy:100000,coin:100000,bonus:50000},
+  {id:'p300000',jpy:300000,coin:300000,bonus:180000},
+  {id:'p500000',jpy:500000,coin:500000,bonus:350000},
+  {id:'p1000000',jpy:1000000,coin:1000000,bonus:800000},
 ];
 function openPurchase(){
+  if(!state.user){
+    closePurchase();
+    document.getElementById('auth-modal').classList.add('show');
+    showToast('チャージにはログインが必要です');return;
+  }
   document.getElementById('purchase-plans').innerHTML=PLANS.map(p=>`
     <div class="plan-item ${p.popular?'popular':''}" onclick="doPurchase('${p.id}')">
       <div>
@@ -1263,14 +1274,29 @@ function openPurchase(){
 }
 function closePurchase(){document.getElementById('purchase-modal').classList.remove('show')}
 async function doPurchase(planId){
+  if(!state.user){showToast('ログインが必要です');return;}
   const plan=PLANS.find(p=>p.id===planId);if(!plan)return;
-  state.coin+=plan.coin+plan.bonus;
-  if(state.user){
-    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-    await db.from('point_purchases').insert({user_id:state.user.id,amount_jpy:plan.jpy,jp_points:plan.coin,bonus_points:plan.bonus,status:'completed'}).catch(()=>{});
+  showToast('決済ページへ移動中...');
+  closePurchase();
+  try{
+    const res=await fetch('/.netlify/functions/create-checkout',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        planId,
+        userId:state.user.id,
+        userEmail:state.user.email||state.session?.user?.email,
+      }),
+    });
+    const data=await res.json();
+    if(data.url){
+      window.location.href=data.url;
+    } else {
+      showToast('⚠️ 決済エラー: '+( data.error||'不明なエラー'));
+    }
+  } catch(e){
+    showToast('⚠️ 通信エラーが発生しました');
   }
-  updateHeaderPts();closePurchase();
-  showToast(`🪙 ${(plan.coin+plan.bonus).toLocaleString()}コイン チャージしました！`);
 }
 
 /* ══ パック表示 ══ */
@@ -1507,6 +1533,16 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 
 /* ══ INIT ══ */
 (async()=>{
+  // 決済完了チェック
+  const params=new URLSearchParams(location.search);
+  if(params.get('payment')==='success'){
+    history.replaceState({},'','/');
+    showToast('🎉 チャージ完了！コインが付与されました！',3500);
+  }
+  if(params.get('payment')==='cancel'){
+    history.replaceState({},'','/');
+    showToast('決済がキャンセルされました');
+  }
   await checkSession();
   if(state.user){
     await loadHistoryFromDB();
