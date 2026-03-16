@@ -15,46 +15,27 @@ const PLANS = [
   { id: 'p1000000', jpy: 1000000, coin: 1000000, bonus: 0, priceId: 'price_1TBfqwJoybCGBMPZikNm3yuw' },
 ];
 
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
-
   try {
-    const { planId, userId, userEmail } = JSON.parse(event.body);
+    const { planId, userId, userEmail } = req.body;
     const plan = PLANS.find(p => p.id === planId);
-    if (!plan) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid plan' }) };
-    }
+    if (!plan) return res.status(400).json({ error: 'Invalid plan' });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [{
-        price: plan.priceId,
-        quantity: 1,
-      }],
+      line_items: [{ price: plan.priceId, quantity: 1 }],
       mode: 'payment',
-      success_url: `https://oripa-max.netlify.app/?payment=success&plan=${planId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `https://oripa-max.netlify.app/?payment=cancel`,
+      success_url: `https://oripa-max.vercel.app/?payment=success&plan=${planId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://oripa-max.vercel.app/?payment=cancel`,
       customer_email: userEmail,
-      metadata: {
-        userId,
-        planId,
-        coin: String(plan.coin),
-        bonus: String(plan.bonus),
-      },
+      metadata: { userId, planId, coin: String(plan.coin), bonus: String(plan.bonus) },
       locale: 'ja',
     });
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ url: session.url }),
-    };
+    return res.status(200).json({ url: session.url });
   } catch (error) {
-    console.error('Stripe error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-    };
+    return res.status(500).json({ error: error.message });
   }
 };
