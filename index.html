@@ -1272,23 +1272,30 @@ async function executeDraw(){
 }
 
 async function saveDrawSession(packId,results,totalCost){
-  const{data:session}=await db.from('draw_sessions').insert({
-    user_id:state.user.id,pack_id:packId,
-    draw_count:results.length,total_cost:totalCost,
-    currency:'coin',server_seed:generateSeed(),
-  }).select().single();
-  if(!session)return;
-  const resultRows=results.map(r=>({
-    session_id:session.id,user_id:state.user.id,
-    pack_id:packId,prize_id:r.prize.id||r.prize.name,
-    prize_name:r.prize.name,prize_tier:r.prize.tier,
-    result_hash:generateSeed(),is_converted:false,
-  }));
-  await db.from('draw_results').insert(resultRows).catch(()=>{});
-  await db.from('transactions').insert({
-    user_id:state.user.id,type:'draw',amount:-totalCost,
-    currency:'coin',description:`${state.activePack?.name} × ${results.length}回`,
-  }).catch(()=>{});
+  try{
+    const{data:session,error:sessionError}=await db.from('draw_sessions').insert({
+      user_id:state.user.id,pack_id:packId,
+      draw_count:results.length,total_cost:totalCost,
+      currency:'coin',server_seed:generateSeed(),
+    }).select().single();
+    if(sessionError){showToast('⚠️ セッション保存エラー: '+sessionError.message,4000);console.error('session error:',sessionError);return;}
+    if(!session){showToast('⚠️ セッションが返りませんでした',4000);return;}
+    const resultRows=results.map(r=>({
+      session_id:session.id,user_id:state.user.id,
+      pack_id:packId,prize_id:r.prize.id||null,
+      prize_name:r.prize.name,prize_tier:r.prize.tier,
+      result_hash:generateSeed(),is_converted:false,
+    }));
+    const{error:resultError}=await db.from('draw_results').insert(resultRows);
+    if(resultError){showToast('⚠️ 結果保存エラー: '+resultError.message,4000);console.error('result error:',resultError);}
+    await db.from('transactions').insert({
+      user_id:state.user.id,type:'draw',amount:-totalCost,
+      currency:'coin',description:`${state.activePack?.name} × ${results.length}回`,
+    }).catch(e=>console.error('tx error:',e));
+  }catch(e){
+    showToast('⚠️ 保存エラー: '+e.message,4000);
+    console.error('saveDrawSession error:',e);
+  }
 }
 
 /* ══ 天井 DB保存 ══ */
