@@ -1234,13 +1234,31 @@ async function executeDraw(){
     showToast('🪙 コインが不足しています');
     closeDrawModal();openPurchase();return;
   }
+  // 残り口数チェック
+  if((pack.remaining||0)<state.drawCount){
+    showToast('⚠️ 残り口数が不足しています');return;
+  }
+  // 賞品チェック
+  const prizes=pack.prizes||[];
+  if(!prizes.length){
+    showToast('⚠️ このオリパに賞品が設定されていません');return;
+  }
   // 未成年チェック
   const canDraw=await checkMinorLimit(cost);
   if(!canDraw)return;
+
   state.coin-=cost;
   updateHeaderPts();closeDrawModal();
-  const prizes=pack.prizes||[];
+
+  // 抽選
   const results=Array.from({length:state.drawCount},()=>({prize:pickPrize(prizes,Math.random())}));
+
+  // 口数を減らす
+  const newRemaining=Math.max(0,(pack.remaining||0)-state.drawCount);
+  await db.from('packs').update({remaining:newRemaining}).eq('id',pack.id);
+  const packInState=state.packs.find(p=>p.id===pack.id);
+  if(packInState)packInState.remaining=newRemaining;
+
   await saveTenjoCount(pack.id,state.drawCount);
   await saveDrawSession(pack.id,results,cost);
   state.totalSpent+=cost;
