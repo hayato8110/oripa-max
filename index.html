@@ -1252,14 +1252,19 @@ async function executeDraw(){
 
   // 口数を減らす
   const newRemaining=Math.max(0,(pack.remaining||0)-state.drawCount);
-  await db.from('packs').update({remaining:newRemaining}).eq('id',pack.id);
+  const{error:remError}=await db.from('packs').update({remaining:newRemaining}).eq('id',pack.id);
+  if(remError)console.error('remaining error:',remError);
   const packInState=state.packs.find(p=>p.id===pack.id);
   if(packInState)packInState.remaining=newRemaining;
 
+  // コイン・消費をDBに保存
+  state.totalSpent=(state.totalSpent||0)+cost;
+  const{error:userError}=await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
+  if(userError){showToast('⚠️ コイン更新エラー: '+userError.message,4000);console.error('user update error:',userError);}
+
   await saveTenjoCount(pack.id,state.drawCount);
   await saveDrawSession(pack.id,results,cost);
-  state.totalSpent+=cost;
-  await db.from('users').update({total_spent:state.totalSpent,coin_points:state.coin}).eq('id',state.user.id);
+
   state.sessions.unshift({
     id:generateSeed().slice(0,8),
     packId:pack.id,packName:pack.name,
