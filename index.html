@@ -349,11 +349,7 @@ input,select,textarea{font-family:inherit;outline:none}
 /* ══ MISC ══ */
 .form-check{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text2);font-weight:700;margin-bottom:10px;cursor:pointer}
 
-.line-section{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
-.line-icon{width:40px;height:40px;background:#06C755;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
-.line-text{flex:1}
-.line-title{font-size:.88rem;font-weight:900;color:#16a34a}
-.line-sub{font-size:.72rem;color:#86efac}
+
 .coupon-section{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
 .coupon-row{display:flex;gap:8px}
 .coupon-input{flex:1;background:#f8f8f8;border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.88rem}
@@ -1130,6 +1126,7 @@ function flipResultCard(i,tier){
 function closeResult(){
   document.getElementById('result-screen').classList.remove('show');
   document.getElementById('share-btn').style.display='none';
+  showPage('items',document.querySelector('[data-page=items]'));
 }
 
 /* ══ 抽選 ══ */
@@ -1461,23 +1458,38 @@ async function submitShipping(){
   if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
   if(pendingShipResultId&&state.user){
     const[sessionId]=pendingShipResultId.split('_');
-    await db.from('draw_sessions').update({
-      results:state.sessions.find(s=>s.id===sessionId)?.results.map(r=>({
-        prize_name:r.prize.name,prize_tier:r.prize.tier,
-        is_converted:r.converted||false,
-        is_shipped:r.dbId===pendingShipResultId?true:(r.shipped||false),
-      }))||[],
-    }).eq('id',sessionId).catch(()=>{});
+    // ローカルのshipped状態を更新
     const sess=state.sessions.find(s=>s.id===sessionId);
     if(sess){const r=sess.results.find(r=>r.dbId===pendingShipResultId);if(r)r.shipped=true;}
-    await db.from('shipping_requests').insert({
-      user_id:state.user.id,draw_session_id:sessionId,result_id:pendingShipResultId,
-      name,zip,prefecture:pref,city,building:document.getElementById('ship-building').value,tel,status:'pending',
-    }).catch(()=>{});
+    // draw_sessions更新
+    try{
+      await db.from('draw_sessions').update({
+        results:sess?.results.map(r=>({
+          prize_name:r.prize.name,prize_tier:r.prize.tier,
+          is_converted:r.converted||false,
+          is_shipped:r.shipped||false,
+        }))||[],
+      }).eq('id',sessionId);
+    }catch(e){console.error('draw_sessions更新エラー:',e);}
+    // shipping_requests保存
+    try{
+      const{error}=await db.from('shipping_requests').insert({
+        user_id:state.user.id,
+        draw_session_id:sessionId,
+        result_id:pendingShipResultId,
+        name,zip,prefecture:pref,city,
+        building:document.getElementById('ship-building').value||'',
+        tel,status:'pending',
+      });
+      if(error)showToast('⚠️ DB保存エラー: '+error.message,4000);
+    }catch(e){
+      showToast('⚠️ エラー: '+e.message,4000);
+      console.error('shipping_requestsエラー:',e);
+    }
   }
   closeModal('shipping-modal');
   showToast('📦 発送依頼を受け付けました！',3000);
-  renderHistory();renderItemsPage();
+  renderItemsPage();
 }
 
 /* ══ マイページ ══ */
@@ -1527,15 +1539,6 @@ function renderMyPage(){
       <div class="mp-menu-item" onclick="doLogout()"><span class="mp-menu-icon">🚪</span>ログアウト<span class="mp-menu-arrow">›</span></div>
     </div>
 
-    ${!state.user?.line_linked?`
-    <div class="line-section" style="margin-top:10px" onclick="doLineLink()">
-      <div class="line-icon">L</div>
-      <div class="line-text">
-        <div class="line-title">LINE連携でクーポンをGET！</div>
-        <div class="line-sub">LINE友だち追加で最大90%OFFクーポン</div>
-      </div>
-      <span style="color:var(--text3)">›</span>
-    </div>`:'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.78rem;color:#16a34a;font-weight:700">✅ LINE連携済み</div>'}
     <div class="coupon-section" style="margin-top:10px">
       <div style="font-size:.88rem;font-weight:900;color:var(--text);margin-bottom:8px">🎟️ クーポンコードを入力</div>
       <div class="coupon-row">
@@ -1606,18 +1609,25 @@ function doSearch(q){
 function openPurchase(){
   if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
   const plans=[
-    {coins:500,bonus:0,price:500,popular:false},
-    {coins:1000,bonus:100,price:1000,popular:false},
-    {coins:3000,bonus:500,price:3000,popular:true},
-    {coins:5000,bonus:1000,price:5000,popular:false},
-    {coins:10000,bonus:3000,price:10000,popular:false},
-    {coins:30000,bonus:10000,price:30000,popular:false},
+    {coins:110,price:110,popular:false},
+    {coins:550,price:550,popular:false},
+    {coins:1100,price:1100,popular:false},
+    {coins:3300,price:3300,popular:false},
+    {coins:5500,price:5500,popular:true},
+    {coins:11000,price:11000,popular:false},
+    {coins:22000,price:22000,popular:false},
+    {coins:50000,price:50000,popular:false},
+    {coins:100000,price:100000,popular:false},
+    {coins:300000,price:300000,popular:false},
+    {coins:500000,price:500000,popular:false},
+    {coins:1000000,price:1000000,popular:false},
   ];
-  document.getElementById('purchase-plans').innerHTML=plans.map(p=>`
+  document.getElementById('purchase-plans').innerHTML=`
+    <div style="display:flex;align-items:center;gap:5px;margin-bottom:10px;font-size:.75rem;color:var(--text3)">💳 クレジットカード決済（1コイン＝1円）</div>
+    `+plans.map(p=>`
     <div class="plan-item ${p.popular?'popular':''}" onclick="startPurchase(${p.price})">
       <div>
-        <div class="plan-jp">🪙 ${(p.coins+p.bonus).toLocaleString()}コイン${p.popular?`<span class="plan-badge">人気</span>`:''}</div>
-        ${p.bonus?`<div class="plan-bonus">+${p.bonus}コイン ボーナス！</div>`:''}
+        <div class="plan-jp">🪙 ${p.coins.toLocaleString()}コイン${p.popular?`<span class="plan-badge">人気</span>`:''}</div>
       </div>
       <div class="plan-price">¥${p.price.toLocaleString()}</div>
     </div>`).join('');
@@ -1655,16 +1665,7 @@ function confirmAge(isAdult){
 
 
 
-/* ══ LINE連携 ══ */
-async function doLineLink(){
-  if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  const lineUrl='https://line.me/R/ti/p/@oripamax';
-  window.open(lineUrl,'_blank');
-  await db.from('users').update({line_linked:true}).eq('id',state.user.id);
-  state.user.line_linked=true;
-  showToast('✅ LINE連携しました！クーポンをお知らせします',3000);
-  renderMyPage();
-}
+
 
 /* ══ クーポン適用 ══ */
 async function applyCoupon(){
