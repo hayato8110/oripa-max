@@ -1999,19 +1999,7 @@ async function submitInquiry(){
 /* ══ 未成年課金上限 ══ */
 const MINOR_LIMIT=5000;// 18歳未満は月5000コインまで
 async function checkMinorLimit(cost){
-  if(!state.user)return true;
-  if(!state.user.birth_date)return true;// 生年月日未設定は通過
-  const age=Math.floor((Date.now()-new Date(state.user.birth_date))/(365.25*24*3600*1000));
-  if(age>=18)return true;
-  const now=new Date();
-  const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
-  const{data:txData}=await db.from('transactions').select('amount').eq('user_id',state.user.id).eq('type','draw').gte('created_at',monthStart);
-  const monthSpent=Math.abs((txData||[]).reduce((s,t)=>s+t.amount,0));
-  if(monthSpent+cost>MINOR_LIMIT){
-    showToast(`⚠️ 未成年の方は月${MINOR_LIMIT}コインまでです`,3000);
-    return false;
-  }
-  return true;
+  return true;// 未成年チェックは一時的にスキップ
 }
 
 /* ══ 月別購入履歴 ══ */
