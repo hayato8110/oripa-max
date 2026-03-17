@@ -463,15 +463,23 @@ input,select,textarea{font-family:inherit}
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group form-full"><label class="form-label">パック名 *</label><input class="form-input" id="pm-name" placeholder="例: リザードン伝説オリパ"></div>
+        <div class="form-group form-full">
+          <label class="form-label">サムネイル画像</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="file" id="pm-image-file" accept="image/*" style="display:none" onchange="uploadPackImage(this)">
+            <button class="btn btn-secondary" onclick="document.getElementById('pm-image-file').click()">📁 画像をアップロード</button>
+            <input class="form-input" id="pm-image-url" placeholder="または画像URLを入力" style="flex:1">
+          </div>
+          <div id="pm-image-preview" style="margin-top:8px;display:none">
+            <img id="pm-preview-img" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1)">
+          </div>
+        </div>
         <div class="form-group"><label class="form-label">カテゴリ</label>
           <select class="form-select" id="pm-cat"><option value="pokemon">ポケモン</option><option value="onepiece">ワンピース</option><option value="yugioh">遊戯王</option><option value="labubu">ラブブ</option><option value="hobby">ホビー</option></select>
         </div>
         <div class="form-group"><label class="form-label">シリーズ名</label><input class="form-input" id="pm-series"></div>
         <div class="form-group"><label class="form-label">絵文字</label><input class="form-input" id="pm-emoji" placeholder="🔥" maxlength="2"></div>
         <div class="form-group"><label class="form-label">価格 *</label><input type="number" class="form-input" id="pm-price" placeholder="3000"></div>
-        <div class="form-group"><label class="form-label">通貨</label>
-          <select class="form-select" id="pm-currency"><option value="coin">コイン</option></select>
-        </div>
         <div class="form-group"><label class="form-label">全口数 *</label><input type="number" class="form-input" id="pm-total" placeholder="500"></div>
         <div class="form-group"><label class="form-label">還元率（%）</label><input type="number" class="form-input" id="pm-rate" placeholder="98"></div>
         <div class="form-group"><label class="form-label">確率テキスト</label><input class="form-input" id="pm-odds" placeholder="1/3でアド確定"></div>
@@ -481,7 +489,7 @@ input,select,textarea{font-family:inherit}
         <div class="form-group"><label class="form-label">リボンタイプ</label>
           <select class="form-select" id="pm-ribbon-type"><option value="hot">🔥 HOT</option><option value="new">✨ NEW</option><option value="limit">⏳ LIMIT</option></select>
         </div>
-        <div class="form-group form-full"><label class="form-label">背景CSS</label><input class="form-input" id="pm-bg" placeholder="radial-gradient(...)"></div>
+        <div class="form-group form-full"><label class="form-label">背景CSS（省略可）</label><input class="form-input" id="pm-bg" placeholder="radial-gradient(...)"></div>
         <div class="form-group"><label class="form-label">表示順</label><input type="number" class="form-input" id="pm-order" value="0"></div>
       </div>
       <div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">
@@ -496,8 +504,14 @@ input,select,textarea{font-family:inherit}
       </div>
       <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
         <div style="font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:8px">🏆 賞品設定</div>
-        <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 70px 28px;gap:4px;margin-bottom:4px">
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">レア度</span><span style="font-size:.6rem;color:rgba(255,255,255,.3)">賞品名</span><span style="font-size:.6rem;color:rgba(255,255,255,.3)">枚数</span><span style="font-size:.6rem;color:rgba(255,255,255,.3)">重み</span><span style="font-size:.6rem;color:rgba(255,255,255,.3)">参考価格</span><span></span>
+        <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 70px 80px 28px;gap:4px;margin-bottom:4px">
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">レア度</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">賞品名</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">枚数</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">重み</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">価格</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">画像</span>
+          <span></span>
         </div>
         <div id="prizes-list"></div>
         <button class="btn btn-secondary" style="margin-top:8px" onclick="addPrizeRow()">＋ 賞品追加</button>
@@ -726,13 +740,19 @@ async function initDashboard(){
 }
 
 async function loadDashWins(){
-  const{data}=await db.from('draw_results').select('created_at,prize_name,prize_tier,users(username)').order('created_at',{ascending:false}).limit(8);
+  const{data}=await db.from('draw_sessions').select('created_at,results,users(username),packs(name)').order('created_at',{ascending:false}).limit(5);
   const tc={sar:'color:#e8a800',sr:'color:#bb88ff',rr:'color:#44ccee'};
-  document.getElementById('dash-wins').innerHTML=(data||[]).map(w=>`
+  const wins=[];
+  (data||[]).forEach(s=>{
+    (s.results||[]).slice(0,1).forEach(r=>{
+      wins.push({prize_name:r.prize_name,prize_tier:r.prize_tier,username:s.users?.username});
+    });
+  });
+  document.getElementById('dash-wins').innerHTML=wins.slice(0,8).map(w=>`
     <div class="win-row">
       <span style="font-size:.62rem;font-weight:900;width:36px;text-align:center;${tc[w.prize_tier]||''}">${(w.prize_tier||'').toUpperCase()}</span>
       <span style="flex:1;font-weight:700;font-size:.78rem">${w.prize_name||'—'}</span>
-      <span style="color:rgba(255,255,255,.3);font-size:.7rem">${(w.users?.username||'???').slice(0,4)}***</span>
+      <span style="color:rgba(255,255,255,.3);font-size:.7rem">${(w.username||'???').slice(0,4)}***</span>
     </div>`).join('')||'<div style="padding:20px;text-align:center;color:rgba(255,255,255,.2);font-size:.8rem">データなし</div>';
 }
 
@@ -817,9 +837,52 @@ async function editPack(id){
   document.getElementById('pack-modal').classList.add('show');
 }
 
+/* ══ 画像アップロード ══ */
+async function uploadImage(file,folder){
+  const ext=file.name.split('.').pop();
+  const path=`${folder}/${Date.now()}.${ext}`;
+  const{data,error}=await db.storage.from('images').upload(path,file,{upsert:true});
+  if(error){showToast('⚠️ アップロード失敗: '+error.message);return null;}
+  const{data:{publicUrl}}=db.storage.from('images').getPublicUrl(path);
+  return publicUrl;
+}
+
+async function uploadPackImage(input){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'packs');
+  if(url){
+    document.getElementById('pm-image-url').value=url;
+    document.getElementById('pm-preview-img').src=url;
+    document.getElementById('pm-image-preview').style.display='block';
+    showToast('✅ アップロード完了！');
+  }
+}
+
+async function uploadBannerImage(input){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'banners');
+  if(url){
+    document.getElementById('bn-image-url').value=url;
+    showToast('✅ アップロード完了！');
+  }
+}
+
+async function uploadPrizeImage(input,idx){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'prizes');
+  if(url){
+    document.getElementById(`prize-img-${idx}`).value=url;
+    showToast('✅ アップロード完了！');
+  }
+}
+
 function addPrizeRow(prize){
+  const idx=document.getElementById('prizes-list').children.length;
   const div=document.createElement('div');
-  div.style.cssText='display:grid;grid-template-columns:80px 1fr 60px 60px 70px 28px;gap:4px;margin-bottom:6px;align-items:center';
+  div.style.cssText='display:grid;grid-template-columns:80px 1fr 60px 60px 70px 80px 28px;gap:4px;margin-bottom:6px;align-items:center';
   div.innerHTML=`
     <select class="form-select" style="padding:6px 8px;font-size:.75rem">
       <option value="sar" ${prize?.tier==='sar'?'selected':''}>SAR(S賞)</option>
@@ -832,6 +895,11 @@ function addPrizeRow(prize){
     <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="枚数" value="${prize?.quantity||''}">
     <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="重み" value="${prize?.weight||'100'}">
     <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="価格" value="${prize?.value_jp||''}">
+    <div style="display:flex;gap:2px">
+      <input type="file" accept="image/*" style="display:none" id="prize-file-${idx}" onchange="uploadPrizeImage(this,${idx})">
+      <input class="form-input" id="prize-img-${idx}" style="padding:4px 6px;font-size:.65rem;flex:1" placeholder="画像URL" value="${prize?.image_url||''}">
+      <button onclick="document.getElementById('prize-file-${idx}').click()" style="background:rgba(68,136,255,.15);color:#6699ff;border:1px solid rgba(68,136,255,.22);border-radius:4px;padding:4px 5px;font-size:.65rem;cursor:pointer;white-space:nowrap">📁</button>
+    </div>
     <button onclick="this.parentElement.remove()" style="background:rgba(255,60,60,.15);color:#ff6060;border:1px solid rgba(255,60,60,.2);border-radius:4px;padding:4px 6px;font-size:.7rem;cursor:pointer">✕</button>`;
   document.getElementById('prizes-list').appendChild(div);
 }
@@ -840,7 +908,7 @@ async function savePack(){
   const name=document.getElementById('pm-name').value;
   if(!name){showToast('⚠️ パック名を入力してください');return;}
   const total=parseInt(document.getElementById('pm-total').value)||0;
-  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,return_rate:parseFloat(document.getElementById('pm-rate').value)||null,odds_text:document.getElementById('pm-odds').value,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,min_guarantee:parseInt(document.getElementById('pm-min-guarantee').value)||0,ribbon_text:document.getElementById('pm-ribbon').value,ribbon_type:document.getElementById('pm-ribbon-type').value,bg_style:document.getElementById('pm-bg').value,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_hot:document.getElementById('pm-hot').checked,is_new:document.getElementById('pm-new').checked,is_ad_confirm:document.getElementById('pm-ad').checked,is_limited:document.getElementById('pm-limit').checked,is_loop:document.getElementById('pm-loop').checked,is_new_user_only:document.getElementById('pm-new-user').checked,is_100x_ad:document.getElementById('pm-100x').checked,is_active:document.getElementById('pm-active').checked};
+  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,return_rate:parseFloat(document.getElementById('pm-rate').value)||null,odds_text:document.getElementById('pm-odds').value,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,min_guarantee:parseInt(document.getElementById('pm-min-guarantee').value)||0,ribbon_text:document.getElementById('pm-ribbon').value,ribbon_type:document.getElementById('pm-ribbon-type').value,bg_style:document.getElementById('pm-bg').value,image_url:document.getElementById('pm-image-url').value||null,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_hot:document.getElementById('pm-hot').checked,is_new:document.getElementById('pm-new').checked,is_ad_confirm:document.getElementById('pm-ad').checked,is_limited:document.getElementById('pm-limit').checked,is_loop:document.getElementById('pm-loop').checked,is_new_user_only:document.getElementById('pm-new-user').checked,is_100x_ad:document.getElementById('pm-100x').checked,is_active:document.getElementById('pm-active').checked};
   if(!editingPackId)packData.remaining=total;
   let packId=editingPackId;
   if(editingPackId){
@@ -854,10 +922,10 @@ async function savePack(){
   const rows=document.getElementById('prizes-list').children;
   if(rows.length&&packId){
     if(editingPackId)await db.from('prizes').delete().eq('pack_id',packId);
-    const prizes=Array.from(rows).map(row=>{
+    const prizes=Array.from(rows).map((row,i)=>{
       const inputs=row.querySelectorAll('select,input');
       const qty=parseInt(inputs[2].value)||1;
-      return{pack_id:packId,tier:inputs[0].value,tier_label:{sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'D賞'}[inputs[0].value]||'',name:inputs[1].value,quantity:qty,remaining_qty:qty,weight:parseInt(inputs[3].value)||100,value_jp:parseInt(inputs[4].value)||0};
+      return{pack_id:packId,tier:inputs[0].value,tier_label:{sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'D賞'}[inputs[0].value]||'',name:inputs[1].value,quantity:qty,remaining_qty:qty,weight:parseInt(inputs[3].value)||100,value_jp:parseInt(inputs[4].value)||0,image_url:document.getElementById(`prize-img-${i}`)?.value||null};
     }).filter(p=>p.name);
     if(prizes.length)await db.from('prizes').insert(prizes);
   }
@@ -1043,20 +1111,23 @@ function viewShipping(id){const s=allShipping.find(x=>x.id===id);if(!s)return;co
 
 /* ══ HISTORY ══ */
 async function loadHistory(){
-  const{data}=await db.from('draw_results').select('created_at,prize_name,prize_tier,users(username),packs(name),draw_sessions(total_cost)').order('created_at',{ascending:false}).limit(200);
+  const{data}=await db.from('draw_sessions').select('*,users(username),packs(name)').order('created_at',{ascending:false}).limit(200);
   allHistory=data||[];renderHistory(allHistory);
 }
 function renderHistory(data){
   const tc={sar:'#e8a800',sr:'#bb88ff',rr:'#44ccee',r:'#8899cc',c:'rgba(255,255,255,.3)'};
-  document.getElementById('history-tbl-body').innerHTML=data.map(r=>`
+  document.getElementById('history-tbl-body').innerHTML=data.map(s=>{
+    const results=s.results||[];
+    return results.map(r=>`
     <tr>
-      <td style="font-size:.7rem">${new Date(r.created_at).toLocaleString('ja-JP')}</td>
-      <td>${(r.users?.username||'???').slice(0,4)}***</td>
-      <td style="font-size:.72rem">${r.packs?.name||'—'}</td>
+      <td style="font-size:.7rem">${new Date(s.created_at).toLocaleString('ja-JP')}</td>
+      <td>${(s.users?.username||'???').slice(0,4)}***</td>
+      <td style="font-size:.72rem">${s.packs?.name||'—'}</td>
       <td class="td-bold">${r.prize_name||'—'}</td>
       <td><span style="color:${tc[r.prize_tier]||'#fff'};font-weight:900;font-size:.72rem">${(r.prize_tier||'').toUpperCase()}</span></td>
-      <td style="font-size:.72rem">${(r.draw_sessions?.total_cost||0).toLocaleString()}</td>
+      <td style="font-size:.72rem">${s.total_cost||0}</td>
     </tr>`).join('');
+  }).join('');
 }
 function filterHistory(q){renderHistory(allHistory.filter(r=>(r.users?.username||'').includes(q)||(r.prize_name||'').includes(q)));}
 
