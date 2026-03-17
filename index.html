@@ -1231,48 +1231,68 @@ async function executeDraw(){
     showToast('🪙 コインが不足しています');
     closeDrawModal();openPurchase();return;
   }
-  // 残り口数チェック
   if((pack.remaining||0)<state.drawCount){
     showToast('⚠️ 残り口数が不足しています');return;
   }
-  // 賞品チェック
   const prizes=pack.prizes||[];
   if(!prizes.length){
-    showToast('⚠️ このオリパに賞品が設定されていません');return;
+    showToast('⚠️ 賞品が設定されていません');return;
   }
-  // 未成年チェック
-  const canDraw=await checkMinorLimit(cost);
-  if(!canDraw)return;
-  showToast('✅ 未成年チェックOK',1500);
 
+  // コイン消費
   state.coin-=cost;
-  updateHeaderPts();closeDrawModal();
-  showToast('🎲 抽選開始！',2000);
+  state.totalSpent=(state.totalSpent||0)+cost;
+  updateHeaderPts();
+  closeDrawModal();
 
   // 抽選
   const results=Array.from({length:state.drawCount},()=>({prize:pickPrize(prizes,Math.random())}));
 
-  // 口数を減らす
-  const newRemaining=Math.max(0,(pack.remaining||0)-state.drawCount);
-  const{error:remError}=await db.from('packs').update({remaining:newRemaining}).eq('id',pack.id);
-  if(remError)console.error('remaining error:',remError);
-  const packInState=state.packs.find(p=>p.id===pack.id);
-  if(packInState)packInState.remaining=newRemaining;
+  // セッションをローカルに追加
+  const sessionId=generateSeed().slice(0,8);
+  const session={
+    id:sessionId,
+    packId:pack.id,
+    packName:pack.name,
+    packEmoji:pack.emoji||'🎴',
+    results:results.map((r,i)=>({
+      dbId:sessionId+'_'+i,
+      sessionId,
+      resultIndex:i,
+      prize:r.prize,
+      converted:false,
+      shipped:false,
+    })),
+    cost,
+    date:new Date().toLocaleString('ja-JP'),
+    shipped:false,
+  };
+  state.sessions.unshift(session);
 
-  // コイン・消費をDBに保存
-  state.totalSpent=(state.totalSpent||0)+cost;
-  const{error:userError}=await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
-  if(userError){showToast('⚠️ コイン更新エラー: '+userError.message,4000);console.error('user update error:',userError);}
+  // DBに保存（失敗しても続行）
+  try{
+    await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
+    await db.from('packs').update({remaining:Math.max(0,(pack.remaining||0)-state.drawCount)}).eq('id',pack.id);
+    const packInState=state.packs.find(p=>p.id===pack.id);
+    if(packInState)packInState.remaining=Math.max(0,(packInState.remaining||0)-state.drawCount);
+    const{data:sess}=await db.from('draw_sessions').insert({
+      user_id:state.user.id,
+      pack_id:pack.id,
+      draw_count:results.length,
+      total_cost:cost,
+      currency:'coin',
+      server_seed:sessionId,
+      results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
+    }).select('id').single();
+    if(sess?.id){
+      // ローカルセッションのIDをDB IDに更新
+      session.id=sess.id;
+      session.results.forEach((r,i)=>{r.sessionId=sess.id;r.dbId=sess.id+'_'+i;});
+    }
+  }catch(e){
+    console.error('DB save error:',e);
+  }
 
-  await saveTenjoCount(pack.id,state.drawCount);
-  showToast('💾 保存中...'+state.user?.id?.slice(0,8),4000);
-  await saveDrawSession(pack.id,results,cost);
-
-  state.sessions.unshift({
-    id:generateSeed().slice(0,8),
-    packId:pack.id,packName:pack.name,
-    results,cost,date:new Date().toLocaleString('ja-JP'),shipped:false,
-  });
   startGachaAnimation(results,pack);
 }
 
