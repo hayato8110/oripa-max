@@ -10,225 +10,208 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow-x:hidden}
 :root{
-  --bg:#07080f;--bg2:#0d0f1c;--bg3:#131628;
-  --gold:#c9a84c;--gold2:#e8c96a;--gold3:#f5e090;--gold-dark:#7a5c1e;
-  --red:#c0392b;--red2:#e74c3c;
-  --border:rgba(201,168,76,.12);--border2:rgba(201,168,76,.25);
-  --text:#f0eadc;--text2:rgba(240,234,220,.6);--text3:rgba(240,234,220,.3);
+  --bg:#f0f0f0;
+  --bg2:#ffffff;
+  --bg3:#f8f8f8;
+  --card-bg:#ffffff;
+  --primary:#e8380d;
+  --primary2:#ff5a38;
+  --gold:#f5c518;
+  --gold2:#e6a817;
+  --green:#22c55e;
+  --blue:#3b82f6;
+  --border:#e5e5e5;
+  --border2:#d0d0d0;
+  --text:#1a1a1a;
+  --text2:#555555;
+  --text3:#999999;
+  --nav-bg:#ffffff;
+  --header-bg:#ffffff;
+  --tab-active:#e8380d;
 }
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:68px}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 10%,rgba(201,168,76,.03) 0%,transparent 50%),radial-gradient(ellipse at 80% 90%,rgba(192,57,43,.03) 0%,transparent 50%);pointer-events:none;z-index:0}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:64px}
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
 input,select,textarea{font-family:inherit;outline:none}
 ::-webkit-scrollbar{display:none}
 
-/* 年齢確認 */
-.age-check-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9000;display:flex;align-items:center;justify-content:center}
-.age-check-box{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:20px;padding:28px 20px;width:min(340px,90vw);text-align:center}
-.age-check-logo{font-size:1.3rem;font-weight:900;color:var(--gold2);margin-bottom:14px}
-.age-check-title{font-size:1rem;font-weight:900;margin-bottom:8px;color:var(--text)}
-.age-check-sub{font-size:.8rem;color:var(--text3);margin-bottom:20px;line-height:1.6}
-.age-check-yes{width:100%;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;padding:13px;border-radius:10px;font-weight:900;font-size:.9rem;border:none;cursor:pointer;margin-bottom:10px;display:block}
-.age-check-no{width:100%;background:rgba(255,255,255,.05);color:var(--text3);padding:10px;border-radius:10px;font-size:.82rem;border:1px solid var(--border);cursor:pointer;display:block}
-.coupon-section{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:10px}
-.coupon-row{display:flex;gap:8px}
-.coupon-input{flex:1;background:rgba(201,168,76,.04);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.88rem}
-.coupon-input:focus{border-color:var(--gold);outline:none}
-.coupon-apply-btn{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;padding:9px 16px;border-radius:8px;font-size:.8rem;font-weight:900;flex-shrink:0}
-.sms-section{background:linear-gradient(145deg,#001a00,#003300);border:1px solid rgba(0,200,80,.2);border-radius:12px;padding:14px;margin-bottom:10px}
-.sms-title{font-size:.88rem;font-weight:900;color:#4ade80;margin-bottom:4px}
-.sms-sub{font-size:.75rem;color:rgba(74,222,128,.6);margin-bottom:10px}
-.sms-row{display:flex;gap:8px;margin-top:8px}
-.sms-input{flex:1;background:rgba(0,200,80,.05);border:1px solid rgba(0,200,80,.2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.88rem}
-.sms-input:focus{border-color:#4ade80;outline:none}
-.sms-btn{background:linear-gradient(135deg,#00aa44,#00cc55);color:#fff;padding:9px 14px;border-radius:8px;font-size:.78rem;font-weight:900;flex-shrink:0}
-.line-section{background:linear-gradient(145deg,#001a0a,#003315);border:1px solid rgba(0,185,0,.2);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
-.line-icon{width:40px;height:40px;background:#06C755;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
-.line-text{flex:1}
-.line-title{font-size:.88rem;font-weight:900;color:#4ade80}
-.line-sub{font-size:.72rem;color:rgba(74,222,128,.6)}
-.inq-input{width:100%;background:rgba(201,168,76,.04);border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:.9rem;margin-bottom:10px}
-.inq-input:focus{border-color:var(--gold);outline:none}
-.inq-textarea{width:100%;background:rgba(201,168,76,.04);border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:.9rem;min-height:120px;resize:vertical;font-family:inherit}
-.inq-textarea:focus{border-color:var(--gold);outline:none}
-.inq-label{font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:4px;display:block;letter-spacing:.05em}
-.inq-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.95rem;font-weight:900;margin-top:4px;box-shadow:0 4px 16px rgba(201,168,76,.25)}
-/* TOAST */
-#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(13,15,28,.95);color:var(--gold2);padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap;border:1px solid var(--border2);box-shadow:0 4px 20px rgba(0,0,0,.5)}
+/* ══ TOAST ══ */
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 #toast.show{opacity:1}
 
-/* MAX COIN */
-.max-coin{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(145deg,var(--gold3),var(--gold),var(--gold-dark));box-shadow:0 2px 8px rgba(201,168,76,.4),inset 0 1px 0 rgba(255,255,255,.3);position:relative;flex-shrink:0}
-.max-coin::before{content:'';position:absolute;inset:2px;border-radius:50%;border:1px solid rgba(255,255,255,.25)}
-.max-coin-text{font-size:.38rem;font-weight:900;color:#1a0a00;position:relative;z-index:1;line-height:1}
+/* ══ 年齢確認 ══ */
+.age-check-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;display:flex;align-items:center;justify-content:center}
+.age-check-box{background:#fff;border-radius:16px;padding:28px 20px;width:min(340px,90vw);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.age-check-logo{font-size:1.3rem;font-weight:900;color:var(--primary);margin-bottom:14px}
+.age-check-title{font-size:1rem;font-weight:900;margin-bottom:8px;color:var(--text)}
+.age-check-sub{font-size:.8rem;color:var(--text3);margin-bottom:20px;line-height:1.6}
+.age-check-yes{width:100%;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:13px;border-radius:10px;font-weight:900;font-size:.9rem;border:none;cursor:pointer;margin-bottom:10px;display:block}
+.age-check-no{width:100%;background:#f5f5f5;color:var(--text3);padding:10px;border-radius:10px;font-size:.82rem;border:1px solid var(--border);cursor:pointer;display:block}
 
-/* HEADER */
-.header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,rgba(7,8,15,.98),rgba(13,15,28,.96));border-bottom:1px solid var(--border2);height:58px;display:flex;align-items:center;padding:0 12px;gap:8px;backdrop-filter:blur(20px)}
-.h-logo{font-size:1.4rem;font-weight:900;flex:1;display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold3),var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.04em}
-.h-logo .logo-mark{background:linear-gradient(135deg,var(--gold),var(--gold-dark));-webkit-background-clip:unset;-webkit-text-fill-color:unset;color:#0a0a0a;font-size:.6rem;font-weight:900;padding:2px 6px;border-radius:3px;letter-spacing:.06em}
-.h-cur{display:flex;align-items:center;gap:4px;background:rgba(201,168,76,.07);border-radius:999px;padding:5px 11px;cursor:pointer;border:1px solid var(--border2)}
-.h-cur .cur-val{font-size:.85rem;font-weight:900;color:var(--gold2)}
-.h-add-btn{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;width:20px;height:20px;border-radius:50%;font-size:.85rem;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(192,57,43,.4)}
-.h-notif{position:relative;background:none;padding:6px;color:var(--text3);font-size:1.2rem}
-.h-notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--red2);border-radius:50%;border:1.5px solid var(--bg)}
+/* ══ HEADER ══ */
+.header{position:sticky;top:0;z-index:100;background:var(--header-bg);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 12px;gap:8px}
+.h-logo{font-size:1.2rem;font-weight:900;flex:1;color:var(--primary);letter-spacing:.02em;display:flex;align-items:center;gap:5px}
+.h-logo-badge{background:var(--primary);color:#fff;font-size:.55rem;font-weight:900;padding:2px 6px;border-radius:3px;letter-spacing:.04em}
+.h-coin-wrap{display:flex;align-items:center;gap:5px;background:#fff8f0;border:1.5px solid #ffd9c8;border-radius:999px;padding:5px 12px;cursor:pointer}
+.h-coin-icon{font-size:.95rem}
+.h-coin-val{font-size:.88rem;font-weight:900;color:var(--primary)}
+.h-coin-plus{background:var(--primary);color:#fff;width:20px;height:20px;border-radius:50%;font-size:.85rem;font-weight:900;display:flex;align-items:center;justify-content:center}
+.h-notif{position:relative;background:none;padding:6px;color:var(--text2);font-size:1.2rem;flex-shrink:0}
+.h-notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--primary);border-radius:50%;border:1.5px solid #fff}
 
-/* BANNER */
+/* ══ CATEGORY TABS ══ */
+.cat-bar{position:sticky;top:52px;z-index:99;background:#fff;border-bottom:2px solid var(--border);display:flex;overflow-x:auto;height:44px}
+.cat-tab{flex-shrink:0;padding:0 16px;height:100%;display:flex;align-items:center;gap:4px;font-size:.82rem;font-weight:700;color:var(--text3);background:none;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:.15s}
+.cat-tab.active{color:var(--tab-active);border-color:var(--tab-active)}
+
+/* ══ ALERT BAR ══ */
+.alert-bar{background:linear-gradient(90deg,#fff8f0,#fff3eb,#fff8f0);border-bottom:1px solid #ffdcc8;padding:7px 14px;font-size:.78rem;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:5px}
+
+
+
+
+
+/* ══ SORT BAR ══ */
+.sort-bar{background:#fff;padding:8px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border)}
+.sort-chip{flex-shrink:0;padding:5px 13px;border-radius:999px;font-size:.73rem;font-weight:700;background:#f5f5f5;color:var(--text2);border:1.5px solid var(--border);transition:.15s}
+.sort-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ══ BANNERS ══ */
 .banners-wrap{overflow:hidden;position:relative}
 .banners-track{display:flex;transition:transform .4s ease}
 .banner-slide{flex-shrink:0;width:100%;min-height:100px;display:flex;align-items:center;padding:16px 18px;position:relative;overflow:hidden;cursor:pointer}
-.banner-slide::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.3),transparent)}
+.banner-slide::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.25),transparent)}
 .banner-content{position:relative;z-index:1}
-.banner-tag{font-size:.6rem;font-weight:900;color:var(--gold2);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase}
-.banner-title{font-size:1.1rem;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5);line-height:1.2}
+.banner-tag{font-size:.6rem;font-weight:900;color:rgba(255,255,255,.8);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase}
+.banner-title{font-size:1.1rem;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.4);line-height:1.2}
 .banner-sub{font-size:.75rem;color:rgba(255,255,255,.7);margin-top:3px}
-.banner-dots{display:flex;justify-content:center;gap:5px;padding:6px 0;background:rgba(0,0,0,.3)}
-.banner-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);transition:.2s}
-.banner-dot.active{background:var(--gold);width:14px;border-radius:3px}
+.banner-dots{display:flex;justify-content:center;gap:5px;padding:5px 0;background:#f8f8f8;border-bottom:1px solid var(--border)}
+.banner-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);transition:.2s}
+.banner-dot.active{background:var(--primary);width:14px;border-radius:3px}
 
-/* CAT TABS */
-.cat-bar{position:sticky;top:58px;z-index:99;background:rgba(7,8,15,.96);backdrop-filter:blur(20px);display:flex;border-bottom:1px solid var(--border);overflow-x:auto;height:44px}
-.cat-tab{flex-shrink:0;padding:0 16px;height:100%;display:flex;align-items:center;font-size:.85rem;font-weight:700;color:var(--text3);background:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:.15s;letter-spacing:.02em}
-.cat-tab.active{color:var(--gold2);border-color:var(--gold)}
-
-/* ALERT */
-.alert-bar{background:linear-gradient(90deg,#1a0800,#2a1200,#1a0800);border-bottom:1px solid rgba(201,168,76,.2);padding:7px 12px;font-size:.78rem;font-weight:700;color:var(--gold2);display:flex;align-items:center;gap:5px}
-
-/* LOGIN BONUS */
-.login-bonus-bar{background:linear-gradient(90deg,#001a00,#003300,#001a00);border-bottom:1px solid rgba(0,200,80,.2);padding:8px 14px;font-size:.8rem;font-weight:700;color:#4ade80;display:flex;align-items:center;justify-content:space-between;cursor:pointer;display:none}
-.lb-btn{background:rgba(0,200,80,.15);border:1px solid rgba(0,200,80,.3);border-radius:999px;padding:3px 12px;font-size:.72rem;font-weight:900;color:#4ade80}
-
-/* WINS TICKER */
-.wins-bar{background:rgba(201,168,76,.03);border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden}
-.wins-track{display:flex;animation:winscroll 22s linear infinite;white-space:nowrap}
-.wins-item{display:inline-flex;align-items:center;gap:6px;padding:0 20px;font-size:.73rem;font-weight:700;color:rgba(201,168,76,.65)}
-.wi-badge{font-size:.58rem;font-weight:900;padding:1px 5px;border-radius:2px}
-.wi-sar{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#0a0a0a}
-.wi-sr{background:#6b21a8;color:#e9d5ff}
-.wi-rr{background:#1e3a5f;color:#93c5fd}
-@keyframes winscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* SORT */
-.sort-bar{background:rgba(13,15,28,.8);padding:8px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border)}
-.sort-chip{flex-shrink:0;padding:5px 13px;border-radius:999px;font-size:.73rem;font-weight:700;background:rgba(201,168,76,.05);color:var(--text3);border:1px solid var(--border);transition:.15s}
-.sort-chip.active{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#0a0a0a;border-color:transparent;box-shadow:0 2px 10px rgba(201,168,76,.25)}
-
-/* PACK CARD */
-.packs-list{padding:10px}
-.pack-card{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.4);cursor:pointer;transition:transform .12s;position:relative}
-.pack-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.02) 0%,transparent 60%);pointer-events:none;z-index:1}
-.pack-card:active{transform:scale(.99)}
-.pc-banner{width:100%;min-height:215px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+/* ══ PACK CARD ══ */
+.packs-list{padding:8px}
+.pack-card{background:#fff;border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;border:1px solid var(--border)}
+.pc-banner{width:100%;min-height:200px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
 .pcb-bg{position:absolute;inset:0;z-index:0}
-.pcb-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:65%;background:linear-gradient(transparent,rgba(0,0,0,.75))}
-.pcb-shine{position:absolute;inset:0;z-index:1;background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,transparent 50%)}
-.pcb-char{position:absolute;right:14px;bottom:50px;z-index:3;font-size:6rem;line-height:1;filter:drop-shadow(2px 8px 18px rgba(0,0,0,.6));animation:flt 3.5s ease-in-out infinite}
+.pcb-bg img{width:100%;height:100%;object-fit:cover}
+.pcb-bg::after{content:'';position:absolute;bottom:0;left:0;right:0;height:65%;background:linear-gradient(transparent,rgba(0,0,0,.72))}
+.pcb-char{position:absolute;right:14px;bottom:52px;z-index:3;font-size:5.5rem;line-height:1;filter:drop-shadow(2px 8px 18px rgba(0,0,0,.5));animation:flt 3.5s ease-in-out infinite}
 @keyframes flt{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
-.pcb-content{position:relative;z-index:4;padding:12px 14px 10px;display:flex;flex-direction:column;gap:5px}
-.pcb-ribbon{display:inline-flex;align-items:center;font-size:.62rem;font-weight:900;letter-spacing:.08em;padding:3px 16px 3px 8px;border-radius:2px;align-self:flex-start;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 50%,calc(100% - 6px) 100%,0 100%)}
-.ribbon-hot{background:linear-gradient(90deg,#7a0000,#c0392b);color:#ffe0e0}
-.ribbon-new{background:linear-gradient(90deg,#003366,#0066cc);color:#e0f0ff}
-.ribbon-limit{background:linear-gradient(90deg,#3d0066,#7b00cc);color:#f0e0ff}
-.pcb-top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.pcb-name{font-size:1.5rem;font-weight:900;color:#fff;line-height:1.15;text-shadow:1px 2px 8px rgba(0,0,0,.6)}
-.pcb-series{font-size:.7rem;color:rgba(255,245,220,.6);margin-top:2px}
-.pcb-rate{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,.5);border:1.5px solid rgba(201,168,76,.45);border-radius:8px;padding:5px 10px;flex-shrink:0;backdrop-filter:blur(8px);min-width:62px}
-.pcb-rate-label{font-size:.5rem;color:rgba(201,168,76,.8);font-weight:700;letter-spacing:.06em}
-.pcb-rate-num{font-size:1.55rem;font-weight:900;line-height:1;color:var(--gold2);text-shadow:0 0 12px rgba(201,168,76,.4)}
-.pcb-rate-unit{font-size:.55rem;color:rgba(201,168,76,.7);font-weight:700}
-.pcb-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
-.pcb-chip{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.4);border:1px solid rgba(201,168,76,.2);border-radius:999px;padding:3px 10px;backdrop-filter:blur(4px)}
-.pcb-chip span{font-size:.65rem;font-weight:700;color:rgba(255,240,200,.85)}
-.pcb-tiers{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
-.tier-pill{font-size:.58rem;font-weight:900;padding:2px 8px;border-radius:2px}
-.tp-s{background:rgba(201,168,76,.15);color:var(--gold2);border:1px solid rgba(201,168,76,.3)}
-.tp-a{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
-.tp-b{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
-.tp-c{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid rgba(255,255,255,.1)}
-.pc-bottom{padding:10px 14px 14px}
-.pc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-.pc-price{font-size:1.2rem;font-weight:900;color:var(--gold2)}
-.pc-price-unit{font-size:.68rem;color:var(--text3);font-weight:700}
-.pc-remain{font-size:.75rem;font-weight:700;color:var(--text2)}
-.pc-remain b{color:var(--red2)}
-.progress-bg{background:rgba(255,255,255,.06);border-radius:999px;height:5px;overflow:hidden;margin-bottom:11px}
-.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold2));position:relative;overflow:hidden;transition:.5s}
-.progress-fill.warn{background:linear-gradient(90deg,#7a3300,#cc5500)}
-.progress-fill.danger{background:linear-gradient(90deg,#7a0000,#c0392b)}
-.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:shimmer 2s infinite}
+.pcb-content{position:relative;z-index:4;padding:10px 12px 10px;display:flex;flex-direction:column;gap:4px}
+.pcb-ribbon{display:inline-flex;align-items:center;font-size:.6rem;font-weight:900;letter-spacing:.06em;padding:2px 10px 2px 8px;border-radius:2px;align-self:flex-start;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 50%,calc(100% - 5px) 100%,0 100%)}
+.ribbon-hot{background:var(--primary);color:#fff}
+.ribbon-new{background:#2563eb;color:#fff}
+.ribbon-limit{background:#7c3aed;color:#fff}
+.pcb-top-row{display:flex;align-items:flex-end;justify-content:space-between;gap:6px}
+.pcb-name{font-size:1.45rem;font-weight:900;color:#fff;line-height:1.15;text-shadow:1px 2px 8px rgba(0,0,0,.5)}
+.pcb-series{font-size:.68rem;color:rgba(255,255,255,.65);margin-top:1px}
+.pcb-rate{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.25);border-radius:8px;padding:4px 9px;flex-shrink:0;backdrop-filter:blur(8px);min-width:58px}
+.pcb-rate-label{font-size:.48rem;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:.04em}
+.pcb-rate-num{font-size:1.45rem;font-weight:900;line-height:1;color:#fff}
+.pcb-rate-unit{font-size:.5rem;color:rgba(255,255,255,.7);font-weight:700}
+.pcb-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.pcb-chip{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.45);border-radius:4px;padding:2px 8px;backdrop-filter:blur(4px)}
+.pcb-chip span{font-size:.63rem;font-weight:700;color:rgba(255,255,255,.85)}
+.pcb-tiers{display:flex;gap:3px;flex-wrap:wrap;margin-top:2px}
+.tier-pill{font-size:.56rem;font-weight:900;padding:2px 7px;border-radius:3px}
+.tp-s{background:rgba(232,56,13,.9);color:#fff}
+.tp-a{background:rgba(124,58,237,.85);color:#fff}
+.tp-b{background:rgba(37,99,235,.85);color:#fff}
+.tp-c{background:rgba(0,0,0,.4);color:rgba(255,255,255,.7)}
+
+/* ══ PACK BOTTOM ══ */
+.pc-bottom{padding:10px 12px 12px;background:#fff}
+.pc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.pc-price{font-size:1.15rem;font-weight:900;color:var(--primary)}
+.pc-price-unit{font-size:.65rem;color:var(--text3);font-weight:700}
+.pc-remain{font-size:.73rem;font-weight:700;color:var(--text3)}
+.pc-remain b{color:var(--primary)}
+.progress-bg{background:#f0f0f0;border-radius:999px;height:6px;overflow:hidden;margin-bottom:10px}
+.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#e8380d,#ff7a5a);transition:.5s;position:relative;overflow:hidden}
+.progress-fill.warn{background:linear-gradient(90deg,#d97706,#f59e0b)}
+.progress-fill.danger{background:linear-gradient(90deg,#dc2626,#ef4444)}
+.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 2s infinite}
 @keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(200%)}}
-.pc-btns{display:flex;gap:8px}
-.pc-btn-1{flex:1;padding:13px 6px;border-radius:10px;font-size:.95rem;font-weight:900;background:linear-gradient(160deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;box-shadow:0 4px 16px rgba(201,168,76,.25),inset 0 1px 0 rgba(255,255,255,.2);letter-spacing:.02em;transition:.1s;position:relative;overflow:hidden}
-.pc-btn-1::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15) 0%,transparent 55%)}
-.pc-btn-1:active{transform:scale(.97)}
-.pc-btn-5{flex:1;padding:13px 6px;border-radius:10px;font-size:.95rem;font-weight:900;background:linear-gradient(160deg,#e74c3c,#c0392b,#922b21);color:#fff;box-shadow:0 4px 16px rgba(192,57,43,.25),inset 0 1px 0 rgba(255,255,255,.12);letter-spacing:.02em;transition:.1s;position:relative;overflow:hidden}
-.pc-btn-5::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.1) 0%,transparent 55%)}
+.pc-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pc-btn-1{padding:12px 6px;border-radius:8px;font-size:.9rem;font-weight:900;background:#fff;color:var(--primary);border:2px solid var(--primary);letter-spacing:.02em;transition:.1s}
+.pc-btn-1:active{background:#fff5f3;transform:scale(.97)}
+.pc-btn-5{padding:12px 6px;border-radius:8px;font-size:.9rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;letter-spacing:.02em;transition:.1s;box-shadow:0 3px 10px rgba(232,56,13,.3)}
 .pc-btn-5:active{transform:scale(.97)}
 
-/* LOADING */
+/* ══ LOADING ══ */
 .loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:16px}
-.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(201,168,76,.15);border-top-color:var(--gold);animation:spin .8s linear infinite}
+.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(232,56,13,.15);border-top-color:var(--primary);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+/* ══ MODAL ══ */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal-overlay.show{opacity:1;pointer-events:all}
-.bottom-sheet{background:linear-gradient(180deg,var(--bg3),var(--bg2));border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:0 0 28px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:92vh;overflow-y:auto;border-top:1px solid var(--border2)}
+.bottom-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:0 0 28px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:92vh;overflow-y:auto;border-top:1px solid var(--border)}
 .modal-overlay.show .bottom-sheet{transform:translateY(0)}
-.bs-drag{width:40px;height:4px;background:rgba(201,168,76,.2);border-radius:2px;margin:14px auto 0}
+.bs-drag{width:40px;height:4px;background:#ddd;border-radius:2px;margin:14px auto 0}
 .bs-hero{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
 .bs-hero-icon{font-size:2.4rem}
 .bs-pack-name{font-size:1.05rem;font-weight:900;color:var(--text)}
 .bs-pack-series{font-size:.74rem;color:var(--text3);margin-top:2px}
-.bs-section-label{padding:12px 16px 6px;font-size:.65rem;font-weight:900;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
-.bs-prizes{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px;border-bottom:1px solid var(--border)}
-.bs-prize{background:rgba(201,168,76,.05);border:1px solid var(--border);border-radius:7px;padding:5px 10px;display:flex;align-items:center;gap:6px}
-.bsp-tier{font-size:.58rem;font-weight:900;padding:1px 5px;border-radius:2px}
-.bsp-s{background:rgba(201,168,76,.2);color:var(--gold2);border:1px solid rgba(201,168,76,.3)}
-.bsp-a{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3)}
-.bsp-b{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
-.bsp-c{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border)}
+.bs-section-label{padding:12px 16px 6px;font-size:.65rem;font-weight:900;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;border-top:1px solid var(--border)}
+.bs-prizes{display:flex;flex-wrap:wrap;gap:5px;padding:0 16px 12px}
+.bs-prize{background:#f8f8f8;border:1px solid var(--border);border-radius:6px;padding:5px 10px;display:flex;align-items:center;gap:5px}
+.bsp-tier{font-size:.58rem;font-weight:900;padding:1px 5px;border-radius:3px}
+.bsp-s{background:var(--primary);color:#fff}
+.bsp-a{background:#7c3aed;color:#fff}
+.bsp-b{background:#2563eb;color:#fff}
+.bsp-c{background:#e5e7eb;color:#6b7280}
 .bsp-name{font-size:.76rem;font-weight:700;color:var(--text)}
 .bsp-cnt{font-size:.65rem;color:var(--text3)}
+
+/* ══ COUNT OPTS ══ */
 .count-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:8px 16px 12px;border-bottom:1px solid var(--border)}
-.count-opt{background:rgba(201,168,76,.04);border:1.5px solid var(--border);border-radius:10px;padding:10px 5px;text-align:center;cursor:pointer;transition:.15s}
-.count-opt.sel{border-color:var(--gold);background:rgba(201,168,76,.08)}
-.co-num{font-size:1.6rem;font-weight:900;color:var(--gold2);line-height:1}
-.co-price{font-size:.7rem;color:var(--text2);margin-top:2px;font-weight:700}
-.co-bonus{font-size:.58rem;color:#4ade80;font-weight:800;margin-top:1px}
-.bs-draw-btn{margin:10px 16px 0;width:calc(100% - 32px);background:linear-gradient(160deg,#e74c3c,#c0392b);color:#fff;font-size:1rem;font-weight:900;padding:14px;border-radius:12px;box-shadow:0 4px 16px rgba(192,57,43,.3);letter-spacing:.02em;transition:.1s}
+.count-opt{background:#f8f8f8;border:2px solid var(--border);border-radius:10px;padding:10px 5px;text-align:center;cursor:pointer;transition:.15s}
+.count-opt.sel{border-color:var(--primary);background:#fff5f3}
+.co-num{font-size:1.6rem;font-weight:900;color:var(--text);line-height:1}
+.co-price{font-size:.68rem;color:var(--text2);margin-top:2px;font-weight:700}
+.co-bonus{font-size:.58rem;color:var(--green);font-weight:800;margin-top:1px}
+.bs-draw-btn{margin:10px 16px 0;width:calc(100% - 32px);background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:1rem;font-weight:900;padding:14px;border-radius:12px;box-shadow:0 4px 14px rgba(232,56,13,.3);letter-spacing:.02em;transition:.1s}
 .bs-draw-btn:active{transform:scale(.98)}
 .bs-cancel-btn{width:100%;padding:12px;margin-top:6px;background:none;color:var(--text3);font-size:.85rem;font-weight:700}
 
-/* 天井 */
-.tenjo-modal{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px 14px;margin:8px 16px;font-size:.78rem}
-.tenjo-modal-label{font-weight:900;color:#93c5fd;margin-bottom:4px}
-.tenjo-modal-bar{background:rgba(59,130,246,.1);border-radius:999px;height:5px;overflow:hidden;margin-bottom:4px}
-.tenjo-modal-fill{height:100%;background:linear-gradient(90deg,#1e40af,#3b82f6);border-radius:999px;transition:.3s}
-.tenjo-modal-sub{font-size:.7rem;color:#93c5fd}
+/* ══ 天井 ══ */
+.tenjo-modal{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin:8px 16px;font-size:.78rem}
+.tenjo-modal-label{font-weight:900;color:#1d4ed8;margin-bottom:4px}
+.tenjo-modal-bar{background:#dbeafe;border-radius:999px;height:5px;overflow:hidden;margin-bottom:4px}
+.tenjo-modal-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#1d4ed8);border-radius:999px;transition:.3s}
+.tenjo-modal-sub{font-size:.7rem;color:#2563eb}
 
-/* AUTH */
+/* ══ AUTH ══ */
 .auth-sheet{max-height:88vh}
-.auth-tabs{display:flex;border-bottom:1px solid var(--border)}
-.auth-tab{flex:1;padding:12px;text-align:center;font-size:.9rem;font-weight:700;color:var(--text3);background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
-.auth-tab.active{color:var(--gold2);border-color:var(--gold)}
+.auth-tabs{display:flex;border-bottom:2px solid var(--border)}
+.auth-tab{flex:1;padding:12px;text-align:center;font-size:.9rem;font-weight:700;color:var(--text3);background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.auth-tab.active{color:var(--primary);border-color:var(--primary)}
 .auth-form{padding:16px}
 .auth-label{font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:4px;display:block;letter-spacing:.05em}
-.auth-input{width:100%;padding:11px 14px;border:1.5px solid var(--border2);border-radius:10px;font-size:.9rem;color:var(--text);background:rgba(201,168,76,.04);transition:.2s;margin-bottom:12px}
-.auth-input:focus{border-color:var(--gold)}
-.auth-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.95rem;font-weight:900;margin-top:4px;transition:.1s;box-shadow:0 4px 16px rgba(201,168,76,.25)}
+.auth-input{width:100%;padding:11px 14px;border:1.5px solid var(--border2);border-radius:10px;font-size:.9rem;color:var(--text);background:#fff;transition:.2s;margin-bottom:12px}
+.auth-input:focus{border-color:var(--primary)}
+.auth-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:.95rem;font-weight:900;margin-top:4px;transition:.1s;box-shadow:0 4px 14px rgba(232,56,13,.25)}
 .auth-submit:active{transform:scale(.98)}
 .auth-forgot{text-align:center;margin-top:10px;font-size:.78rem;color:var(--text3);cursor:pointer;text-decoration:underline}
 
-/* PURCHASE */
-.plan-item{display:flex;align-items:center;justify-content:space-between;background:rgba(201,168,76,.04);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
-.plan-item.popular{border-color:var(--gold);background:rgba(201,168,76,.08)}
+/* ══ PURCHASE ══ */
+.plan-item{display:flex;align-items:center;justify-content:space-between;background:#f8f8f8;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.plan-item.popular{border-color:var(--primary);background:#fff5f3}
 .plan-jp{font-size:1.1rem;font-weight:900;color:var(--text)}
-.plan-bonus{font-size:.7rem;color:#4ade80;font-weight:700;margin-top:1px}
-.plan-badge{background:var(--red2);color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:2px;margin-left:6px}
-.plan-price{font-size:.95rem;font-weight:900;color:var(--gold2);text-align:right}
+.plan-bonus{font-size:.7rem;color:var(--green);font-weight:700;margin-top:1px}
+.plan-badge{background:var(--primary);color:#fff;font-size:.55rem;font-weight:900;padding:1px 5px;border-radius:2px;margin-left:6px}
+.plan-price{font-size:.95rem;font-weight:900;color:var(--primary);text-align:right}
 
-/* GACHA SCREEN */
-.gacha-screen{position:fixed;inset:0;z-index:500;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s;overflow:hidden}
+/* ══ SHIPPING ══ */
+.ship-form{padding:14px 16px}
+.ship-label{font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:4px;display:block;letter-spacing:.05em}
+.ship-input{width:100%;padding:11px 14px;border:1.5px solid var(--border2);border-radius:10px;font-size:.9rem;color:var(--text);background:#fff;margin-bottom:12px}
+.ship-input:focus{border-color:var(--primary);outline:none}
+.ship-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:.95rem;font-weight:900;box-shadow:0 4px 14px rgba(232,56,13,.25)}
+
+/* ══ GACHA SCREEN ══ */
+.gacha-screen{position:fixed;inset:0;z-index:500;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s;overflow:hidden}
 .gacha-screen.show{opacity:1;pointer-events:all}
 .gacha-stage{position:relative;z-index:10;width:280px;height:280px;display:flex;align-items:center;justify-content:center}
 .gacha-pack{width:160px;height:200px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;transition:all .3s}
@@ -238,49 +221,49 @@ input,select,textarea{font-family:inherit;outline:none}
 .gacha-pack.col-blue{background:linear-gradient(145deg,#0a1a3a,#0a2a6a);color:#4488ff;box-shadow:0 0 30px rgba(68,136,255,.4)}
 .gacha-pack.col-green{background:linear-gradient(145deg,#0a2a0a,#0a5a0a);color:#00cc44;box-shadow:0 0 30px rgba(0,200,60,.4)}
 .gacha-pack.col-red{background:linear-gradient(145deg,#2a0a0a,#5a0a0a);color:#ff4444;box-shadow:0 0 40px rgba(255,60,60,.5)}
-.gacha-pack.col-gold{background:linear-gradient(145deg,#2a1a00,#5a3a00);color:var(--gold2);box-shadow:0 0 50px rgba(201,168,76,.6)}
+.gacha-pack.col-gold{background:linear-gradient(145deg,#2a1a00,#5a3a00);color:#f5c518;box-shadow:0 0 50px rgba(245,197,24,.6)}
 .gacha-pack.col-rainbow{background:linear-gradient(145deg,#1a0040,#400010,#002040,#004020,#402000);color:#fff;animation:rainbow-glow 1s infinite}
-@keyframes rainbow-glow{0%{box-shadow:0 0 60px rgba(255,0,0,.6)}25%{box-shadow:0 0 60px rgba(201,168,76,.6)}50%{box-shadow:0 0 60px rgba(0,255,100,.6)}75%{box-shadow:0 0 60px rgba(0,100,255,.6)}100%{box-shadow:0 0 60px rgba(255,0,255,.6)}}
+@keyframes rainbow-glow{0%{box-shadow:0 0 60px rgba(255,0,0,.6)}25%{box-shadow:0 0 60px rgba(245,197,24,.6)}50%{box-shadow:0 0 60px rgba(0,255,100,.6)}75%{box-shadow:0 0 60px rgba(0,100,255,.6)}100%{box-shadow:0 0 60px rgba(255,0,255,.6)}}
 .puchun-wrap{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .puchun-heart{font-size:4rem;animation:puchun-anim .6s ease-out forwards;opacity:0}
 @keyframes puchun-anim{0%{transform:scale(0) translateY(0);opacity:1}50%{transform:scale(1.4) translateY(-20px);opacity:1}100%{transform:scale(1) translateY(-60px);opacity:0}}
 .dokkun-wrap{position:absolute;inset:0;z-index:25;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none}
 .dokkun-char{font-size:5rem;animation:dokkun .4s ease-out}
 @keyframes dokkun{0%{transform:scale(1)}30%{transform:scale(1.3)}60%{transform:scale(.9)}100%{transform:scale(1)}}
-.dokkun-text{font-size:1.4rem;font-weight:900;color:var(--gold2);text-shadow:0 0 20px rgba(201,168,76,.8);animation:dokkun-text-in .3s ease-out}
+.dokkun-text{font-size:1.4rem;font-weight:900;color:#f5c518;text-shadow:0 0 20px rgba(245,197,24,.8);animation:dokkun-text-in .3s ease-out}
 @keyframes dokkun-text-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
 .rewind-overlay{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 .rewind-text{font-size:1.2rem;font-weight:900;color:#fff;letter-spacing:.15em;animation:glitch .1s infinite}
-@keyframes glitch{0%{transform:translateX(0);color:#fff}25%{transform:translateX(-3px);color:var(--red2)}50%{transform:translateX(3px);color:#00ffaa}75%{transform:translateX(-2px);color:var(--gold2)}100%{transform:translateX(0);color:#fff}}
+@keyframes glitch{0%{transform:translateX(0);color:#fff}25%{transform:translateX(-3px);color:var(--primary)}50%{transform:translateX(3px);color:#00ffaa}75%{transform:translateX(-2px);color:#f5c518}100%{transform:translateX(0);color:#fff}}
 .rewind-bar{width:200px;height:4px;background:#1a1a2e;border-radius:999px;overflow:hidden}
-.rewind-fill{height:100%;background:linear-gradient(90deg,var(--red2),var(--gold2),#00ffaa);animation:rewind-progress .8s ease-out forwards}
+.rewind-fill{height:100%;background:linear-gradient(90deg,var(--primary),#f5c518,#00ffaa);animation:rewind-progress .8s ease-out forwards}
 @keyframes rewind-progress{from{width:100%}to{width:0%}}
 .gacha-label{position:relative;z-index:10;text-align:center;padding:0 16px}
-.gacha-label-main{font-size:1.1rem;font-weight:900;color:rgba(201,168,76,.5);letter-spacing:.1em;margin-bottom:4px}
-.gacha-label-sub{font-size:.8rem;color:rgba(201,168,76,.3)}
+.gacha-label-main{font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:4px}
+.gacha-label-sub{font-size:.8rem;color:rgba(255,255,255,.35)}
 .color-indicator{display:flex;gap:6px;position:relative;z-index:10}
 .ci-dot{width:10px;height:10px;border-radius:50%;opacity:.25;transition:.3s}
 .ci-dot.active{opacity:1;transform:scale(1.3)}
-.ci-white{background:rgba(255,255,255,.4)}.ci-blue{background:#4488ff}.ci-green{background:#00cc44}.ci-red{background:#ff4444}.ci-gold{background:var(--gold2)}.ci-rainbow{background:linear-gradient(90deg,#f00,#ff0,#0f0,#00f,#f0f)}
-.gacha-skip{position:absolute;bottom:30px;right:20px;z-index:50;background:rgba(201,168,76,.1);color:rgba(201,168,76,.5);font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:999px;border:1px solid rgba(201,168,76,.2)}
+.ci-white{background:rgba(255,255,255,.4)}.ci-blue{background:#4488ff}.ci-green{background:#00cc44}.ci-red{background:#ff4444}.ci-gold{background:#f5c518}.ci-rainbow{background:linear-gradient(90deg,#f00,#ff0,#0f0,#00f,#f0f)}
+.gacha-skip{position:absolute;bottom:30px;right:20px;z-index:50;background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2)}
 
-/* RESULT */
-.result-screen{position:fixed;inset:0;z-index:600;background:rgba(7,8,15,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s}
+/* ══ RESULT ══ */
+.result-screen{position:fixed;inset:0;z-index:600;background:rgba(10,10,10,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s}
 .result-screen.show{opacity:1;pointer-events:all}
-.result-title{font-size:1rem;font-weight:900;color:rgba(201,168,76,.4);letter-spacing:.15em}
+.result-title{font-size:1rem;font-weight:900;color:rgba(255,255,255,.5);letter-spacing:.15em}
 .result-cards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:440px;padding:0 12px}
 .rc{width:100px;height:140px;perspective:500px;cursor:pointer;flex-shrink:0}
 .rc-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1);border-radius:9px}
 .rc.done .rc-inner{transform:rotateY(180deg)}
 .rc-back,.rc-front{position:absolute;inset:0;backface-visibility:hidden;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.rc-back{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1.5px solid var(--border2);font-size:2.6rem;box-shadow:0 4px 18px rgba(0,0,0,.5)}
-.rc-back::before{content:'';position:absolute;inset:5px;border:1px solid var(--border);border-radius:6px}
+.rc-back{background:linear-gradient(145deg,#1a1a2e,#2a2a40);border:1.5px solid rgba(255,255,255,.1);font-size:2.6rem;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.rc-back::before{content:'';position:absolute;inset:5px;border:1px solid rgba(255,255,255,.05);border-radius:6px}
 .rc-front{border-width:2px;border-style:solid;transform:rotateY(180deg)}
 .rc-emoji{font-size:1.8rem;z-index:1}
 .rc-name{font-size:.52rem;font-weight:900;text-align:center;padding:0 4px;z-index:1;line-height:1.3}
 .rc-tier{font-size:.48rem;z-index:1;opacity:.7}
-.rf-sar{background:linear-gradient(145deg,#1c1200,#2e1e00);border-color:var(--gold);box-shadow:0 0 28px rgba(201,168,76,.35)}
-.rf-sar .rc-emoji,.rf-sar .rc-name{color:var(--gold2)}
+.rf-sar{background:linear-gradient(145deg,#2a0800,#5a1800);border-color:var(--primary);box-shadow:0 0 28px rgba(232,56,13,.4)}
+.rf-sar .rc-emoji,.rf-sar .rc-name{color:#ff9070}
 .rf-sr{background:linear-gradient(145deg,#0e0020,#1a0035);border-color:#7c3aed}
 .rf-sr .rc-emoji,.rf-sr .rc-name{color:#c4b5fd}
 .rf-rr{background:linear-gradient(145deg,#001626,#002040);border-color:#1d4ed8}
@@ -289,100 +272,112 @@ input,select,textarea{font-family:inherit;outline:none}
 .rf-r .rc-emoji,.rf-r .rc-name{color:#94a3b8}
 .rf-c{background:linear-gradient(145deg,#0f1015,#15161e);border-color:#1e2030}
 .rf-c .rc-emoji,.rf-c .rc-name{color:#4a4a5a}
-.result-hint{font-size:.72rem;color:rgba(201,168,76,.25);font-weight:700}
-.result-done-btn{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.95rem;font-weight:900;padding:13px 48px;border-radius:12px;box-shadow:0 4px 16px rgba(201,168,76,.3);display:none}
+.result-hint{font-size:.72rem;color:rgba(255,255,255,.25);font-weight:700}
+.result-done-btn{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:.95rem;font-weight:900;padding:13px 48px;border-radius:12px;box-shadow:0 4px 16px rgba(232,56,13,.35);display:none}
 .result-done-btn.show{display:block;animation:pop .3s ease-out}
-.convert-btn{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;font-size:.72rem;font-weight:900;padding:4px 10px;border-radius:5px;margin-top:3px}
 @keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 
-/* JACKPOT */
-.jackpot-overlay{position:fixed;inset:0;z-index:700;background:radial-gradient(ellipse at 50% 50%,rgba(201,168,76,.1) 0%,var(--bg) 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:.3s}
+/* ══ JACKPOT ══ */
+.jackpot-overlay{position:fixed;inset:0;z-index:700;background:radial-gradient(ellipse at 50% 50%,rgba(232,56,13,.15) 0%,#0a0a0a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:.3s}
 .jackpot-overlay.show{opacity:1;pointer-events:all}
-.jackpot-text{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:jackpot-shine 1s infinite;text-align:center;letter-spacing:.1em}
-@keyframes jackpot-shine{0%,100%{filter:drop-shadow(0 0 10px rgba(201,168,76,.4))}50%{filter:drop-shadow(0 0 30px rgba(201,168,76,.9))}}
-.jackpot-card-name{font-size:1.2rem;font-weight:900;color:var(--gold2);text-align:center}
+.jackpot-text{font-size:2.5rem;font-weight:900;color:var(--primary);animation:jackpot-shine 1s infinite;text-align:center;letter-spacing:.1em}
+@keyframes jackpot-shine{0%,100%{filter:drop-shadow(0 0 10px rgba(232,56,13,.4))}50%{filter:drop-shadow(0 0 30px rgba(232,56,13,.9))}}
+.jackpot-card-name{font-size:1.2rem;font-weight:900;color:#fff;text-align:center}
 .jackpot-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .jp-particle{position:absolute;font-size:1.5rem;animation:jp-fall linear forwards}
 @keyframes jp-fall{from{transform:translateY(-50px) rotate(0deg);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
-.jackpot-btn{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-weight:900;font-size:1rem;padding:14px 48px;border-radius:12px;box-shadow:0 4px 20px rgba(201,168,76,.35)}
-.sar-flash{position:fixed;inset:0;z-index:500;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 45%,rgba(201,168,76,.4) 0%,transparent 65%)}
+.jackpot-btn{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-weight:900;font-size:1rem;padding:14px 48px;border-radius:12px;box-shadow:0 4px 20px rgba(232,56,13,.4)}
+.sar-flash{position:fixed;inset:0;z-index:500;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 45%,rgba(232,56,13,.35) 0%,transparent 65%)}
 .sar-flash.go{animation:sarflash .9s ease-out forwards}
 @keyframes sarflash{0%{opacity:1}100%{opacity:0;transform:scale(1.07)}}
 
-/* PAGES */
+/* ══ PAGES ══ */
 .page{display:none}
 .page.active{display:block}
 
-/* MYPAGE */
-.mypage{padding:16px}
-.mp-user-card{background:linear-gradient(135deg,#0a0800,#1a1200,#2a2000);border:1px solid var(--border2);border-radius:14px;padding:18px;margin-bottom:14px;color:var(--text);position:relative;overflow:hidden}
-.mp-user-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(201,168,76,.08),transparent);border-radius:50%}
-.mp-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:10px;box-shadow:0 4px 16px rgba(201,168,76,.25)}
-.mp-username{font-size:1.1rem;font-weight:900;margin-bottom:3px;color:var(--text)}
-.mp-rank{font-size:.72rem;color:var(--gold2);font-weight:700}
+/* ══ MYPAGE ══ */
+.mypage{padding:14px}
+.mp-user-card{background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:14px;padding:18px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
+.mp-user-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(255,255,255,.1);border-radius:50%}
+.mp-avatar{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:10px;border:2px solid rgba(255,255,255,.4)}
+.mp-username{font-size:1.1rem;font-weight:900;margin-bottom:3px;color:#fff}
 .mp-pts-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.mp-pt{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
-.mp-pt-label{font-size:.6rem;color:var(--text3);font-weight:700;margin-bottom:3px;letter-spacing:.05em}
-.mp-pt-val{font-size:1.1rem;font-weight:900;color:var(--gold2)}
-.mp-rank-wrap{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
-.mp-rank-title{font-size:.82rem;font-weight:900;margin-bottom:8px;color:var(--text)}
-.mp-rank-bar-wrap{background:rgba(255,255,255,.05);border-radius:999px;height:6px;overflow:hidden;margin-bottom:5px}
-.mp-rank-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold2));border-radius:999px}
-.mp-rank-labels{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text3)}
-.mp-menu{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:10px}
-.mp-menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);font-size:.88rem;font-weight:700;cursor:pointer;transition:.15s;color:var(--text2)}
-.mp-menu-item:last-child{border:none}
-.mp-menu-item:active{background:rgba(201,168,76,.05)}
-.mp-menu-icon{font-size:1.2rem;width:28px;text-align:center}
+.mp-pt{background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,.2)}
+.mp-pt-label{font-size:.6rem;color:rgba(255,255,255,.7);font-weight:700;margin-bottom:3px;letter-spacing:.05em}
+.mp-pt-val{font-size:1.1rem;font-weight:900;color:#fff}
+.mp-menu{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:10px}
+.mp-menu-item{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;color:var(--text);font-size:.88rem;font-weight:700;transition:.1s}
+.mp-menu-item:last-child{border-bottom:none}
+.mp-menu-item:active{background:#f8f8f8}
+.mp-menu-icon{font-size:1.1rem;width:24px;text-align:center;flex-shrink:0}
 .mp-menu-arrow{margin-left:auto;color:var(--text3)}
-.referral-section{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px}
-.ref-code-box{background:rgba(201,168,76,.05);border:2px dashed var(--border2);border-radius:10px;padding:14px;text-align:center;margin:10px 0}
-.ref-code{font-size:1.5rem;font-weight:900;color:var(--gold2);letter-spacing:.15em}
-.ref-copy-btn{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.82rem;font-weight:900;padding:8px 20px;border-radius:8px;margin-top:8px}
+.referral-section{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.ref-code-box{background:#fff8f0;border:2px dashed #ffd9c8;border-radius:10px;padding:12px;text-align:center;margin-bottom:8px}
+.ref-code{font-size:1.6rem;font-weight:900;letter-spacing:.2em;color:var(--primary)}
+.ref-copy-btn{width:100%;background:var(--primary);color:#fff;padding:10px;border-radius:8px;font-weight:900;font-size:.85rem}
 
-/* HISTORY */
-.history-page{padding:8px}
-.hist-card{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:7px}
-.hist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.hist-pack{font-size:.82rem;font-weight:900;color:var(--text)}
-.hist-time{font-size:.68rem;color:var(--text3)}
-.hist-results{display:flex;gap:5px;flex-wrap:wrap}
-.hist-chip{font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:3px;cursor:pointer}
-.hc-sar{background:rgba(201,168,76,.15);color:var(--gold2);border:1px solid rgba(201,168,76,.3)}
-.hc-sr{background:rgba(124,58,237,.15);color:#c4b5fd;border:1px solid rgba(124,58,237,.3)}
-.hc-rr{background:rgba(29,78,216,.1);color:#93c5fd;border:1px solid rgba(29,78,216,.25)}
-.hc-r{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border)}
-.hc-c{background:rgba(255,255,255,.03);color:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.06)}
-.hc-converted{opacity:.4;text-decoration:line-through}
-.hist-cost{font-size:.72rem;color:var(--text3);margin-top:5px}
-.hist-action-btns{display:flex;gap:6px;margin-top:8px}
-.hist-btn{flex:1;padding:8px;border-radius:8px;font-size:.75rem;font-weight:900;text-align:center}
-.hist-btn-convert{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff}
-.hist-btn-ship{background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a}
+/* ══ NOTICE ══ */
+.notice-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.notice-type{font-size:.6rem;font-weight:900;padding:2px 7px;border-radius:3px;margin-bottom:5px;display:inline-block}
+.nt-info{background:#eff6ff;color:#1d4ed8}
+.nt-campaign{background:#fef3c7;color:#92400e}
+.nt-system{background:#f3f4f6;color:#374151}
+.notice-title{font-size:.88rem;font-weight:900;color:var(--text);margin-bottom:4px}
+.notice-body{font-size:.78rem;color:var(--text2);line-height:1.5}
+.notice-time{font-size:.68rem;color:var(--text3);margin-top:5px}
 
-/* NOTICES */
-.notice-item{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
-.notice-type{font-size:.62rem;font-weight:900;padding:2px 7px;border-radius:3px;margin-bottom:6px;display:inline-block;letter-spacing:.05em}
-.nt-info{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
-.nt-campaign{background:rgba(201,168,76,.1);color:var(--gold2);border:1px solid var(--border2)}
-.nt-system{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border)}
-.notice-title{font-size:.88rem;font-weight:900;margin-bottom:4px;color:var(--text)}
-.notice-body{font-size:.78rem;color:var(--text2);line-height:1.6}
-.notice-time{font-size:.68rem;color:var(--text3);margin-top:6px}
+/* ══ HISTORY ══ */
+.history-page{padding:12px}
+.history-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.hi-icon{font-size:1.5rem;flex-shrink:0}
+.hi-info{flex:1}
+.hi-pack{font-size:.82rem;font-weight:900;color:var(--text)}
+.hi-date{font-size:.68rem;color:var(--text3)}
+.hi-tier{font-size:.7rem;font-weight:900;padding:2px 7px;border-radius:3px}
+.ht-sar{background:var(--primary);color:#fff}
+.ht-sr{background:#7c3aed;color:#fff}
+.ht-rr{background:#2563eb;color:#fff}
+.ht-r{background:#e5e7eb;color:#374151}
+.ht-c{background:#f3f4f6;color:#9ca3af}
 
-/* SHIP FORM */
-.ship-form{padding:16px}
-.ship-input{width:100%;padding:11px 14px;border:1.5px solid var(--border2);border-radius:10px;font-size:.9rem;color:var(--text);background:rgba(201,168,76,.04);margin-bottom:10px}
-.ship-input:focus{border-color:var(--gold);outline:none}
-.ship-label{font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:4px;display:block;letter-spacing:.05em}
-.ship-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;font-size:.95rem;font-weight:900;margin-top:4px;box-shadow:0 4px 16px rgba(201,168,76,.25)}
+/* ══ ITEMS PAGE ══ */
+.items-page{padding:12px}
+.item-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ic-left{display:flex;align-items:center;gap:10px}
+.ic-icon{font-size:1.5rem;flex-shrink:0}
+.ic-info{flex:1}
+.ic-name{font-size:.85rem;font-weight:900;color:var(--text)}
+.ic-pack{font-size:.7rem;color:var(--text3)}
+.ic-ship-btn{background:var(--primary);color:#fff;padding:6px 12px;border-radius:6px;font-size:.72rem;font-weight:900;flex-shrink:0}
+.ic-shipped{font-size:.72rem;color:var(--green);font-weight:700;flex-shrink:0}
 
-/* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(180deg,rgba(7,8,15,.95),rgba(13,15,28,.98));border-top:1px solid var(--border2);display:flex;z-index:150;backdrop-filter:blur(20px)}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 10px;gap:2px;background:none;color:var(--text3);font-size:.56rem;font-weight:700;transition:.15s;position:relative;letter-spacing:.03em}
-.bnav-btn.active{color:var(--gold2)}
-.bnav-icon{font-size:1.25rem;line-height:1}
-.bnav-badge{position:absolute;top:5px;right:calc(50% - 16px);background:var(--red2);color:#fff;font-size:.5rem;font-weight:900;padding:1px 5px;border-radius:999px;min-width:14px;text-align:center}
+/* ══ BOTTOM NAV ══ */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:flex;height:60px;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px 8px;gap:2px;background:none;color:var(--text3);font-size:.56rem;font-weight:700;transition:.15s;position:relative;letter-spacing:.03em}
+.bnav-btn.active{color:var(--primary)}
+.bnav-icon{font-size:1.2rem;line-height:1}
+.bnav-badge{position:absolute;top:5px;right:calc(50% - 18px);background:var(--primary);color:#fff;font-size:.5rem;font-weight:900;padding:1px 5px;border-radius:999px;min-width:14px;text-align:center}
+
+/* ══ MISC ══ */
+.form-check{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text2);font-weight:700;margin-bottom:10px;cursor:pointer}
+
+.line-section{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.line-icon{width:40px;height:40px;background:#06C755;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.line-text{flex:1}
+.line-title{font-size:.88rem;font-weight:900;color:#16a34a}
+.line-sub{font-size:.72rem;color:#86efac}
+.coupon-section{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.coupon-row{display:flex;gap:8px}
+.coupon-input{flex:1;background:#f8f8f8;border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.88rem}
+.coupon-input:focus{border-color:var(--primary);outline:none}
+.coupon-apply-btn{background:var(--primary);color:#fff;padding:9px 16px;border-radius:8px;font-size:.8rem;font-weight:900;flex-shrink:0}
+.inq-input{width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:.9rem;margin-bottom:10px}
+.inq-input:focus{border-color:var(--primary);outline:none}
+.inq-textarea{width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:.9rem;min-height:120px;resize:vertical;font-family:inherit}
+.inq-textarea:focus{border-color:var(--primary);outline:none}
+.inq-label{font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:4px;display:block;letter-spacing:.05em}
+.inq-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:.95rem;font-weight:900;margin-top:4px;box-shadow:0 4px 14px rgba(232,56,13,.25)}
+.convert-btn{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;font-size:.72rem;font-weight:900;padding:4px 10px;border-radius:5px;margin-top:3px}
 </style>
 </head>
 <body>
@@ -430,11 +425,11 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 
 <!-- HEADER -->
 <header class="header">
-  <div class="h-logo">オリパMAX<span class="logo-mark">MAX</span></div>
-  <div class="h-cur" onclick="openPurchase()">
-    <div class="max-coin"><span class="max-coin-text">MAX</span></div>
-    <span class="cur-val" id="h-coin">500</span>
-    <button class="h-add-btn" onclick="event.stopPropagation();openPurchase()">＋</button>
+  <div class="h-logo">オリパMAX<span class="h-logo-badge">MAX</span></div>
+  <div class="h-coin-wrap" onclick="openPurchase()">
+    <span class="h-coin-icon">🪙</span>
+    <span class="h-coin-val" id="h-coin">500</span>
+    <button class="h-coin-plus" onclick="event.stopPropagation();openPurchase()">＋</button>
   </div>
   <button class="h-notif" onclick="showPage('notices',document.querySelector('[data-page=notices]'))">
     🔔<span class="h-notif-dot" id="notif-dot" style="display:none"></span>
@@ -452,9 +447,10 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   </div>
 
   <div class="alert-bar">✦ 登録後限定！今だけ引ける超お得なオリパ ✦</div>
-  <div class="login-bonus-bar" id="login-bonus-wrap" onclick="claimLoginBonus()">
-    🎁 本日のログインボーナスを受け取る！<span class="lb-btn">受け取る</span>
-  </div>
+
+
+
+
   <div class="sort-bar">
     <button class="sort-chip active" data-sort="new">🆕 新着順</button>
     <button class="sort-chip" data-sort="hot">🔥 人気順</button>
@@ -469,7 +465,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 
 <!-- PAGE: 獲得商品 -->
 <div id="page-items" class="page">
-  <div style="padding:16px" id="items-content">
+  <div class="items-page" id="items-content">
     <div style="text-align:center;padding:48px 16px;color:var(--text3)">
       <div style="font-size:2.5rem;margin-bottom:12px">📦</div>
       <div style="font-weight:700;margin-bottom:6px;color:var(--text2)">獲得商品はありません</div>
@@ -489,7 +485,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 
 <!-- PAGE: お知らせ -->
 <div id="page-notices" class="page">
-  <div style="padding:16px">
+  <div style="padding:14px">
     <div style="font-size:.95rem;font-weight:900;margin-bottom:12px;color:var(--text)">🔔 お知らせ</div>
     <div id="notices-list"></div>
   </div>
@@ -497,7 +493,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 
 <!-- PAGE: お問い合わせ -->
 <div id="page-inquiry" class="page">
-  <div style="padding:16px">
+  <div style="padding:14px">
     <div style="font-size:.95rem;font-weight:900;margin-bottom:4px;color:var(--text)">💬 お問い合わせ</div>
     <div style="font-size:.78rem;color:var(--text3);margin-bottom:16px">返信まで1〜3営業日かかる場合があります</div>
     <label class="inq-label">お名前</label>
@@ -534,8 +530,8 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 <div id="page-search" class="page">
   <div style="padding:12px">
     <div style="display:flex;gap:8px;margin-bottom:12px">
-      <input type="text" id="search-input" class="search-bar-input" placeholder="🔍 オリパ名・カテゴリで検索..." oninput="doSearch(this.value)"
-        style="flex:1;background:rgba(201,168,76,.06);border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:.9rem">
+      <input type="text" id="search-input" placeholder="🔍 オリパ名・カテゴリで検索..." oninput="doSearch(this.value)"
+        style="flex:1;background:#fff;border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:.9rem">
     </div>
     <div id="search-results" class="packs-list" style="padding:0"></div>
   </div>
@@ -595,7 +591,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
       <input type="email" class="auth-input" id="reg-email" placeholder="example@mail.com">
       <label class="auth-label">パスワード（8文字以上）</label>
       <input type="password" class="auth-input" id="reg-pass" placeholder="パスワード">
-      <label class="auth-label">生年月日 <span style="color:var(--red2);font-size:.7rem">※18歳以上のみ</span></label>
+      <label class="auth-label">生年月日 <span style="color:var(--primary);font-size:.7rem">※18歳以上のみ</span></label>
       <input type="date" class="auth-input" id="reg-birth">
       <label class="auth-label">紹介コード（任意）</label>
       <input type="text" class="auth-input" id="reg-referral" placeholder="紹介コードがあれば入力（+300コイン）">
@@ -614,7 +610,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     </div>
     <div style="padding:12px 16px" id="purchase-plans"></div>
     <div style="padding:0 16px">
-      <button onclick="closePurchase()" style="width:100%;padding:11px;background:rgba(255,255,255,.05);border-radius:10px;color:var(--text3);font-weight:700;font-size:.85rem;border:1px solid var(--border)">閉じる</button>
+      <button onclick="closePurchase()" style="width:100%;padding:11px;background:#f5f5f5;border-radius:10px;color:var(--text3);font-weight:700;font-size:.85rem;border:1px solid var(--border)">閉じる</button>
     </div>
   </div>
 </div>
@@ -724,6 +720,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   </div>
   <div class="gacha-stage">
     <div class="gacha-pack col-white" id="gacha-pack">🎴</div>
+    <!-- mp4演出スロット：後で差し替え可能 -->
     <div class="gacha-video-wrap" id="gacha-video-wrap"><video id="gacha-video" playsinline muted></video></div>
     <div class="puchun-wrap" id="puchun-wrap"></div>
     <div class="dokkun-wrap" id="dokkun-wrap" style="display:none"></div>
@@ -866,7 +863,7 @@ async function loadBanners(){
   const track=document.getElementById('banners-track');
   const dots=document.getElementById('banner-dots');
   track.innerHTML=banners.map(b=>`
-    <div class="banner-slide" style="background:${b.bg_style||'linear-gradient(135deg,#1a0040,#0a0020)'}" onclick="location.href='${b.link_url||'#'}'">
+    <div class="banner-slide" style="background:${b.bg_style||'linear-gradient(135deg,#e8380d,#ff5a38)'}" onclick="location.href='${b.link_url||'#'}'">
       <div class="banner-content">
         ${b.tag_text?`<div class="banner-tag">${b.tag_text}</div>`:''}
         <div class="banner-title">${b.title||''}</div>
@@ -1125,7 +1122,6 @@ function showResultCards(results,pack){
       </div>
     </div>`).join('');
   document.getElementById('result-screen').classList.add('show');
-  // 10枚以上は自動連続開封
   if(results.length>=10){
     setTimeout(()=>showSequentialCards(results,pack),500);
   }
@@ -1238,93 +1234,47 @@ async function executeDraw(){
   if(!prizes.length){
     showToast('⚠️ 賞品が設定されていません');return;
   }
-
-  // コイン消費
   state.coin-=cost;
   state.totalSpent=(state.totalSpent||0)+cost;
   updateHeaderPts();
   closeDrawModal();
-
-  // 抽選
   const results=Array.from({length:state.drawCount},()=>({prize:pickPrize(prizes,Math.random())}));
-
-  // セッションをローカルに追加
   const sessionId=generateSeed().slice(0,8);
   const session={
-    id:sessionId,
-    packId:pack.id,
-    packName:pack.name,
-    packEmoji:pack.emoji||'🎴',
-    results:results.map((r,i)=>({
-      dbId:sessionId+'_'+i,
-      sessionId,
-      resultIndex:i,
-      prize:r.prize,
-      converted:false,
-      shipped:false,
-    })),
-    cost,
-    date:new Date().toLocaleString('ja-JP'),
-    shipped:false,
+    id:sessionId,packId:pack.id,packName:pack.name,packEmoji:pack.emoji||'🎴',
+    results:results.map((r,i)=>({dbId:sessionId+'_'+i,sessionId,resultIndex:i,prize:r.prize,converted:false,shipped:false})),
+    cost,date:new Date().toLocaleString('ja-JP'),shipped:false,
   };
   state.sessions.unshift(session);
-
-  // DBに保存（失敗しても続行）
   try{
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
     await db.from('packs').update({remaining:Math.max(0,(pack.remaining||0)-state.drawCount)}).eq('id',pack.id);
     const packInState=state.packs.find(p=>p.id===pack.id);
     if(packInState)packInState.remaining=Math.max(0,(packInState.remaining||0)-state.drawCount);
     const{data:sess}=await db.from('draw_sessions').insert({
-      user_id:state.user.id,
-      pack_id:pack.id,
-      draw_count:results.length,
-      total_cost:cost,
-      currency:'coin',
-      server_seed:sessionId,
-      results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
+      user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
+      server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
     }).select('id').single();
     if(sess?.id){
-      // ローカルセッションのIDをDB IDに更新
       session.id=sess.id;
       session.results.forEach((r,i)=>{r.sessionId=sess.id;r.dbId=sess.id+'_'+i;});
     }
-  }catch(e){
-    console.error('DB save error:',e);
-  }
-
+  }catch(e){console.error('DB save error:',e);}
   startGachaAnimation(results,pack);
 }
 
 async function saveDrawSession(packId,results,totalCost){
   try{
-    // 結果をJSONBで一緒に保存（シンプル方式）
     const{data:session,error}=await db.from('draw_sessions').insert({
-      user_id:state.user.id,
-      pack_id:packId,
-      draw_count:results.length,
-      total_cost:totalCost,
-      currency:'coin',
-      server_seed:generateSeed(),
-      results:results.map(r=>({
-        prize_name:r.prize.name,
-        prize_tier:r.prize.tier,
-        is_converted:false,
-        is_shipped:false,
-      })),
+      user_id:state.user.id,pack_id:packId,draw_count:results.length,total_cost:totalCost,currency:'coin',
+      server_seed:generateSeed(),results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
     }).select('id').single();
     if(error){showToast('⚠️ 保存エラー: '+error.message,4000);return;}
-    // transactionsに記録
     await db.from('transactions').insert({
-      user_id:state.user.id,
-      type:'draw',
-      amount:-totalCost,
-      currency:'coin',
+      user_id:state.user.id,type:'draw',amount:-totalCost,currency:'coin',
       description:`${state.activePack?.name} × ${results.length}回`,
     }).catch(()=>{});
-  }catch(e){
-    showToast('⚠️ エラー: '+e.message,4000);
-  }
+  }catch(e){showToast('⚠️ エラー: '+e.message,4000);}
 }
 
 /* ══ 天井 DB保存 ══ */
@@ -1332,7 +1282,6 @@ async function saveTenjoCount(packId,count){
   state.tenjoCount[packId]=(state.tenjoCount[packId]||0)+count;
   localStorage.setItem('tenjo',JSON.stringify(state.tenjoCount));
   if(state.user){
-    // DBにも保存
     const existing=await db.from('transactions').select('id').eq('user_id',state.user.id).eq('type','tenjo').eq('description',packId).single();
     if(existing.data){
       await db.from('transactions').update({amount:state.tenjoCount[packId]}).eq('id',existing.data.id);
@@ -1354,87 +1303,161 @@ async function loadTenjoFromDB(){
 /* ══ 当選履歴 DB取得 ══ */
 async function loadHistoryFromDB(){
   if(!state.user)return;
-  const{data}=await db.from('draw_sessions').select(`
-    id,pack_id,draw_count,total_cost,created_at,results,
-    packs(name,emoji)
-  `).eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
+  const{data}=await db.from('draw_sessions').select(`id,pack_id,draw_count,total_cost,created_at,results,packs(name,emoji)`).eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
   if(!data)return;
   state.sessions=data.map(s=>({
-    id:s.id,
-    packId:s.pack_id,
-    packName:s.packs?.name||'—',
-    packEmoji:s.packs?.emoji||'🎴',
-    cost:s.total_cost,
-    currency:'coin',
-    date:new Date(s.created_at).toLocaleString('ja-JP'),
-    shipped:(s.results||[]).some(r=>r.is_shipped)||false,
-    results:(s.results||[]).map((r,i)=>({
-      dbId:s.id+'_'+i,
-      sessionId:s.id,
-      resultIndex:i,
-      prize:{name:r.prize_name||'—',tier:r.prize_tier||'c'},
-      converted:r.is_converted||false,
-      shipped:r.is_shipped||false,
-    })),
+    id:s.id,packId:s.pack_id,packName:s.packs?.name||'—',packEmoji:s.packs?.emoji||'🎴',
+    cost:s.total_cost,currency:'coin',
+    results:(s.results||[]).map((r,i)=>({dbId:s.id+'_'+i,sessionId:s.id,resultIndex:i,prize:{name:r.prize_name,tier:r.prize_tier},converted:r.is_converted||false,shipped:r.is_shipped||false})),
+    date:new Date(s.created_at).toLocaleString('ja-JP'),shipped:false,
   }));
 }
 
-/* ══ ポイント還元 DB連動 ══ */
-async function convertToPoints(sessionIdx,resultIdx){
-  const session=state.sessions[sessionIdx];if(!session||session.shipped)return;
-  const result=session.results[resultIdx];
-  if(result.converted){showToast('すでに還元済みです');return;}
-  const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
-  const points=tierValue[result.prize.tier]||50;
-  result.converted=true;state.coin+=points;updateHeaderPts();
-  if(state.user){
-    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-    if(result.sessionId){
-      const{data:sess}=await db.from('draw_sessions').select('results').eq('id',result.sessionId).single();
-      if(sess?.results){
-        const newResults=[...sess.results];
-        if(newResults[result.resultIndex])newResults[result.resultIndex].is_converted=true;
-        await db.from('draw_sessions').update({results:newResults}).eq('id',result.sessionId);
-      }
-    }
-    await db.from('transactions').insert({
-      user_id:state.user.id,type:'convert',amount:points,
-      currency:'coin',description:`${result.prize.name} をポイント還元`,
-    }).catch(()=>{});
-  }
-  renderHistory();renderItemsPage();
-  showToast(`💰 ${points}コインに還元しました！`,2500);
+/* ══ パック一覧 ══ */
+async function loadAndRenderPacks(){
+  const packs=await fetchPacks();
+  state.packs=packs;
+  renderPacks();
 }
 
-async function convertAllToPoints(sessionIdx){
-  const session=state.sessions[sessionIdx];if(!session)return;
-  const tierValue={sar:5000,sr:1000,rr:300,r:100,c:50};
-  let total=0;
-  session.results.forEach(r=>{
-    if(!r.converted){r.converted=true;total+=tierValue[r.prize.tier]||50;}
-  });
-  if(total===0){showToast('還元できるカードがありません');return;}
-  state.coin+=total;updateHeaderPts();
-  if(state.user){
-    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-    const newResults=session.results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:true,is_shipped:r.shipped||false}));
-    await db.from('draw_sessions').update({results:newResults}).eq('id',session.id);
+function renderPacks(){
+  let list=[...state.packs];
+  if(state.currentCat!=='all')list=list.filter(p=>p.category===state.currentCat);
+  if(state.currentSort==='hot')list.sort((a,b)=>(b.draw_count||0)-(a.draw_count||0));
+  else if(state.currentSort==='cheap')list.sort((a,b)=>a.price-b.price);
+  else if(state.currentSort==='ad')list=list.filter(p=>p.is_ad_confirmed);
+  else if(state.currentSort==='rate')list.sort((a,b)=>(b.return_rate||0)-(a.return_rate||0));
+  else list.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const container=document.getElementById('packs-list');
+  if(!list.length){
+    container.innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">📦</div><div style="font-weight:700">オリパがありません</div></div>';
+    return;
   }
-  renderHistory();renderItemsPage();
-  showToast(`💰 ${total}コインに一括還元しました！`,2500);
+  container.innerHTML=renderPackCards(list);
+}
+
+function renderPackCards(list){
+  return list.map(p=>{
+    const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
+    const barClass=pct<10?'danger':pct<30?'warn':'';
+    const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
+    const tiers=prizes.map(pr=>`<span class="tier-pill ${tierPillClass[pr.tier]}">${pr.tier_label} ${pr.quantity}枚</span>`).join('');
+    const isFav=favorites.has(p.id);
+    return `
+    <div class="pack-card">
+      <div class="pc-banner" onclick="openPackDetail('${p.id}')">
+        <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(145deg,#1a1a3a,#2a1a1a)'}"></div>
+        <div class="pcb-char">${p.emoji||'🎴'}</div>
+        <button onclick="event.stopPropagation();toggleFavorite('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.4);border:none;font-size:1.1rem;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff">${isFav?'★':'☆'}</button>
+        <div class="pcb-content">
+          <span class="pcb-ribbon ${ribbonClass[p.ribbon_type]||'ribbon-hot'}">${p.ribbon_text||'HOT'}</span>
+          <div class="pcb-top-row">
+            <div>
+              <div class="pcb-name">${p.name}</div>
+              <div class="pcb-series">${p.series||''}</div>
+            </div>
+            <div class="pcb-rate">
+              <span class="pcb-rate-label">総還元率</span>
+              <span class="pcb-rate-num">${p.return_rate||'-'}</span>
+              <span class="pcb-rate-unit">%</span>
+            </div>
+          </div>
+          ${p.odds_text?`<div class="pcb-chips"><div class="pcb-chip"><span>${p.odds_text}</span></div></div>`:''}
+          <div class="pcb-tiers">${tiers}</div>
+        </div>
+      </div>
+      <div class="pc-bottom">
+        <div class="pc-meta">
+          <div><span class="pc-price">🪙 ${p.price.toLocaleString()}</span><span class="pc-price-unit">/1回</span></div>
+          <span class="pc-remain">${p.remaining<=0?'<b style="color:var(--primary)">販売終了</b>':`残り<b>${(p.remaining||0).toLocaleString()}</b>/${(p.total_slots||0).toLocaleString()}口`}</span>
+        </div>
+        <div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
+        ${p.remaining<=0?
+          `<div style="text-align:center;padding:10px;font-size:.82rem;color:var(--text3);font-weight:700">このオリパは終了しました</div>`:
+          `<div class="pc-btns">
+            <button class="pc-btn-1" onclick="openDrawModal('${p.id}',1)">1回ガチャ</button>
+            <button class="pc-btn-5" onclick="openDrawModal('${p.id}',10)">10連ガチャ</button>
+          </div>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ パック詳細 ══ */
+let currentDetailPackId=null;
+function openPackDetail(packId){
+  const pack=state.packs.find(p=>p.id===packId);if(!pack)return;
+  currentDetailPackId=packId;
+  document.getElementById('pd-icon').textContent=pack.emoji||'🎴';
+  document.getElementById('pd-name').textContent=pack.name;
+  document.getElementById('pd-series').textContent=pack.series||'';
+  document.getElementById('pd-fav-btn').textContent=favorites.has(packId)?'★':'☆';
+  document.getElementById('pd-stats').innerHTML=`
+    <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">🪙 ${pack.price.toLocaleString()}コイン/回</span></span>
+    <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">📦 残り${pack.remaining||0}/${pack.total_slots||0}口</span></span>
+    <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">📈 還元率${pack.return_rate||'-'}%</span></span>
+    ${pack.tenjo_limit>0?`<span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">🏆 天井${pack.tenjo_limit}回</span></span>`:''}
+  `;
+  document.getElementById('pd-prizes').innerHTML=(pack.prizes||[]).map(pr=>`
+    <div class="bs-prize">
+      <span class="bsp-tier bsp-${pr.tier==='sar'?'s':pr.tier==='sr'?'a':pr.tier==='rr'?'b':'c'}">${pr.tier_label}</span>
+      <span class="bsp-name">${pr.name}</span>
+      <span class="bsp-cnt">×${pr.quantity}枚</span>
+    </div>`).join('');
+  document.getElementById('pack-detail-modal').classList.add('show');
+}
+
+/* ══ 当選履歴表示 ══ */
+function renderHistory(){
+  const list=document.getElementById('history-list');
+  const allResults=state.sessions.flatMap(s=>
+    s.results.map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,date:s.date,sessionId:s.id}))
+  );
+  if(!allResults.length){
+    list.innerHTML='<div style="text-align:center;padding:48px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">🕐</div><div style="font-weight:700;color:var(--text2)">当選履歴はありません</div></div>';
+    return;
+  }
+  list.innerHTML=allResults.slice(0,100).map(r=>`
+    <div class="history-item">
+      <span class="hi-icon">${r.packEmoji}</span>
+      <div class="hi-info">
+        <div class="hi-pack">${r.prize.name}</div>
+        <div class="hi-date">${r.packName} · ${r.date}</div>
+      </div>
+      <span class="hi-tier ht-${r.prize.tier}">${rarLabel[r.prize.tier]||r.prize.tier}</span>
+    </div>`).join('');
+}
+
+/* ══ 獲得商品 ══ */
+function renderItemsPage(){
+  const content=document.getElementById('items-content');
+  const pending=state.sessions.flatMap(s=>
+    s.results.filter(r=>!r.shipped&&!r.converted).map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,sessionId:s.id}))
+  );
+  if(!pending.length){
+    content.innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">📦</div><div style="font-weight:700;margin-bottom:6px;color:var(--text2)">獲得商品はありません</div></div>';
+    return;
+  }
+  content.innerHTML='<div class="items-page">'+pending.map(r=>`
+    <div class="item-card">
+      <div class="ic-left">
+        <span class="ic-icon">${r.packEmoji}</span>
+        <div class="ic-info">
+          <div class="ic-name">${r.prize.name}</div>
+          <div class="ic-pack">${r.packName} · ${rarLabel[r.prize.tier]||r.prize.tier}</div>
+        </div>
+      </div>
+      <button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>
+    </div>`).join('')+'</div>';
 }
 
 /* ══ 発送 ══ */
-let shippingSessionIdx=-1;
-function openShippingModal(sessionIdx){
+let pendingShipResultId=null;
+function openShippingModal(dbId){
   if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
-  shippingSessionIdx=sessionIdx;
-  const session=state.sessions[sessionIdx];
-  const unconverted=session.results.filter(r=>!r.converted);
-  document.getElementById('ship-items-list').innerHTML=`
-    <div style="font-size:.82rem;font-weight:900;margin-bottom:8px;color:var(--text)">📦 発送するカード（${unconverted.length}点）</div>
-    ${unconverted.map(r=>`<div style="font-size:.78rem;background:rgba(201,168,76,.05);border:1px solid var(--border);border-radius:6px;padding:6px 10px;margin-bottom:4px;color:var(--text2)">${r.prize.name}</div>`).join('')}
-    ${!unconverted.length?'<div style="color:var(--text3);font-size:.78rem">発送するカードがありません</div>':''}`;
+  pendingShipResultId=dbId;
+  document.getElementById('ship-items-list').innerHTML=`<div style="font-size:.82rem;font-weight:700;color:var(--text)">📦 発送商品確認済み</div>`;
   document.getElementById('shipping-modal').classList.add('show');
 }
 async function submitShipping(){
@@ -1444,181 +1467,25 @@ async function submitShipping(){
   const city=document.getElementById('ship-city').value;
   const tel=document.getElementById('ship-tel').value;
   if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
-  const session=state.sessions[shippingSessionIdx];
-  const unconvertedResults=session.results.filter(r=>!r.converted);
-  if(!unconvertedResults.length){showToast('発送するカードがありません');return;}
-  const address={name,zip,prefecture:pref,city,building:document.getElementById('ship-building').value,tel};
-  if(state.user){
-    await db.from('shipping_requests').insert({user_id:state.user.id,result_ids:unconvertedResults.map(r=>r.prize.name),address,status:'pending'}).catch(()=>{});
-    // JSONB方式でDBを更新
-    const newResults=session.results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:r.converted||false,is_shipped:!r.converted}));
-    await db.from('draw_sessions').update({results:newResults}).eq('id',session.id).catch(()=>{});
+  if(pendingShipResultId&&state.user){
+    const[sessionId]=pendingShipResultId.split('_');
+    await db.from('draw_sessions').update({
+      results:state.sessions.find(s=>s.id===sessionId)?.results.map(r=>({
+        prize_name:r.prize.name,prize_tier:r.prize.tier,
+        is_converted:r.converted||false,
+        is_shipped:r.dbId===pendingShipResultId?true:(r.shipped||false),
+      }))||[],
+    }).eq('id',sessionId).catch(()=>{});
+    const sess=state.sessions.find(s=>s.id===sessionId);
+    if(sess){const r=sess.results.find(r=>r.dbId===pendingShipResultId);if(r)r.shipped=true;}
+    await db.from('shipping_requests').insert({
+      user_id:state.user.id,draw_session_id:sessionId,result_id:pendingShipResultId,
+      name,zip,prefecture:pref,city,building:document.getElementById('ship-building').value,tel,status:'pending',
+    }).catch(()=>{});
   }
-  session.shipped=true;
   closeModal('shipping-modal');
   showToast('📦 発送依頼を受け付けました！',3000);
-  renderHistory();
-}
-
-/* ══ チャージ ══ */
-const PLANS=[
-  {id:'p110',jpy:110,coin:110,bonus:0},
-  {id:'p550',jpy:550,coin:550,bonus:0},
-  {id:'p1100',jpy:1100,coin:1100,bonus:0},
-  {id:'p3300',jpy:3300,coin:3300,bonus:0},
-  {id:'p5500',jpy:5500,coin:5500,bonus:0},
-  {id:'p11000',jpy:11000,coin:11000,bonus:0},
-  {id:'p22000',jpy:22000,coin:22000,bonus:0},
-  {id:'p50000',jpy:50000,coin:50000,bonus:0},
-  {id:'p100000',jpy:100000,coin:100000,bonus:0},
-  {id:'p300000',jpy:300000,coin:300000,bonus:0},
-  {id:'p500000',jpy:500000,coin:500000,bonus:0},
-  {id:'p1000000',jpy:1000000,coin:1000000,bonus:0},
-];
-function openPurchase(){
-  if(!state.user){
-    closePurchase();
-    document.getElementById('auth-modal').classList.add('show');
-    showToast('チャージにはログインが必要です');return;
-  }
-  document.getElementById('purchase-plans').innerHTML=`
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button onclick="switchPayMethod('card')" id="pay-card" style="flex:1;padding:8px;border-radius:8px;font-size:.78rem;font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--gold-dark));color:#0a0a0a">💳 カード</button>
-      <button onclick="switchPayMethod('convenience')" id="pay-conv" style="flex:1;padding:8px;border-radius:8px;font-size:.78rem;font-weight:700;background:rgba(255,255,255,.06);color:var(--text3);border:1px solid var(--border)">🏪 コンビニ</button>
-      <button onclick="switchPayMethod('paypay')" id="pay-pp" style="flex:1;padding:8px;border-radius:8px;font-size:.78rem;font-weight:700;background:rgba(255,255,255,.06);color:var(--text3);border:1px solid var(--border)">PayPay</button>
-    </div>
-    <div id="pay-method-note" style="font-size:.72rem;color:var(--text3);margin-bottom:8px;text-align:center"></div>
-    <div id="pay-plans-list">
-    ${PLANS.map(p=>`
-    <div class="plan-item ${p.popular?'popular':''}" onclick="doPurchase('${p.id}')">
-      <div>
-        ${p.popular?'<div style="font-size:.62rem;font-weight:900;color:var(--gold2);margin-bottom:2px">⭐ 人気No.1</div>':''}
-        <div class="plan-jp">🪙 ${p.coin.toLocaleString()} コイン</div>
-      </div>
-      <div><div class="plan-price">¥${p.jpy.toLocaleString()}</div></div>
-    </div>`).join('')}
-    </div>`;
-  document.getElementById('purchase-modal').classList.add('show');
-}
-let currentPayMethod='card';
-function switchPayMethod(method){
-  currentPayMethod=method;
-  ['card','conv','pp'].forEach(m=>{
-    const btn=document.getElementById(`pay-${m}`);
-    if(btn)btn.style.background=method===(m==='conv'?'convenience':m==='pp'?'paypay':m)?'linear-gradient(135deg,var(--gold2),var(--gold-dark))':'rgba(255,255,255,.06)';
-    if(btn)btn.style.color=method===(m==='conv'?'convenience':m==='pp'?'paypay':m)?'#0a0a0a':'var(--text3)';
-  });
-  const note=document.getElementById('pay-method-note');
-  if(method==='convenience')note.textContent='※コンビニ払いは準備中です';
-  else if(method==='paypay')note.textContent='※PayPay決済は準備中です';
-  else note.textContent='';
-}
-function closePurchase(){document.getElementById('purchase-modal').classList.remove('show')}
-async function doPurchase(planId){
-  if(!state.user){showToast('ログインが必要です');return;}
-  if(currentPayMethod==='convenience'||currentPayMethod==='paypay'){
-    showToast('⚠️ この支払い方法は準備中です');return;
-  }
-  const plan=PLANS.find(p=>p.id===planId);if(!plan)return;
-  showToast('決済ページへ移動中...');
-  closePurchase();
-  try{
-    const res=await fetch('/api/create-checkout',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        planId,
-        userId:state.user.id,
-        userEmail:state.user.email||state.session?.user?.email,
-      }),
-    });
-    const data=await res.json();
-    if(data.url){
-      window.location.href=data.url;
-    } else {
-      showToast('⚠️ 決済エラー: '+(data.error||'不明なエラー'));
-    }
-  } catch(e){
-    showToast('⚠️ 通信エラーが発生しました');
-  }
-}
-
-/* ══ パック表示 ══ */
-async function loadAndRenderPacks(){
-  const packs=await fetchPacks();
-  state.packs=packs;renderPacks();
-}
-function getFilteredPacks(){
-  let list=state.currentCat==='all'?state.packs:
-           state.currentCat==='new_user'?state.packs.filter(p=>p.is_new):
-           state.packs.filter(p=>p.category===state.currentCat);
-  if(state.currentSort==='hot')list=[...list].sort((a,b)=>(b.is_hot?1:0)-(a.is_hot?1:0));
-  if(state.currentSort==='cheap')list=[...list].sort((a,b)=>a.price-b.price);
-  if(state.currentSort==='ad')list=list.filter(p=>p.is_ad_confirm);
-  if(state.currentSort==='rate')list=[...list].sort((a,b)=>(b.return_rate||0)-(a.return_rate||0));
-  return list;
-}
-function renderPacks(){
-  const list=getFilteredPacks();
-  if(!list.length){
-    document.getElementById('packs-list').innerHTML=`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">🎴</div>このカテゴリのオリパはありません</div>`;
-    return;
-  }
-  document.getElementById('packs-list').innerHTML=renderPackCards(list);
-}
-
-/* ══ 獲得商品 ══ */
-function renderItemsPage(){
-  const allItems=state.sessions.flatMap((s,si)=>
-    s.results.filter(r=>!r.converted).map((r,ri)=>({...r,sessionIdx:si,resultIdx:ri,sessionName:s.packName,date:s.date}))
-  );
-  const content=document.getElementById('items-content');
-  if(!allItems.length){
-    content.innerHTML=`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">📦</div><div style="font-weight:700;color:var(--text2)">獲得商品はありません</div></div>`;
-    return;
-  }
-  content.innerHTML=`
-    <div style="padding:12px 12px 0;font-size:.82rem;font-weight:900;color:var(--text)">📦 獲得商品（${allItems.length}点）</div>
-    <div style="padding:8px">
-    ${allItems.map(item=>`
-      <div style="background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
-        <div style="font-size:1.8rem">${state.packs.find(p=>p.id===state.sessions[item.sessionIdx]?.packId)?.emoji||'🎴'}</div>
-        <div style="flex:1">
-          <div style="font-size:.85rem;font-weight:900;color:var(--text)">${item.prize.name}</div>
-          <div style="font-size:.72rem;color:var(--text3)">${item.sessionName} · ${item.date}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <button class="convert-btn" onclick="convertToPoints(${item.sessionIdx},${item.resultIdx})">💰 還元</button>
-          <button style="background:rgba(201,168,76,.1);color:var(--gold2);font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:5px;border:1px solid var(--border2)" onclick="openShippingModal(${item.sessionIdx})">📦 発送</button>
-        </div>
-      </div>`).join('')}
-    </div>`;
-}
-
-/* ══ 履歴 ══ */
-function renderHistory(){
-  const list=document.getElementById('history-list');
-  if(!state.sessions.length){
-    list.innerHTML=`<div style="text-align:center;padding:48px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">🕐</div><div style="font-weight:700;color:var(--text2)">当選履歴はありません</div></div>`;
-    return;
-  }
-  list.innerHTML=state.sessions.map((s,si)=>`
-    <div class="hist-card">
-      <div class="hist-top"><span class="hist-pack">${s.packName}</span><span class="hist-time">${s.date}</span></div>
-      <div class="hist-results">
-        ${s.results.map((r,ri)=>`
-          <span class="hist-chip hc-${r.prize.tier} ${r.converted?'hc-converted':''}" onclick="convertToPoints(${si},${ri})">
-            ${r.prize.name}${r.converted?'（済）':''}
-          </span>`).join('')}
-      </div>
-      <div class="hist-cost">消費: ${s.cost.toLocaleString()} コイン</div>
-      <div class="hist-action-btns">
-        ${!s.shipped?`
-          <button class="hist-btn hist-btn-convert" onclick="convertAllToPoints(${si})">💰 一括還元</button>
-          <button class="hist-btn hist-btn-ship" onclick="openShippingModal(${si})">📦 発送依頼</button>
-        `:'<span style="font-size:.72rem;color:var(--text3)">📦 発送依頼済み</span>'}
-      </div>
-    </div>`).join('');
+  renderHistory();renderItemsPage();
 }
 
 /* ══ マイページ ══ */
@@ -1626,12 +1493,12 @@ function renderMyPage(){
   const content=document.getElementById('mypage-content');
   if(!state.user){
     content.innerHTML=`
-      <div style="text-align:center;padding:40px 0">
-        <div style="font-size:3rem;margin-bottom:12px">🎴</div>
-        <div style="font-size:1rem;font-weight:900;margin-bottom:6px;color:var(--text)">ログインして始めよう</div>
-        <div style="font-size:.82rem;color:var(--text3);margin-bottom:20px">新規登録で500コイン無料！</div>
+      <div style="text-align:center;padding:48px 16px">
+        <div style="font-size:3rem;margin-bottom:14px">👤</div>
+        <div style="font-size:1rem;font-weight:900;margin-bottom:6px;color:var(--text)">ログインしてください</div>
+        <div style="font-size:.78rem;color:var(--text3);margin-bottom:20px">登録で500コイン無料プレゼント！</div>
         <button onclick="document.getElementById('auth-modal').classList.add('show')"
-          style="background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;padding:13px 40px;border-radius:12px;font-weight:900;font-size:.95rem;box-shadow:0 4px 16px rgba(201,168,76,.25)">
+          style="background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:13px 40px;border-radius:12px;font-weight:900;font-size:.95rem;box-shadow:0 4px 14px rgba(232,56,13,.3)">
           ログイン / 無料登録
         </button>
       </div>`;
@@ -1663,22 +1530,12 @@ function renderMyPage(){
       <div class="mp-menu-item" onclick="showPage('items',document.querySelector('[data-page=items]'))"><span class="mp-menu-icon">📦</span>獲得商品・発送依頼<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openAddressManager()"><span class="mp-menu-icon">📮</span>発送先住所管理<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openReferralProgress()"><span class="mp-menu-icon">🔗</span>友達招待・進捗確認<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="togglePushNotification()"><span class="mp-menu-icon">${state.user?.push_enabled!==false?'🔔':'🔕'}</span>プッシュ通知 <span style="margin-left:auto;font-size:.72rem;color:${state.user?.push_enabled!==false?'#4ade80':'var(--text3)'}">${state.user?.push_enabled!==false?'ON':'OFF'}</span></div>
+      <div class="mp-menu-item" onclick="togglePushNotification()"><span class="mp-menu-icon">${state.user?.push_enabled!==false?'🔔':'🔕'}</span>プッシュ通知 <span style="margin-left:auto;font-size:.72rem;color:${state.user?.push_enabled!==false?'var(--green)':'var(--text3)'}">${state.user?.push_enabled!==false?'ON':'OFF'}</span></div>
       <div class="mp-menu-item" onclick="showPage('inquiry',null)"><span class="mp-menu-icon">💬</span>お問い合わせ<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="doForgotPassword()"><span class="mp-menu-icon">🔑</span>パスワードリセット<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="doLogout()"><span class="mp-menu-icon">🚪</span>ログアウト<span class="mp-menu-arrow">›</span></div>
     </div>
-    ${!state.user?.sms_verified?`
-    <div class="sms-section" style="margin-top:10px">
-      <div class="sms-title">📱 SMS認証で+300コイン！</div>
-      <div class="sms-sub">電話番号を認証してボーナスコインをもらおう</div>
-      <input type="tel" class="sms-input" id="sms-phone" placeholder="090-1234-5678" style="width:100%;margin-bottom:8px">
-      <div class="sms-row">
-        <input type="text" class="sms-input" id="sms-code" placeholder="認証コード6桁">
-        <button class="sms-btn" onclick="sendSmsCode()">送信</button>
-        <button class="sms-btn" style="margin-left:4px" onclick="verifySmsCode()">認証</button>
-      </div>
-    </div>`:'<div style="background:rgba(0,200,80,.05);border:1px solid rgba(0,200,80,.15);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.78rem;color:#4ade80;font-weight:700">✅ SMS認証済み</div>'}
+
     ${!state.user?.line_linked?`
     <div class="line-section" style="margin-top:10px" onclick="doLineLink()">
       <div class="line-icon">L</div>
@@ -1686,8 +1543,8 @@ function renderMyPage(){
         <div class="line-title">LINE連携でクーポンをGET！</div>
         <div class="line-sub">LINE友だち追加で最大90%OFFクーポン</div>
       </div>
-      <span style="color:rgba(74,222,128,.4)">›</span>
-    </div>`:'<div style="background:rgba(0,200,80,.05);border:1px solid rgba(0,200,80,.15);border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.78rem;color:#4ade80;font-weight:700">✅ LINE連携済み</div>'}
+      <span style="color:var(--text3)">›</span>
+    </div>`:'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:.78rem;color:#16a34a;font-weight:700">✅ LINE連携済み</div>'}
     <div class="coupon-section" style="margin-top:10px">
       <div style="font-size:.88rem;font-weight:900;color:var(--text);margin-bottom:8px">🎟️ クーポンコードを入力</div>
       <div class="coupon-row">
@@ -1696,11 +1553,11 @@ function renderMyPage(){
       </div>
     </div>
     <div style="margin-top:14px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;padding:8px 0">
-      <a href="/tokushoho.html" style="font-size:.7rem;color:rgba(240,234,220,.3);text-decoration:none">特定商取引法</a>
-      <a href="/privacy.html" style="font-size:.7rem;color:rgba(240,234,220,.3);text-decoration:none">プライバシーポリシー</a>
-      <a href="/terms.html" style="font-size:.7rem;color:rgba(240,234,220,.3);text-decoration:none">利用規約</a>
+      <a href="/tokushoho.html" style="font-size:.7rem;color:var(--text3);text-decoration:none">特定商取引法</a>
+      <a href="/privacy.html" style="font-size:.7rem;color:var(--text3);text-decoration:none">プライバシーポリシー</a>
+      <a href="/terms.html" style="font-size:.7rem;color:var(--text3);text-decoration:none">利用規約</a>
     </div>
-    <div style="text-align:center;padding:8px 0 4px;font-size:.65rem;color:rgba(240,234,220,.2)">© 2026 オリパMAX All Rights Reserved.</div>`;
+    <div style="text-align:center;padding:8px 0 4px;font-size:.65rem;color:var(--text3)">© 2026 オリパMAX All Rights Reserved.</div>`;
 }
 
 function copyCode(code){
@@ -1746,11 +1603,7 @@ async function loadFavoritesPage(){
 /* ══ 検索 ══ */
 function doSearch(q){
   if(!q){document.getElementById('search-results').innerHTML='';return;}
-  const results=state.packs.filter(p=>
-    p.name.includes(q)||
-    (p.series||'').includes(q)||
-    (p.category||'').includes(q)
-  );
+  const results=state.packs.filter(p=>p.name.includes(q)||(p.series||'').includes(q)||(p.category||'').includes(q));
   if(!results.length){
     document.getElementById('search-results').innerHTML=`<div style="text-align:center;padding:48px 16px;color:var(--text3)">「${q}」に一致するオリパはありません</div>`;
     return;
@@ -1758,152 +1611,36 @@ function doSearch(q){
   document.getElementById('search-results').innerHTML=renderPackCards(results);
 }
 
-function renderPackCards(list){
-  return list.map(p=>{
-    const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
-    const barClass=pct<10?'danger':pct<30?'warn':'';
-    const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
-    const tiers=prizes.map(pr=>`<span class="tier-pill ${tierPillClass[pr.tier]}">${pr.tier_label} ${pr.quantity}枚</span>`).join('');
-    const isFav=favorites.has(p.id);
-    return `
-    <div class="pack-card">
-      <div class="pc-banner" onclick="openPackDetail('${p.id}')">
-        <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(145deg,#0a0a1a,#1a1a2e)'}"></div>
-        <div class="pcb-shine"></div>
-        <div class="pcb-char">${p.emoji||'🎴'}</div>
-        <button onclick="event.stopPropagation();toggleFavorite('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.5);border:none;font-size:1.2rem;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer">${isFav?'★':'☆'}</button>
-        <div class="pcb-content">
-          <span class="pcb-ribbon ${ribbonClass[p.ribbon_type]||'ribbon-hot'}">${p.ribbon_text||'HOT'}</span>
-          <div class="pcb-top-row">
-            <div>
-              <div class="pcb-name">${p.name}</div>
-              <div class="pcb-series">${p.series||''}</div>
-            </div>
-            <div class="pcb-rate">
-              <span class="pcb-rate-label">総還元率</span>
-              <span class="pcb-rate-num">${p.return_rate||'-'}</span>
-              <span class="pcb-rate-unit">%</span>
-            </div>
-          </div>
-          ${p.odds_text?`<div class="pcb-chips"><div class="pcb-chip"><span>${p.odds_text}</span></div></div>`:''}
-          <div class="pcb-tiers">${tiers}</div>
-        </div>
-      </div>
-      <div class="pc-bottom">
-        <div class="pc-meta">
-          <div><span class="pc-price">🪙 ${p.price.toLocaleString()}</span><span class="pc-price-unit">/1回</span></div>
-          <span class="pc-remain">${p.remaining<=0?'<b style="color:#ff4060">販売終了</b>':`残り<b>${(p.remaining||0).toLocaleString()}</b>/${(p.total_slots||0).toLocaleString()}口`}</span>
-        </div>
-        <div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
-        ${p.remaining<=0?
-          `<div style="text-align:center;padding:10px;font-size:.82rem;color:rgba(255,255,255,.3);font-weight:700">このオリパは終了しました</div>`:
-          `<div class="pc-btns">
-            <button class="pc-btn-1" onclick="openDrawModal('${p.id}',1)">1回ガチャ</button>
-            <button class="pc-btn-5" onclick="openDrawModal('${p.id}',10)">10連ガチャ</button>
-          </div>`
-        }
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ══ パック詳細 ══ */
-let currentDetailPackId=null;
-function openPackDetail(packId){
-  const pack=state.packs.find(p=>p.id===packId);if(!pack)return;
-  currentDetailPackId=packId;
-  document.getElementById('pd-icon').textContent=pack.emoji||'🎴';
-  document.getElementById('pd-name').textContent=pack.name;
-  document.getElementById('pd-series').textContent=pack.series||'';
-  document.getElementById('pd-fav-btn').textContent=favorites.has(packId)?'★':'☆';
-  document.getElementById('pd-stats').innerHTML=`
-    <span class="pcb-chip"><span>🪙 ${pack.price.toLocaleString()}コイン/回</span></span>
-    <span class="pcb-chip"><span>📦 残り${pack.remaining||0}/${pack.total_slots||0}口</span></span>
-    <span class="pcb-chip"><span>📈 還元率${pack.return_rate||'-'}%</span></span>
-    ${pack.tenjo_limit>0?`<span class="pcb-chip"><span>🏆 天井${pack.tenjo_limit}回</span></span>`:''}
-  `;
-  document.getElementById('pd-prizes').innerHTML=(pack.prizes||[]).map(pr=>`
-    <div class="bs-prize">
-      <span class="bsp-tier bsp-${pr.tier==='sar'?'s':pr.tier==='sr'?'a':pr.tier==='rr'?'b':'c'}">${pr.tier_label}</span>
-      <span class="bsp-name">${pr.name}</span>
-      <span class="bsp-cnt">×${pr.quantity}枚</span>
-    </div>`).join('');
-  document.getElementById('pack-detail-modal').classList.add('show');
-}
-
-/* ══ 新規限定オリパ判定 ══ */
-function isNewUser(){
-  if(!state.user?.created_at)return false;
-  const days=(Date.now()-new Date(state.user.created_at))/(1000*60*60*24);
-  return days<=7;
-}
-
-/* ══ 発送先住所管理 ══ */
-let savedAddresses=[];
-async function loadAddresses(){
-  if(!state.user)return;
-  const{data}=await db.from('shipping_addresses').select('*').eq('user_id',state.user.id).order('is_default',{ascending:false});
-  savedAddresses=data||[];
-}
-async function saveAddress(){
-  const name=document.getElementById('addr-name').value;
-  const zip=document.getElementById('addr-zip').value;
-  const pref=document.getElementById('addr-pref').value;
-  const city=document.getElementById('addr-city').value;
-  const tel=document.getElementById('addr-tel').value;
-  const isDefault=document.getElementById('addr-default').checked;
-  if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
-  if(!state.user)return;
-  if(isDefault){
-    await db.from('shipping_addresses').update({is_default:false}).eq('user_id',state.user.id);
-  }
-  await db.from('shipping_addresses').insert({
-    user_id:state.user.id,name,zip,prefecture:pref,city,
-    building:document.getElementById('addr-building').value,tel,is_default:isDefault,
-  });
-  closeModal('address-modal');
-  showToast('✅ 住所を保存しました！');
-  await loadAddresses();
-  renderMyPage();
-}
-
-/* ══ コイン履歴 ══ */
-async function openCoinHistory(){
-  if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  const{data}=await db.from('transactions').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
-  const typeLabel={draw:'ガチャ',purchase_coin:'チャージ',bonus:'ボーナス',convert:'ポイント還元',tenjo:'天井'};
-  document.getElementById('coin-history-list').innerHTML=(data||[]).map(t=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border)">
+/* ══ コイン購入 ══ */
+function openPurchase(){
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
+  const plans=[
+    {coins:500,bonus:0,price:500,popular:false},
+    {coins:1000,bonus:100,price:1000,popular:false},
+    {coins:3000,bonus:500,price:3000,popular:true},
+    {coins:5000,bonus:1000,price:5000,popular:false},
+    {coins:10000,bonus:3000,price:10000,popular:false},
+    {coins:30000,bonus:10000,price:30000,popular:false},
+  ];
+  document.getElementById('purchase-plans').innerHTML=plans.map(p=>`
+    <div class="plan-item ${p.popular?'popular':''}" onclick="startPurchase(${p.price})">
       <div>
-        <div style="font-size:.82rem;font-weight:700;color:var(--text)">${typeLabel[t.type]||t.type}</div>
-        <div style="font-size:.7rem;color:var(--text3)">${t.description||'—'} · ${new Date(t.created_at).toLocaleDateString('ja-JP')}</div>
+        <div class="plan-jp">🪙 ${(p.coins+p.bonus).toLocaleString()}コイン${p.popular?`<span class="plan-badge">人気</span>`:''}</div>
+        ${p.bonus?`<div class="plan-bonus">+${p.bonus}コイン ボーナス！</div>`:''}
       </div>
-      <div style="font-size:.9rem;font-weight:900;color:${t.amount>0?'#4ade80':'#ff6060'}">${t.amount>0?'+':''}${t.amount.toLocaleString()}</div>
-    </div>`).join('')||'<div style="padding:40px;text-align:center;color:var(--text3)">履歴がありません</div>';
-  document.getElementById('coin-history-modal').classList.add('show');
+      <div class="plan-price">¥${p.price.toLocaleString()}</div>
+    </div>`).join('');
+  document.getElementById('purchase-modal').classList.add('show');
 }
-
-/* ══ プッシュ通知設定 ══ */
-async function togglePushNotification(){
-  if(!state.user)return;
-  const newVal=!state.user.push_enabled;
-  await db.from('users').update({push_enabled:newVal}).eq('id',state.user.id);
-  state.user.push_enabled=newVal;
-  showToast(newVal?'🔔 プッシュ通知をONにしました':'🔕 プッシュ通知をOFFにしました');
-  renderMyPage();
+function closePurchase(){document.getElementById('purchase-modal').classList.remove('show');}
+async function startPurchase(amount){
+  showToast('決済ページへ移動中...');
+  try{
+    const{data,error}=await db.functions.invoke('create-checkout',{body:{amount,userId:state.user.id,successUrl:window.location.origin+'?payment=success',cancelUrl:window.location.origin+'?payment=cancel'}});
+    if(error||!data?.url){showToast('⚠️ 決済エラー: '+(error?.message||'不明'));return;}
+    window.location.href=data.url;
+  }catch(e){showToast('⚠️ エラー: '+e.message);}
 }
-
-/* ══ コイン有効期限 ══ */
-function getCoinExpiryText(){
-  if(!state.user?.coin_expires_at)return null;
-  const exp=new Date(state.user.coin_expires_at);
-  const days=Math.ceil((exp-Date.now())/(1000*60*60*24));
-  if(days<=0)return '⚠️ コインの有効期限が切れています';
-  if(days<=30)return `⚠️ コインの有効期限まであと${days}日`;
-  return null;
-}
-
-
 
 /* ══ 年齢確認 ══ */
 function checkAgeVerification(){
@@ -1925,44 +1662,15 @@ function confirmAge(isAdult){
   }
 }
 
-/* ══ SMS認証 ══ */
-let smsSent=false;
-async function sendSmsCode(){
-  const phone=document.getElementById('sms-phone')?.value;
-  if(!phone){showToast('⚠️ 電話番号を入力してください');return;}
-  if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  // SMS送信（実際はTwilio等のAPIが必要。現在はモック）
-  smsSent=true;
-  showToast('📱 認証コードを送信しました（テスト: 123456）',3000);
-}
-async function verifySmsCode(){
-  const code=document.getElementById('sms-code')?.value;
-  if(!smsSent){showToast('⚠️ まず認証コードを送信してください');return;}
-  if(!code){showToast('⚠️ 認証コードを入力してください');return;}
-  // テスト用: 123456で認証成功
-  if(code==='123456'){
-    state.coin+=300;
-    if(state.user){
-      await db.from('users').update({coin_points:state.coin,sms_verified:true}).eq('id',state.user.id);
-      state.user.sms_verified=true;
-    }
-    updateHeaderPts();renderMyPage();
-    showToast('🎉 SMS認証完了！+300コインプレゼント！',3000);
-  } else {
-    showToast('⚠️ 認証コードが違います');
-  }
-}
+
 
 /* ══ LINE連携 ══ */
 async function doLineLink(){
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  // LINE連携URL（実際はLINE Developers設定が必要）
   const lineUrl='https://line.me/R/ti/p/@oripamax';
   window.open(lineUrl,'_blank');
-  // 連携済みとしてDB更新
   await db.from('users').update({line_linked:true}).eq('id',state.user.id);
   state.user.line_linked=true;
-  // クーポンを付与
   showToast('✅ LINE連携しました！クーポンをお知らせします',3000);
   renderMyPage();
 }
@@ -1973,10 +1681,7 @@ async function applyCoupon(){
   if(!code){showToast('⚠️ クーポンコードを入力してください');return;}
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
   const{data:coupon}=await db.from('coupons').select('*').eq('code',code).eq('is_active',true).single();
-  if(!coupon){showToast('⚠️ クーポンが見つかりません');return;}
-  if(coupon.expires_at&&new Date(coupon.expires_at)<new Date()){showToast('⚠️ クーポンの有効期限が切れています');return;}
-  if(coupon.max_uses>0&&coupon.used_count>=coupon.max_uses){showToast('⚠️ このクーポンは使用上限に達しています');return;}
-  // コイン付与
+  if(!coupon){showToast('⚠️ 無効なクーポンコードです');return;}
   if(coupon.discount_type==='coin'){
     state.coin+=coupon.discount_amount;
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
@@ -1993,7 +1698,7 @@ async function applyCoupon(){
 let lastResultForShare=null;
 function shareResult(){
   if(!lastResultForShare)return;
-  const text=`🎴 オリパMAXで「${lastResultForShare}」を当てました！\n#オリパMAX #ポケカ\nhttps://oripa-max.netlify.app`;
+  const text=`🎴 オリパMAXで「${lastResultForShare}」を当てました！\n#オリパMAX #ポケカ\nhttps://oripa-max.vercel.app`;
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,'_blank');
 }
 
@@ -2004,10 +1709,7 @@ async function submitInquiry(){
   const subject=document.getElementById('inq-subject')?.value;
   const body=document.getElementById('inq-body')?.value;
   if(!name||!email||!subject||!body){showToast('⚠️ 全項目を入力してください');return;}
-  await db.from('inquiries').insert({
-    user_id:state.user?.id||null,
-    email,subject,body,status:'open',
-  }).catch(()=>{});
+  await db.from('inquiries').insert({user_id:state.user?.id||null,email,subject,body,status:'open'}).catch(()=>{});
   document.getElementById('inq-name').value='';
   document.getElementById('inq-email').value='';
   document.getElementById('inq-subject').value='';
@@ -2016,10 +1718,30 @@ async function submitInquiry(){
   showPage('gacha',document.querySelector('[data-page=gacha]'));
 }
 
-/* ══ 未成年課金上限 ══ */
-const MINOR_LIMIT=5000;// 18歳未満は月5000コインまで
-async function checkMinorLimit(cost){
-  return true;// 未成年チェックは一時的にスキップ
+/* ══ コイン履歴 ══ */
+async function openCoinHistory(){
+  if(!state.user){showToast('⚠️ ログインが必要です');return;}
+  const{data}=await db.from('transactions').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
+  const typeLabel={draw:'ガチャ',purchase_coin:'チャージ',bonus:'ボーナス',convert:'ポイント還元',tenjo:'天井'};
+  document.getElementById('coin-history-list').innerHTML=(data||[]).map(t=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:.82rem;font-weight:700;color:var(--text)">${typeLabel[t.type]||t.type}</div>
+        <div style="font-size:.7rem;color:var(--text3)">${t.description||'—'} · ${new Date(t.created_at).toLocaleDateString('ja-JP')}</div>
+      </div>
+      <div style="font-size:.9rem;font-weight:900;color:${t.amount>0?'var(--green)':'var(--primary)'}">${t.amount>0?'+':''}${t.amount.toLocaleString()}</div>
+    </div>`).join('')||'<div style="padding:40px;text-align:center;color:var(--text3)">履歴がありません</div>';
+  document.getElementById('coin-history-modal').classList.add('show');
+}
+
+/* ══ プッシュ通知 ══ */
+async function togglePushNotification(){
+  if(!state.user)return;
+  const newVal=!state.user.push_enabled;
+  await db.from('users').update({push_enabled:newVal}).eq('id',state.user.id);
+  state.user.push_enabled=newVal;
+  showToast(newVal?'🔔 プッシュ通知をONにしました':'🔕 プッシュ通知をOFFにしました');
+  renderMyPage();
 }
 
 /* ══ 月別購入履歴 ══ */
@@ -2034,7 +1756,7 @@ async function openMonthlyHistory(){
         <div style="font-size:.82rem;font-weight:700;color:var(--text)">🪙 ${(p.jp_points+(p.bonus_points||0)).toLocaleString()}コイン</div>
         <div style="font-size:.7rem;color:var(--text3)">${new Date(p.created_at).toLocaleDateString('ja-JP')}</div>
       </div>
-      <div style="font-size:.9rem;font-weight:900;color:var(--gold2)">¥${(p.amount_jpy||0).toLocaleString()}</div>
+      <div style="font-size:.9rem;font-weight:900;color:var(--primary)">¥${(p.amount_jpy||0).toLocaleString()}</div>
     </div>`).join('');
   modal.innerHTML=`<div class="bottom-sheet"><div class="bs-drag"></div>
     <div style="padding:14px 16px;border-bottom:1px solid var(--border)"><span style="font-size:1.05rem;font-weight:900;color:var(--text)">📅 購入履歴</span></div>
@@ -2055,24 +1777,24 @@ async function openReferralProgress(){
   modal.innerHTML=`<div class="bottom-sheet"><div class="bs-drag"></div>
     <div style="padding:14px 16px;border-bottom:1px solid var(--border)"><span style="font-size:1.05rem;font-weight:900;color:var(--text)">🔗 友達招待</span></div>
     <div style="padding:16px">
-      <div style="background:rgba(201,168,76,.05);border:1px solid var(--border2);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px">
+      <div style="background:#fff8f0;border:2px dashed #ffd9c8;border-radius:12px;padding:16px;text-align:center;margin-bottom:14px">
         <div style="font-size:.78rem;color:var(--text3);margin-bottom:6px">あなたの紹介コード</div>
-        <div style="font-size:1.8rem;font-weight:900;color:var(--gold2);letter-spacing:.15em">${refCode}</div>
-        <button onclick="navigator.clipboard.writeText('${refCode}');showToast('コピーしました！')" style="margin-top:8px;background:linear-gradient(135deg,var(--gold2),var(--gold-dark));color:#0a0a0a;padding:7px 20px;border-radius:8px;font-size:.78rem;font-weight:900">📋 コピー</button>
+        <div style="font-size:1.8rem;font-weight:900;color:var(--primary);letter-spacing:.15em">${refCode}</div>
+        <button onclick="navigator.clipboard.writeText('${refCode}');showToast('コピーしました！')" style="margin-top:8px;background:var(--primary);color:#fff;padding:7px 20px;border-radius:8px;font-size:.78rem;font-weight:900">📋 コピー</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-        <div style="background:rgba(0,200,80,.05);border:1px solid rgba(0,200,80,.15);border-radius:10px;padding:14px;text-align:center">
-          <div style="font-size:.72rem;color:#4ade80;font-weight:700;margin-bottom:4px">招待した人数</div>
-          <div style="font-size:1.8rem;font-weight:900;color:#4ade80">${count||0}</div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:.72rem;color:var(--green);font-weight:700;margin-bottom:4px">招待した人数</div>
+          <div style="font-size:1.8rem;font-weight:900;color:var(--green)">${count||0}</div>
         </div>
-        <div style="background:rgba(201,168,76,.05);border:1px solid var(--border2);border-radius:10px;padding:14px;text-align:center">
-          <div style="font-size:.72rem;color:var(--gold2);font-weight:700;margin-bottom:4px">獲得コイン</div>
-          <div style="font-size:1.8rem;font-weight:900;color:var(--gold2)">${((count||0)*300).toLocaleString()}</div>
+        <div style="background:#fff8f0;border:1px solid #ffd9c8;border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:.72rem;color:var(--primary);font-weight:700;margin-bottom:4px">獲得コイン</div>
+          <div style="font-size:1.8rem;font-weight:900;color:var(--primary)">${((count||0)*300).toLocaleString()}</div>
         </div>
       </div>
-      <div style="font-size:.78rem;color:var(--text3);line-height:1.7;background:rgba(255,255,255,.03);border-radius:8px;padding:12px">
+      <div style="font-size:.78rem;color:var(--text3);line-height:1.7;background:#f8f8f8;border-radius:8px;padding:12px">
         友達があなたのコードで登録すると<br>
-        <span style="color:var(--gold2);font-weight:700">あなたに+300コイン、友達にも+300コイン</span>プレゼント！
+        <span style="color:var(--primary);font-weight:700">あなたに+300コイン、友達にも+300コイン</span>プレゼント！
       </div>
     </div>
     <button class="bs-cancel-btn" onclick="this.closest('.modal-overlay').remove()">閉じる</button>
@@ -2081,50 +1803,64 @@ async function openReferralProgress(){
   document.body.appendChild(modal);
 }
 
-/* ══ 演出選択 ══ */
-let selectedEffect='auto';
-function openEffectSelector(){
-  const effects=[
-    {id:'auto',name:'オート',icon:'🎲',desc:'自動で演出を選択'},
-    {id:'video',name:'動画演出',icon:'🎬',desc:'動画を使った演出'},
-    {id:'color',name:'カラー演出',icon:'🌈',desc:'色変化演出'},
-    {id:'puchun',name:'プチュン演出',icon:'💓',desc:'ドキドキ演出'},
-    {id:'rewind',name:'リワインド演出',icon:'⏪',desc:'逆転演出'},
-  ];
-  const modal=document.createElement('div');
-  modal.className='modal-overlay show';
-  modal.innerHTML=`<div class="bottom-sheet"><div class="bs-drag"></div>
-    <div style="padding:14px 16px;border-bottom:1px solid var(--border)"><span style="font-size:1.05rem;font-weight:900;color:var(--text)">🎬 演出を選ぶ</span></div>
-    <div style="padding:12px 16px">
-      ${effects.map(e=>`
-        <div onclick="selectedEffect='${e.id}';this.parentElement.querySelectorAll('.eff-item').forEach(x=>x.style.borderColor='var(--border)');this.style.borderColor='var(--gold)';showToast('${e.name}を選択しました')" 
-          class="eff-item" style="display:flex;align-items:center;gap:12px;background:rgba(201,168,76,.04);border:1.5px solid ${selectedEffect===e.id?'var(--gold)':'var(--border)'};border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer">
-          <span style="font-size:1.5rem">${e.icon}</span>
-          <div><div style="font-size:.85rem;font-weight:900;color:var(--text)">${e.name}</div><div style="font-size:.72rem;color:var(--text3)">${e.desc}</div></div>
-        </div>`).join('')}
-    </div>
-    <button class="bs-cancel-btn" onclick="this.closest('.modal-overlay').remove()">閉じる</button>
-  </div>`;
-  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
-  document.body.appendChild(modal);
+/* ══ 発送先住所管理 ══ */
+let savedAddresses=[];
+async function loadAddresses(){
+  if(!state.user)return;
+  const{data}=await db.from('shipping_addresses').select('*').eq('user_id',state.user.id).order('is_default',{ascending:false});
+  savedAddresses=data||[];
 }
-
-/* ══ ループオリパ判定 ══ */
-function isLoopOripa(pack){
-  return pack?.odds_text?.includes('ループ')||pack?.ribbon_text?.includes('ループ')||false;
+async function saveAddress(){
+  const name=document.getElementById('addr-name').value;
+  const zip=document.getElementById('addr-zip').value;
+  const pref=document.getElementById('addr-pref').value;
+  const city=document.getElementById('addr-city').value;
+  const tel=document.getElementById('addr-tel').value;
+  const isDefault=document.getElementById('addr-default').checked;
+  if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
+  if(!state.user)return;
+  if(isDefault){await db.from('shipping_addresses').update({is_default:false}).eq('user_id',state.user.id);}
+  await db.from('shipping_addresses').insert({user_id:state.user.id,name,zip,prefecture:pref,city,building:document.getElementById('addr-building').value,tel,is_default:isDefault});
+  closeModal('address-modal');
+  showToast('✅ 住所を保存しました！');
+  await loadAddresses();
+  renderMyPage();
 }
-
-/* ══ 最低保証判定 ══ */
-function getMinGuarantee(pack){
-  if(!pack)return null;
-  const text=pack.odds_text||'';
-  const match=text.match(/最低保証[：:]?\s*(\d+)/);
-  return match?parseInt(match[1]):null;
+function openAddressManager(){
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
+  loadAddresses().then(()=>{
+    const list=savedAddresses.map((a,i)=>`
+      <div style="background:#f8f8f8;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--text)">${a.name} ${a.is_default?'<span style="font-size:.62rem;color:var(--green);font-weight:900">デフォルト</span>':''}</div>
+          <div style="font-size:.72rem;color:var(--text3)">〒${a.zip} ${a.prefecture}${a.city}</div>
+        </div>
+        <button onclick="deleteAddress('${a.id}')" style="background:#fff0f0;color:var(--primary);border:1px solid #ffd9c8;border-radius:5px;padding:4px 8px;font-size:.7rem;font-weight:700">削除</button>
+      </div>`).join('');
+    const modal=document.createElement('div');
+    modal.className='modal-overlay show';
+    modal.innerHTML=`<div class="bottom-sheet"><div class="bs-drag"></div>
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:1.05rem;font-weight:900;color:var(--text)">📮 発送先住所</span>
+        <button onclick="this.closest('.modal-overlay').remove();document.getElementById('address-modal').classList.add('show')" style="background:var(--primary);color:#fff;padding:6px 12px;border-radius:7px;font-size:.75rem;font-weight:900">＋追加</button>
+      </div>
+      <div style="padding:12px 16px">${list||'<div style="text-align:center;padding:20px;color:var(--text3)">住所が登録されていません</div>'}</div>
+      <button class="bs-cancel-btn" onclick="this.closest('.modal-overlay').remove()">閉じる</button>
+    </div>`;
+    modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+    document.body.appendChild(modal);
+  });
+}
+async function deleteAddress(id){
+  if(!confirm('この住所を削除しますか？'))return;
+  await db.from('shipping_addresses').delete().eq('id',id);
+  showToast('🗑️ 削除しました');
+  document.querySelector('.modal-overlay.show')?.remove();
+  openAddressManager();
 }
 
 /* ══ 連続開封アニメーション ══ */
 async function showSequentialCards(results,pack){
-  // 1枚ずつ順番にフリップ
   await new Promise(resolve=>{
     let idx=0;
     const interval=setInterval(()=>{
@@ -2151,40 +1887,6 @@ async function showSequentialCards(results,pack){
   },results[0]);
   lastResultForShare=topResult?.prize?.name||'レアカード';
   renderHistory();renderItemsPage();
-}
-
-function openAddressManager(){
-  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
-  // 住所一覧をモーダルで表示
-  loadAddresses().then(()=>{
-    const list=savedAddresses.map((a,i)=>`
-      <div style="background:rgba(201,168,76,.05);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--text)">${a.name} ${a.is_default?'<span style="font-size:.62rem;color:#4ade80;font-weight:900">デフォルト</span>':''}</div>
-          <div style="font-size:.72rem;color:var(--text3)">〒${a.zip} ${a.prefecture}${a.city}</div>
-        </div>
-        <button onclick="deleteAddress('${a.id}')" style="background:rgba(255,64,96,.1);color:#ff6680;border:1px solid rgba(255,64,96,.2);border-radius:5px;padding:4px 8px;font-size:.7rem;font-weight:700">削除</button>
-      </div>`).join('');
-    const modal=document.createElement('div');
-    modal.className='modal-overlay show';
-    modal.innerHTML=`<div class="bottom-sheet"><div class="bs-drag"></div>
-      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:1.05rem;font-weight:900;color:var(--text)">📮 発送先住所</span>
-        <button onclick="this.closest('.modal-overlay').remove();document.getElementById('address-modal').classList.add('show')" style="background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dark));color:#0a0a0a;padding:6px 12px;border-radius:7px;font-size:.75rem;font-weight:900">＋追加</button>
-      </div>
-      <div style="padding:12px 16px">${list||'<div style="text-align:center;padding:20px;color:var(--text3)">住所が登録されていません</div>'}</div>
-      <button class="bs-cancel-btn" onclick="this.closest('.modal-overlay').remove()">閉じる</button>
-    </div>`;
-    modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
-    document.body.appendChild(modal);
-  });
-}
-async function deleteAddress(id){
-  if(!confirm('この住所を削除しますか？'))return;
-  await db.from('shipping_addresses').delete().eq('id',id);
-  showToast('🗑️ 削除しました');
-  document.querySelector('.modal-overlay.show')?.remove();
-  openAddressManager();
 }
 
 /* ══ ナビ ══ */
@@ -2234,9 +1936,7 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 
 /* ══ INIT ══ */
 (async()=>{
-  // 年齢確認
   checkAgeVerification();
-  // 決済完了チェック
   const params=new URLSearchParams(location.search);
   if(params.get('payment')==='success'){
     history.replaceState({},'','/');
