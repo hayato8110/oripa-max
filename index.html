@@ -1419,9 +1419,13 @@ function renderItemsPage(){
     return;
   }
   content.innerHTML='<div class="items-page">'+pending.map(r=>{
-    const pack=state.packs.find(p=>p.id===r.packId||state.sessions.find(s=>s.id===r.sessionId)?.packId===p.id);
+    const sess=state.sessions.find(s=>s.id===r.sessionId);
+    const pack=state.packs.find(p=>p.id===sess?.packId);
     const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
     const convertCoin=prizeData?.value_jp||0;
+    const exType=prizeData?.exchange_type||'both'; // both / ship_only / coin_only
+    const showShip = exType!=='coin_only';
+    const showCoin = exType!=='ship_only';
     return `
     <div class="item-card">
       <div class="ic-left">
@@ -1429,11 +1433,13 @@ function renderItemsPage(){
         <div class="ic-info">
           <div class="ic-name">${r.prize.name}</div>
           <div class="ic-pack">${r.packName} · ${rarLabel[r.prize.tier]||r.prize.tier}</div>
+          ${exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900;margin-top:2px">📦 発送専用</div>':''}
+          ${exType==='coin_only'?'<div style="font-size:.62rem;color:var(--blue);font-weight:900;margin-top:2px">🪙 コイン還元専用</div>':''}
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
-        <button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>
-        ${convertCoin>0?`<button onclick="convertToPoints('${r.dbId}')" style="background:#fff;color:var(--blue);border:1.5px solid var(--blue);padding:5px 10px;border-radius:6px;font-size:.7rem;font-weight:900;cursor:pointer">🪙${convertCoin}に還元</button>`:''}
+        ${showShip?`<button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>`:''}
+        ${showCoin?`<button onclick="convertToPoints('${r.dbId}')" style="background:#fff;color:var(--blue);border:1.5px solid var(--blue);padding:5px 10px;border-radius:6px;font-size:.7rem;font-weight:900;cursor:pointer">🪙${convertCoin>0?convertCoin+'に還元':'還元'}</button>`:''}
       </div>
     </div>`}).join('')+'</div>';
 }
