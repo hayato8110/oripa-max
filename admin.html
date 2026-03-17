@@ -894,7 +894,12 @@ function addPrizeRow(prize){
     <input class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="賞品名" value="${prize?.name||''}">
     <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="枚数" value="${prize?.quantity||''}">
     <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="重み" value="${prize?.weight||'100'}">
-    <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="価格" value="${prize?.value_jp||''}">
+    <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="還元コイン" value="${prize?.value_jp||''}">
+    <select class="form-select" style="padding:6px 8px;font-size:.72rem">
+      <option value="both" ${(prize?.exchange_type||'both')==='both'?'selected':''}>発送＆還元</option>
+      <option value="ship_only" ${prize?.exchange_type==='ship_only'?'selected':''}>発送のみ</option>
+      <option value="coin_only" ${prize?.exchange_type==='coin_only'?'selected':''}>還元のみ</option>
+    </select>
     <div style="display:flex;gap:2px">
       <input type="file" accept="image/*" style="display:none" id="prize-file-${idx}" onchange="uploadPrizeImage(this,${idx})">
       <input class="form-input" id="prize-img-${idx}" style="padding:4px 6px;font-size:.65rem;flex:1" placeholder="画像URL" value="${prize?.image_url||''}">
@@ -925,7 +930,7 @@ async function savePack(){
     const prizes=Array.from(rows).map((row,i)=>{
       const inputs=row.querySelectorAll('select,input');
       const qty=parseInt(inputs[2].value)||1;
-      return{pack_id:packId,tier:inputs[0].value,tier_label:{sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'D賞'}[inputs[0].value]||'',name:inputs[1].value,quantity:qty,remaining_qty:qty,weight:parseInt(inputs[3].value)||100,value_jp:parseInt(inputs[4].value)||0,image_url:document.getElementById(`prize-img-${i}`)?.value||null};
+      return{pack_id:packId,tier:inputs[0].value,tier_label:{sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'D賞'}[inputs[0].value]||'',name:inputs[1].value,quantity:qty,remaining_qty:qty,weight:parseInt(inputs[3].value)||100,value_jp:parseInt(inputs[4].value)||0,exchange_type:inputs[5].value||'both',image_url:document.getElementById(`prize-img-${i}`)?.value||null};
     }).filter(p=>p.name);
     if(prizes.length)await db.from('prizes').insert(prizes);
   }
