@@ -1263,6 +1263,7 @@ async function executeDraw(){
   if(userError){showToast('⚠️ コイン更新エラー: '+userError.message,4000);console.error('user update error:',userError);}
 
   await saveTenjoCount(pack.id,state.drawCount);
+  showToast('💾 保存中...'+state.user?.id?.slice(0,8),4000);
   await saveDrawSession(pack.id,results,cost);
 
   state.sessions.unshift({
