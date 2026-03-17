@@ -1243,6 +1243,7 @@ async function executeDraw(){
   // 未成年チェック
   const canDraw=await checkMinorLimit(cost);
   if(!canDraw)return;
+  showToast('✅ 未成年チェックOK',1500);
 
   state.coin-=cost;
   updateHeaderPts();closeDrawModal();
@@ -1998,7 +1999,8 @@ async function submitInquiry(){
 /* ══ 未成年課金上限 ══ */
 const MINOR_LIMIT=5000;// 18歳未満は月5000コインまで
 async function checkMinorLimit(cost){
-  if(!state.user?.birth_date)return true;
+  if(!state.user)return true;
+  if(!state.user.birth_date)return true;// 生年月日未設定は通過
   const age=Math.floor((Date.now()-new Date(state.user.birth_date))/(365.25*24*3600*1000));
   if(age>=18)return true;
   const now=new Date();
