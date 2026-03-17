@@ -321,7 +321,7 @@ input,select,textarea{font-family:inherit}
             <button class="btn btn-secondary" onclick="exportCSV('shipping')">📥 CSV</button>
           </div>
         </div>
-        <table class="tbl"><thead><tr><th>ID</th><th>ユーザー</th><th>カード数</th><th>住所</th><th>依頼日</th><th>状態</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>ID</th><th>ユーザー</th><th>お名前/TEL</th><th>住所</th><th>依頼日</th><th>状態</th><th>操作</th></tr></thead>
         <tbody id="shipping-tbl-body"></tbody></table>
       </div>
     </div>
@@ -1095,25 +1095,35 @@ async function loadShipping(status='all'){
   document.getElementById('ship-done').textContent=done;
   document.getElementById('ship-badge').textContent=pending;
   document.getElementById('stat-ship').textContent=pending;
-  document.getElementById('shipping-tbl-body').innerHTML=allShipping.map(s=>{
-    return`<tr>
+  document.getElementById('shipping-tbl-body').innerHTML=allShipping.length?allShipping.map(s=>`
+    <tr>
       <td class="td-bold" style="font-size:.72rem">#${(s.id||'').slice(0,8)}</td>
-      <td>${s.users?.username||'—'}</td>
-      <td style="font-size:.72rem">${s.name||'—'}</td>
-      <td style="font-size:.72rem">${s.prefecture||''}${s.city||''}</td>
+      <td><div>${s.users?.username||'—'}</div><div class="td-sub">${s.users?.email||''}</div></td>
+      <td><div>${s.name||'—'}</div><div class="td-sub">${s.tel||''}</div></td>
+      <td style="font-size:.72rem"><div>〒${s.zip||'—'}</div><div>${s.prefecture||''}${s.city||''}</div><div class="td-sub">${s.building||''}</div></td>
       <td style="font-size:.7rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</td>
-      <td><span class="badge badge-${s.status==='pending'?'pending':'shipped'}">${s.status==='pending'?'発送待ち':'発送済み'}</span></td>
+      <td><span class="badge badge-${s.status==='pending'?'pending':'shipped'}">${s.status==='pending'?'発送待ち':'発送済み'}</span>${s.tracking_number?`<div class="td-sub">${s.tracking_number}</div>`:''}</td>
       <td>
-        ${s.status==='pending'?`<button class="btn btn-success" onclick="shipOrder('${s.id}')">発送処理</button>`:''}
-        <button class="btn btn-edit" onclick="viewShipping('${s.id}')" style="margin-left:4px">詳細</button>
+        ${s.status==='pending'?`<button class="btn btn-success" onclick="shipOrder('${s.id}')">✅ 発送処理</button>`:''}
+        <button class="btn btn-danger" onclick="cancelShipping('${s.id}')" style="margin-left:4px">✕</button>
       </td>
-    </tr>`;
-  }).join('');
+    </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">発送依頼はありません</td></tr>';
 }
-async function shipOrder(id){const tracking=prompt('追跡番号（任意）:')||'';await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking,shipped_at:new Date().toISOString()}).eq('id',id);showToast('✅ 発送処理完了');loadShipping('all');}
+async function shipOrder(id){
+  const tracking=prompt('追跡番号を入力（任意、スキップはOK）:')||'';
+  await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking||null,shipped_at:new Date().toISOString()}).eq('id',id);
+  showToast('✅ 発送処理完了');
+  loadShipping('all');
+}
+async function cancelShipping(id){
+  if(!confirm('この発送依頼をキャンセルしますか？'))return;
+  await db.from('shipping_requests').delete().eq('id',id);
+  showToast('🗑️ 削除しました');
+  loadShipping('all');
+}
 function viewShipping(id){
   const s=allShipping.find(x=>x.id===id);if(!s)return;
-  alert(`【発送先】\n名前: ${s.name||'—'}\n〒${s.zip||'—'}\n${s.prefecture||''}${s.city||''}\n${s.building||''}\nTEL: ${s.tel||'—'}\n\n【ユーザー】${s.users?.username||'—'} (${s.users?.email||'—'})\n追跡番号: ${s.tracking_number||'未設定'}`);
+  alert(`【発送先】\n名前: ${s.name||'—'}\n〒${s.zip||'—'} ${s.prefecture||''}${s.city||''}\n${s.building||''}\nTEL: ${s.tel||'—'}\n\n【ユーザー】${s.users?.username||'—'} (${s.users?.email||'—'})\n追跡番号: ${s.tracking_number||'未設定'}`);
 }
 /* ══ HISTORY ══ */
 async function loadHistory(){
@@ -1135,7 +1145,15 @@ function renderHistory(data){
     </tr>`).join('');
   }).join('');
 }
-function filterHistory(q){renderHistory(allHistory.filter(r=>(r.users?.username||'').includes(q)||(r.prize_name||'').includes(q)));}
+function filterHistory(q){
+  if(!q){renderHistory(allHistory);return;}
+  const filtered=allHistory.filter(s=>
+    (s.users?.username||'').includes(q)||
+    (s.packs?.name||'').includes(q)||
+    (s.results||[]).some(r=>(r.prize_name||'').includes(q))
+  );
+  renderHistory(filtered);
+}
 
 /* ══ COUPONS ══ */
 async function loadCoupons(){
