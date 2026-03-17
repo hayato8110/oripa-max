@@ -1409,20 +1409,19 @@ function renderHistory(){
 function renderItemsPage(){
   const content=document.getElementById('items-content');
   const pending=state.sessions.flatMap(s=>
-    s.results.filter(r=>!r.shipped&&!r.converted).map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,sessionId:s.id}))
+    s.results.filter(r=>!r.shipped&&!r.converted).map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,sessionId:s.id,packId:s.packId}))
   );
   if(!pending.length){
     content.innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">📦</div><div style="font-weight:700;margin-bottom:6px;color:var(--text2)">獲得商品はありません</div></div>';
     return;
   }
   content.innerHTML='<div class="items-page">'+pending.map(r=>{
-    const sess=state.sessions.find(s=>s.id===r.sessionId);
-    const pack=state.packs.find(p=>p.id===sess?.packId);
+    const pack=state.packs.find(p=>p.id===r.packId);
     const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
     const convertCoin=prizeData?.value_jp||0;
-    const exType=prizeData?.exchange_type||'both'; // both / ship_only / coin_only
-    const showShip = exType!=='coin_only';
-    const showCoin = exType!=='ship_only';
+    const exType=prizeData?.exchange_type||'both';
+    const showShip=exType!=='coin_only';
+    const showCoin=exType!=='ship_only';
     return `
     <div class="item-card">
       <div class="ic-left">
