@@ -1450,45 +1450,50 @@ function openShippingModal(dbId){
   document.getElementById('shipping-modal').classList.add('show');
 }
 async function submitShipping(){
-  const name=document.getElementById('ship-name').value;
-  const zip=document.getElementById('ship-zip').value;
+  const name=document.getElementById('ship-name').value.trim();
+  const zip=document.getElementById('ship-zip').value.trim();
   const pref=document.getElementById('ship-pref').value;
-  const city=document.getElementById('ship-city').value;
-  const tel=document.getElementById('ship-tel').value;
+  const city=document.getElementById('ship-city').value.trim();
+  const tel=document.getElementById('ship-tel').value.trim();
+  const building=document.getElementById('ship-building').value.trim()||'';
   if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
-  if(pendingShipResultId&&state.user){
+
+  // まずモーダルを閉じてUXを先に返す
+  closeModal('shipping-modal');
+  showToast('📦 発送依頼を受け付けました！',3000);
+
+  // ローカル状態を更新
+  if(pendingShipResultId){
     const[sessionId]=pendingShipResultId.split('_');
-    // ローカルのshipped状態を更新
     const sess=state.sessions.find(s=>s.id===sessionId);
-    if(sess){const r=sess.results.find(r=>r.dbId===pendingShipResultId);if(r)r.shipped=true;}
-    // draw_sessions更新
-    try{
-      await db.from('draw_sessions').update({
-        results:sess?.results.map(r=>({
-          prize_name:r.prize.name,prize_tier:r.prize.tier,
-          is_converted:r.converted||false,
-          is_shipped:r.shipped||false,
-        }))||[],
-      }).eq('id',sessionId);
-    }catch(e){console.error('draw_sessions更新エラー:',e);}
-    // shipping_requests保存
-    try{
-      const{error}=await db.from('shipping_requests').insert({
+    if(sess){
+      const r=sess.results.find(r=>r.dbId===pendingShipResultId);
+      if(r)r.shipped=true;
+    }
+    // DB保存（失敗しても無視）
+    if(state.user){
+      db.from('shipping_requests').insert({
         user_id:state.user.id,
         draw_session_id:sessionId,
         result_id:pendingShipResultId,
-        name,zip,prefecture:pref,city,
-        building:document.getElementById('ship-building').value||'',
-        tel,status:'pending',
+        name,zip,prefecture:pref,city,building,tel,status:'pending',
+      }).then(({error})=>{
+        if(error)console.error('shipping_requests error:',error.message);
       });
-      if(error)showToast('⚠️ DB保存エラー: '+error.message,4000);
-    }catch(e){
-      showToast('⚠️ エラー: '+e.message,4000);
-      console.error('shipping_requestsエラー:',e);
+      // draw_sessions更新
+      const sess2=state.sessions.find(s=>s.id===sessionId);
+      if(sess2){
+        db.from('draw_sessions').update({
+          results:sess2.results.map(r=>({
+            prize_name:r.prize.name,prize_tier:r.prize.tier,
+            is_converted:r.converted||false,is_shipped:r.shipped||false,
+          })),
+        }).eq('id',sessionId).then(({error})=>{
+          if(error)console.error('draw_sessions error:',error.message);
+        });
+      }
     }
   }
-  closeModal('shipping-modal');
-  showToast('📦 発送依頼を受け付けました！',3000);
   renderItemsPage();
 }
 
