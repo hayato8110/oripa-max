@@ -326,19 +326,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .notice-body{font-size:.78rem;color:var(--text2);line-height:1.5}
 .notice-time{font-size:.68rem;color:var(--text3);margin-top:5px}
 
-/* ══ HISTORY ══ */
-.history-page{padding:12px}
-.history-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
-.hi-icon{font-size:1.5rem;flex-shrink:0}
-.hi-info{flex:1}
-.hi-pack{font-size:.82rem;font-weight:900;color:var(--text)}
-.hi-date{font-size:.68rem;color:var(--text3)}
-.hi-tier{font-size:.7rem;font-weight:900;padding:2px 7px;border-radius:3px}
-.ht-sar{background:var(--primary);color:#fff}
-.ht-sr{background:#7c3aed;color:#fff}
-.ht-rr{background:#2563eb;color:#fff}
-.ht-r{background:#e5e7eb;color:#374151}
-.ht-c{background:#f3f4f6;color:#9ca3af}
+
 
 /* ══ ITEMS PAGE ══ */
 .items-page{padding:12px}
@@ -473,15 +461,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   </div>
 </div>
 
-<!-- PAGE: 当選履歴 -->
-<div id="page-history" class="page">
-  <div class="history-page" id="history-list">
-    <div style="text-align:center;padding:48px;color:var(--text3)">
-      <div style="font-size:2rem;margin-bottom:10px">🕐</div>
-      <div style="font-weight:700;color:var(--text2)">当選履歴はありません</div>
-    </div>
-  </div>
-</div>
+
 
 <!-- PAGE: お知らせ -->
 <div id="page-notices" class="page">
@@ -541,7 +521,6 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 <nav class="bottom-nav">
   <button class="bnav-btn active" data-page="gacha"><span class="bnav-icon">🎴</span>ガチャ</button>
   <button class="bnav-btn" data-page="items"><span class="bnav-icon">📦</span>獲得商品</button>
-  <button class="bnav-btn" data-page="history"><span class="bnav-icon">🕐</span>当選履歴</button>
   <button class="bnav-btn" data-page="notices"><span class="bnav-icon">🔔</span>お知らせ<span class="bnav-badge" id="notice-badge" style="display:none">0</span></button>
   <button class="bnav-btn" data-page="mypage"><span class="bnav-icon">👤</span>マイページ</button>
 </nav>
@@ -1439,7 +1418,11 @@ function renderItemsPage(){
     content.innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">📦</div><div style="font-weight:700;margin-bottom:6px;color:var(--text2)">獲得商品はありません</div></div>';
     return;
   }
-  content.innerHTML='<div class="items-page">'+pending.map(r=>`
+  content.innerHTML='<div class="items-page">'+pending.map(r=>{
+    const pack=state.packs.find(p=>p.id===r.packId||state.sessions.find(s=>s.id===r.sessionId)?.packId===p.id);
+    const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+    const convertCoin=prizeData?.value_jp||0;
+    return `
     <div class="item-card">
       <div class="ic-left">
         <span class="ic-icon">${r.packEmoji}</span>
@@ -1448,8 +1431,11 @@ function renderItemsPage(){
           <div class="ic-pack">${r.packName} · ${rarLabel[r.prize.tier]||r.prize.tier}</div>
         </div>
       </div>
-      <button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>
-    </div>`).join('')+'</div>';
+      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+        <button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>
+        ${convertCoin>0?`<button onclick="convertToPoints('${r.dbId}')" style="background:#fff;color:var(--blue);border:1.5px solid var(--blue);padding:5px 10px;border-radius:6px;font-size:.7rem;font-weight:900;cursor:pointer">🪙${convertCoin}に還元</button>`:''}
+      </div>
+    </div>`}).join('')+'</div>';
 }
 
 /* ══ 発送 ══ */
@@ -1526,7 +1512,6 @@ function renderMyPage(){
       <div class="mp-menu-item" onclick="openPurchase()"><span class="mp-menu-icon">🪙</span>コインをチャージ<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openCoinHistory()"><span class="mp-menu-icon">📊</span>コイン履歴<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openMonthlyHistory()"><span class="mp-menu-icon">📅</span>購入履歴<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="showPage('history',document.querySelector('[data-page=history]'))"><span class="mp-menu-icon">🕐</span>当選履歴<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="showPage('items',document.querySelector('[data-page=items]'))"><span class="mp-menu-icon">📦</span>獲得商品・発送依頼<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openAddressManager()"><span class="mp-menu-icon">📮</span>発送先住所管理<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openReferralProgress()"><span class="mp-menu-icon">🔗</span>友達招待・進捗確認<span class="mp-menu-arrow">›</span></div>
@@ -1718,7 +1703,37 @@ async function submitInquiry(){
   showPage('gacha',document.querySelector('[data-page=gacha]'));
 }
 
-/* ══ コイン履歴 ══ */
+/* ══ ポイント還元 ══ */
+async function convertToPoints(dbId){
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
+  if(!confirm('この商品をポイントに還元しますか？'))return;
+  const[sessionId]=dbId.split('_');
+  const sess=state.sessions.find(s=>s.id===sessionId);
+  const r=sess?.results.find(r=>r.dbId===dbId);
+  if(!r)return;
+  // 管理画面で設定したvalue_jpを還元コインとして使う
+  const pack=state.packs.find(p=>p.id===sess.packId);
+  const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+  const bonus=prizeData?.value_jp||0;
+  if(bonus<=0){showToast('⚠️ この賞品は還元設定がありません');return;}
+  r.converted=true;
+  state.coin+=bonus;
+  updateHeaderPts();
+  try{
+    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`}).catch(()=>{});
+    // draw_sessionsのis_convertedを更新
+    const updatedResults=sess.results.map(res=>({
+      prize_name:res.prize.name,prize_tier:res.prize.tier,
+      is_converted:res.converted||false,is_shipped:res.shipped||false,
+    }));
+    await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId).catch(()=>{});
+  }catch(e){console.error(e);}
+  showToast(`🪙 +${bonus}コインに還元しました！`,2500);
+  renderItemsPage();
+}
+
+
 async function openCoinHistory(){
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
   const{data}=await db.from('transactions').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
@@ -1898,7 +1913,6 @@ function showPage(name,el){
   document.getElementById(`page-${name}`)?.classList.add('active');
   if(name==='mypage')renderMyPage();
   if(name==='notices')renderNotices();
-  if(name==='history')renderHistory();
   if(name==='items')renderItemsPage();
   if(name==='favorites')loadFavoritesPage();
   if(name==='inquiry'&&state.user){document.getElementById('inq-email').value=state.user.email||'';}
