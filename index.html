@@ -1246,6 +1246,7 @@ async function executeDraw(){
 
   state.coin-=cost;
   updateHeaderPts();closeDrawModal();
+  showToast('🎲 抽選開始！',2000);
 
   // 抽選
   const results=Array.from({length:state.drawCount},()=>({prize:pickPrize(prizes,Math.random())}));
