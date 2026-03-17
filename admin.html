@@ -1096,12 +1096,11 @@ async function loadShipping(status='all'){
   document.getElementById('ship-badge').textContent=pending;
   document.getElementById('stat-ship').textContent=pending;
   document.getElementById('shipping-tbl-body').innerHTML=allShipping.map(s=>{
-    const addr=s.address||{};
     return`<tr>
       <td class="td-bold" style="font-size:.72rem">#${(s.id||'').slice(0,8)}</td>
       <td>${s.users?.username||'—'}</td>
-      <td>${(s.result_ids||[]).length}点</td>
-      <td style="font-size:.72rem">${addr.prefecture||''}${addr.city||''}</td>
+      <td style="font-size:.72rem">${s.name||'—'}</td>
+      <td style="font-size:.72rem">${s.prefecture||''}${s.city||''}</td>
       <td style="font-size:.7rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</td>
       <td><span class="badge badge-${s.status==='pending'?'pending':'shipped'}">${s.status==='pending'?'発送待ち':'発送済み'}</span></td>
       <td>
@@ -1112,8 +1111,10 @@ async function loadShipping(status='all'){
   }).join('');
 }
 async function shipOrder(id){const tracking=prompt('追跡番号（任意）:')||'';await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking,shipped_at:new Date().toISOString()}).eq('id',id);showToast('✅ 発送処理完了');loadShipping('all');}
-function viewShipping(id){const s=allShipping.find(x=>x.id===id);if(!s)return;const a=s.address||{};alert(`発送先\n名前: ${a.name||'—'}\n〒${a.zip||'—'}\n${a.prefecture||''}${a.city||''}\n${a.street||''}\n${a.building||''}\nTEL: ${a.tel||'—'}\n\nカード:\n${(s.result_ids||[]).join('\n')}\n追跡番号: ${s.tracking_number||'未設定'}`);}
-
+function viewShipping(id){
+  const s=allShipping.find(x=>x.id===id);if(!s)return;
+  alert(`【発送先】\n名前: ${s.name||'—'}\n〒${s.zip||'—'}\n${s.prefecture||''}${s.city||''}\n${s.building||''}\nTEL: ${s.tel||'—'}\n\n【ユーザー】${s.users?.username||'—'} (${s.users?.email||'—'})\n追跡番号: ${s.tracking_number||'未設定'}`);
+}
 /* ══ HISTORY ══ */
 async function loadHistory(){
   const{data}=await db.from('draw_sessions').select('*,users(username),packs(name)').order('created_at',{ascending:false}).limit(200);
