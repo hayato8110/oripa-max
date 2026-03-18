@@ -292,12 +292,11 @@ input,select,textarea{font-family:inherit;outline:none}
 .mp-pt-label{font-size:.6rem;color:#888;font-weight:700;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
 .mp-pt-val{font-size:1.3rem;font-weight:900;color:#1a0a00}
 .mp-menu{background:var(--bg2);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin-top:10px;box-shadow:0 2px 12px rgba(0,0,0,.3)}
-.mp-menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;color:var(--text);font-size:.88rem;font-weight:700;transition:.15s}
+.mp-menu-item{display:flex;align-items:center;gap:12px;padding:16px 16px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;color:#ffffff;font-size:.95rem;font-weight:700;transition:.15s}
 .mp-menu-item:last-child{border-bottom:none}
 .mp-menu-item:active{background:rgba(201,168,76,.08)}
-.mp-menu-icon{font-size:1.1rem;width:26px;text-align:center;flex-shrink:0;opacity:.8}
-.mp-menu-arrow{margin-left:auto;color:rgba(255,255,255,.2);font-size:1.1rem}
-.ref-copy-btn{width:100%;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:10px;border-radius:8px;font-weight:900;font-size:.85rem}
+.mp-menu-icon{font-size:1.2rem;width:26px;text-align:center;flex-shrink:0}
+.mp-menu-arrow{margin-left:auto;color:rgba(255,255,255,.3);font-size:1.1rem}
 
 /* ══ NOTICE ══ */
 .notice-item{background:var(--card-bg);border:1px solid rgba(201,168,76,.12);border-radius:10px;padding:12px 14px;margin-bottom:8px}
@@ -558,8 +557,6 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
       <input type="password" class="auth-input" id="reg-pass" placeholder="パスワード">
       <label class="auth-label">生年月日 <span style="color:var(--primary);font-size:.7rem">※18歳以上のみ</span></label>
       <input type="date" class="auth-input" id="reg-birth">
-      <label class="auth-label">紹介コード（任意）</label>
-      <input type="text" class="auth-input" id="reg-referral" placeholder="紹介コードがあれば入力（+300コイン）">
       <button class="auth-submit" onclick="doRegister()">無料登録する</button>
     </div>
   </div>
@@ -784,11 +781,6 @@ async function loadUserProfile(userId){
   state.totalSpent=profile.total_spent||0;
   updateHeaderPts();
   checkLoginBonus();
-  if(!state.user.referral_code){
-    const code=generateCode();
-    await db.from('users').update({referral_code:code}).eq('id',userId);
-    state.user.referral_code=code;
-  }
 }
 
 /* ══ AUTH ══ */
@@ -810,26 +802,16 @@ async function doRegister(){
   const email=document.getElementById('reg-email').value;
   const pass=document.getElementById('reg-pass').value;
   const birth=document.getElementById('reg-birth').value;
-  const referral=document.getElementById('reg-referral').value;
   if(!name||!email||!pass||!birth){showToast('⚠️ 全項目を入力してください');return;}
   const age=Math.floor((Date.now()-new Date(birth))/(365.25*24*3600*1000));
   if(age<18){showToast('⚠️ 18歳未満は利用できません');return;}
   showToast('登録中...');
   const{data,error}=await db.auth.signUp({email,password:pass});
   if(error){showToast('⚠️ '+error.message);return;}
-  let bonusCoin=0;
-  if(referral){
-    const{data:refUser}=await db.from('users').select('id,coin_points').eq('referral_code',referral).single();
-    if(refUser){
-      bonusCoin+=300;
-      await db.from('users').update({coin_points:(refUser.coin_points||0)+0}).eq('id',refUser.id);
-    }
-  }
-  const refCode=generateCode();
   await db.from('users').insert({
     id:data.user.id,email,username:name,
-    password_hash:'supabase_auth',coin_points:bonusCoin,
-    birth_date:birth,referral_code:refCode,
+    password_hash:'supabase_auth',coin_points:0,
+    birth_date:birth,
   });
   state.session=data.session;
   await loadUserProfile(data.user.id);
@@ -1561,7 +1543,6 @@ function renderMyPage(){
       </div>`;
     return;
   }
-  const refCode=state.user.referral_code||'—';
   content.innerHTML=`
     <div class="mp-user-card">
       <div style="display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1.5px solid rgba(255,255,255,.15);margin-bottom:14px;position:relative;z-index:1">
@@ -1614,10 +1595,6 @@ function renderMyPage(){
     <div style="text-align:center;padding:8px 0 4px;font-size:.65rem;color:var(--text3)">© 2026 オリパMAX All Rights Reserved.</div>`;
 }
 
-function copyCode(code){
-  navigator.clipboard.writeText(code).catch(()=>{});
-  showToast('📋 コードをコピーしました！');
-}
 
 /* ══ お気に入り ══ */
 let favorites=new Set();
@@ -1844,42 +1821,6 @@ async function openMonthlyHistory(){
   modal.innerHTML=`<div class="bottom-sheet"><div class="bs-drag"></div>
     <div style="padding:14px 16px;border-bottom:1px solid var(--border)"><span style="font-size:1.05rem;font-weight:900;color:var(--text)">📅 購入履歴</span></div>
     <div style="max-height:60vh;overflow-y:auto">${rows||'<div style="padding:40px;text-align:center;color:var(--text3)">購入履歴がありません</div>'}</div>
-    <button class="bs-cancel-btn" onclick="this.closest('.modal-overlay').remove()">閉じる</button>
-  </div>`;
-  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
-  document.body.appendChild(modal);
-}
-
-/* ══ 友達招待進捗 ══ */
-async function openReferralProgress(){
-  if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  const refCode=state.user.referral_code||'—';
-  const{count}=await db.from('users').select('*',{count:'exact',head:true}).eq('referral_code',refCode);
-  const modal=document.createElement('div');
-  modal.className='modal-overlay show';
-  modal.innerHTML=`<div class="bottom-sheet"><div class="bs-drag"></div>
-    <div style="padding:14px 16px;border-bottom:1px solid var(--border)"><span style="font-size:1.05rem;font-weight:900;color:var(--text)">🔗 友達招待</span></div>
-    <div style="padding:16px">
-      <div style="background:#fff8f0;border:2px dashed #ffd9c8;border-radius:12px;padding:16px;text-align:center;margin-bottom:14px">
-        <div style="font-size:.78rem;color:var(--text3);margin-bottom:6px">あなたの紹介コード</div>
-        <div style="font-size:1.8rem;font-weight:900;color:var(--primary);letter-spacing:.15em">${refCode}</div>
-        <button onclick="navigator.clipboard.writeText('${refCode}');showToast('コピーしました！')" style="margin-top:8px;background:var(--primary);color:#fff;padding:7px 20px;border-radius:8px;font-size:.78rem;font-weight:900">📋 コピー</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;text-align:center">
-          <div style="font-size:.72rem;color:var(--green);font-weight:700;margin-bottom:4px">招待した人数</div>
-          <div style="font-size:1.8rem;font-weight:900;color:var(--green)">${count||0}</div>
-        </div>
-        <div style="background:#fff8f0;border:1px solid #ffd9c8;border-radius:10px;padding:14px;text-align:center">
-          <div style="font-size:.72rem;color:var(--primary);font-weight:700;margin-bottom:4px">獲得コイン</div>
-          <div style="font-size:1.8rem;font-weight:900;color:var(--primary)">${((count||0)*300).toLocaleString()}</div>
-        </div>
-      </div>
-      <div style="font-size:.78rem;color:var(--text3);line-height:1.7;background:#f8f8f8;border-radius:8px;padding:12px">
-        友達があなたのコードで登録すると<br>
-        <span style="color:var(--primary);font-weight:700">あなたに+300コイン、友達にも+300コイン</span>プレゼント！
-      </div>
-    </div>
     <button class="bs-cancel-btn" onclick="this.closest('.modal-overlay').remove()">閉じる</button>
   </div>`;
   modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
