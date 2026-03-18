@@ -1120,10 +1120,42 @@ function closeJackpot(){
 let resultFlipped=0,resultTotal=0;
 function showResultCards(results,pack){
   resultFlipped=0;resultTotal=results.length;
-  document.getElementById('result-title').textContent=results.length>=10?'🎊 自動開封中...':'カードをタップして開封！';
-  document.getElementById('result-hint').style.display=results.length>=10?'none':'block';
+  const isList=results.length>=10;
+
+  document.getElementById('result-title').textContent=isList?'🎊 開封完了！':'カードをタップして開封！';
+  document.getElementById('result-hint').style.display=isList?'none':'block';
   document.getElementById('result-done').classList.remove('show');
   document.getElementById('share-btn').style.display='none';
+
+  if(isList){
+    // リスト表示（10枚以上）
+    const rarLabel2={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C'};
+    const tierColor={sar:'#ff9070',sr:'#c4b5fd',rr:'#93c5fd',r:'#94a3b8',c:'#4a4a5a'};
+    document.getElementById('result-cards').innerHTML=`
+      <div style="width:100%;max-width:440px;overflow-y:auto;max-height:70vh;padding:0 12px;display:flex;flex-direction:column;gap:8px">
+        ${results.map((r,i)=>{
+          const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+          const imgUrl=prizeData?.image_url||'';
+          return `
+          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:12px">
+            ${imgUrl
+              ?`<img src="${imgUrl}" style="width:52px;height:52px;object-fit:contain;border-radius:6px;flex-shrink:0;background:rgba(0,0,0,.3)">`
+              :`<div style="width:52px;height:52px;border-radius:6px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0">${pack?.emoji||'🎴'}</div>`}
+            <div style="flex:1;min-width:0">
+              <div style="font-size:.85rem;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.prize.name}</div>
+              <div style="font-size:.7rem;color:${tierColor[r.prize.tier]||'#888'};font-weight:700;margin-top:2px">${rarLabel2[r.prize.tier]||r.prize.tier} ✦</div>
+            </div>
+            <div style="font-size:.65rem;color:rgba(255,255,255,.3)">#${i+1}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    document.getElementById('result-screen').classList.add('show');
+    resultFlipped=resultTotal;
+    document.getElementById('result-done').classList.add('show');
+    return;
+  }
+
+  // カード表示（9枚以下）
   document.getElementById('result-cards').innerHTML=results.map((r,i)=>{
     const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
     const imgUrl=prizeData?.image_url||'';
@@ -1146,9 +1178,6 @@ function showResultCards(results,pack){
     </div>`;
   }).join('');
   document.getElementById('result-screen').classList.add('show');
-  if(results.length>=10){
-    setTimeout(()=>showSequentialCards(results,pack),500);
-  }
 }
 function flipResultCard(i,tier){
   const card=document.getElementById(`rc-${i}`);
