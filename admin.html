@@ -464,7 +464,7 @@ input,select,textarea{font-family:inherit}
           <label class="form-label">サムネイル画像</label>
           <!-- プレビューエリア（クリックでアップロード） -->
           <label for="pm-image-file" style="display:block;cursor:pointer">
-            <div id="pm-image-preview-wrap" style="width:100%;height:120px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:6px;transition:.2s"
+            <div id="pm-image-preview-wrap" style="width:100%;height:120px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:6px;transition:.2s;position:relative"
               ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)'"
               ondragleave="this.style.borderColor='rgba(201,168,76,.3)'"
               ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.3)';handlePackDrop(event)">
@@ -922,10 +922,17 @@ function previewPackImage(url){
   const wrap=document.getElementById('pm-image-preview-wrap');
   if(!wrap)return;
   if(url){
-    wrap.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=\\'color:rgba(255,60,60,.5);font-size:.75rem\\'>読み込み失敗</div>'">`;
+    wrap.innerHTML=`
+      <img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=\\'color:rgba(255,60,60,.5);font-size:.75rem\\'>読み込み失敗</div>'">
+      <button onclick="event.preventDefault();event.stopPropagation();clearPackImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:50%;width:26px;height:26px;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>`;
   } else {
     wrap.innerHTML=`<div style="text-align:center;pointer-events:none"><div style="font-size:1.5rem;margin-bottom:4px">📁</div><div style="font-size:.75rem;color:rgba(255,255,255,.4)">タップ or ドラッグして画像をアップ</div></div>`;
   }
+}
+
+function clearPackImage(){
+  document.getElementById('pm-image-url').value='';
+  previewPackImage('');
 }
 
 async function uploadBannerImage(input){
@@ -1048,12 +1055,12 @@ async function uploadBlockImage(input,idx){
   showToast('📤 アップロード中...');
   const url=await uploadImage(file,'prizes');
   if(url){
-    // URLフィールドに値をセット
     const imgInput=document.getElementById(`prize-img-${idx}`);
     if(imgInput)imgInput.value=url;
-    // プレビューエリアを更新
     const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
-    if(wrap)wrap.innerHTML=`<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain">`;
+    if(wrap)wrap.innerHTML=`
+      <img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain">
+      <button onclick="event.preventDefault();event.stopPropagation();clearBlockImage(${idx})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:50%;width:20px;height:20px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>`;
     showToast('✅ 画像アップロード完了！');
   }
 }
@@ -1063,10 +1070,19 @@ function previewBlockImage(input,idx){
   const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
   if(!wrap)return;
   if(url){
-    wrap.innerHTML=`<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain" onerror="this.parentElement.innerHTML='<span style=\\'font-size:.7rem;color:rgba(255,60,60,.5)\\'>画像を読み込めません</span>'">`;
+    wrap.innerHTML=`
+      <img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain" onerror="this.parentElement.innerHTML='<span style=\\'font-size:.7rem;color:rgba(255,60,60,.5)\\'>画像を読み込めません</span>'">
+      <button onclick="event.preventDefault();event.stopPropagation();clearBlockImage(${idx})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:50%;width:20px;height:20px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>`;
   } else {
     wrap.innerHTML=`<span style="font-size:.7rem;color:rgba(255,255,255,.25)">📷 クリックして画像をアップ</span>`;
   }
+}
+
+function clearBlockImage(idx){
+  const imgInput=document.getElementById(`prize-img-${idx}`);
+  if(imgInput)imgInput.value='';
+  const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
+  if(wrap)wrap.innerHTML=`<span style="font-size:.7rem;color:rgba(255,255,255,.25)">📷 クリックして画像をアップ</span>`;
 }
 
 function getPrizeBlocksData(packId){
@@ -1174,13 +1190,20 @@ function previewBannerImage(url){
   const frontPrev=document.getElementById('bn-front-preview');
   const previewImg=document.getElementById('bn-preview-img');
   if(url){
-    prev.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+    prev.innerHTML=`
+      <img src="${url}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="event.preventDefault();event.stopPropagation();clearBannerImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:50%;width:26px;height:26px;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>`;
     if(frontPrev)frontPrev.style.display='block';
     if(previewImg)previewImg.src=url;
   } else {
     prev.innerHTML=`<div style="text-align:center"><div style="font-size:2rem;margin-bottom:6px">📁</div><div style="font-size:.78rem;color:rgba(255,255,255,.4)">クリック or ドロップして画像をアップ</div><div style="font-size:.65rem;color:rgba(255,255,255,.2);margin-top:2px">JPG / PNG / WebP</div></div>`;
     if(frontPrev)frontPrev.style.display='none';
   }
+}
+
+function clearBannerImage(){
+  document.getElementById('bn-image-url-hidden').value='';
+  previewBannerImage('');
 }
 
 async function handleBannerDrop(event){
