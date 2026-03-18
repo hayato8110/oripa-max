@@ -1277,20 +1277,20 @@ async function executeDraw(){
   updateHeaderPts();
   closeDrawModal();
 
-  // 残り在庫のコピーを作成（ローカルで管理）
+  // 残り在庫のコピーを作成（idをキーに）
   const prizeStock={};
   freshPrizes.forEach(p=>{
-    prizeStock[p.name]=(p.remaining_qty!=null?p.remaining_qty:p.quantity)||0;
+    prizeStock[p.id]=(p.remaining_qty!=null?p.remaining_qty:p.quantity)||0;
   });
 
   const results=[];
   for(let i=0;i<state.drawCount;i++){
     // 在庫がある賞品だけを対象に抽選
-    const available=freshPrizes.filter(p=>prizeStock[p.name]>0);
+    const available=freshPrizes.filter(p=>prizeStock[p.id]>0);
     if(!available.length)break;
     const prize=pickPrize(available,Math.random());
     results.push({prize});
-    prizeStock[prize.name]--;
+    prizeStock[prize.id]--;
   }
 
   if(!results.length){
@@ -1299,12 +1299,12 @@ async function executeDraw(){
 
   // DBの残り在庫を一括更新
   await Promise.all(freshPrizes.map(p=>
-    db.from('prizes').update({remaining_qty:prizeStock[p.name]}).eq('id',p.id)
+    db.from('prizes').update({remaining_qty:prizeStock[p.id]}).eq('id',p.id)
   ));
 
   // stateのprizesも更新
   const packInState=state.packs.find(p=>p.id===pack.id);
-  if(packInState)packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.name]}));
+  if(packInState)packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
   const sessionId=generateSeed().slice(0,8);
   const session={
     id:sessionId,packId:pack.id,packName:pack.name,packEmoji:pack.emoji||'🎴',
