@@ -515,29 +515,59 @@ input,select,textarea{font-family:inherit}
 <!-- BANNER MODAL -->
 <div class="modal-overlay" id="banner-modal">
   <div class="modal">
-    <div class="modal-header"><span class="modal-title" id="banner-modal-title">🖼️ バナー設定</span><button class="modal-close" onclick="closeModal('banner-modal')">✕</button></div>
+    <div class="modal-header"><span class="modal-title" id="banner-modal-title">🖼️ バナー追加</span><button class="modal-close" onclick="closeModal('banner-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル *</label><input class="form-input" id="bn-title" placeholder="例: 🎊 新規登録特典！500コインプレゼント"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub" placeholder="例: 今すぐ登録して引いてみよう！"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タグテキスト</label><input class="form-input" id="bn-tag" placeholder="例: 🎊 期間限定"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">リンク先URL</label><input class="form-input" id="bn-link" placeholder="https://..."></div>
-      <div class="form-group" style="margin-bottom:10px">
-        <label class="form-label">バナー画像（任意）</label>
-        <div id="bn-img-preview" style="width:100%;height:100px;border-radius:8px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:6px;cursor:pointer" onclick="document.getElementById('bn-file').click()">
-          <span style="font-size:.75rem;color:rgba(255,255,255,.3)">📷 クリックして画像をアップロード</span>
+
+      <!-- 画像アップロード（メイン） -->
+      <div style="margin-bottom:14px">
+        <label class="form-label" style="margin-bottom:6px;display:block">📷 バナー画像（タップしてアップロード）</label>
+        <div id="bn-img-preview" onclick="document.getElementById('bn-file').click()" style="width:100%;height:140px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:.2s;position:relative">
+          <div style="text-align:center">
+            <div style="font-size:2rem;margin-bottom:6px">📁</div>
+            <div style="font-size:.78rem;color:rgba(255,255,255,.4)">クリック or ドロップして画像をアップ</div>
+            <div style="font-size:.65rem;color:rgba(255,255,255,.2);margin-top:2px">JPG / PNG / WebP</div>
+          </div>
         </div>
         <input type="file" accept="image/*" id="bn-file" style="display:none" onchange="uploadBannerImageNew(this)">
-        <input class="form-input" id="bn-image-url" placeholder="または画像URLを貼り付け" oninput="previewBannerImage(this.value)" style="margin-bottom:6px">
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">背景グラデーション（画像なしの場合）</label><input class="form-input" id="bn-bg" placeholder="linear-gradient(135deg,#1a0040,#cc00ff)"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div class="form-group"><label class="form-label">表示順</label><input type="number" class="form-input" id="bn-order" value="0"></div>
-        <div class="form-group" style="padding-top:18px"><label class="form-check"><input type="checkbox" id="bn-active" checked> 公開する</label></div>
+
+      <!-- フロントプレビュー -->
+      <div id="bn-front-preview" style="display:none;margin-bottom:14px">
+        <label class="form-label" style="margin-bottom:6px;display:block">👁️ フロント表示プレビュー</label>
+        <div style="width:100%;height:140px;border-radius:10px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.1)">
+          <img id="bn-preview-img" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+          <div style="position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.6));display:flex;align-items:flex-end;padding:12px 14px">
+            <div>
+              <div id="bn-preview-tag" style="font-size:.6rem;color:rgba(255,255,255,.8);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;display:none"></div>
+              <div id="bn-preview-title" style="font-size:1rem;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5)"></div>
+              <div id="bn-preview-sub" style="font-size:.72rem;color:rgba(255,255,255,.75);margin-top:2px;display:none"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- テキスト設定（折りたたみ） -->
+      <details style="margin-bottom:10px">
+        <summary style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;padding:6px 0;list-style:none">▶ テキスト・リンク設定（任意）</summary>
+        <div style="padding-top:10px">
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">タイトル</label><input class="form-input" id="bn-title" placeholder="例: 銀行振込が可能になりました！" oninput="updateBannerPreview()"></div>
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub" placeholder="例: 詳しくはこちら" oninput="updateBannerPreview()"></div>
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">タグ（小文字ラベル）</label><input class="form-input" id="bn-tag" placeholder="例: 🎊 お知らせ" oninput="updateBannerPreview()"></div>
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">タップ先URL</label><input class="form-input" id="bn-link" placeholder="https://..."></div>
+        </div>
+      </details>
+
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <label class="form-label" style="margin:0">表示順</label>
+          <input type="number" class="form-input" id="bn-order" value="0" style="width:60px;padding:5px 8px">
+        </div>
+        <label class="form-check"><input type="checkbox" id="bn-active" checked> 公開する</label>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('banner-modal')">キャンセル</button>
-      <button class="btn btn-primary btn-lg" onclick="saveBanner()">保存</button>
+      <button class="btn btn-primary btn-lg" onclick="saveBanner()">✅ 保存</button>
     </div>
   </div>
 </div>
@@ -1069,12 +1099,29 @@ async function loadBanners(){
     </div>`).join('');
 }
 
+function updateBannerPreview(){
+  const title=document.getElementById('bn-title').value;
+  const sub=document.getElementById('bn-sub').value;
+  const tag=document.getElementById('bn-tag').value;
+  const titleEl=document.getElementById('bn-preview-title');
+  const subEl=document.getElementById('bn-preview-sub');
+  const tagEl=document.getElementById('bn-preview-tag');
+  if(titleEl)titleEl.textContent=title;
+  if(subEl){subEl.textContent=sub;subEl.style.display=sub?'block':'none';}
+  if(tagEl){tagEl.textContent=tag;tagEl.style.display=tag?'block':'none';}
+}
+
 function previewBannerImage(url){
   const prev=document.getElementById('bn-img-preview');
+  const frontPrev=document.getElementById('bn-front-preview');
+  const previewImg=document.getElementById('bn-preview-img');
   if(url){
-    prev.innerHTML=`<img src="${url}" style="max-width:100%;max-height:100%;object-fit:cover" onerror="this.style.display='none'">`;
+    prev.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+    if(frontPrev)frontPrev.style.display='block';
+    if(previewImg)previewImg.src=url;
   } else {
-    prev.innerHTML=`<span style="font-size:.75rem;color:rgba(255,255,255,.3)">📷 クリックして画像をアップロード</span>`;
+    prev.innerHTML=`<div style="text-align:center"><div style="font-size:2rem;margin-bottom:6px">📁</div><div style="font-size:.78rem;color:rgba(255,255,255,.4)">クリック or ドロップして画像をアップ</div><div style="font-size:.65rem;color:rgba(255,255,255,.2);margin-top:2px">JPG / PNG / WebP</div></div>`;
+    if(frontPrev)frontPrev.style.display='none';
   }
 }
 
@@ -1083,19 +1130,26 @@ async function uploadBannerImageNew(input){
   showToast('📤 アップロード中...');
   const url=await uploadImage(file,'banners');
   if(url){
-    document.getElementById('bn-image-url').value=url;
+    if(!document.getElementById('bn-image-url-hidden')){
+      const h=document.createElement('input');h.type='hidden';h.id='bn-image-url-hidden';
+      document.getElementById('banner-modal').appendChild(h);
+    }
+    document.getElementById('bn-image-url-hidden').value=url;
     previewBannerImage(url);
-    showToast('✅ 画像アップロード完了！');
+    showToast('✅ 画像アップロード完了！プレビューを確認してください');
   }
 }
 
 function openBannerModal(){
   editingBannerId=null;
   document.getElementById('banner-modal-title').textContent='🖼️ バナー追加';
-  ['bn-title','bn-sub','bn-link','bn-bg','bn-tag','bn-image-url'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  ['bn-title','bn-sub','bn-link','bn-tag'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  const h=document.getElementById('bn-image-url-hidden');if(h)h.value='';
   document.getElementById('bn-order').value='0';
   document.getElementById('bn-active').checked=true;
+  document.getElementById('bn-file').value='';
   previewBannerImage('');
+  updateBannerPreview();
   document.getElementById('banner-modal').classList.add('show');
 }
 
@@ -1106,32 +1160,37 @@ function editBanner(id){
   document.getElementById('bn-title').value=b.title||'';
   document.getElementById('bn-sub').value=b.sub_text||'';
   document.getElementById('bn-link').value=b.link_url||'';
-  document.getElementById('bn-bg').value=b.bg_style||'';
   document.getElementById('bn-tag').value=b.tag_text||'';
   document.getElementById('bn-order').value=b.sort_order||0;
-  document.getElementById('bn-image-url').value=b.image_url||'';
   document.getElementById('bn-active').checked=b.is_active!==false;
+  if(!document.getElementById('bn-image-url-hidden')){
+    const h=document.createElement('input');h.type='hidden';h.id='bn-image-url-hidden';
+    document.getElementById('banner-modal').appendChild(h);
+  }
+  document.getElementById('bn-image-url-hidden').value=b.image_url||'';
   previewBannerImage(b.image_url||'');
+  updateBannerPreview();
   document.getElementById('banner-modal').classList.add('show');
 }
 
 async function saveBanner(){
+  const image_url=document.getElementById('bn-image-url-hidden')?.value||'';
   const title=document.getElementById('bn-title').value;
-  if(!title){showToast('⚠️ タイトルを入力してください');return;}
+  if(!image_url&&!title){showToast('⚠️ 画像またはタイトルを入力してください');return;}
   const bannerData={
-    title,
+    title:title||'',
     sub_text:document.getElementById('bn-sub').value,
     link_url:document.getElementById('bn-link').value,
-    bg_style:document.getElementById('bn-bg').value,
+    bg_style:'linear-gradient(135deg,#1a1200,#2a1e00)',
     tag_text:document.getElementById('bn-tag').value,
-    image_url:document.getElementById('bn-image-url').value||null,
+    image_url:image_url||null,
     sort_order:parseInt(document.getElementById('bn-order').value)||0,
     is_active:document.getElementById('bn-active').checked,
   };
   if(editingBannerId)await db.from('banners').update(bannerData).eq('id',editingBannerId);
   else await db.from('banners').insert(bannerData);
   closeModal('banner-modal');
-  showToast('✅ バナーを保存しました');
+  showToast('✅ バナーを保存しました！フロントに反映されます');
   loadBanners();
 }
 
