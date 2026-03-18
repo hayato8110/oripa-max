@@ -281,7 +281,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .page.active{display:block}
 
 /* ══ MYPAGE ══ */
-.mypage{padding:14px;background:var(--bg)}
+.mypage{padding:14px;background:#1e1e26}
 .mp-user-card{background:linear-gradient(135deg,#1a0050,#0a2a8a,#006688,#00aa66);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:20px 18px;margin-bottom:12px;color:var(--text);position:relative;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.5)}
 .mp-user-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,.12),transparent 70%);border-radius:50%;pointer-events:none}
 .mp-user-card::after{content:'';position:absolute;bottom:-40px;left:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(0,200,255,.1),transparent 70%);border-radius:50%;pointer-events:none}
@@ -369,7 +369,7 @@ const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 const state={
   user:null,session:null,
-  coin:500,dp:0,
+  coin:0,dp:0,
   rank:'ブロンズIV',totalSpent:0,
   currentCat:'all',currentSort:'new',
   activePack:null,drawCount:1,
@@ -535,7 +535,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     <div class="bs-drag"></div>
     <div style="padding:14px 16px 0;text-align:center">
       <div style="font-size:1.2rem;font-weight:900;color:var(--text)">🎴 オリパMAXへようこそ</div>
-      <div style="font-size:.78rem;color:var(--text3);margin-top:4px">登録で500コイン無料プレゼント！</div>
+      <div style="font-size:.78rem;color:var(--text3);margin-top:4px"></div>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuth('login')">ログイン</button>
@@ -560,7 +560,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
       <input type="date" class="auth-input" id="reg-birth">
       <label class="auth-label">紹介コード（任意）</label>
       <input type="text" class="auth-input" id="reg-referral" placeholder="紹介コードがあれば入力（+300コイン）">
-      <button class="auth-submit" onclick="doRegister()">無料登録して500コインもらう！</button>
+      <button class="auth-submit" onclick="doRegister()">無料登録する</button>
     </div>
   </div>
 </div>
@@ -817,12 +817,12 @@ async function doRegister(){
   showToast('登録中...');
   const{data,error}=await db.auth.signUp({email,password:pass});
   if(error){showToast('⚠️ '+error.message);return;}
-  let bonusCoin=500;
+  let bonusCoin=0;
   if(referral){
     const{data:refUser}=await db.from('users').select('id,coin_points').eq('referral_code',referral).single();
     if(refUser){
       bonusCoin+=300;
-      await db.from('users').update({coin_points:(refUser.coin_points||0)+500}).eq('id',refUser.id);
+      await db.from('users').update({coin_points:(refUser.coin_points||0)+0}).eq('id',refUser.id);
     }
   }
   const refCode=generateCode();
@@ -834,7 +834,7 @@ async function doRegister(){
   state.session=data.session;
   await loadUserProfile(data.user.id);
   closeAllModals();
-  showToast(`🎉 登録完了！${bonusCoin}コインプレゼント！`,3000);
+  showToast(`🎉 登録完了！`,3000);
 }
 async function doForgotPassword(){
   const email=prompt('登録済みのメールアドレスを入力:');
@@ -1553,7 +1553,7 @@ function renderMyPage(){
       <div style="text-align:center;padding:48px 16px">
         <div style="margin-bottom:14px;color:rgba(240,234,220,.3);display:flex;justify-content:center"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
         <div style="font-size:1rem;font-weight:900;margin-bottom:6px;color:var(--text)">ログインしてください</div>
-        <div style="font-size:.78rem;color:var(--text3);margin-bottom:20px">登録で500コイン無料プレゼント！</div>
+        <div style="font-size:.78rem;color:var(--text3);margin-bottom:20px"></div>
         <button onclick="document.getElementById('auth-modal').classList.add('show')"
           style="background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:13px 40px;border-radius:12px;font-weight:900;font-size:.95rem;box-shadow:0 4px 14px rgba(201,168,76,.3)">
           ログイン / 無料登録
