@@ -1223,45 +1223,31 @@ function pickDrawCount(el,n){
 async function executeDraw(){
   const pack=state.activePack;if(!pack)return;
   if(!state.user){
-      document.getElementById('auth-modal').classList.add('show');
+    document.getElementById('auth-modal').classList.add('show');
     showToast('ガチャを引くにはログインが必要です');return;
   }
   const cost=pack.price*state.drawCount;
-  if(state.coin<cost){
-    showToast('🪙 コインが不足しています');
-    closeDrawModal();openPurchase();return;
-  }
-  if((pack.remaining||0)<state.drawCount){
-    showToast('⚠️ 残り口数が不足しています');return;
-  }
-  const prizes=pack.prizes||[];
-  if(!prizes.length){
-    showToast('⚠️ 賞品が設定されていません');return;
-  }
-
-  state.coin-=cost;
-  state.totalSpent=(state.totalSpent||0)+cost;
-  updateHeaderPts();
+  if(state.coin<cost){showToast('🪙 コインが不足しています');openPurchase();return;}
+  if((pack.remaining||0)<state.drawCount){showToast('⚠️ 残り口数が不足しています');return;}
 
   // DBから最新の賞品在庫を取得
   const{data:freshPrizes,error:prizesErr}=await db.from('prizes').select('*').eq('pack_id',pack.id);
-  if(prizesErr||!freshPrizes?.length){
-    showToast('⚠️ 賞品データの取得に失敗しました');return;
-  }
+  if(prizesErr||!freshPrizes?.length){showToast('⚠️ 賞品データの取得に失敗しました');return;}
 
+  // コイン消費（1回だけ）
   state.coin-=cost;
   state.totalSpent=(state.totalSpent||0)+cost;
   updateHeaderPts();
 
-  // 残り在庫のコピーを作成（idをキーに）
+  // 在庫コピー（idをキーに）
   const prizeStock={};
   freshPrizes.forEach(p=>{
     prizeStock[p.id]=(p.remaining_qty!=null?p.remaining_qty:p.quantity)||0;
   });
 
+  // 抽選（在庫がある賞品のみ）
   const results=[];
   for(let i=0;i<state.drawCount;i++){
-    // 在庫がある賞品だけを対象に抽選
     const available=freshPrizes.filter(p=>prizeStock[p.id]>0);
     if(!available.length)break;
     const prize=pickPrize(available,Math.random());
@@ -1269,18 +1255,20 @@ async function executeDraw(){
     prizeStock[prize.id]--;
   }
 
-  if(!results.length){
-    showToast('⚠️ 在庫がありません');return;
-  }
+  if(!results.length){showToast('⚠️ 在庫がありません');return;}
 
-  // DBの残り在庫を一括更新
+  // DBの在庫を更新
   await Promise.all(freshPrizes.map(p=>
     db.from('prizes').update({remaining_qty:prizeStock[p.id]}).eq('id',p.id)
   ));
 
-  // stateのprizesも更新
+  // stateを更新
   const packInState=state.packs.find(p=>p.id===pack.id);
-  if(packInState)packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
+  if(packInState){
+    packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
+    packInState.remaining=Math.max(0,(packInState.remaining||0)-results.length);
+  }
+
   const sessionId=generateSeed().slice(0,8);
   const session={
     id:sessionId,packId:pack.id,packName:pack.name,packEmoji:pack.emoji||'🎴',
@@ -1288,10 +1276,10 @@ async function executeDraw(){
     cost,date:new Date().toLocaleString('ja-JP'),shipped:false,
   };
   state.sessions.unshift(session);
+
   try{
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
-    await db.from('packs').update({remaining:Math.max(0,(pack.remaining||0)-results.length)}).eq('id',pack.id);
-    if(packInState)packInState.remaining=Math.max(0,(packInState.remaining||0)-results.length);
+    await db.from('packs').update({remaining:packInState?.remaining||0}).eq('id',pack.id);
     const{data:sess}=await db.from('draw_sessions').insert({
       user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
       server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
@@ -1412,7 +1400,7 @@ function renderPackCards(list){
           `<div class="pc-btns">
             ${drawOpts.d1!==false?`<button class="pc-btn-1" onclick="drawDirect('${p.id}',1)">1回ガチャ</button>`:''}
             ${drawOpts.d10?`<button class="pc-btn-5" onclick="drawDirect('${p.id}',10)">10連ガチャ</button>`:''}
-            ${drawOpts.d100?`<button class="pc-btn-100" onclick="drawDirect('${p.id}',100)" style="grid-column:1/-1;background:linear-gradient(135deg,#1a0a00,#3a1e00);color:var(--gold2);border:1.5px solid rgba(201,168,76,.4);border-radius:10px;font-size:.88rem;font-weight:900;padding:13px;letter-spacing:.04em">💯 100連ガチャ</button>`:''}
+            ${drawOpts.d100?`<button class="pc-btn-100" onclick="drawDirect('${p.id}',100)" style="grid-column:1/-1;background:linear-gradient(135deg,#1a0a00,#3a1e00);color:var(--gold2);border:1.5px solid rgba(201,168,76,.4);border-radius:10px;font-size:.88rem;font-weight:900;padding:13px;letter-spacing:.04em">100連ガチャ</button>`:''}
           </div>`
         }
       </div>
