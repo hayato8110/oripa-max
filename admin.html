@@ -462,14 +462,20 @@ input,select,textarea{font-family:inherit}
         <div class="form-group form-full"><label class="form-label">パック名 *</label><input class="form-input" id="pm-name" placeholder="例: リザードン伝説オリパ"></div>
         <div class="form-group form-full">
           <label class="form-label">サムネイル画像</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <input type="file" id="pm-image-file" accept="image/*" style="display:none" onchange="uploadPackImage(this)">
-            <button class="btn btn-secondary" onclick="document.getElementById('pm-image-file').click()">📁 画像をアップロード</button>
-            <input class="form-input" id="pm-image-url" placeholder="または画像URLを入力" style="flex:1">
-          </div>
-          <div id="pm-image-preview" style="margin-top:8px;display:none">
-            <img id="pm-preview-img" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1)">
-          </div>
+          <!-- プレビューエリア（クリックでアップロード） -->
+          <label for="pm-image-file" style="display:block;cursor:pointer">
+            <div id="pm-image-preview-wrap" style="width:100%;height:120px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:6px;transition:.2s"
+              ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)'"
+              ondragleave="this.style.borderColor='rgba(201,168,76,.3)'"
+              ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.3)';handlePackDrop(event)">
+              <div style="text-align:center;pointer-events:none">
+                <div style="font-size:1.5rem;margin-bottom:4px">📁</div>
+                <div style="font-size:.75rem;color:rgba(255,255,255,.4)">タップ or ドラッグして画像をアップ</div>
+              </div>
+            </div>
+          </label>
+          <input type="file" id="pm-image-file" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" onchange="uploadPackImage(this)">
+          <input class="form-input" id="pm-image-url" placeholder="または画像URLを貼り付け" style="width:100%" oninput="previewPackImage(this.value)">
         </div>
         <div class="form-group"><label class="form-label">カテゴリ</label>
           <select class="form-select" id="pm-cat"><option value="pokemon">ポケモン</option><option value="onepiece">ワンピース</option><option value="yugioh">遊戯王</option><option value="labubu">ラブブ</option><option value="hobby">ホビー</option></select>
@@ -835,7 +841,7 @@ function openPackModal(){
   document.getElementById('pack-modal-title').textContent='🎴 新規オリパ作成';
   document.getElementById('prizes-blocks').innerHTML='';
   ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-rate','pm-odds','pm-ribbon','pm-bg','pm-image-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('pm-cat').value='pokemon';
+  previewPackImage('');
   document.getElementById('pm-ribbon-type').value='hot';
   document.getElementById('pm-tenjo').value='0';
   document.getElementById('pm-order').value='0';
@@ -865,6 +871,7 @@ async function editPack(id){
   document.getElementById('pm-ribbon-type').value=pack.ribbon_type||'hot';
   document.getElementById('pm-order').value=pack.sort_order||'0';
   document.getElementById('pm-image-url').value=pack.image_url||'';
+  previewPackImage(pack.image_url||'');
   document.getElementById('pm-hot').checked=pack.is_hot||false;
   document.getElementById('pm-new').checked=pack.is_new||false;
   document.getElementById('pm-ad').checked=pack.is_ad_confirm||false;
@@ -894,9 +901,30 @@ async function uploadPackImage(input){
   const url=await uploadImage(file,'packs');
   if(url){
     document.getElementById('pm-image-url').value=url;
-    document.getElementById('pm-preview-img').src=url;
-    document.getElementById('pm-image-preview').style.display='block';
-    showToast('✅ アップロード完了！');
+    previewPackImage(url);
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+
+async function handlePackDrop(event){
+  const file=event.dataTransfer.files[0];
+  if(!file||!file.type.startsWith('image/')){showToast('⚠️ 画像ファイルを選択してください');return;}
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'packs');
+  if(url){
+    document.getElementById('pm-image-url').value=url;
+    previewPackImage(url);
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+
+function previewPackImage(url){
+  const wrap=document.getElementById('pm-image-preview-wrap');
+  if(!wrap)return;
+  if(url){
+    wrap.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=\\'color:rgba(255,60,60,.5);font-size:.75rem\\'>読み込み失敗</div>'">`;
+  } else {
+    wrap.innerHTML=`<div style="text-align:center;pointer-events:none"><div style="font-size:1.5rem;margin-bottom:4px">📁</div><div style="font-size:.75rem;color:rgba(255,255,255,.4)">タップ or ドラッグして画像をアップ</div></div>`;
   }
 }
 
@@ -969,7 +997,7 @@ function addPrizeBlock(prize){
         <input type="number" min="1" step="1" class="form-input prize-qty" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="1" value="${parseInt(prize?.quantity)||1}">
       </div>
       <div>
-        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">重み（出やすさ）</div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">重み（同じ数=均等）</div>
         <input type="number" min="1" step="1" class="form-input prize-weight" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="100" value="${parseInt(prize?.weight)||100}">
       </div>
     </div>
