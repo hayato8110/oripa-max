@@ -1266,16 +1266,27 @@ async function executeDraw(){
   updateHeaderPts();
   closeDrawModal();
 
+  // DBから最新の賞品在庫を取得
+  const{data:freshPrizes,error:prizesErr}=await db.from('prizes').select('*').eq('pack_id',pack.id);
+  if(prizesErr||!freshPrizes?.length){
+    showToast('⚠️ 賞品データの取得に失敗しました');return;
+  }
+
+  state.coin-=cost;
+  state.totalSpent=(state.totalSpent||0)+cost;
+  updateHeaderPts();
+  closeDrawModal();
+
   // 残り在庫のコピーを作成（ローカルで管理）
   const prizeStock={};
-  prizes.forEach(p=>{
+  freshPrizes.forEach(p=>{
     prizeStock[p.name]=(p.remaining_qty!=null?p.remaining_qty:p.quantity)||0;
   });
 
   const results=[];
   for(let i=0;i<state.drawCount;i++){
     // 在庫がある賞品だけを対象に抽選
-    const available=prizes.filter(p=>prizeStock[p.name]>0);
+    const available=freshPrizes.filter(p=>prizeStock[p.name]>0);
     if(!available.length)break;
     const prize=pickPrize(available,Math.random());
     results.push({prize});
@@ -1286,12 +1297,14 @@ async function executeDraw(){
     showToast('⚠️ 在庫がありません');return;
   }
 
-  // DBの残り在庫を更新
-  const updatedPrizes=prizes.map(p=>({
-    ...p,
-    remaining_qty:prizeStock[p.name]
-  }));
-  db.from('prizes').upsert(updatedPrizes).catch(()=>{});
+  // DBの残り在庫を一括更新
+  await Promise.all(freshPrizes.map(p=>
+    db.from('prizes').update({remaining_qty:prizeStock[p.name]}).eq('id',p.id)
+  ));
+
+  // stateのprizesも更新
+  const packInState=state.packs.find(p=>p.id===pack.id);
+  if(packInState)packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.name]}));
   const sessionId=generateSeed().slice(0,8);
   const session={
     id:sessionId,packId:pack.id,packName:pack.name,packEmoji:pack.emoji||'🎴',
@@ -1301,9 +1314,8 @@ async function executeDraw(){
   state.sessions.unshift(session);
   try{
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
-    await db.from('packs').update({remaining:Math.max(0,(pack.remaining||0)-state.drawCount)}).eq('id',pack.id);
-    const packInState=state.packs.find(p=>p.id===pack.id);
-    if(packInState)packInState.remaining=Math.max(0,(packInState.remaining||0)-state.drawCount);
+    await db.from('packs').update({remaining:Math.max(0,(pack.remaining||0)-results.length)}).eq('id',pack.id);
+    if(packInState)packInState.remaining=Math.max(0,(packInState.remaining||0)-results.length);
     const{data:sess}=await db.from('draw_sessions').insert({
       user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
       server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
