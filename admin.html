@@ -518,21 +518,28 @@ input,select,textarea{font-family:inherit}
     <div class="modal-header"><span class="modal-title" id="banner-modal-title">🖼️ バナー追加</span><button class="modal-close" onclick="closeModal('banner-modal')">✕</button></div>
     <div class="modal-body">
 
+      <!-- 画像URL（hidden） -->
+      <input type="hidden" id="bn-image-url-hidden" value="">
+
       <!-- 画像アップロード（メイン） -->
       <div style="margin-bottom:14px">
-        <label class="form-label" style="margin-bottom:6px;display:block">📷 バナー画像（タップしてアップロード）</label>
-        <div id="bn-img-preview" onclick="document.getElementById('bn-file').click()"
-          ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)';this.style.background='rgba(201,168,76,.08)'"
-          ondragleave="this.style.borderColor='rgba(201,168,76,.3)';this.style.background='rgba(255,255,255,.05)'"
-          ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.3)';this.style.background='rgba(255,255,255,.05)';handleBannerDrop(event)"
-          style="width:100%;height:140px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:.2s;position:relative">
-          <div style="text-align:center">
-            <div style="font-size:2rem;margin-bottom:6px">📁</div>
-            <div style="font-size:.78rem;color:rgba(255,255,255,.4)">クリック or ドラッグして画像をアップ</div>
-            <div style="font-size:.65rem;color:rgba(255,255,255,.2);margin-top:2px">JPG / PNG / WebP</div>
+        <label class="form-label" style="margin-bottom:6px;display:block">📷 バナー画像</label>
+
+        <!-- ファイル選択ボタン（スマホでも確実に動く） -->
+        <label for="bn-file" style="display:block;width:100%;cursor:pointer">
+          <div id="bn-img-preview"
+            ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)';this.style.background='rgba(201,168,76,.08)'"
+            ondragleave="this.style.borderColor='rgba(201,168,76,.3)';this.style.background='rgba(255,255,255,.05)'"
+            ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.3)';this.style.background='rgba(255,255,255,.05)';handleBannerDrop(event)"
+            style="width:100%;height:140px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:.2s;position:relative">
+            <div style="text-align:center;pointer-events:none">
+              <div style="font-size:2rem;margin-bottom:6px">📁</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.4)">タップ or ドラッグして画像をアップ</div>
+              <div style="font-size:.65rem;color:rgba(255,255,255,.2);margin-top:2px">JPG / PNG / WebP</div>
+            </div>
           </div>
-        </div>
-        <input type="file" accept="image/*" id="bn-file" style="display:none" onchange="uploadBannerImageNew(this)">
+        </label>
+        <input type="file" accept="image/*" id="bn-file" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" onchange="uploadBannerImageNew(this)">
       </div>
 
       <!-- フロントプレビュー -->
@@ -550,13 +557,13 @@ input,select,textarea{font-family:inherit}
         </div>
       </div>
 
-      <!-- テキスト設定（折りたたみ） -->
+      <!-- テキスト・リンク設定 -->
       <details style="margin-bottom:10px">
         <summary style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;padding:6px 0;list-style:none">▶ テキスト・リンク設定（任意）</summary>
         <div style="padding-top:10px">
           <div class="form-group" style="margin-bottom:8px"><label class="form-label">タイトル</label><input class="form-input" id="bn-title" placeholder="例: 銀行振込が可能になりました！" oninput="updateBannerPreview()"></div>
           <div class="form-group" style="margin-bottom:8px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub" placeholder="例: 詳しくはこちら" oninput="updateBannerPreview()"></div>
-          <div class="form-group" style="margin-bottom:8px"><label class="form-label">タグ（小文字ラベル）</label><input class="form-input" id="bn-tag" placeholder="例: 🎊 お知らせ" oninput="updateBannerPreview()"></div>
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">タグ</label><input class="form-input" id="bn-tag" placeholder="例: 🎊 お知らせ" oninput="updateBannerPreview()"></div>
           <div class="form-group" style="margin-bottom:8px"><label class="form-label">タップ先URL</label><input class="form-input" id="bn-link" placeholder="https://..."></div>
         </div>
       </details>
@@ -1154,10 +1161,6 @@ async function handleBannerDrop(event){
   showToast('📤 アップロード中...');
   const url=await uploadImage(file,'banners');
   if(url){
-    if(!document.getElementById('bn-image-url-hidden')){
-      const h=document.createElement('input');h.type='hidden';h.id='bn-image-url-hidden';
-      document.getElementById('banner-modal').appendChild(h);
-    }
     document.getElementById('bn-image-url-hidden').value=url;
     previewBannerImage(url);
     showToast('✅ 画像アップロード完了！');
@@ -1169,10 +1172,6 @@ async function uploadBannerImageNew(input){
   showToast('📤 アップロード中...');
   const url=await uploadImage(file,'banners');
   if(url){
-    if(!document.getElementById('bn-image-url-hidden')){
-      const h=document.createElement('input');h.type='hidden';h.id='bn-image-url-hidden';
-      document.getElementById('banner-modal').appendChild(h);
-    }
     document.getElementById('bn-image-url-hidden').value=url;
     previewBannerImage(url);
     showToast('✅ 画像アップロード完了！プレビューを確認してください');
@@ -1183,7 +1182,7 @@ function openBannerModal(){
   editingBannerId=null;
   document.getElementById('banner-modal-title').textContent='🖼️ バナー追加';
   ['bn-title','bn-sub','bn-link','bn-tag'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
-  const h=document.getElementById('bn-image-url-hidden');if(h)h.value='';
+  document.getElementById('bn-image-url-hidden').value='';
   document.getElementById('bn-order').value='0';
   document.getElementById('bn-active').checked=true;
   document.getElementById('bn-file').value='';
@@ -1202,10 +1201,6 @@ function editBanner(id){
   document.getElementById('bn-tag').value=b.tag_text||'';
   document.getElementById('bn-order').value=b.sort_order||0;
   document.getElementById('bn-active').checked=b.is_active!==false;
-  if(!document.getElementById('bn-image-url-hidden')){
-    const h=document.createElement('input');h.type='hidden';h.id='bn-image-url-hidden';
-    document.getElementById('banner-modal').appendChild(h);
-  }
   document.getElementById('bn-image-url-hidden').value=b.image_url||'';
   previewBannerImage(b.image_url||'');
   updateBannerPreview();
