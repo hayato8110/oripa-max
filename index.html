@@ -661,7 +661,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     <div class="bs-section-label">🏆 賞品一覧</div>
     <div class="bs-prizes" id="pd-prizes"></div>
     <div style="padding:10px 16px 0">
-      <button class="bs-draw-btn" onclick="closeModal('pack-detail-modal');openDrawModal(currentDetailPackId,1)">🎴 このオリパを引く！</button>
+      <button class="bs-draw-btn" onclick="closeModal('pack-detail-modal');drawDirect(currentDetailPackId,1)">🎴 このオリパを引く！</button>
       <button class="bs-cancel-btn" onclick="closeModal('pack-detail-modal')">閉じる</button>
     </div>
   </div>
@@ -1197,45 +1197,24 @@ function pickPrize(prizes,rng){
   return prizes[prizes.length-1];
 }
 
-function openDrawModal(packId,defaultCount){
+async function drawDirect(packId,count){
   const pack=state.packs.find(p=>p.id===packId);if(!pack)return;
-  state.activePack=pack;state.drawCount=defaultCount;
-  document.getElementById('bs-icon').textContent=pack.emoji||'🎴';
-  document.getElementById('bs-name').textContent=pack.name;
-  document.getElementById('bs-series').textContent=pack.series||'';
-  const tenjoCount=state.tenjoCount[pack.id]||0;
-  const tenjoLimit=pack.tenjo_limit||0;
-  const tenjoSection=document.getElementById('tenjo-modal-section');
-  if(tenjoLimit>0){
-    const pct=Math.round((tenjoCount/tenjoLimit)*100);
-    tenjoSection.innerHTML=`
-      <div class="tenjo-modal">
-        <div class="tenjo-modal-label">🏆 天井まで あと ${tenjoLimit-tenjoCount}回</div>
-        <div class="tenjo-modal-bar"><div class="tenjo-modal-fill" style="width:${pct}%"></div></div>
-        <div class="tenjo-modal-sub">${tenjoCount}/${tenjoLimit}回でSAR確定！</div>
-      </div>`;
-  } else {
-    tenjoSection.innerHTML='';
+  if(!state.user){
+    document.getElementById('auth-modal').classList.add('show');
+    showToast('ガチャを引くにはログインが必要です');return;
   }
-  document.getElementById('bs-prizes').innerHTML=(pack.prizes||[]).map(pr=>`
-    <div class="bs-prize">
-      ${pr.image_url?`<img src="${pr.image_url}" style="width:36px;height:36px;object-fit:contain;border-radius:4px;flex-shrink:0;background:rgba(255,255,255,.05)">`:''}
-      <span class="bsp-tier bsp-${pr.tier==='sar'?'s':pr.tier==='sr'?'a':pr.tier==='rr'?'b':'c'}">${pr.tier_label}</span>
-      <span class="bsp-name">${pr.name}</span>
-      <span class="bsp-cnt">×${pr.quantity}枚</span>
-    </div>`).join('');
-  document.getElementById('count-opts').innerHTML=[
-    {n:1,bonus:null},{n:3,bonus:null},{n:5,bonus:null},{n:10,bonus:'アド確定'},{n:50,bonus:'お得！'},{n:100,bonus:'最大割引'}
-  ].map(o=>`
-    <div class="count-opt ${o.n===defaultCount?'sel':''}" onclick="pickDrawCount(this,${o.n})">
-      <div class="co-num">${o.n}</div>
-      <div class="co-price">${(pack.price*o.n).toLocaleString()}コイン</div>
-      ${o.bonus?`<div class="co-bonus">${o.bonus}</div>`:''}
-    </div>`).join('');
-  document.getElementById('draw-modal').classList.add('show');
+  const cost=pack.price*count;
+  if(state.coin<cost){showToast('🪙 コインが不足しています');openPurchase();return;}
+  if((pack.remaining||0)<count){showToast('⚠️ 残り口数が不足しています');return;}
+  if(!confirm(`${count}回ガチャを引きますか？\n${cost.toLocaleString()}コインを消費します`))return;
+  state.activePack=pack;
+  state.drawCount=count;
+  await executeDraw();
 }
 
-function closeDrawModal(){document.getElementById('draw-modal').classList.remove('show')}
+function openDrawModal(packId,defaultCount){
+  drawDirect(packId,defaultCount);
+}
 function pickDrawCount(el,n){
   document.querySelectorAll('.count-opt').forEach(o=>o.classList.remove('sel'));
   el.classList.add('sel');state.drawCount=n;
@@ -1244,8 +1223,7 @@ function pickDrawCount(el,n){
 async function executeDraw(){
   const pack=state.activePack;if(!pack)return;
   if(!state.user){
-    closeDrawModal();
-    document.getElementById('auth-modal').classList.add('show');
+      document.getElementById('auth-modal').classList.add('show');
     showToast('ガチャを引くにはログインが必要です');return;
   }
   const cost=pack.price*state.drawCount;
@@ -1264,7 +1242,6 @@ async function executeDraw(){
   state.coin-=cost;
   state.totalSpent=(state.totalSpent||0)+cost;
   updateHeaderPts();
-  closeDrawModal();
 
   // DBから最新の賞品在庫を取得
   const{data:freshPrizes,error:prizesErr}=await db.from('prizes').select('*').eq('pack_id',pack.id);
@@ -1275,7 +1252,6 @@ async function executeDraw(){
   state.coin-=cost;
   state.totalSpent=(state.totalSpent||0)+cost;
   updateHeaderPts();
-  closeDrawModal();
 
   // 残り在庫のコピーを作成（idをキーに）
   const prizeStock={};
@@ -1408,6 +1384,7 @@ function renderPackCards(list){
     const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
     const tiers=prizes.map(pr=>`<span class="tier-pill ${tierPillClass[pr.tier]}">${pr.tier_label} ${pr.quantity}枚</span>`).join('');
     const isFav=favorites.has(p.id);
+    const drawOpts=p.draw_options?JSON.parse(p.draw_options):{d1:true,d10:false,d100:false};
     return `
     <div class="pack-card">
       <div class="pc-banner" onclick="openPackDetail('${p.id}')">
@@ -1422,15 +1399,6 @@ function renderPackCards(list){
           <div style="font-size:.68rem;color:rgba(255,255,255,.6);letter-spacing:.1em;font-weight:700">SOLD OUT</div>
         </div>`:''}
         <div class="pcb-content">
-          <span class="pcb-ribbon ${ribbonClass[p.ribbon_type]||'ribbon-hot'}">${p.ribbon_text||'HOT'}</span>
-          <div class="pcb-top-row">
-            <div>
-              <div class="pcb-name">${p.name}</div>
-              <div class="pcb-series">${p.series||''}</div>
-            </div>
-          </div>
-          ${p.odds_text?`<div class="pcb-chips"><div class="pcb-chip"><span>${p.odds_text}</span></div></div>`:''}
-          <div class="pcb-tiers">${tiers}</div>
         </div>
       </div>
       <div class="pc-bottom">
@@ -1442,8 +1410,9 @@ function renderPackCards(list){
         ${p.remaining<=0?
           `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(201,168,76,.5);font-weight:700;letter-spacing:.08em">— ありがとうございました —</div>`:
           `<div class="pc-btns">
-            <button class="pc-btn-1" onclick="openDrawModal('${p.id}',1)">1回ガチャ</button>
-            <button class="pc-btn-5" onclick="openDrawModal('${p.id}',10)">10連ガチャ</button>
+            ${drawOpts.d1!==false?`<button class="pc-btn-1" onclick="drawDirect('${p.id}',1)">1回ガチャ</button>`:''}
+            ${drawOpts.d10?`<button class="pc-btn-5" onclick="drawDirect('${p.id}',10)">10連ガチャ</button>`:''}
+            ${drawOpts.d100?`<button class="pc-btn-100" onclick="drawDirect('${p.id}',100)" style="grid-column:1/-1;background:linear-gradient(135deg,#1a0a00,#3a1e00);color:var(--gold2);border:1.5px solid rgba(201,168,76,.4);border-radius:10px;font-size:.88rem;font-weight:900;padding:13px;letter-spacing:.04em">💯 100連ガチャ</button>`:''}
           </div>`
         }
       </div>
