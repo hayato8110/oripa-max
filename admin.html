@@ -234,10 +234,7 @@ input,select,textarea{font-family:inherit}
         <span style="font-size:.95rem;font-weight:900">🖼️ バナー管理</span>
         <button class="btn btn-primary btn-lg" onclick="openBannerModal()">＋ バナー追加</button>
       </div>
-      <div class="table-card">
-        <table class="tbl"><thead><tr><th>タイトル</th><th>リンク先</th><th>順序</th><th>状態</th><th>操作</th></tr></thead>
-        <tbody id="banners-tbl-body"></tbody></table>
-      </div>
+      <div id="banners-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
     </div>
 
     <!-- VIDEOS -->
@@ -503,18 +500,9 @@ input,select,textarea{font-family:inherit}
         <label class="form-check"><input type="checkbox" id="pm-active" checked> 🟢 公開</label>
       </div>
       <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
-        <div style="font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:8px">🏆 賞品設定</div>
-        <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 70px 80px 28px;gap:4px;margin-bottom:4px">
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">レア度</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">賞品名</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">枚数</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">重み</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">価格</span>
-          <span style="font-size:.6rem;color:rgba(255,255,255,.3)">画像</span>
-          <span></span>
-        </div>
-        <div id="prizes-list"></div>
-        <button class="btn btn-secondary" style="margin-top:8px" onclick="addPrizeRow()">＋ 賞品追加</button>
+        <div style="font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:12px">🏆 賞品設定</div>
+        <div id="prizes-blocks" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+        <button class="btn btn-secondary" style="margin-top:10px" onclick="addPrizeBlock()">＋ 賞品ブロック追加</button>
       </div>
     </div>
     <div class="modal-footer">
@@ -529,13 +517,23 @@ input,select,textarea{font-family:inherit}
   <div class="modal">
     <div class="modal-header"><span class="modal-title" id="banner-modal-title">🖼️ バナー設定</span><button class="modal-close" onclick="closeModal('banner-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="bn-title"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">リンク先URL</label><input class="form-input" id="bn-link"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">背景グラデーション</label><input class="form-input" id="bn-bg" placeholder="linear-gradient(135deg,#1a0040,#cc00ff)"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タグテキスト</label><input class="form-input" id="bn-tag" placeholder="🎊 期間限定"></div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">表示順</label><input type="number" class="form-input" id="bn-order" value="0"></div>
-      <label class="form-check"><input type="checkbox" id="bn-active" checked> 公開する</label>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル *</label><input class="form-input" id="bn-title" placeholder="例: 🎊 新規登録特典！500コインプレゼント"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub" placeholder="例: 今すぐ登録して引いてみよう！"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タグテキスト</label><input class="form-input" id="bn-tag" placeholder="例: 🎊 期間限定"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">リンク先URL</label><input class="form-input" id="bn-link" placeholder="https://..."></div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">バナー画像（任意）</label>
+        <div id="bn-img-preview" style="width:100%;height:100px;border-radius:8px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:6px;cursor:pointer" onclick="document.getElementById('bn-file').click()">
+          <span style="font-size:.75rem;color:rgba(255,255,255,.3)">📷 クリックして画像をアップロード</span>
+        </div>
+        <input type="file" accept="image/*" id="bn-file" style="display:none" onchange="uploadBannerImageNew(this)">
+        <input class="form-input" id="bn-image-url" placeholder="または画像URLを貼り付け" oninput="previewBannerImage(this.value)" style="margin-bottom:6px">
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">背景グラデーション（画像なしの場合）</label><input class="form-input" id="bn-bg" placeholder="linear-gradient(135deg,#1a0040,#cc00ff)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="form-group"><label class="form-label">表示順</label><input type="number" class="form-input" id="bn-order" value="0"></div>
+        <div class="form-group" style="padding-top:18px"><label class="form-check"><input type="checkbox" id="bn-active" checked> 公開する</label></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('banner-modal')">キャンセル</button>
@@ -792,23 +790,24 @@ function renderPacks(packs){
 function filterPacks(q){renderPacks(allPacks.filter(p=>p.name.includes(q)||(p.series||'').includes(q)));}
 
 function openPackModal(){
-  editingPackId=null;
+  editingPackId=null;prizeBlockCount=0;
   document.getElementById('pack-modal-title').textContent='🎴 新規オリパ作成';
-  document.getElementById('prizes-list').innerHTML='';
-  ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-rate','pm-odds','pm-ribbon','pm-bg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('prizes-blocks').innerHTML='';
+  ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-rate','pm-odds','pm-ribbon','pm-bg','pm-image-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('pm-cat').value='pokemon';
   document.getElementById('pm-ribbon-type').value='hot';
   document.getElementById('pm-tenjo').value='0';
   document.getElementById('pm-order').value='0';
   ['pm-hot','pm-new','pm-ad','pm-limit','pm-loop','pm-new-user','pm-100x'].forEach(id=>document.getElementById(id).checked=false);
   document.getElementById('pm-active').checked=true;
-  addPrizeRow();addPrizeRow();addPrizeRow();
+  // デフォルトでS賞・A賞・B賞・C賞・D賞を1つずつ追加
+  ['sar','sr','rr','r','c'].forEach(tier=>addPrizeBlock({tier}));
   document.getElementById('pack-modal').classList.add('show');
 }
 
 async function editPack(id){
   const pack=allPacks.find(p=>p.id===id);if(!pack)return;
-  editingPackId=id;
+  editingPackId=id;prizeBlockCount=0;
   document.getElementById('pack-modal-title').textContent='🎴 オリパ編集';
   document.getElementById('pm-name').value=pack.name||'';
   document.getElementById('pm-series').value=pack.series||'';
@@ -824,6 +823,7 @@ async function editPack(id){
   document.getElementById('pm-cat').value=pack.category||'pokemon';
   document.getElementById('pm-ribbon-type').value=pack.ribbon_type||'hot';
   document.getElementById('pm-order').value=pack.sort_order||'0';
+  document.getElementById('pm-image-url').value=pack.image_url||'';
   document.getElementById('pm-hot').checked=pack.is_hot||false;
   document.getElementById('pm-new').checked=pack.is_new||false;
   document.getElementById('pm-ad').checked=pack.is_ad_confirm||false;
@@ -832,8 +832,8 @@ async function editPack(id){
   document.getElementById('pm-new-user').checked=pack.is_new_user_only||false;
   document.getElementById('pm-100x').checked=pack.is_100x_ad||false;
   document.getElementById('pm-active').checked=pack.is_active!==false;
-  document.getElementById('prizes-list').innerHTML='';
-  (pack.prizes||[]).forEach(pr=>addPrizeRow(pr));
+  document.getElementById('prizes-blocks').innerHTML='';
+  (pack.prizes||[]).forEach(pr=>addPrizeBlock(pr));
   document.getElementById('pack-modal').classList.add('show');
 }
 
@@ -869,44 +869,130 @@ async function uploadBannerImage(input){
   }
 }
 
-async function uploadPrizeImage(input,idx){
+/* ══ 賞品ブロック形式 ══ */
+const TIER_CONFIG={
+  sar:{label:'S賞',color:'#e8a800',bg:'rgba(232,168,0,.1)',border:'rgba(232,168,0,.35)'},
+  sr: {label:'A賞',color:'#bb88ff',bg:'rgba(187,136,255,.08)',border:'rgba(187,136,255,.3)'},
+  rr: {label:'B賞',color:'#44aaff',bg:'rgba(68,170,255,.08)',border:'rgba(68,170,255,.3)'},
+  r:  {label:'C賞',color:'#66cc99',bg:'rgba(102,204,153,.07)',border:'rgba(102,204,153,.25)'},
+  c:  {label:'D賞',color:'rgba(255,255,255,.4)',bg:'rgba(255,255,255,.03)',border:'rgba(255,255,255,.1)'},
+};
+
+let prizeBlockCount=0;
+
+function addPrizeBlock(prize){
+  const idx=prizeBlockCount++;
+  const tier=prize?.tier||'c';
+  const tc=TIER_CONFIG[tier]||TIER_CONFIG.c;
+  const container=document.getElementById('prizes-blocks');
+  const div=document.createElement('div');
+  div.className='prize-block';
+  div.dataset.idx=idx;
+  div.style.cssText=`background:${tc.bg};border:2px solid ${tc.border};border-radius:12px;padding:12px;position:relative;transition:.2s`;
+  div.innerHTML=`
+    <button onclick="this.closest('.prize-block').remove()" title="削除" style="position:absolute;top:7px;right:7px;background:rgba(255,60,60,.15);color:#ff6060;border:1px solid rgba(255,60,60,.2);border-radius:4px;width:22px;height:22px;font-size:.75rem;cursor:pointer">✕</button>
+
+    <!-- レア度 -->
+    <div style="margin-bottom:8px">
+      <select class="form-select prize-tier" style="width:100%;padding:5px 8px;font-size:.8rem;font-weight:900;color:${tc.color};border-color:${tc.border}" onchange="updateBlockStyle(this)">
+        ${Object.entries(TIER_CONFIG).map(([v,t])=>`<option value="${v}" ${tier===v?'selected':''}>${t.label}（${v.toUpperCase()}）</option>`).join('')}
+      </select>
+    </div>
+
+    <!-- 画像プレビュー＆アップロード -->
+    <div style="margin-bottom:8px;text-align:center">
+      <div id="prize-preview-wrap-${idx}" style="width:100%;height:90px;border-radius:7px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:4px;cursor:pointer" onclick="document.getElementById('prize-file-${idx}').click()">
+        ${prize?.image_url
+          ?`<img src="${prize.image_url}" style="max-width:100%;max-height:100%;object-fit:contain">`
+          :`<span style="font-size:.7rem;color:rgba(255,255,255,.25)">📷 クリックして画像をアップ</span>`}
+      </div>
+      <input type="file" accept="image/*" style="display:none" id="prize-file-${idx}" onchange="uploadBlockImage(this,${idx})">
+      <input class="form-input prize-img" id="prize-img-${idx}" style="padding:4px 8px;font-size:.62rem;width:100%" placeholder="または画像URLを貼り付け" value="${prize?.image_url||''}" oninput="previewBlockImage(this,${idx})">
+    </div>
+
+    <!-- 賞品名 -->
+    <div style="margin-bottom:6px">
+      <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">賞品名 *</div>
+      <input class="form-input prize-name" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="例: リザードンex SAR" value="${prize?.name||''}">
+    </div>
+
+    <!-- 枚数・重み -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+      <div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">枚数</div>
+        <input type="number" min="1" step="1" class="form-input prize-qty" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="1" value="${parseInt(prize?.quantity)||1}">
+      </div>
+      <div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">重み（出やすさ）</div>
+        <input type="number" min="1" step="1" class="form-input prize-weight" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="100" value="${parseInt(prize?.weight)||100}">
+      </div>
+    </div>
+
+    <!-- 還元コイン・交換種別 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">還元コイン</div>
+        <input type="number" min="0" step="1" class="form-input prize-value" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="0" value="${parseInt(prize?.value_jp)||0}">
+      </div>
+      <div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">交換種別</div>
+        <select class="form-select prize-exchange" style="width:100%;padding:5px 8px;font-size:.72rem">
+          <option value="both" ${(prize?.exchange_type||'both')==='both'?'selected':''}>発送＆還元</option>
+          <option value="ship_only" ${prize?.exchange_type==='ship_only'?'selected':''}>発送のみ</option>
+          <option value="coin_only" ${prize?.exchange_type==='coin_only'?'selected':''}>還元のみ</option>
+        </select>
+      </div>
+    </div>`;
+  container.appendChild(div);
+}
+
+function updateBlockStyle(sel){
+  const block=sel.closest('.prize-block');
+  const tc=TIER_CONFIG[sel.value]||TIER_CONFIG.c;
+  block.style.background=tc.bg;
+  block.style.borderColor=tc.border;
+  sel.style.color=tc.color;
+  sel.style.borderColor=tc.border;
+}
+
+async function uploadBlockImage(input,idx){
   const file=input.files[0];if(!file)return;
   showToast('📤 アップロード中...');
   const url=await uploadImage(file,'prizes');
   if(url){
-    document.getElementById(`prize-img-${idx}`).value=url;
-    showToast('✅ アップロード完了！');
+    // URLフィールドに値をセット
+    const imgInput=document.getElementById(`prize-img-${idx}`);
+    if(imgInput)imgInput.value=url;
+    // プレビューエリアを更新
+    const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
+    if(wrap)wrap.innerHTML=`<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain">`;
+    showToast('✅ 画像アップロード完了！');
   }
 }
 
-function addPrizeRow(prize){
-  const idx=document.getElementById('prizes-list').children.length;
-  const div=document.createElement('div');
-  div.style.cssText='display:grid;grid-template-columns:80px 1fr 60px 60px 70px 80px 28px;gap:4px;margin-bottom:6px;align-items:center';
-  div.innerHTML=`
-    <select class="form-select" style="padding:6px 8px;font-size:.75rem">
-      <option value="sar" ${prize?.tier==='sar'?'selected':''}>SAR(S賞)</option>
-      <option value="sr"  ${prize?.tier==='sr'?'selected':''}>SR(A賞)</option>
-      <option value="rr"  ${prize?.tier==='rr'?'selected':''}>RR(B賞)</option>
-      <option value="r"   ${prize?.tier==='r'?'selected':''}>R(C賞)</option>
-      <option value="c"   ${prize?.tier==='c'?'selected':''}>C(D賞)</option>
-    </select>
-    <input class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="賞品名" value="${prize?.name||''}">
-    <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="枚数" value="${prize?.quantity||''}">
-    <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="重み" value="${prize?.weight||'100'}">
-    <input type="number" class="form-input" style="padding:6px 8px;font-size:.75rem" placeholder="還元コイン" value="${prize?.value_jp||''}">
-    <select class="form-select" style="padding:6px 8px;font-size:.72rem">
-      <option value="both" ${(prize?.exchange_type||'both')==='both'?'selected':''}>発送＆還元</option>
-      <option value="ship_only" ${prize?.exchange_type==='ship_only'?'selected':''}>発送のみ</option>
-      <option value="coin_only" ${prize?.exchange_type==='coin_only'?'selected':''}>還元のみ</option>
-    </select>
-    <div style="display:flex;gap:2px">
-      <input type="file" accept="image/*" style="display:none" id="prize-file-${idx}" onchange="uploadPrizeImage(this,${idx})">
-      <input class="form-input" id="prize-img-${idx}" style="padding:4px 6px;font-size:.65rem;flex:1" placeholder="画像URL" value="${prize?.image_url||''}">
-      <button onclick="document.getElementById('prize-file-${idx}').click()" style="background:rgba(68,136,255,.15);color:#6699ff;border:1px solid rgba(68,136,255,.22);border-radius:4px;padding:4px 5px;font-size:.65rem;cursor:pointer;white-space:nowrap">📁</button>
-    </div>
-    <button onclick="this.parentElement.remove()" style="background:rgba(255,60,60,.15);color:#ff6060;border:1px solid rgba(255,60,60,.2);border-radius:4px;padding:4px 6px;font-size:.7rem;cursor:pointer">✕</button>`;
-  document.getElementById('prizes-list').appendChild(div);
+function previewBlockImage(input,idx){
+  const url=input.value.trim();
+  const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
+  if(!wrap)return;
+  if(url){
+    wrap.innerHTML=`<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain" onerror="this.parentElement.innerHTML='<span style=\\'font-size:.7rem;color:rgba(255,60,60,.5)\\'>画像を読み込めません</span>'">`;
+  } else {
+    wrap.innerHTML=`<span style="font-size:.7rem;color:rgba(255,255,255,.25)">📷 クリックして画像をアップ</span>`;
+  }
+}
+
+function getPrizeBlocksData(packId){
+  return Array.from(document.querySelectorAll('.prize-block')).map(block=>{
+    const tier=block.querySelector('.prize-tier').value;
+    const name=block.querySelector('.prize-name').value.trim();
+    const qty=parseInt(block.querySelector('.prize-qty').value)||1;
+    const weight=parseInt(block.querySelector('.prize-weight').value)||100;
+    const value_jp=parseInt(block.querySelector('.prize-value').value)||0;
+    const exchange_type=block.querySelector('.prize-exchange').value||'both';
+    const image_url=block.querySelector('.prize-img').value.trim()||null;
+    const tier_label={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'D賞'}[tier]||'';
+    return{pack_id:packId,tier,tier_label,name,quantity:qty,remaining_qty:qty,weight,value_jp,exchange_type,image_url};
+  }).filter(p=>p.name);
 }
 
 async function savePack(){
@@ -924,15 +1010,11 @@ async function savePack(){
     if(error){showToast('⚠️ 保存失敗: '+error.message);return;}
     packId=data.id;
   }
-  const rows=document.getElementById('prizes-list').children;
-  if(rows.length&&packId){
+  const prizes=getPrizeBlocksData(packId);
+  if(prizes.length){
     if(editingPackId)await db.from('prizes').delete().eq('pack_id',packId);
-    const prizes=Array.from(rows).map((row,i)=>{
-      const inputs=row.querySelectorAll('select,input');
-      const qty=parseInt(inputs[2].value)||1;
-      return{pack_id:packId,tier:inputs[0].value,tier_label:{sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'D賞'}[inputs[0].value]||'',name:inputs[1].value,quantity:qty,remaining_qty:qty,weight:parseInt(inputs[3].value)||100,value_jp:parseInt(inputs[4].value)||0,exchange_type:inputs[5].value||'both',image_url:document.getElementById(`prize-img-${i}`)?.value||null};
-    }).filter(p=>p.name);
-    if(prizes.length)await db.from('prizes').insert(prizes);
+    const{error}=await db.from('prizes').insert(prizes);
+    if(error){showToast('⚠️ 賞品保存エラー: '+error.message);return;}
   }
   closeModal('pack-modal');showToast('✅ オリパを保存しました！');loadPacks();
 }
@@ -953,22 +1035,106 @@ async function deletePack(id){
 async function loadBanners(){
   const{data}=await db.from('banners').select('*').order('sort_order');
   allBanners=data||[];
-  document.getElementById('banners-tbl-body').innerHTML=allBanners.map(b=>`
-    <tr>
-      <td class="td-bold">${b.title||'—'}</td>
-      <td style="font-size:.72rem">${b.link_url||'—'}</td>
-      <td>${b.sort_order||0}</td>
-      <td><span class="badge ${b.is_active?'badge-active':'badge-pause'}">${b.is_active?'公開中':'非公開'}</span></td>
-      <td>
-        <button class="btn btn-edit" onclick="editBanner('${b.id}')">編集</button>
-        <button class="btn btn-danger" onclick="deleteBanner('${b.id}')" style="margin-left:4px">削除</button>
-      </td>
-    </tr>`).join('');
+  const container=document.getElementById('banners-cards');
+  if(!allBanners.length){
+    container.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,.2)">バナーがありません。＋ バナー追加で作成してください。</div>';
+    return;
+  }
+  container.innerHTML=allBanners.map(b=>`
+    <div style="background:#1a1b25;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden">
+      <!-- プレビュー -->
+      <div style="width:100%;height:110px;position:relative;overflow:hidden;cursor:pointer" onclick="editBanner('${b.id}')">
+        ${b.image_url
+          ?`<img src="${b.image_url}" style="width:100%;height:100%;object-fit:cover">`
+          :`<div style="width:100%;height:100%;${b.bg_style||'background:linear-gradient(135deg,#e8380d,#ff5a38)'}"></div>`}
+        <div style="position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.6));display:flex;align-items:flex-end;padding:10px 12px">
+          <div>
+            ${b.tag_text?`<div style="font-size:.58rem;color:rgba(255,255,255,.7);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">${b.tag_text}</div>`:''}
+            <div style="font-size:.9rem;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5)">${b.title||'—'}</div>
+            ${b.sub_text?`<div style="font-size:.7rem;color:rgba(255,255,255,.7);margin-top:1px">${b.sub_text}</div>`:''}
+          </div>
+        </div>
+        <div style="position:absolute;top:8px;right:8px">
+          <span style="background:${b.is_active?'rgba(0,230,120,.2)':'rgba(255,200,0,.15)'};color:${b.is_active?'#00e676':'#e8a800'};border:1px solid ${b.is_active?'rgba(0,230,120,.3)':'rgba(255,200,0,.2)'};font-size:.58rem;font-weight:900;padding:2px 7px;border-radius:3px">${b.is_active?'公開中':'非公開'}</span>
+        </div>
+      </div>
+      <!-- 操作 -->
+      <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="font-size:.68rem;color:rgba(255,255,255,.3)">順序: ${b.sort_order||0} ${b.link_url?`· <a href="${b.link_url}" target="_blank" style="color:rgba(68,136,255,.6);text-decoration:none">リンク↗</a>`:''}</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-edit" onclick="editBanner('${b.id}')">編集</button>
+          <button class="btn btn-danger" onclick="deleteBanner('${b.id}')">削除</button>
+        </div>
+      </div>
+    </div>`).join('');
 }
 
-function openBannerModal(){editingBannerId=null;document.getElementById('banner-modal-title').textContent='🖼️ バナー追加';['bn-title','bn-sub','bn-link','bn-bg','bn-tag'].forEach(i=>document.getElementById(i).value='');document.getElementById('bn-order').value='0';document.getElementById('bn-active').checked=true;document.getElementById('banner-modal').classList.add('show');}
-function editBanner(id){const b=allBanners.find(x=>x.id===id);if(!b)return;editingBannerId=id;document.getElementById('banner-modal-title').textContent='🖼️ バナー編集';document.getElementById('bn-title').value=b.title||'';document.getElementById('bn-sub').value=b.sub_text||'';document.getElementById('bn-link').value=b.link_url||'';document.getElementById('bn-bg').value=b.bg_style||'';document.getElementById('bn-tag').value=b.tag_text||'';document.getElementById('bn-order').value=b.sort_order||0;document.getElementById('bn-active').checked=b.is_active!==false;document.getElementById('banner-modal').classList.add('show');}
-async function saveBanner(){const bannerData={title:document.getElementById('bn-title').value,sub_text:document.getElementById('bn-sub').value,link_url:document.getElementById('bn-link').value,bg_style:document.getElementById('bn-bg').value,tag_text:document.getElementById('bn-tag').value,sort_order:parseInt(document.getElementById('bn-order').value)||0,is_active:document.getElementById('bn-active').checked};if(editingBannerId)await db.from('banners').update(bannerData).eq('id',editingBannerId);else await db.from('banners').insert(bannerData);closeModal('banner-modal');showToast('✅ バナーを保存しました');loadBanners();}
+function previewBannerImage(url){
+  const prev=document.getElementById('bn-img-preview');
+  if(url){
+    prev.innerHTML=`<img src="${url}" style="max-width:100%;max-height:100%;object-fit:cover" onerror="this.style.display='none'">`;
+  } else {
+    prev.innerHTML=`<span style="font-size:.75rem;color:rgba(255,255,255,.3)">📷 クリックして画像をアップロード</span>`;
+  }
+}
+
+async function uploadBannerImageNew(input){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'banners');
+  if(url){
+    document.getElementById('bn-image-url').value=url;
+    previewBannerImage(url);
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+
+function openBannerModal(){
+  editingBannerId=null;
+  document.getElementById('banner-modal-title').textContent='🖼️ バナー追加';
+  ['bn-title','bn-sub','bn-link','bn-bg','bn-tag','bn-image-url'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  document.getElementById('bn-order').value='0';
+  document.getElementById('bn-active').checked=true;
+  previewBannerImage('');
+  document.getElementById('banner-modal').classList.add('show');
+}
+
+function editBanner(id){
+  const b=allBanners.find(x=>x.id===id);if(!b)return;
+  editingBannerId=id;
+  document.getElementById('banner-modal-title').textContent='🖼️ バナー編集';
+  document.getElementById('bn-title').value=b.title||'';
+  document.getElementById('bn-sub').value=b.sub_text||'';
+  document.getElementById('bn-link').value=b.link_url||'';
+  document.getElementById('bn-bg').value=b.bg_style||'';
+  document.getElementById('bn-tag').value=b.tag_text||'';
+  document.getElementById('bn-order').value=b.sort_order||0;
+  document.getElementById('bn-image-url').value=b.image_url||'';
+  document.getElementById('bn-active').checked=b.is_active!==false;
+  previewBannerImage(b.image_url||'');
+  document.getElementById('banner-modal').classList.add('show');
+}
+
+async function saveBanner(){
+  const title=document.getElementById('bn-title').value;
+  if(!title){showToast('⚠️ タイトルを入力してください');return;}
+  const bannerData={
+    title,
+    sub_text:document.getElementById('bn-sub').value,
+    link_url:document.getElementById('bn-link').value,
+    bg_style:document.getElementById('bn-bg').value,
+    tag_text:document.getElementById('bn-tag').value,
+    image_url:document.getElementById('bn-image-url').value||null,
+    sort_order:parseInt(document.getElementById('bn-order').value)||0,
+    is_active:document.getElementById('bn-active').checked,
+  };
+  if(editingBannerId)await db.from('banners').update(bannerData).eq('id',editingBannerId);
+  else await db.from('banners').insert(bannerData);
+  closeModal('banner-modal');
+  showToast('✅ バナーを保存しました');
+  loadBanners();
+}
+
 async function deleteBanner(id){if(!confirm('削除しますか？'))return;await db.from('banners').delete().eq('id',id);showToast('🗑️ 削除しました');loadBanners();}
 
 /* ══ VIDEOS ══ */
