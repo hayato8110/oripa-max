@@ -90,10 +90,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .pcb-top-row{display:flex;align-items:flex-end;justify-content:space-between;gap:6px}
 .pcb-name{font-size:1.45rem;font-weight:900;color:#fff;line-height:1.15;text-shadow:1px 2px 8px rgba(0,0,0,.5)}
 .pcb-series{font-size:.68rem;color:rgba(255,255,255,.65);margin-top:1px}
-.pcb-rate{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.25);border-radius:8px;padding:4px 9px;flex-shrink:0;backdrop-filter:blur(8px);min-width:58px}
-.pcb-rate-label{font-size:.48rem;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:.04em}
-.pcb-rate-num{font-size:1.45rem;font-weight:900;line-height:1;color:#fff}
-.pcb-rate-unit{font-size:.5rem;color:rgba(255,255,255,.7);font-weight:700}
+
 .pcb-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
 .pcb-chip{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.45);border-radius:4px;padding:2px 8px;backdrop-filter:blur(4px)}
 .pcb-chip span{font-size:.63rem;font-weight:700;color:rgba(255,255,255,.85)}
@@ -109,8 +106,8 @@ input,select,textarea{font-family:inherit;outline:none}
 .pc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .pc-price{font-size:1.15rem;font-weight:900;color:var(--gold2)}
 .pc-price-unit{font-size:.65rem;color:var(--text3);font-weight:700}
-.pc-remain{font-size:.73rem;font-weight:700;color:var(--text3)}
-.pc-remain b{color:var(--primary)}
+.pc-remain{font-size:.82rem;font-weight:700;color:var(--text2)}
+.pc-remain b{color:var(--gold2);font-size:.95rem}
 .progress-bg{background:rgba(255,255,255,.06);border-radius:999px;height:4px;overflow:hidden;margin-bottom:10px}
 .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:.5s;position:relative;overflow:hidden}
 .progress-fill.warn{background:linear-gradient(90deg,#d97706,#f59e0b)}
@@ -1135,12 +1132,16 @@ function showResultCards(results,pack){
     <div class="rc" id="rc-${i}" onclick="flipResultCard(${i},'${r.prize.tier}')">
       <div class="rc-inner">
         <div class="rc-back">🎴</div>
-        <div class="rc-front ${rfClass[r.prize.tier]||'rf-c'}">
+        <div class="rc-front ${rfClass[r.prize.tier]||'rf-c'}" style="${imgUrl?'padding:0;overflow:hidden;':''}">
           ${imgUrl
-            ?`<img src="${imgUrl}" style="width:80%;max-height:65%;object-fit:contain;border-radius:6px;margin-bottom:4px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))">`
-            :`<span class="rc-emoji">${pack?.emoji||'🎴'}</span>`}
-          <span class="rc-name">${r.prize.name}</span>
-          <span class="rc-tier">${rarLabel[r.prize.tier]||r.prize.tier}</span>
+            ?`<img src="${imgUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:9px">
+               <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.75));padding:8px 6px 6px;border-radius:0 0 9px 9px;z-index:2">
+                 <div class="rc-name" style="font-size:.58rem">${r.prize.name}</div>
+                 <div class="rc-tier" style="opacity:.85">${rarLabel[r.prize.tier]||r.prize.tier}</div>
+               </div>`
+            :`<span class="rc-emoji">${pack?.emoji||'🎴'}</span>
+              <span class="rc-name">${r.prize.name}</span>
+              <span class="rc-tier">${rarLabel[r.prize.tier]||r.prize.tier}</span>`}
         </div>
       </div>
     </div>`;
@@ -1375,17 +1376,17 @@ function renderPackCards(list){
         <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(145deg,#1a1a3a,#2a1a1a)'}"></div>
         <div class="pcb-char">${p.emoji||'🎴'}</div>
         <button onclick="event.stopPropagation();toggleFavorite('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.4);border:none;font-size:1.1rem;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff">${isFav?'★':'☆'}</button>
+        ${p.remaining<=0?`
+        <div style="position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.62);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+          <div style="font-size:1.9rem;font-weight:900;letter-spacing:.12em;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.8);font-style:italic;border:3px solid rgba(255,255,255,.7);padding:6px 22px;border-radius:4px;background:rgba(0,0,0,.3)">完売御礼</div>
+          <div style="font-size:.68rem;color:rgba(255,255,255,.6);letter-spacing:.1em;font-weight:700">SOLD OUT</div>
+        </div>`:''}
         <div class="pcb-content">
           <span class="pcb-ribbon ${ribbonClass[p.ribbon_type]||'ribbon-hot'}">${p.ribbon_text||'HOT'}</span>
           <div class="pcb-top-row">
             <div>
               <div class="pcb-name">${p.name}</div>
               <div class="pcb-series">${p.series||''}</div>
-            </div>
-            <div class="pcb-rate">
-              <span class="pcb-rate-label">総還元率</span>
-              <span class="pcb-rate-num">${p.return_rate||'-'}</span>
-              <span class="pcb-rate-unit">%</span>
             </div>
           </div>
           ${p.odds_text?`<div class="pcb-chips"><div class="pcb-chip"><span>${p.odds_text}</span></div></div>`:''}
@@ -1395,11 +1396,11 @@ function renderPackCards(list){
       <div class="pc-bottom">
         <div class="pc-meta">
           <div><span class="pc-price">🪙 ${p.price.toLocaleString()}</span><span class="pc-price-unit">/1回</span></div>
-          <span class="pc-remain">${p.remaining<=0?'<b style="color:var(--primary)">販売終了</b>':`残り<b>${(p.remaining||0).toLocaleString()}</b>/${(p.total_slots||0).toLocaleString()}口`}</span>
+          <span class="pc-remain">${p.remaining<=0?'<b style="color:rgba(201,168,76,.7)">完売御礼</b>':`残り<b>${(p.remaining||0).toLocaleString()}</b>/${(p.total_slots||0).toLocaleString()}口`}</span>
         </div>
         <div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
         ${p.remaining<=0?
-          `<div style="text-align:center;padding:10px;font-size:.82rem;color:var(--text3);font-weight:700">このオリパは終了しました</div>`:
+          `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(201,168,76,.5);font-weight:700;letter-spacing:.08em">— ありがとうございました —</div>`:
           `<div class="pc-btns">
             <button class="pc-btn-1" onclick="openDrawModal('${p.id}',1)">1回ガチャ</button>
             <button class="pc-btn-5" onclick="openDrawModal('${p.id}',10)">10連ガチャ</button>
@@ -1422,7 +1423,7 @@ function openPackDetail(packId){
   document.getElementById('pd-stats').innerHTML=`
     <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">🪙 ${pack.price.toLocaleString()}コイン/回</span></span>
     <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">📦 残り${pack.remaining||0}/${pack.total_slots||0}口</span></span>
-    <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">📈 還元率${pack.return_rate||'-'}%</span></span>
+    
     ${pack.tenjo_limit>0?`<span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">🏆 天井${pack.tenjo_limit}回</span></span>`:''}
   `;
   document.getElementById('pd-prizes').innerHTML=(pack.prizes||[]).map(pr=>`
