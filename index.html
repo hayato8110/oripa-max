@@ -1260,11 +1260,51 @@ async function executeDraw(){
   if(!prizes.length){
     showToast('⚠️ 賞品が設定されていません');return;
   }
+
   state.coin-=cost;
   state.totalSpent=(state.totalSpent||0)+cost;
   updateHeaderPts();
   closeDrawModal();
-  const results=Array.from({length:state.drawCount},()=>({prize:pickPrize(prizes,Math.random())}));
+
+  // DBから最新の賞品在庫を取得
+  const{data:freshPrizes,error:prizesErr}=await db.from('prizes').select('*').eq('pack_id',pack.id);
+  if(prizesErr||!freshPrizes?.length){
+    showToast('⚠️ 賞品データの取得に失敗しました');return;
+  }
+
+  state.coin-=cost;
+  state.totalSpent=(state.totalSpent||0)+cost;
+  updateHeaderPts();
+  closeDrawModal();
+
+  // 残り在庫のコピーを作成（idをキーに）
+  const prizeStock={};
+  freshPrizes.forEach(p=>{
+    prizeStock[p.id]=(p.remaining_qty!=null?p.remaining_qty:p.quantity)||0;
+  });
+
+  const results=[];
+  for(let i=0;i<state.drawCount;i++){
+    // 在庫がある賞品だけを対象に抽選
+    const available=freshPrizes.filter(p=>prizeStock[p.id]>0);
+    if(!available.length)break;
+    const prize=pickPrize(available,Math.random());
+    results.push({prize});
+    prizeStock[prize.id]--;
+  }
+
+  if(!results.length){
+    showToast('⚠️ 在庫がありません');return;
+  }
+
+  // DBの残り在庫を一括更新
+  await Promise.all(freshPrizes.map(p=>
+    db.from('prizes').update({remaining_qty:prizeStock[p.id]}).eq('id',p.id)
+  ));
+
+  // stateのprizesも更新
+  const packInState=state.packs.find(p=>p.id===pack.id);
+  if(packInState)packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
   const sessionId=generateSeed().slice(0,8);
   const session={
     id:sessionId,packId:pack.id,packName:pack.name,packEmoji:pack.emoji||'🎴',
@@ -1274,9 +1314,8 @@ async function executeDraw(){
   state.sessions.unshift(session);
   try{
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
-    await db.from('packs').update({remaining:Math.max(0,(pack.remaining||0)-state.drawCount)}).eq('id',pack.id);
-    const packInState=state.packs.find(p=>p.id===pack.id);
-    if(packInState)packInState.remaining=Math.max(0,(packInState.remaining||0)-state.drawCount);
+    await db.from('packs').update({remaining:Math.max(0,(pack.remaining||0)-results.length)}).eq('id',pack.id);
+    if(packInState)packInState.remaining=Math.max(0,(packInState.remaining||0)-results.length);
     const{data:sess}=await db.from('draw_sessions').insert({
       user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
       server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
@@ -1467,31 +1506,106 @@ function renderItemsPage(){
     content.innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">📦</div><div style="font-weight:700;margin-bottom:6px;color:var(--text2)">獲得商品はありません</div></div>';
     return;
   }
-  content.innerHTML='<div class="items-page">'+pending.map(r=>{
+
+  // 還元可能な商品（ship_only以外）
+  const convertible=pending.filter(r=>{
     const pack=state.packs.find(p=>p.id===r.packId);
     const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
-    const convertCoin=prizeData?.value_jp||0;
-    const exType=prizeData?.exchange_type||'both';
-    const showShip=exType!=='coin_only';
-    const showCoin=exType!=='ship_only';
-    return `
-    <div class="item-card">
-      <div class="ic-left">
-        ${prizeData?.image_url
-          ?`<img src="${prizeData.image_url}" style="width:52px;height:52px;object-fit:contain;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,.05)">`
-          :`<span class="ic-icon">${r.packEmoji}</span>`}
-        <div class="ic-info">
-          <div class="ic-name">${r.prize.name}</div>
-          <div class="ic-pack">${r.packName} · ${rarLabel[r.prize.tier]||r.prize.tier}</div>
-          ${exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900;margin-top:2px">📦 発送専用</div>':''}
-          ${exType==='coin_only'?'<div style="font-size:.62rem;color:var(--blue);font-weight:900;margin-top:2px">🪙 コイン還元専用</div>':''}
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
-        ${showShip?`<button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>`:''}
-        ${showCoin?`<button onclick="convertToPoints('${r.dbId}')" style="background:#fff;color:var(--blue);border:1.5px solid var(--blue);padding:5px 10px;border-radius:6px;font-size:.7rem;font-weight:900;cursor:pointer">🪙${convertCoin>0?convertCoin+'に還元':'還元'}</button>`:''}
-      </div>
-    </div>`}).join('')+'</div>';
+    return (prizeData?.exchange_type||'both')!=='ship_only';
+  });
+
+  content.innerHTML=`
+    <div class="items-page">
+      <!-- 一括操作バー -->
+      ${convertible.length>0?`
+      <div style="background:var(--bg2);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem;font-weight:700;color:var(--text)">
+          <input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;accent-color:var(--gold2)">
+          すべて選択
+        </label>
+        <span style="color:rgba(255,255,255,.2)">|</span>
+        <span id="selected-count" style="font-size:.78rem;color:var(--text3)">0件選択中</span>
+        <button onclick="bulkConvert()" style="margin-left:auto;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:7px 16px;border-radius:8px;font-size:.78rem;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(201,168,76,.3)">
+          🪙 選択を一括還元
+        </button>
+      </div>`:''}
+      ${pending.map(r=>{
+        const pack=state.packs.find(p=>p.id===r.packId);
+        const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+        const convertCoin=prizeData?.value_jp||0;
+        const exType=prizeData?.exchange_type||'both';
+        const showShip=exType!=='coin_only';
+        const showCoin=exType!=='ship_only' && convertCoin>0;
+        return `
+        <div class="item-card" data-dbid="${r.dbId}">
+          ${exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" onchange="updateSelectedCount()" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--gold2);cursor:pointer">`:'<div style="width:18px;flex-shrink:0"></div>'}
+          <div class="ic-left">
+            ${prizeData?.image_url
+              ?`<img src="${prizeData.image_url}" style="width:52px;height:52px;object-fit:contain;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,.05)">`
+              :`<span class="ic-icon">${r.packEmoji}</span>`}
+            <div class="ic-info">
+              <div class="ic-name">${r.prize.name}</div>
+              <div class="ic-pack">${r.packName} · ${rarLabel[r.prize.tier]||r.prize.tier}</div>
+              ${exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900;margin-top:2px">📦 発送専用</div>':''}
+              ${showCoin?`<div style="font-size:.62rem;color:var(--gold2);font-weight:700;margin-top:2px">🪙 ${convertCoin}コイン</div>`:''}
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+            ${showShip?`<button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>`:''}
+            ${showCoin?`<button onclick="convertToPoints('${r.dbId}')" style="background:#fff;color:#1a0a00;border:none;padding:5px 10px;border-radius:6px;font-size:.7rem;font-weight:900;cursor:pointer">🪙還元</button>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function updateSelectedCount(){
+  const cbs=document.querySelectorAll('.item-cb');
+  const checked=Array.from(cbs).filter(cb=>cb.checked).length;
+  const countEl=document.getElementById('selected-count');
+  if(countEl)countEl.textContent=`${checked}件選択中`;
+  const allCb=document.getElementById('select-all-cb');
+  if(allCb)allCb.checked=checked===cbs.length&&cbs.length>0;
+}
+
+function toggleSelectAll(checked){
+  document.querySelectorAll('.item-cb').forEach(cb=>cb.checked=checked);
+  updateSelectedCount();
+}
+
+async function bulkConvert(){
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
+  const selected=Array.from(document.querySelectorAll('.item-cb:checked')).map(cb=>cb.dataset.dbid);
+  if(!selected.length){showToast('⚠️ 商品を選択してください');return;}
+  if(!confirm(`${selected.length}件の商品をまとめてコインに還元しますか？`))return;
+  let totalBonus=0;
+  for(const dbId of selected){
+    const[sessionId]=dbId.split('_');
+    const sess=state.sessions.find(s=>s.id===sessionId);
+    const r=sess?.results.find(r=>r.dbId===dbId);
+    if(!r||r.converted)continue;
+    const pack=state.packs.find(p=>p.id===sess.packId);
+    const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+    const bonus=prizeData?.value_jp||0;
+    if(bonus<=0)continue;
+    r.converted=true;
+    state.coin+=bonus;
+    totalBonus+=bonus;
+    try{
+      const updatedResults=sess.results.map(res=>({
+        prize_name:res.prize.name,prize_tier:res.prize.tier,
+        is_converted:res.converted||false,is_shipped:res.shipped||false,
+      }));
+      await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId);
+      db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`}).catch(()=>{});
+    }catch(e){console.error(e);}
+  }
+  if(totalBonus>0){
+    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    updateHeaderPts();
+    showToast(`🪙 合計 +${totalBonus}コインに還元しました！`,3000);
+  }
+  renderItemsPage();
 }
 
 /* ══ 発送 ══ */
