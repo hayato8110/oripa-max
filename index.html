@@ -297,9 +297,6 @@ input,select,textarea{font-family:inherit;outline:none}
 .mp-menu-item:active{background:rgba(201,168,76,.08)}
 .mp-menu-icon{font-size:1.1rem;width:26px;text-align:center;flex-shrink:0;opacity:.8}
 .mp-menu-arrow{margin-left:auto;color:rgba(255,255,255,.2);font-size:1.1rem}
-.referral-section{background:var(--bg2);border:1px solid rgba(201,168,76,.15);border-radius:12px;padding:14px;margin-bottom:10px}
-.ref-code-box{background:#ffffff;border:2px dashed rgba(201,168,76,.4);border-radius:10px;padding:12px;text-align:center;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.ref-code{font-size:1.6rem;font-weight:900;letter-spacing:.2em;color:#1a0a00}
 .ref-copy-btn{width:100%;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:10px;border-radius:8px;font-weight:900;font-size:.85rem}
 
 /* ══ NOTICE ══ */
@@ -326,11 +323,12 @@ input,select,textarea{font-family:inherit;outline:none}
 .ic-shipped{font-size:.72rem;color:var(--green);font-weight:700;flex-shrink:0}
 
 /* ══ BOTTOM NAV ══ */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--nav-bg);border-top:1px solid rgba(201,168,76,.12);display:flex;height:60px;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,.4)}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px 8px;gap:2px;background:none;color:rgba(240,234,220,.3);font-size:.56rem;font-weight:700;transition:.15s;position:relative;letter-spacing:.03em}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#111118;border-top:1px solid rgba(201,168,76,.25);display:flex;height:64px;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,.6)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px 8px;gap:3px;background:none;color:rgba(255,255,255,.6);font-size:.68rem;font-weight:700;transition:.15s;position:relative;letter-spacing:.03em}
 .bnav-btn.active{color:var(--gold2)}
-.bnav-icon{font-size:1.2rem;line-height:1}
-.bnav-badge{position:absolute;top:5px;right:calc(50% - 18px);background:var(--primary);color:#fff;font-size:.5rem;font-weight:900;padding:1px 5px;border-radius:999px;min-width:14px;text-align:center}
+.bnav-btn.active .bnav-icon{filter:drop-shadow(0 0 6px rgba(201,168,76,.6))}
+.bnav-icon{font-size:1.35rem;line-height:1}
+.bnav-badge{position:absolute;top:5px;right:calc(50% - 18px);background:#e8380d;color:#fff;font-size:.5rem;font-weight:900;padding:1px 5px;border-radius:999px;min-width:14px;text-align:center}
 
 /* ══ MISC ══ */
 .form-check{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text2);font-weight:700;margin-bottom:10px;cursor:pointer}
@@ -1574,15 +1572,6 @@ function renderMyPage(){
         <div class="mp-pt" style="grid-column:1/-1"><div class="mp-pt-label">コイン残高</div><div class="mp-pt-val">${state.coin.toLocaleString()}</div></div>
       </div>
     </div>
-    <div class="referral-section">
-      <div style="font-size:.88rem;font-weight:900;margin-bottom:4px;color:var(--text)">🔗 友達紹介コード</div>
-      <div style="font-size:.75rem;color:var(--text3);margin-bottom:8px">友達が登録すると双方に300コインプレゼント！</div>
-      <div class="ref-code-box">
-        <div class="ref-code">${refCode}</div>
-        <div style="font-size:.72rem;color:#1a0a00;margin-top:4px;font-weight:700">紹介成功で +300コイン</div>
-      </div>
-      <button class="ref-copy-btn" onclick="copyCode('${refCode}')">📋 コードをコピー</button>
-    </div>
     <div class="mp-menu">
       <div class="mp-menu-item" onclick="openPurchase()"><span class="mp-menu-icon"><svg width="14" height="14" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0">
   <circle cx="11" cy="11" r="10" fill="url(#cg4a)" stroke="url(#cg4b)" stroke-width="1"/>
@@ -1604,7 +1593,6 @@ function renderMyPage(){
       <div class="mp-menu-item" onclick="openMonthlyHistory()"><span class="mp-menu-icon">📅</span>購入履歴<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="showPage('items',document.querySelector('[data-page=items]'))"><span class="mp-menu-icon">📦</span>獲得商品・発送依頼<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openAddressManager()"><span class="mp-menu-icon">📮</span>発送先住所管理<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="openReferralProgress()"><span class="mp-menu-icon">🔗</span>友達招待・進捗確認<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="togglePushNotification()"><span class="mp-menu-icon">${state.user?.push_enabled!==false?'🔔':'🔕'}</span>プッシュ通知 <span style="margin-left:auto;font-size:.72rem;color:${state.user?.push_enabled!==false?'var(--green)':'var(--text3)'}">${state.user?.push_enabled!==false?'ON':'OFF'}</span></div>
       <div class="mp-menu-item" onclick="showPage('inquiry',null)"><span class="mp-menu-icon">💬</span>お問い合わせ<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="doForgotPassword()"><span class="mp-menu-icon">🔑</span>パスワードリセット<span class="mp-menu-arrow">›</span></div>
