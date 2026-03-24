@@ -315,7 +315,7 @@ input,select,textarea{font-family:inherit;outline:none}
 
 /* ══ ITEMS PAGE ══ */
 .items-page{padding:12px}
-.item-card{background:var(--card-bg);border:1px solid rgba(201,168,76,.12);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.item-card{background:var(--card-bg);border:1px solid rgba(201,168,76,.12);border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;overflow:hidden}
 .ic-left{display:flex;align-items:center;gap:10px}
 .ic-icon{font-size:1.5rem;flex-shrink:0}
 .ic-info{flex:1}
@@ -465,15 +465,6 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   </div>
 </div>
 
-
-
-<!-- PAGE: お知らせ -->
-<div id="page-notices" class="page">
-  <div style="padding:14px">
-    <div style="font-size:.95rem;font-weight:900;margin-bottom:12px;color:var(--text)">🔔 お知らせ</div>
-    <div id="notices-list"></div>
-  </div>
-</div>
 
 <!-- PAGE: お問い合わせ -->
 <div id="page-inquiry" class="page">
@@ -724,12 +715,13 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
       <stop offset="100%" stop-color="#8a6020"/>
     </linearGradient>
   </defs>
-</svg> コイン履歴</div>
+</svg> コイン購入履歴</div>
     </div>
     <div style="padding:8px 0;max-height:60vh;overflow-y:auto" id="coin-history-list"></div>
     <button class="bs-cancel-btn" onclick="closeModal('coin-history-modal')">閉じる</button>
   </div>
 </div>
+
 
 <!-- GACHA SCREEN -->
 <div class="gacha-screen" id="gacha-screen">
@@ -807,7 +799,6 @@ async function loadUserProfile(userId){
   state.coin=profile.coin_points||0;
   state.totalSpent=profile.total_spent||0;
   updateHeaderPts();
-  checkLoginBonus();
 }
 
 /* ══ AUTH ══ */
@@ -945,25 +936,6 @@ function getVideoForTier(tier){
   return v?.video_url||null;
 }
 
-/* ══ LOGIN BONUS ══ */
-async function checkLoginBonus(){
-  if(!state.user)return;
-  const today=new Date().toDateString();
-  const last=localStorage.getItem(`lb_${state.user.id}`);
-  if(last!==today)document.getElementById('login-bonus-wrap').style.display='flex';
-}
-async function claimLoginBonus(){
-  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
-  const today=new Date().toDateString();
-  if(localStorage.getItem(`lb_${state.user.id}`)===today){showToast('本日はすでに受け取り済みです');return;}
-  state.coin+=100;
-  await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-  await db.from('transactions').insert({user_id:state.user.id,type:'bonus',amount:100,currency:'coin',description:'ログインボーナス'}).catch(()=>{});
-  localStorage.setItem(`lb_${state.user.id}`,today);
-  document.getElementById('login-bonus-wrap').style.display='none';
-  updateHeaderPts();
-  showToast('🎁 ログインボーナス！100コインを受け取りました！',3000);
-}
 
 /* ══ GACHA 演出 ══ */
 const rfClass={sar:'rf-sar',sr:'rf-sr',rr:'rf-rr',r:'rf-r',c:'rf-c'};
@@ -1210,7 +1182,7 @@ function flipResultCard(i,tier){
       return(order[r.prize.tier]||0)>(order[best.prize.tier]||0)?r:best;
     },gachaResults[0]);
     lastResultForShare=topResult?.prize?.name||'レアカード';
-    renderHistory();renderItemsPage();
+    renderItemsPage();
   }
 }
 function closeResult(){
@@ -1464,9 +1436,9 @@ function renderPackCards(list){
             let opts={d1:true,d10:true,d100:false};
             try{if(p.draw_options)opts={...opts,...JSON.parse(p.draw_options)};}catch(e){}
             const btns=[];
-            if(opts.d1)btns.push(`<button class="pc-btn-1" onclick="drawDirect('${p.id}',1)">1回</button>`);
-            if(opts.d10)btns.push(`<button class="pc-btn-5" onclick="drawDirect('${p.id}',10)">10連</button>`);
-            if(opts.d100)btns.push(`<button class="pc-btn-100" onclick="drawDirect('${p.id}',100)">100連</button>`);
+            if(opts.d1)btns.push(`<button class="pc-btn-1" onclick="drawDirect('${p.id}',1)">1回ガチャ</button>`);
+            if(opts.d10)btns.push(`<button class="pc-btn-5" onclick="drawDirect('${p.id}',10)">10連ガチャ</button>`);
+            if(opts.d100)btns.push(`<button class="pc-btn-100" onclick="drawDirect('${p.id}',100)">100連ガチャ</button>`);
             return btns.join('');
           })()}</div>`
         }
@@ -1499,26 +1471,7 @@ function openPackDetail(packId){
   document.getElementById('pack-detail-modal').classList.add('show');
 }
 
-/* ══ 当選履歴表示 ══ */
-function renderHistory(){
-  const list=document.getElementById('history-list');
-  const allResults=state.sessions.flatMap(s=>
-    s.results.map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,date:s.date,sessionId:s.id}))
-  );
-  if(!allResults.length){
-    list.innerHTML='<div style="text-align:center;padding:48px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">🕐</div><div style="font-weight:700;color:var(--text2)">当選履歴はありません</div></div>';
-    return;
-  }
-  list.innerHTML=allResults.slice(0,100).map(r=>`
-    <div class="history-item">
-      <span class="hi-icon">${r.packEmoji}</span>
-      <div class="hi-info">
-        <div class="hi-pack">${r.prize.name}</div>
-        <div class="hi-date">${r.packName} · ${r.date}</div>
-      </div>
-      <span class="hi-tier ht-${r.prize.tier}">${rarLabel[r.prize.tier]||r.prize.tier}</span>
-    </div>`).join('');
-}
+
 
 /* ══ 獲得商品 ══ */
 let itemsTab='unselected'; // unselected | waiting | shipped | converted
@@ -1608,10 +1561,7 @@ function renderItemsPage(tab){
           ?`<div style="margin-top:4px;font-size:.68rem;color:var(--text3)">追跡番号なし</div>`
           :'';
         return `
-        <div class="item-card" data-dbid="${r.dbId}" style="${itemsTab!=='unselected'?'flex-direction:column;align-items:stretch;padding:0;overflow:hidden;':''}">
-          ${itemsTab==='unselected'&&exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" onchange="updateSelectedCount()" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--gold2);cursor:pointer">`:''}
-          ${itemsTab!=='unselected'?`
-          <!-- 発送待ち・発送済みは大きいカードレイアウト -->
+        <div class="item-card" data-dbid="${r.dbId}" style="flex-direction:column;align-items:stretch;padding:0;overflow:hidden;">
           <div style="display:flex;gap:0;align-items:stretch">
             <div style="width:120px;min-height:120px;flex-shrink:0;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden">
               ${prizeData?.image_url
@@ -1619,28 +1569,20 @@ function renderItemsPage(tab){
                 :`<span style="font-size:3rem">${r.packEmoji}</span>`}
             </div>
             <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:6px">
+              ${itemsTab==='unselected'&&exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" onchange="updateSelectedCount()" style="position:absolute;top:10px;right:10px;width:20px;height:20px;accent-color:var(--gold2);cursor:pointer">`:''}
               <div style="font-size:1rem;font-weight:900;color:var(--text);line-height:1.3">${r.prize.name}</div>
               <div style="font-size:.75rem;color:var(--text3)">${r.packName} · ${prizeData?.tier_label||rarLabel[r.prize.tier]||r.prize.tier}</div>
               ${statusBadge?`<div>${statusBadge}</div>`:''}
               ${trackingHtml}
-            </div>
-          </div>`:`
-          <!-- 未選択は従来レイアウト -->
-          <div class="ic-left">
-            ${prizeData?.image_url
-              ?`<img src="${prizeData.image_url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#e8e8e8">`
-              :`<span class="ic-icon">${r.packEmoji}</span>`}
-            <div class="ic-info">
-              <div class="ic-name">${r.prize.name}</div>
-              <div class="ic-pack">${r.packName} · ${prizeData?.tier_label||rarLabel[r.prize.tier]||r.prize.tier}</div>
-              ${itemsTab==='unselected'&&exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900;margin-top:2px">📦 発送専用</div>':''}
-              ${itemsTab==='unselected'&&showCoin?`<div style="font-size:.62rem;color:var(--gold2);font-weight:700;margin-top:2px">🪙 ${convertCoin}コイン</div>`:''}
+              ${itemsTab==='unselected'&&exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900">📦 発送専用</div>':''}
+              ${itemsTab==='unselected'&&showCoin?`<div style="font-size:.68rem;color:var(--gold2);font-weight:700">🪙 ${convertCoin}コイン</div>`:''}
+              ${itemsTab==='unselected'?`
+              <div style="display:flex;gap:6px;margin-top:4px">
+                ${showShip?`<button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>`:''}
+                ${showCoin?`<button onclick="convertToPoints('${r.dbId}')" style="background:rgba(201,168,76,.15);color:var(--gold2);border:1px solid rgba(201,168,76,.3);padding:6px 12px;border-radius:6px;font-size:.72rem;font-weight:900;cursor:pointer">🪙還元</button>`:''}
+              </div>`:''}
             </div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
-            ${showShip?`<button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>`:''}
-            ${showCoin?`<button onclick="convertToPoints('${r.dbId}')" style="background:#fff;color:#1a0a00;border:none;padding:5px 10px;border-radius:6px;font-size:.7rem;font-weight:900;cursor:pointer">🪙還元</button>`:''}
-          </div>`}
         </div>`;
       }).join('')}
     </div>`;
@@ -1840,11 +1782,9 @@ function renderMyPage(){
     </linearGradient>
   </defs>
 </svg></span>コインをチャージ<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="openCoinHistory()"><span class="mp-menu-icon">📊</span>コイン履歴<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="openMonthlyHistory()"><span class="mp-menu-icon">📅</span>購入履歴<span class="mp-menu-arrow">›</span></div>
+      <div class="mp-menu-item" onclick="openCoinHistory()"><span class="mp-menu-icon">📊</span>コイン購入履歴<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="showPage('items',document.querySelector('[data-page=items]'))"><span class="mp-menu-icon">📦</span>獲得商品・発送依頼<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openAddressManager()"><span class="mp-menu-icon">📮</span>発送先住所管理<span class="mp-menu-arrow">›</span></div>
-      <div class="mp-menu-item" onclick="togglePushNotification()"><span class="mp-menu-icon">${state.user?.push_enabled!==false?'🔔':'🔕'}</span>プッシュ通知 <span style="margin-left:auto;font-size:.72rem;color:${state.user?.push_enabled!==false?'var(--green)':'var(--text3)'}">${state.user?.push_enabled!==false?'ON':'OFF'}</span></div>
       <div class="mp-menu-item" onclick="showPage('inquiry',null)"><span class="mp-menu-icon">💬</span>お問い合わせ<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="doForgotPassword()"><span class="mp-menu-icon">🔑</span>パスワードリセット<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="doLogout()"><span class="mp-menu-icon">🚪</span>ログアウト<span class="mp-menu-arrow">›</span></div>
@@ -2051,7 +1991,7 @@ async function convertToPoints(dbId){
 
 async function openCoinHistory(){
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  const{data}=await db.from('transactions').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
+  const{data}=await db.from('transactions').select('*').eq('user_id',state.user.id).eq('type','purchase_coin').order('created_at',{ascending:false}).limit(50);
   const typeLabel={draw:'ガチャ',purchase_coin:'チャージ',bonus:'ボーナス',convert:'ポイント還元',tenjo:'天井'};
   document.getElementById('coin-history-list').innerHTML=(data||[]).map(t=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border)">
@@ -2064,38 +2004,9 @@ async function openCoinHistory(){
   document.getElementById('coin-history-modal').classList.add('show');
 }
 
-/* ══ プッシュ通知 ══ */
-async function togglePushNotification(){
-  if(!state.user)return;
-  const newVal=!state.user.push_enabled;
-  await db.from('users').update({push_enabled:newVal}).eq('id',state.user.id);
-  state.user.push_enabled=newVal;
-  showToast(newVal?'🔔 プッシュ通知をONにしました':'🔕 プッシュ通知をOFFにしました');
-  renderMyPage();
-}
 
-/* ══ 月別購入履歴 ══ */
-async function openMonthlyHistory(){
-  if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  const{data}=await db.from('point_purchases').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
-  const modal=document.createElement('div');
-  modal.className='modal-overlay show';
-  const rows=(data||[]).map(p=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border)">
-      <div>
-        <div style="font-size:.82rem;font-weight:700;color:var(--text)">🪙 ${(p.jp_points+(p.bonus_points||0)).toLocaleString()}コイン</div>
-        <div style="font-size:.7rem;color:var(--text3)">${new Date(p.created_at).toLocaleDateString('ja-JP')}</div>
-      </div>
-      <div style="font-size:.9rem;font-weight:900;color:var(--primary)">¥${(p.amount_jpy||0).toLocaleString()}</div>
-    </div>`).join('');
-  modal.innerHTML=`<div class="bottom-sheet"><div class="bs-drag"></div>
-    <div style="padding:14px 16px;border-bottom:1px solid var(--border)"><span style="font-size:1.05rem;font-weight:900;color:var(--text)">📅 購入履歴</span></div>
-    <div style="max-height:60vh;overflow-y:auto">${rows||'<div style="padding:40px;text-align:center;color:var(--text3)">購入履歴がありません</div>'}</div>
-    <button class="bs-cancel-btn" onclick="this.closest('.modal-overlay').remove()">閉じる</button>
-  </div>`;
-  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
-  document.body.appendChild(modal);
-}
+
+
 
 /* ══ 発送先住所管理 ══ */
 let savedAddresses=[];
@@ -2180,7 +2091,7 @@ async function showSequentialCards(results,pack){
     return(order[r.prize.tier]||0)>(order[best.prize.tier]||0)?r:best;
   },results[0]);
   lastResultForShare=topResult?.prize?.name||'レアカード';
-  renderHistory();renderItemsPage();
+  renderItemsPage();
 }
 
 /* ══ ナビ ══ */
