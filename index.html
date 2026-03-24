@@ -319,8 +319,8 @@ input,select,textarea{font-family:inherit;outline:none}
 .ic-left{display:flex;align-items:center;gap:10px}
 .ic-icon{font-size:1.5rem;flex-shrink:0}
 .ic-info{flex:1}
-.ic-name{font-size:1.05rem;font-weight:900;color:var(--text)}
-.ic-pack{font-size:.78rem;color:var(--text2);font-weight:700}
+.ic-name{font-size:1.05rem;font-weight:900;color:#ffffff}
+.ic-pack{font-size:.78rem;color:rgba(255,255,255,.75);font-weight:700}
 .ic-ship-btn{background:linear-gradient(135deg,var(--gold),var(--gold2),#b8832a);color:#1a0a00;padding:6px 12px;border-radius:6px;font-size:.72rem;font-weight:900;flex-shrink:0;box-shadow:0 2px 8px rgba(201,168,76,.3)}
 .ic-shipped{font-size:.72rem;color:var(--green);font-weight:700;flex-shrink:0}
 
@@ -467,11 +467,18 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 
 
 
-<!-- PAGE: お知らせ -->
-<div id="page-notices" class="page">
-  <div style="padding:14px">
-    <div style="font-size:.95rem;font-weight:900;margin-bottom:12px;color:var(--text)">🔔 お知らせ</div>
-    <div id="notices-list"></div>
+<!-- PAGE: 交換所 -->
+<div id="page-shop" class="page">
+  <div style="padding:0 0 80px">
+    <div style="padding:14px 14px 8px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:1.05rem;font-weight:900;color:var(--text)">🛒 交換所</div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:2px">コインで商品と交換できます</div>
+      </div>
+    </div>
+    <div id="shop-list" style="padding:0 12px">
+      <div class="loading"><div class="spinner"></div><span style="font-size:.82rem;color:var(--text3)">読み込み中...</span></div>
+    </div>
   </div>
 </div>
 
@@ -525,7 +532,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 <nav class="bottom-nav">
   <button class="bnav-btn active" data-page="gacha"><span class="bnav-icon">🎴</span>ガチャ</button>
   <button class="bnav-btn" data-page="items"><span class="bnav-icon">📦</span>獲得商品</button>
-  <button class="bnav-btn" data-page="notices"><span class="bnav-icon">🔔</span>お知らせ<span class="bnav-badge" id="notice-badge" style="display:none">0</span></button>
+  <button class="bnav-btn" data-page="shop"><span class="bnav-icon">🛒</span>交換所</button>
   <button class="bnav-btn" data-page="mypage"><span class="bnav-icon" style="display:flex;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
   <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -1148,7 +1155,7 @@ function showResultCards(results,pack){
               <div style="font-size:1rem;font-weight:900;color:#1a1a1a;margin-bottom:8px;line-height:1.3">${r.prize.name}</div>
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                 <span style="background:${tierBg[r.prize.tier]||'#888'};color:#fff;font-size:.7rem;font-weight:900;padding:3px 12px;border-radius:20px">${r.prize.tier_label||rarLabel2[r.prize.tier]||r.prize.tier}</span>
-                ${convertCoin>0?`<span style="font-size:.8rem;color:#c8860a;font-weight:900;background:#fff8e6;padding:3px 10px;border-radius:8px">🪙 ${convertCoin}コイン</span>`:''}
+                ${convertCoin>0?`<span style="font-size:.8rem;color:#c8860a;font-weight:900;background:#fff8e6;padding:3px 10px;border-radius:8px"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#mcg1a)" stroke="url(#mcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="mcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="mcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> ${convertCoin}コイン</span>`:''}
               </div>
             </div>
           </div>`;
@@ -1443,7 +1450,7 @@ function renderPackCards(list){
       </div>
       <div class="pc-bottom">
         <div class="pc-meta">
-          <div><span class="pc-price">🪙 ${p.price.toLocaleString()}</span><span class="pc-price-unit">&#47;1回</span></div>
+          <div><span class="pc-price"><svg width="20" height="20" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#pcg1a)" stroke="url(#pcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="pcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="pcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> ${p.price.toLocaleString()}</span><span class="pc-price-unit">&#47;1回</span></div>
           <span class="pc-remain">${p.remaining<=0?'<b style="color:rgba(201,168,76,.7)">完売御礼</b>':`残り<b>${(p.remaining||0).toLocaleString()}</b>&#47;${(p.total_slots||0).toLocaleString()}口`}</span>
         </div>
         <div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
@@ -1474,7 +1481,7 @@ function openPackDetail(packId){
   document.getElementById('pd-series').textContent=pack.series||'';
   document.getElementById('pd-fav-btn').textContent=favorites.has(packId)?'★':'☆';
   document.getElementById('pd-stats').innerHTML=`
-    <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">🪙 ${pack.price.toLocaleString()}コイン/回</span></span>
+    <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2);display:flex;align-items:center;gap:3px"><svg width="20" height="20" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#pcg1a)" stroke="url(#pcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="pcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="pcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> ${pack.price.toLocaleString()}コイン/回</span></span>
     <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">📦 残り${pack.remaining||0}&#47;${pack.total_slots||0}口</span></span>
     
     ${pack.tenjo_limit>0?`<span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">🏆 天井${pack.tenjo_limit}回</span></span>`:''}
@@ -1525,7 +1532,7 @@ function renderItemsPage(tab){
         </label>
         <span style="color:rgba(255,255,255,.2)">|</span>
         <span id="selected-count" style="font-size:.78rem;color:var(--text3)">0件選択中</span>
-        <button onclick="bulkConvert()" style="margin-left:auto;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:7px 16px;border-radius:8px;font-size:.78rem;font-weight:900;cursor:pointer">🪙 一括還元</button>
+        <button onclick="bulkConvert()" style="margin-left:auto;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:7px 16px;border-radius:8px;font-size:.78rem;font-weight:900;cursor:pointer"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#mcg1a)" stroke="url(#mcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="mcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="mcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> 一括還元</button>
       </div>`:''}
       ${showItems.length===0?`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">${itemsTab==='shipped'?'🚚':itemsTab==='waiting'?'📬':'📦'}</div><div style="font-weight:700;color:var(--text2)">${itemsTab==='shipped'?'発送済みの商品はありません':itemsTab==='waiting'?'発送待ちの商品はありません':'未選択の獲得商品がありません'}</div></div>`:''}
       ${showItems.map(r=>{
@@ -1556,15 +1563,15 @@ function renderItemsPage(tab){
             </div>
             <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:6px;position:relative">
               ${itemsTab==='unselected'&&exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" onchange="updateSelectedCount()" style="position:absolute;top:10px;right:10px;width:20px;height:20px;accent-color:var(--gold2);cursor:pointer">`:''}
-              <div style="font-size:1.05rem;font-weight:900;color:var(--text);line-height:1.3">${r.prize.name}</div>
-              <div style="font-size:.78rem;color:var(--text2);font-weight:700">${r.packName} · ${prizeData?.tier_label||rarLabel[r.prize.tier]||r.prize.tier}</div>
+              <div style="font-size:1.05rem;font-weight:900;color:#ffffff;line-height:1.3">${r.prize.name}</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.75);font-weight:700">${r.packName} · ${prizeData?.tier_label||rarLabel[r.prize.tier]||r.prize.tier}</div>
               ${statusBadge?`<div>${statusBadge}</div>`:''}
               ${trackingHtml}
               ${itemsTab==='unselected'&&exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900">📦 発送専用</div>':''}
-              ${itemsTab==='unselected'&&showCoin?`<div style="font-size:.88rem;color:var(--gold2);font-weight:900">🪙 ${convertCoin}コイン</div>`:''}
+              ${itemsTab==='unselected'&&showCoin?`<div style="font-size:.88rem;color:var(--gold2);font-weight:900;display:flex;align-items:center;gap:3px"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#mcg1a)" stroke="url(#mcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="mcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="mcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> ${convertCoin}コイン</div>`:''}
               ${itemsTab==='unselected'?`<div style="display:flex;gap:6px;margin-top:4px">
                 ${showShip?`<button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>`:''}
-                ${showCoin?`<button onclick="convertToPoints('${r.dbId}')" style="background:rgba(201,168,76,.15);color:var(--gold2);border:1px solid rgba(201,168,76,.3);padding:6px 12px;border-radius:6px;font-size:.72rem;font-weight:900;cursor:pointer">🪙還元</button>`:''}
+                ${showCoin?`<button onclick="convertToPoints('${r.dbId}')" style="background:rgba(201,168,76,.15);color:var(--gold2);border:1px solid rgba(201,168,76,.3);padding:6px 12px;border-radius:6px;font-size:.72rem;font-weight:900;cursor:pointer"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#mcg1a)" stroke="url(#mcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="mcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="mcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg>還元</button>`:''}
               </div>`:''}
             </div>
           </div>
@@ -1848,7 +1855,7 @@ function openPurchase(){
     `+plans.map(p=>`
     <div class="plan-item ${p.popular?'popular':''}" onclick="startPurchase(${p.price})">
       <div>
-        <div class="plan-jp">🪙 ${p.coins.toLocaleString()}コイン${p.popular?`<span class="plan-badge">人気</span>`:''}</div>
+        <div class="plan-jp"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#mcg1a)" stroke="url(#mcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="mcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="mcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> ${p.coins.toLocaleString()}コイン${p.popular?`<span class="plan-badge">人気</span>`:''}</div>
       </div>
       <div class="plan-price">¥${p.price.toLocaleString()}</div>
     </div>`).join('');
@@ -1905,6 +1912,66 @@ async function applyCoupon(){
   } else {
     showToast(`🎟️ ${coupon.discount_amount}%OFFクーポンを適用しました！`,3000);
   }
+}
+
+/* ══ 交換所 ══ */
+async function loadShopPage(){
+  const{data:items}=await db.from('shop_items').select('*').order('sort_order').order('created_at',{ascending:false});
+  const list=document.getElementById('shop-list');
+  if(!list)return;
+  if(!items||!items.length){
+    list.innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">🛒</div><div style="font-weight:700;color:var(--text2)">商品はありません</div></div>';
+    return;
+  }
+  list.innerHTML=items.map(item=>{
+    const soldOut=item.stock<=0;
+    return `
+    <div style="background:var(--card-bg);border:1px solid rgba(201,168,76,.15);border-radius:14px;margin-bottom:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.4);position:relative">
+      ${soldOut?'<div style="position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:5;display:flex;align-items:center;justify-content:center;border-radius:14px"><div style="border:3px solid rgba(255,255,255,.7);padding:6px 22px;border-radius:4px;background:rgba(0,0,0,.3)"><div style="font-size:1.4rem;font-weight:900;color:#fff;letter-spacing:.12em">完売御礼</div><div style="font-size:.62rem;color:rgba(255,255,255,.6);text-align:center;letter-spacing:.1em">SOLD OUT</div></div></div>':''}
+      ${item.image_url?`<div style="width:100%;height:200px;overflow:hidden;background:#111"><img src="${item.image_url}" style="width:100%;height:100%;object-fit:cover"></div>`:'<div style="width:100%;height:120px;background:linear-gradient(135deg,#1a1a2e,#2a1a1a);display:flex;align-items:center;justify-content:center;font-size:3rem">🛒</div>'}
+      <div style="padding:14px 16px">
+        <div style="font-size:1.05rem;font-weight:900;color:#fff;margin-bottom:4px;line-height:1.3">${item.name}</div>
+        ${item.description?`<div style="font-size:.78rem;color:var(--text2);margin-bottom:10px;line-height:1.5">${item.description}</div>`:''}
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+          <div style="display:flex;align-items:center;gap:4px">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><circle cx="11" cy="11" r="10" fill="url(#scg${item.id.slice(0,4)}a)" stroke="url(#scg${item.id.slice(0,4)}b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="scg${item.id.slice(0,4)}a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="scg${item.id.slice(0,4)}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg>
+            <span style="font-size:1.3rem;font-weight:900;color:var(--gold2)">${item.price.toLocaleString()}</span>
+            <span style="font-size:.78rem;color:var(--text2);font-weight:700">コイン</span>
+          </div>
+          ${!soldOut
+            ?`<button onclick="buyShopItem('${item.id}','${item.name}',${item.price})"
+                style="background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:10px 22px;border-radius:10px;font-size:.88rem;font-weight:900;box-shadow:0 4px 14px rgba(201,168,76,.35);cursor:pointer">購入する</button>`
+            :`<span style="font-size:.82rem;color:rgba(201,168,76,.5);font-weight:700;letter-spacing:.08em">完売御礼</span>`}
+        </div>
+        ${!soldOut?`<div style="font-size:.65rem;color:var(--text3);margin-top:6px">残り ${item.stock}点</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function buyShopItem(itemId, itemName, price){
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
+  if(state.coin<price){showToast('コインが不足しています');openPurchase();return;}
+  if(!confirm(`「${itemName}」を${price.toLocaleString()}コインで購入しますか？`))return;
+
+  // コイン消費
+  state.coin-=price;
+  await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+  updateHeaderPts();
+
+  // 在庫を減らす
+  await db.rpc('decrement_shop_stock',{item_id:itemId}).catch(()=>{});
+
+  // 注文を保存
+  await db.from('shop_orders').insert({
+    user_id:state.user.id,item_id:itemId,item_name:itemName,price,status:'pending'
+  });
+
+  // トランザクション記録
+  db.from('transactions').insert({user_id:state.user.id,type:'shop_purchase',amount:-price,currency:'coin',description:`交換所: ${itemName}`}).catch(()=>{});
+
+  showToast(`✅ 「${itemName}」を購入しました！`,3000);
+  loadShopPage();
 }
 
 /* ══ SNSシェア ══ */
@@ -2078,6 +2145,7 @@ function showPage(name,el){
   if(name==='mypage')renderMyPage();
   if(name==='notices')renderNotices();
   if(name==='items')renderItemsPage();
+  if(name==='shop')loadShopPage();
   if(name==='favorites')loadFavoritesPage();
   if(name==='inquiry'&&state.user){document.getElementById('inq-email').value=state.user.email||'';}
   if(name==='search')document.getElementById('search-input')?.focus();
