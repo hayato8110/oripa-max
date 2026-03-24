@@ -376,7 +376,7 @@ const state={
   currentCat:'all',currentSort:'new',
   activePack:null,drawCount:1,
   sessions:[],packs:[],notices:[],banners:[],videos:[],
-  tenjoCount:{},shopOrders:[],
+  tenjoCount:{},shopOrders:[],shopItems:[],
 };
 const RANKS=[
   {name:'ブロンズIV',min:0,max:1000},{name:'ブロンズIII',min:1000,max:3000},
@@ -1989,6 +1989,7 @@ async function loadShopOrdersToItems(){
 /* ══ 交換所 ══ */
 async function loadShopPage(){
   const{data:items}=await db.from('shop_items').select('*').eq('is_active',true).order('sort_order').order('created_at',{ascending:false});
+  state.shopItems=items||[];
   const list=document.getElementById('shop-list');
   if(!list)return;
   if(!items||!items.length){
@@ -2021,10 +2022,14 @@ async function buyShopItem(itemId, itemNameEncoded, price){
   try{
     const itemName=decodeURIComponent(itemNameEncoded);
     if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
-    // 在庫確認
-    const{data:itemData}=await db.from('shop_items').select('stock,image_url').eq('id',itemId).single();
-    const maxStock=itemData?.stock||1;
-    const imgUrl=itemData?.image_url||null;
+    // 在庫確認（state.shopItemsから取得、なければDB）
+    let maxStock=1;let imgUrl=null;
+    const cachedItem=state.shopItems.find(i=>i.id===itemId);
+    if(cachedItem){maxStock=cachedItem.stock||1;imgUrl=cachedItem.image_url||null;}
+    else{
+      try{const{data:itemData}=await db.from('shop_items').select('stock,image_url').eq('id',itemId).single();
+      maxStock=itemData?.stock||1;imgUrl=itemData?.image_url||null;}catch(e){}
+    }
     // 個数選択モーダル
     _shopQty=1;
     const modal=document.createElement('div');
@@ -2083,8 +2088,8 @@ async function confirmBuyShopItem(itemId, itemNameEncoded, price, btn){
 
     // 注文をqty件保存
     let lastOrderId=null;
-    const{data:imgData}=await db.from('shop_items').select('image_url').eq('id',itemId).single().catch(()=>({data:null}));
-    const imgUrl=imgData?.image_url||null;
+    let imgUrl=null;
+    try{const{data:imgData}=await db.from('shop_items').select('image_url').eq('id',itemId).single();imgUrl=imgData?.image_url||null;}catch(e){}
     for(let i=0;i<qty;i++){
       const oid=crypto.randomUUID();
       if(i===qty-1)lastOrderId=oid;
