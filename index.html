@@ -1453,9 +1453,9 @@ function renderPackCards(list){
             let opts={d1:true,d10:true,d100:false};
             try{if(p.draw_options)opts={...opts,...JSON.parse(p.draw_options)};}catch(e){}
             const btns=[];
-            if(opts.d1)btns.push(\`<button class="pc-btn-1" onclick="drawDirect('\${p.id}',1)">1回ガチャ</button>\`);
-            if(opts.d10)btns.push(\`<button class="pc-btn-5" onclick="drawDirect('\${p.id}',10)">10連ガチャ</button>\`);
-            if(opts.d100)btns.push(\`<button class="pc-btn-100" onclick="drawDirect('\${p.id}',100)">100連ガチャ</button>\`);
+            if(opts.d1)btns.push('<button class="pc-btn-1" onclick="drawDirect(\''+p.id+'\',1)">1回ガチャ</button>');
+            if(opts.d10)btns.push('<button class="pc-btn-5" onclick="drawDirect(\''+p.id+'\',10)">10連ガチャ</button>');
+            if(opts.d100)btns.push('<button class="pc-btn-100" onclick="drawDirect(\''+p.id+'\',100)">100連ガチャ</button>');
             return btns.join('');
           })()}</div>`
         }
