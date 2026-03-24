@@ -855,6 +855,9 @@ function openPackModal(){
   document.getElementById('pm-order').value='0';
   ['pm-hot','pm-new','pm-ad','pm-limit','pm-loop','pm-new-user','pm-100x'].forEach(id=>document.getElementById(id).checked=false);
   document.getElementById('pm-active').checked=true;
+  document.getElementById('pm-draw-1').checked=true;
+  document.getElementById('pm-draw-10').checked=true;
+  document.getElementById('pm-draw-100').checked=false;
   // デフォルトでS賞・A賞・B賞・C賞・D賞を1つずつ追加
   ['sar','sr','rr','r','c'].forEach(tier=>addPrizeBlock({tier}));
   document.getElementById('pack-modal').classList.add('show');
@@ -1417,19 +1420,29 @@ async function loadShipping(status='all'){
   document.getElementById('ship-done').textContent=done;
   document.getElementById('ship-badge').textContent=pending;
   document.getElementById('stat-ship').textContent=pending;
-  document.getElementById('shipping-tbl-body').innerHTML=allShipping.length?allShipping.map(s=>`
+  document.getElementById('shipping-tbl-body').innerHTML=allShipping.length?allShipping.map(s=>{
+    // address は jsonb なので s.address.name 等でアクセス
+    const addr=s.address||{};
+    const dispName=addr.name||s.name||'—';
+    const dispTel=addr.tel||s.tel||'';
+    const dispZip=addr.zip||s.zip||'—';
+    const dispPref=addr.prefecture||s.prefecture||'';
+    const dispCity=addr.city||s.city||'';
+    const dispBuilding=addr.building||s.building||'';
+    return `
     <tr>
       <td class="td-bold" style="font-size:.72rem">#${(s.id||'').slice(0,8)}</td>
       <td><div>${s.users?.username||'—'}</div><div class="td-sub">${s.users?.email||''}</div></td>
-      <td><div>${s.name||'—'}</div><div class="td-sub">${s.tel||''}</div></td>
-      <td style="font-size:.72rem"><div>〒${s.zip||'—'}</div><div>${s.prefecture||''}${s.city||''}</div><div class="td-sub">${s.building||''}</div></td>
+      <td><div>${dispName}</div><div class="td-sub">${dispTel}</div></td>
+      <td style="font-size:.72rem"><div>〒${dispZip}</div><div>${dispPref}${dispCity}</div><div class="td-sub">${dispBuilding}</div></td>
       <td style="font-size:.7rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</td>
       <td><span class="badge badge-${s.status==='pending'?'pending':'shipped'}">${s.status==='pending'?'発送待ち':'発送済み'}</span>${s.tracking_number?`<div class="td-sub">${s.tracking_number}</div>`:''}</td>
       <td>
         ${s.status==='pending'?`<button class="btn btn-success" onclick="shipOrder('${s.id}')">✅ 発送処理</button>`:''}
         <button class="btn btn-danger" onclick="cancelShipping('${s.id}')" style="margin-left:4px">✕</button>
       </td>
-    </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">発送依頼はありません</td></tr>';
+    </tr>`;
+  }).join(''):'<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">発送依頼はありません</td></tr>';
 }
 async function shipOrder(id){
   const tracking=prompt('追跡番号を入力（任意、スキップはOK）:')||'';
