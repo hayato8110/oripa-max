@@ -1966,36 +1966,43 @@ async function loadShopPage(){
 }
 
 async function buyShopItem(itemId, itemNameEncoded, price){
-  const itemName=decodeURIComponent(itemNameEncoded);
-  if(!state.user){document.getElementById('auth-modal').classList.add('show');showToast('ログインが必要です');return;}
-  if(state.coin<price){showToast('⚠️ コインが不足しています');openPurchase();return;}
-  if(!confirm(`「${itemName}」を${Number(price).toLocaleString()}コインで購入しますか？`))return;
+  try{
+    const itemName=decodeURIComponent(itemNameEncoded);
+    if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
+    if(Number(state.coin)<Number(price)){showToast('⚠️ コインが不足しています');openPurchase();return;}
+    if(!confirm('「'+itemName+'」を'+Number(price).toLocaleString()+'コインで購入しますか？'))return;
 
-  showToast('処理中...',1500);
+    showToast('処理中...',2000);
 
-  // コイン消費
-  const newCoin=state.coin-Number(price);
-  const{error:coinErr}=await db.from('users').update({coin_points:newCoin}).eq('id',state.user.id);
-  if(coinErr){alert('コインエラー: '+coinErr.message);return;}
-  state.coin=newCoin;
-  updateHeaderPts();
+    // コイン消費
+    const newCoin=Number(state.coin)-Number(price);
+    const r1=await db.from('users').update({coin_points:newCoin}).eq('id',state.user.id);
+    if(r1.error){alert('コインエラー: '+r1.error.message);return;}
+    state.coin=newCoin;
+    updateHeaderPts();
 
-  // 在庫を減らす（直接update）
-  await db.from('shop_items').update({stock:0}).eq('id',itemId).gt('stock',0).catch(e=>alert('在庫エラー: '+e.message));
+    // 在庫を減らす
+    await db.from('shop_items').update({stock:0}).eq('id',itemId);
 
-  // 注文を保存
-  const orderId=crypto.randomUUID();
-  const{error:orderErr}=await db.from('shop_orders').insert({
-    id:orderId,user_id:state.user.id,item_id:itemId,item_name:itemName,price:Number(price),status:'pending'
-  });
-  if(orderErr){alert('注文エラー: '+orderErr.message);return;}
+    // 注文を保存
+    const orderId=crypto.randomUUID();
+    const r2=await db.from('shop_orders').insert({
+      id:orderId,user_id:state.user.id,item_id:itemId,
+      item_name:itemName,price:Number(price),status:'pending'
+    });
+    if(r2.error){alert('注文エラー: '+r2.error.message);return;}
 
-  db.from('transactions').insert({user_id:state.user.id,type:'shop_purchase',amount:-Number(price),currency:'coin',description:`交換所: ${itemName}`}).catch(()=>{});
+    db.from('transactions').insert({user_id:state.user.id,type:'shop_purchase',
+      amount:-Number(price),currency:'coin',description:'交換所: '+itemName}).catch(()=>{});
 
-  loadShopPage();
-  showToast(`✅ 購入完了！発送先を入力してください`,3000);
-  setTimeout(()=>openShopShippingModal(orderId, itemName),500);
+    loadShopPage();
+    showToast('✅ 購入完了！',2000);
+    setTimeout(()=>openShopShippingModal(orderId,itemName),800);
+  }catch(e){
+    alert('エラー: '+e.message);
+  }
 }
+
 
 
 async function openShopShippingModal(orderId, itemName){
