@@ -1597,17 +1597,35 @@ function renderItemsPage(tab){
           :'';
         // 追跡番号表示
         const trackingHtml=itemsTab==='shipped'&&r.trackingNumber
-          ?`<div style="margin-top:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:6px 10px">
-              <div style="font-size:.62rem;color:var(--green);font-weight:900;margin-bottom:2px">📦 追跡番号</div>
-              <div style="font-size:.82rem;font-weight:900;color:var(--text);letter-spacing:.05em">${r.trackingNumber}</div>
+          ?`<div style="margin-top:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:8px 12px">
+              <div style="font-size:.62rem;color:var(--green);font-weight:900;margin-bottom:3px">📦 追跡番号</div>
+              <a href="https://trackings.post.japanpost.jp/services/srv/search/?requestNo1=${r.trackingNumber}" target="_blank"
+                style="font-size:.9rem;font-weight:900;color:var(--green);letter-spacing:.06em;text-decoration:underline;display:block">${r.trackingNumber}</a>
+              <div style="font-size:.65rem;color:var(--text3);margin-top:2px">タップして追跡する →</div>
               ${r.shippedAt?`<div style="font-size:.62rem;color:var(--text3);margin-top:2px">発送日: ${new Date(r.shippedAt).toLocaleDateString('ja-JP')}</div>`:''}
             </div>`
           :itemsTab==='shipped'&&!r.trackingNumber
-          ?`<div style="margin-top:4px;font-size:.65rem;color:var(--text3)">追跡番号なし</div>`
+          ?`<div style="margin-top:4px;font-size:.68rem;color:var(--text3)">追跡番号なし</div>`
           :'';
         return `
-        <div class="item-card" data-dbid="${r.dbId}">
-          ${itemsTab==='unselected'&&exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" onchange="updateSelectedCount()" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--gold2);cursor:pointer">`:'<div style="width:18px;flex-shrink:0"></div>'}
+        <div class="item-card" data-dbid="${r.dbId}" style="${itemsTab!=='unselected'?'flex-direction:column;align-items:stretch;padding:0;overflow:hidden;':''}">
+          ${itemsTab==='unselected'&&exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" onchange="updateSelectedCount()" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--gold2);cursor:pointer">`:''}
+          ${itemsTab!=='unselected'?`
+          <!-- 発送待ち・発送済みは大きいカードレイアウト -->
+          <div style="display:flex;gap:0;align-items:stretch">
+            <div style="width:120px;min-height:120px;flex-shrink:0;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden">
+              ${prizeData?.image_url
+                ?`<img src="${prizeData.image_url}" style="width:100%;height:100%;object-fit:cover">`
+                :`<span style="font-size:3rem">${r.packEmoji}</span>`}
+            </div>
+            <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:6px">
+              <div style="font-size:1rem;font-weight:900;color:var(--text);line-height:1.3">${r.prize.name}</div>
+              <div style="font-size:.75rem;color:var(--text3)">${r.packName} · ${prizeData?.tier_label||rarLabel[r.prize.tier]||r.prize.tier}</div>
+              ${statusBadge?`<div>${statusBadge}</div>`:''}
+              ${trackingHtml}
+            </div>
+          </div>`:`
+          <!-- 未選択は従来レイアウト -->
           <div class="ic-left">
             ${prizeData?.image_url
               ?`<img src="${prizeData.image_url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#e8e8e8">`
@@ -1615,8 +1633,6 @@ function renderItemsPage(tab){
             <div class="ic-info">
               <div class="ic-name">${r.prize.name}</div>
               <div class="ic-pack">${r.packName} · ${prizeData?.tier_label||rarLabel[r.prize.tier]||r.prize.tier}</div>
-              ${statusBadge?`<div style="margin-top:4px">${statusBadge}</div>`:''}
-              ${trackingHtml}
               ${itemsTab==='unselected'&&exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900;margin-top:2px">📦 発送専用</div>':''}
               ${itemsTab==='unselected'&&showCoin?`<div style="font-size:.62rem;color:var(--gold2);font-weight:700;margin-top:2px">🪙 ${convertCoin}コイン</div>`:''}
             </div>
@@ -1624,7 +1640,7 @@ function renderItemsPage(tab){
           <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
             ${showShip?`<button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>`:''}
             ${showCoin?`<button onclick="convertToPoints('${r.dbId}')" style="background:#fff;color:#1a0a00;border:none;padding:5px 10px;border-radius:6px;font-size:.7rem;font-weight:900;cursor:pointer">🪙還元</button>`:''}
-          </div>
+          </div>`}
         </div>`;
       }).join('')}
     </div>`;
@@ -1777,7 +1793,7 @@ async function submitShipping(){
   }
 
   closeModal('shipping-modal');
-  showToast('📦 発送依頼を受け付けました！管理画面に反映されます',3000);
+  showToast('📦 発送依頼を受け付けました！',3000);
   renderItemsPage();
 }
 
