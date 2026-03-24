@@ -156,6 +156,8 @@ input,select,textarea{font-family:inherit}
     <div class="sb-item" onclick="showPage('points',this)"><span class="sb-icon">💎</span>ポイント管理</div>
     <div class="sb-item" onclick="showPage('ranking',this)"><span class="sb-icon">🏆</span>ランキング</div>
     <div class="sb-section">注文・発送</div>
+    <div class="sb-item" onclick="showPage('shop',this)"><span class="sb-icon">🛒</span>交換所管理</div>
+    <div class="sb-item" onclick="showPage('shop_orders',this)"><span class="sb-icon">📋</span>交換所注文</div>
     <div class="sb-item" onclick="showPage('shipping',this)"><span class="sb-icon">📦</span>発送管理<span class="sb-badge" id="ship-badge">0</span></div>
     <div class="sb-item" onclick="showPage('history',this)"><span class="sb-icon">📋</span>当選履歴</div>
     <div class="sb-section">マーケティング</div>
@@ -300,6 +302,27 @@ input,select,textarea{font-family:inherit}
       <div class="table-card">
         <div class="table-head"><span class="table-title" id="ranking-title">💰 累計消費ランキング</span></div>
         <div id="ranking-list"></div>
+      </div>
+    </div>
+
+    <!-- SHOP ITEMS -->
+    <div class="admin-page" id="page-shop">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:.95rem;font-weight:900">🛒 交換所管理</span>
+        <button class="btn btn-primary btn-lg" onclick="openShopItemModal()">＋ 商品追加</button>
+      </div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>画像</th><th>商品名</th><th>価格</th><th>在庫</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="shop-items-tbl"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SHOP ORDERS -->
+    <div class="admin-page" id="page-shop_orders">
+      <div style="margin-bottom:14px"><span style="font-size:.95rem;font-weight:900">📋 交換所注文一覧</span></div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>注文ID</th><th>ユーザー</th><th>商品名</th><th>価格</th><th>日時</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="shop-orders-tbl"></tbody></table>
       </div>
     </div>
 
@@ -737,9 +760,9 @@ function showPage(name,el){
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   document.getElementById(`page-${name}`)?.classList.add('active');
   if(el)el.classList.add('active');
-  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',ranking:'🏆 ランキング',shipping:'📦 発送管理',history:'📋 当選履歴',coupons:'🎟️ クーポン管理',push:'🔔 プッシュ通知',notices:'📢 お知らせ管理',inquiries:'💬 お問い合わせ',revenue:'💰 売上・収益',analytics:'📈 アクセス解析',settings:'⚙️ サイト設定'};
+  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',ranking:'🏆 ランキング',shipping:'📦 発送管理',history:'📋 当選履歴',coupons:'🎟️ クーポン管理',push:'🔔 プッシュ通知',notices:'📢 お知らせ管理',inquiries:'💬 お問い合わせ',revenue:'💰 売上・収益',analytics:'📈 アクセス解析',settings:'⚙️ サイト設定',shop:'🛒 交換所管理',shop_orders:'📋 交換所注文'};
   document.getElementById('page-title').textContent=titles[name]||name;
-  const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices,coupons:loadCoupons,inquiries:()=>loadInquiries('all'),push:loadPush,ranking:()=>loadRanking('spent'),analytics:loadAnalytics};
+  const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices,coupons:loadCoupons,inquiries:()=>loadInquiries('all'),push:loadPush,ranking:()=>loadRanking('spent'),analytics:loadAnalytics,shop:loadShopItems,shop_orders:loadShopOrders};
   if(loaders[name])loaders[name]();
 }
 
@@ -1741,6 +1764,121 @@ document.querySelectorAll('.modal-overlay').forEach(el=>{
     initDashboard();
   }
 })();
+
+/* ══ 交換所管理 ══ */
+let allShopItems=[];
+async function loadShopItems(){
+  const{data}=await db.from('shop_items').select('*').order('sort_order').order('created_at',{ascending:false});
+  allShopItems=data||[];
+  document.getElementById('shop-items-tbl').innerHTML=allShopItems.length?allShopItems.map(item=>`
+    <tr>
+      <td>${item.image_url?`<img src="${item.image_url}" style="width:48px;height:48px;object-fit:cover;border-radius:6px">`:'—'}</td>
+      <td class="td-bold">${item.name}</td>
+      <td style="color:var(--gold2);font-weight:900">${item.price.toLocaleString()}コイン</td>
+      <td>${item.stock<=0?'<span style="color:#ef4444;font-weight:900">完売</span>':`${item.stock}点`}</td>
+      <td><span class="badge" style="background:${item.is_active?'rgba(0,230,120,.15)':'rgba(255,255,255,.05)'};color:${item.is_active?'#00e676':'rgba(255,255,255,.3)'};border:1px solid ${item.is_active?'rgba(0,230,120,.2)':'rgba(255,255,255,.1)'}">${item.is_active?'公開':'非公開'}</span></td>
+      <td>
+        <button class="btn btn-secondary" onclick="editShopItem('${item.id}')">✏️ 編集</button>
+        <button class="btn btn-danger" onclick="deleteShopItem('${item.id}')" style="margin-left:4px">✕</button>
+      </td>
+    </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">商品がありません</td></tr>';
+}
+
+async function loadShopOrders(){
+  const{data}=await db.from('shop_orders').select('*,users(username,email)').order('created_at',{ascending:false});
+  const orders=data||[];
+  document.getElementById('shop-orders-tbl').innerHTML=orders.length?orders.map(o=>`
+    <tr>
+      <td class="td-bold" style="font-size:.72rem">#${(o.id||'').slice(0,8)}</td>
+      <td><div>${o.users?.username||'—'}</div><div class="td-sub">${o.users?.email||''}</div></td>
+      <td>${o.item_name||'—'}</td>
+      <td style="color:var(--gold2);font-weight:900">${(o.price||0).toLocaleString()}コイン</td>
+      <td style="font-size:.7rem">${new Date(o.created_at).toLocaleDateString('ja-JP')}</td>
+      <td><span class="badge badge-${o.status==='pending'?'pending':'shipped'}">${o.status==='pending'?'処理待ち':'完了'}</span></td>
+      <td>
+        ${o.status==='pending'?`<button class="btn btn-success" onclick="completeShopOrder('${o.id}')">✅ 完了</button>`:''}
+        <button class="btn btn-danger" onclick="deleteShopOrder('${o.id}')" style="margin-left:4px">✕</button>
+      </td>
+    </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">注文がありません</td></tr>';
+}
+
+let editingShopItemId=null;
+function openShopItemModal(id){
+  editingShopItemId=id||null;
+  const item=id?allShopItems.find(x=>x.id===id):null;
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(480px,95vw);max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-size:1rem;font-weight:900">${item?'✏️ 商品編集':'＋ 商品追加'}</span>
+      <button onclick="this.closest('.modal-overlay').remove()" style="background:none;color:var(--text3);font-size:1.2rem">✕</button>
+    </div>
+    <label class="form-label">商品名 *</label>
+    <input class="form-input" id="si-name" value="${item?.name||''}" placeholder="例: ピカチュウex PSA10">
+    <label class="form-label">説明</label>
+    <textarea class="form-input" id="si-desc" rows="3" placeholder="商品の詳細説明">${item?.description||''}</textarea>
+    <label class="form-label">価格（コイン）*</label>
+    <input class="form-input" type="number" id="si-price" value="${item?.price||''}" placeholder="例: 5000">
+    <label class="form-label">在庫数 *</label>
+    <input class="form-input" type="number" id="si-stock" value="${item?.stock||0}" placeholder="例: 1">
+    <label class="form-label">画像URL</label>
+    <input class="form-input" id="si-image" value="${item?.image_url||''}" placeholder="https://...">
+    <label class="form-label">並び順</label>
+    <input class="form-input" type="number" id="si-order" value="${item?.sort_order||0}">
+    <label class="form-check" style="margin-bottom:16px"><input type="checkbox" id="si-active" ${item?.is_active!==false?'checked':''}> 公開する</label>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-primary btn-lg" style="flex:1" onclick="saveShopItem()">✅ 保存</button>
+      <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">キャンセル</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+}
+
+function editShopItem(id){openShopItemModal(id);}
+
+async function saveShopItem(){
+  const name=document.getElementById('si-name').value.trim();
+  const price=parseInt(document.getElementById('si-price').value)||0;
+  const stock=parseInt(document.getElementById('si-stock').value)||0;
+  if(!name||!price){showToast('⚠️ 商品名と価格は必須です');return;}
+  const data={
+    name,
+    description:document.getElementById('si-desc').value.trim()||null,
+    price,stock,
+    image_url:document.getElementById('si-image').value.trim()||null,
+    sort_order:parseInt(document.getElementById('si-order').value)||0,
+    is_active:document.getElementById('si-active').checked,
+  };
+  if(editingShopItemId){
+    await db.from('shop_items').update(data).eq('id',editingShopItemId);
+  } else {
+    await db.from('shop_items').insert(data);
+  }
+  document.querySelector('.modal-overlay.show')?.remove();
+  showToast('✅ 商品を保存しました');
+  loadShopItems();
+}
+
+async function deleteShopItem(id){
+  if(!confirm('この商品を削除しますか？'))return;
+  await db.from('shop_items').delete().eq('id',id);
+  showToast('🗑️ 削除しました');
+  loadShopItems();
+}
+
+async function completeShopOrder(id){
+  await db.from('shop_orders').update({status:'completed'}).eq('id',id);
+  showToast('✅ 注文を完了にしました');
+  loadShopOrders();
+}
+
+async function deleteShopOrder(id){
+  if(!confirm('この注文を削除しますか？'))return;
+  await db.from('shop_orders').delete().eq('id',id);
+  showToast('🗑️ 削除しました');
+  loadShopOrders();
+}
 </script>
 </body>
 </html>
