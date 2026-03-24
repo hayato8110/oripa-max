@@ -1980,8 +1980,8 @@ async function buyShopItem(itemId, itemNameEncoded, price){
   state.coin=newCoin;
   updateHeaderPts();
 
-  // 在庫を減らす
-  await db.rpc('decrement_shop_stock',{item_id:itemId}).catch(e=>alert('在庫エラー: '+e.message));
+  // 在庫を減らす（直接update）
+  await db.from('shop_items').update({stock:0}).eq('id',itemId).gt('stock',0).catch(e=>alert('在庫エラー: '+e.message));
 
   // 注文を保存
   const{data:orderData,error:orderErr}=await db.from('shop_orders').insert({
