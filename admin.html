@@ -74,6 +74,7 @@ input,select,textarea{font-family:inherit}
 .btn-danger{background:rgba(255,64,96,.1);color:#ff6680;border:1px solid rgba(255,64,96,.22)}
 .btn-success{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
 .btn-secondary{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1)}
+.btn-warning{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
 .btn-purple{background:rgba(187,136,255,.1);color:#bb88ff;border:1px solid rgba(187,136,255,.22)}
 .btn-lg{padding:10px 20px;font-size:.85rem;border-radius:8px}
 .prog{background:rgba(255,255,255,.08);border-radius:999px;height:4px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle}
@@ -1438,7 +1439,10 @@ async function loadShipping(status='all'){
       <td style="font-size:.7rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</td>
       <td><span class="badge badge-${s.status==='pending'?'pending':'shipped'}">${s.status==='pending'?'発送待ち':'発送済み'}</span>${s.tracking_number?`<div class="td-sub">${s.tracking_number}</div>`:''}</td>
       <td>
-        ${s.status==='pending'?`<button class="btn btn-success" onclick="shipOrder('${s.id}')">✅ 発送処理</button>`:''}
+        ${s.status==='pending'
+          ?`<button class="btn btn-success" onclick="shipOrder('${s.id}')">✅ 発送処理</button>`
+          :`<button class="btn btn-secondary" onclick="editShipOrder('${s.id}')">✏️ 修正</button>
+            <button class="btn btn-warning" onclick="revertShipping('${s.id}')" style="margin-left:4px">↩️ 戻す</button>`}
         <button class="btn btn-danger" onclick="cancelShipping('${s.id}')" style="margin-left:4px">✕</button>
       </td>
     </tr>`;
@@ -1448,6 +1452,20 @@ async function shipOrder(id){
   const tracking=prompt('追跡番号を入力（任意、スキップはOK）:')||'';
   await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking||null,shipped_at:new Date().toISOString()}).eq('id',id);
   showToast('✅ 発送処理完了');
+  loadShipping('all');
+}
+async function editShipOrder(id){
+  const s=allShipping.find(x=>x.id===id);if(!s)return;
+  const tracking=prompt('追跡番号を修正（空欄で削除）:',s.tracking_number||'');
+  if(tracking===null)return; // キャンセル
+  await db.from('shipping_requests').update({tracking_number:tracking||null}).eq('id',id);
+  showToast('✅ 追跡番号を更新しました');
+  loadShipping('all');
+}
+async function revertShipping(id){
+  if(!confirm('発送済みを「発送待ち」に戻しますか？'))return;
+  await db.from('shipping_requests').update({status:'pending',tracking_number:null,shipped_at:null}).eq('id',id);
+  showToast('↩️ 発送待ちに戻しました');
   loadShipping('all');
 }
 async function cancelShipping(id){
