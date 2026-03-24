@@ -1696,19 +1696,22 @@ async function submitShipping(){
       if(error)console.error('draw_sessions error:',error.message);
     }
 
-    // shipping_requestsは非同期で保存（失敗しても続行）
-    db.from('shipping_requests').insert({
+    // shipping_requestsに保存（awaitで確実に待つ）
+    const{error:shipErr}=await db.from('shipping_requests').insert({
       user_id:state.user.id,
-      draw_session_id:sessionId,
-      result_id:pendingShipResultId,
+      draw_session_id:sessionId||null,
+      result_id:pendingShipResultId||null,
       name,zip,prefecture:pref,city,building,tel,status:'pending',
-    }).then(({error})=>{
-      if(error)console.error('shipping_requests error:',error.message);
     });
+    if(shipErr){
+      console.error('shipping_requests error:',shipErr.message,shipErr.details,shipErr.hint);
+      showToast('⚠️ 発送依頼の保存に失敗しました: '+shipErr.message,4000);
+      return;
+    }
   }
 
   closeModal('shipping-modal');
-  showToast('📦 発送依頼を受け付けました！',3000);
+  showToast('📦 発送依頼を受け付けました！管理画面に反映されます',3000);
   renderItemsPage();
 }
 
