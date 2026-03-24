@@ -110,6 +110,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .pc-remain{font-size:1.05rem;font-weight:700;color:#fff}
 .pc-remain b{color:#fff;font-size:1.2rem;font-weight:900}
 .pc-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.pc-btns button:only-child{grid-column:span 2}
 .pc-btn-1{padding:13px 6px;border-radius:10px;font-size:.92rem;font-weight:900;background:#ffffff;color:#1a0a00;border:none;letter-spacing:.04em;transition:.15s;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .pc-btn-1:active{transform:scale(.97);background:#f0f0f0}
 .pc-btn-5{padding:13px 6px;border-radius:10px;font-size:.92rem;font-weight:900;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;letter-spacing:.04em;transition:.15s;box-shadow:0 4px 18px rgba(201,168,76,.35),inset 0 1px 0 rgba(255,255,255,.2);position:relative;overflow:hidden}
@@ -120,7 +121,6 @@ input,select,textarea{font-family:inherit;outline:none}
 .progress-fill.danger{background:linear-gradient(90deg,#dc2626,#ef4444)}
 .progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 2s infinite}
 @keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(200%)}}
-.pc-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 /* ══ LUXURY BUTTON EFFECTS ══ */
 .pc-btn-5::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);border-radius:10px 10px 0 0;pointer-events:none}
 .pc-btn-1:hover{background:#f0f0f0}
@@ -1129,32 +1129,36 @@ function showResultCards(results,pack){
 
   if(isList){
     const rarLabel2={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C'};
-    const tierColor={sar:'#e8380d',sr:'#7c3aed',rr:'#2563eb',r:'#6b7280',c:'#9ca3af'};
+    const tierBg={sar:'#e8380d',sr:'#7c3aed',rr:'#2563eb',r:'#6b7280',c:'#9ca3af'};
+    document.getElementById('result-screen').style.background='#f5f5f5';
+    document.getElementById('result-title').style.cssText='color:#1a1a1a;font-size:1rem;font-weight:900;padding:16px 0 8px';
     document.getElementById('result-cards').innerHTML=`
-      <div style="width:100%;max-width:440px;overflow-y:auto;max-height:72vh;padding:0 12px;display:flex;flex-direction:column;gap:8px">
+      <div style="width:100%;max-width:440px;overflow-y:auto;max-height:68vh;padding:0 12px;display:flex;flex-direction:column;gap:1px;background:#e0e0e0;border-radius:12px;overflow:hidden">
         ${results.map((r,i)=>{
           const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
           const imgUrl=prizeData?.image_url||'';
           const convertCoin=prizeData?.value_jp||0;
           return `
-          <div style="background:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15)">
-            ${imgUrl
-              ?`<img src="${imgUrl}" style="width:64px;height:64px;object-fit:contain;border-radius:8px;flex-shrink:0;background:#f5f5f5">`
-              :`<div style="width:64px;height:64px;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0">${pack?.emoji||'🎴'}</div>`}
-            <div style="flex:1;min-width:0">
-              <div style="font-size:.92rem;font-weight:900;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.prize.name}</div>
-              <div style="margin-top:4px">
-                <span style="background:${tierColor[r.prize.tier]||'#888'};color:#fff;font-size:.6rem;font-weight:900;padding:2px 8px;border-radius:20px">${rarLabel2[r.prize.tier]||r.prize.tier}</span>
-              </div>
-              ${convertCoin>0?`<div style="font-size:.72rem;color:#888;margin-top:4px">🪙 ${convertCoin}コイン</div>`:''}
+          <div style="background:#fff;padding:14px 16px;display:flex;align-items:center;gap:14px">
+            <div style="width:70px;height:70px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">
+              ${imgUrl
+                ?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:contain">`
+                :`<span style="font-size:2rem">${pack?.emoji||'🎴'}</span>`}
             </div>
-            <div style="font-size:.65rem;color:#bbb;flex-shrink:0">#${i+1}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:.95rem;font-weight:900;color:#1a1a1a;margin-bottom:4px">${r.prize.name}</div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span style="background:${tierBg[r.prize.tier]||'#888'};color:#fff;font-size:.62rem;font-weight:900;padding:2px 10px;border-radius:20px">${rarLabel2[r.prize.tier]||r.prize.tier}</span>
+                ${convertCoin>0?`<span style="font-size:.75rem;color:#f5a623;font-weight:700">🪙 ${convertCoin}コイン</span>`:''}
+              </div>
+            </div>
           </div>`;
         }).join('')}
       </div>`;
     document.getElementById('result-screen').classList.add('show');
     resultFlipped=resultTotal;
     document.getElementById('result-done').classList.add('show');
+    document.getElementById('result-done').style.cssText='display:block;background:linear-gradient(135deg,#f5a623,#f5c518);color:#1a0a00;font-size:1rem;font-weight:900;padding:14px 48px;border-radius:12px;margin-top:12px';
     return;
   }
 
@@ -1205,9 +1209,12 @@ function flipResultCard(i,tier){
   }
 }
 function closeResult(){
-  document.getElementById('result-screen').classList.remove('show');
-  document.getElementById('share-btn').style.display='none';
-  showPage('items',document.querySelector('[data-page=items]'));
+  const rs=document.getElementById('result-screen');
+  rs.classList.remove('show');
+  rs.style.background='';
+  document.getElementById('result-title').style.cssText='';
+  document.getElementById('result-done').style.cssText='';
+  renderPacks();renderItemsPage();
 }
 
 /* ══ 抽選 ══ */
@@ -1423,8 +1430,8 @@ function renderPackCards(list){
       </div>
       <div class="pc-bottom">
         <div class="pc-meta">
-          <div><span class="pc-price">🪙 ${p.price.toLocaleString()}</span><span class="pc-price-unit">/1回</span></div>
-          <span class="pc-remain">${p.remaining<=0?'<b style="color:rgba(201,168,76,.7)">完売御礼</b>':`残り<b>${(p.remaining||0).toLocaleString()}</b>/${(p.total_slots||0).toLocaleString()}口`}</span>
+          <div><span class="pc-price">🪙 ${p.price.toLocaleString()}</span><span class="pc-price-unit">&#47;1回</span></div>
+          <span class="pc-remain">${p.remaining<=0?'<b style="color:rgba(201,168,76,.7)">完売御礼</b>':`残り<b>${(p.remaining||0).toLocaleString()}</b>&#47;${(p.total_slots||0).toLocaleString()}口`}</span>
         </div>
         <div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
         ${p.remaining<=0?
@@ -1432,7 +1439,8 @@ function renderPackCards(list){
           `<div class="pc-btns">
             ${drawOpts.d1!==false?`<button class="pc-btn-1" onclick="drawDirect('${p.id}',1)">1回ガチャ</button>`:''}
             ${drawOpts.d10?`<button class="pc-btn-5" onclick="drawDirect('${p.id}',10)">10連ガチャ</button>`:''}
-            ${drawOpts.d100?`<button class="pc-btn-100" onclick="drawDirect('${p.id}',100)" style="grid-column:1/-1;background:linear-gradient(135deg,#1a0a00,#3a1e00);color:var(--gold2);border:1.5px solid rgba(201,168,76,.4);border-radius:10px;font-size:.88rem;font-weight:900;padding:13px;letter-spacing:.04em">100連ガチャ</button>`:''}
+            ${drawOpts.d100?`<button class="pc-btn-100" onclick="drawDirect('${p.id}',100)" style="grid-column:span 2;background:linear-gradient(135deg,#1a0a00,#3a1e00);color:var(--gold2);border:1.5px solid rgba(201,168,76,.4);border-radius:10px;font-size:.88rem;font-weight:900;padding:13px;letter-spacing:.04em">100連ガチャ</button>`:''}
+          </div>`
           </div>`
         }
       </div>
@@ -1451,7 +1459,7 @@ function openPackDetail(packId){
   document.getElementById('pd-fav-btn').textContent=favorites.has(packId)?'★':'☆';
   document.getElementById('pd-stats').innerHTML=`
     <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">🪙 ${pack.price.toLocaleString()}コイン/回</span></span>
-    <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">📦 残り${pack.remaining||0}/${pack.total_slots||0}口</span></span>
+    <span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">📦 残り${pack.remaining||0}&#47;${pack.total_slots||0}口</span></span>
     
     ${pack.tenjo_limit>0?`<span class="pcb-chip" style="background:#f8f8f8;border:1px solid var(--border)"><span style="color:var(--text2)">🏆 天井${pack.tenjo_limit}回</span></span>`:''}
   `;
@@ -1675,7 +1683,7 @@ function renderMyPage(){
         <div class="mp-username" style="border-bottom:none;padding-bottom:0">${state.user.username}</div>
       </div>
       <div class="mp-pts-row" style="position:relative;z-index:1">
-        <div class="mp-pt" style="grid-column:1/-1"><div class="mp-pt-label">コイン残高</div><div class="mp-pt-val">${state.coin.toLocaleString()}</div></div>
+        <div class="mp-pt" style="grid-column:span 2"><div class="mp-pt-label">コイン残高</div><div class="mp-pt-val">${state.coin.toLocaleString()}</div></div>
       </div>
     </div>
     <div class="mp-menu">
