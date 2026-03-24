@@ -321,7 +321,7 @@ input,select,textarea{font-family:inherit}
     <div class="admin-page" id="page-shop_orders">
       <div style="margin-bottom:14px"><span style="font-size:.95rem;font-weight:900">📋 交換所注文一覧</span></div>
       <div class="table-card">
-        <table class="tbl"><thead><tr><th>注文ID</th><th>ユーザー</th><th>商品名</th><th>価格</th><th>日時</th><th>状態</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>注文ID</th><th>ユーザー</th><th>商品名</th><th>価格</th><th>日時</th><th>発送先</th><th>状態</th><th>操作</th></tr></thead>
         <tbody id="shop-orders-tbl"></tbody></table>
       </div>
     </div>
@@ -1792,19 +1792,24 @@ async function loadShopItems(){
 async function loadShopOrders(){
   const{data}=await db.from('shop_orders').select('*,users(username,email)').order('created_at',{ascending:false});
   const orders=data||[];
-  document.getElementById('shop-orders-tbl').innerHTML=orders.length?orders.map(o=>`
+  document.getElementById('shop-orders-tbl').innerHTML=orders.length?orders.map(o=>{
+    const addr=o.address||{};
+    return `
     <tr>
       <td class="td-bold" style="font-size:.72rem">#${(o.id||'').slice(0,8)}</td>
       <td><div>${o.users?.username||'—'}</div><div class="td-sub">${o.users?.email||''}</div></td>
       <td>${o.item_name||'—'}</td>
       <td style="color:var(--gold2);font-weight:900">${(o.price||0).toLocaleString()}コイン</td>
       <td style="font-size:.7rem">${new Date(o.created_at).toLocaleDateString('ja-JP')}</td>
-      <td><span class="badge badge-${o.status==='pending'?'pending':'shipped'}">${o.status==='pending'?'処理待ち':'完了'}</span></td>
       <td>
-        ${o.status==='pending'?`<button class="btn btn-success" onclick="completeShopOrder('${o.id}')">✅ 完了</button>`:''}
+        ${addr.name?`<div style="font-size:.72rem"><div style="font-weight:700">${addr.name} / ${addr.tel||''}</div><div class="td-sub">〒${addr.zip||''} ${addr.prefecture||''}${addr.city||''}${addr.building?' '+addr.building:''}</div></div>`:'<span style="color:rgba(255,255,255,.3);font-size:.7rem">住所未入力</span>'}
+      </td>
+      <td><span class="badge badge-${o.status==='pending'||o.status==='address_submitted'?'pending':'shipped'}">${o.status==='pending'?'住所待ち':o.status==='address_submitted'?'発送待ち':'完了'}</span></td>
+      <td>
+        ${o.status!=='completed'?`<button class="btn btn-success" onclick="completeShopOrder('${o.id}')">✅ 完了</button>`:''}
         <button class="btn btn-danger" onclick="deleteShopOrder('${o.id}')" style="margin-left:4px">✕</button>
       </td>
-    </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">注文がありません</td></tr>';
+    </tr>`}).join(''):'<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">注文がありません</td></tr>';
 }
 
 let editingShopItemId=null;
