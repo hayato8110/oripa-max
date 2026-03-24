@@ -979,7 +979,9 @@ async function uploadBannerImage(input){
   showToast('📤 アップロード中...');
   const url=await uploadImage(file,'banners');
   if(url){
-    document.getElementById('bn-image-url').value=url;
+    document.getElementById('bn-image-url-hidden').value=url;
+    const prev=document.getElementById('bn-preview-img');
+    if(prev){prev.src=url;document.getElementById('bn-front-preview').style.display='block';}
     showToast('✅ アップロード完了！');
   }
 }
@@ -1779,6 +1781,9 @@ async function loadShopItems(){
       <td><span class="badge" style="background:${item.is_active?'rgba(0,230,120,.15)':'rgba(255,255,255,.05)'};color:${item.is_active?'#00e676':'rgba(255,255,255,.3)'};border:1px solid ${item.is_active?'rgba(0,230,120,.2)':'rgba(255,255,255,.1)'}">${item.is_active?'公開':'非公開'}</span></td>
       <td>
         <button class="btn btn-secondary" onclick="editShopItem('${item.id}')">✏️ 編集</button>
+        ${item.stock>0
+          ?`<button class="btn btn-warning" onclick="soldOutShopItem('${item.id}')" style="margin-left:4px">完売</button>`
+          :`<button class="btn btn-success" onclick="restoreShopItem('${item.id}')" style="margin-left:4px">復活</button>`}
         <button class="btn btn-danger" onclick="deleteShopItem('${item.id}')" style="margin-left:4px">✕</button>
       </td>
     </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">商品がありません</td></tr>';
@@ -1821,8 +1826,17 @@ function openShopItemModal(id){
     <input class="form-input" type="number" id="si-price" value="${item?.price||''}" placeholder="例: 5000">
     <label class="form-label">在庫数 *</label>
     <input class="form-input" type="number" id="si-stock" value="${item?.stock||0}" placeholder="例: 1">
-    <label class="form-label">画像URL</label>
-    <input class="form-input" id="si-image" value="${item?.image_url||''}" placeholder="https://...">
+    <label class="form-label">商品画像</label>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+      <input class="form-input" id="si-image" value="${item?.image_url||''}" placeholder="https://..." style="flex:1;margin-bottom:0" oninput="previewShopImage(this.value)">
+      <label style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text2)">
+        📤 アップロード
+        <input type="file" accept="image/*" style="display:none" onchange="uploadShopImage(this)">
+      </label>
+    </div>
+    <div id="si-image-preview" style="margin-bottom:12px;${item?.image_url?'':'display:none'}">
+      <img src="${item?.image_url||''}" id="si-image-preview-img" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1)">
+    </div>
     <label class="form-label">並び順</label>
     <input class="form-input" type="number" id="si-order" value="${item?.sort_order||0}">
     <label class="form-check" style="margin-bottom:16px"><input type="checkbox" id="si-active" ${item?.is_active!==false?'checked':''}> 公開する</label>
@@ -1860,11 +1874,46 @@ async function saveShopItem(){
   loadShopItems();
 }
 
+async function soldOutShopItem(id){
+  if(!confirm('この商品を完売にしますか？'))return;
+  await db.from('shop_items').update({stock:0}).eq('id',id);
+  showToast('完売にしました');
+  loadShopItems();
+}
+async function restoreShopItem(id){
+  const stock=prompt('復活させる在庫数を入力してください:','1');
+  if(!stock)return;
+  await db.from('shop_items').update({stock:parseInt(stock)||1}).eq('id',id);
+  showToast('✅ 在庫を復活しました');
+  loadShopItems();
+}
 async function deleteShopItem(id){
   if(!confirm('この商品を削除しますか？'))return;
   await db.from('shop_items').delete().eq('id',id);
   showToast('🗑️ 削除しました');
   loadShopItems();
+}
+
+async function uploadShopImage(input){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'shop');
+  if(url){
+    document.getElementById('si-image').value=url;
+    previewShopImage(url);
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+function previewShopImage(url){
+  const preview=document.getElementById('si-image-preview');
+  const img=document.getElementById('si-image-preview-img');
+  if(!preview||!img)return;
+  if(url){
+    img.src=url;
+    preview.style.display='block';
+  } else {
+    preview.style.display='none';
+  }
 }
 
 async function completeShopOrder(id){
