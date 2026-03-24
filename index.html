@@ -236,10 +236,10 @@ input,select,textarea{font-family:inherit;outline:none}
 .gacha-skip{position:absolute;bottom:30px;right:20px;z-index:50;background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2)}
 
 /* ══ RESULT ══ */
-.result-screen{position:fixed;inset:0;z-index:600;background:rgba(10,10,10,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:.3s}
+.result-screen{position:fixed;inset:0;z-index:600;background:rgba(10,10,10,.97);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;opacity:0;pointer-events:none;transition:.3s;overflow:hidden}
 .result-screen.show{opacity:1;pointer-events:all}
-.result-title{font-size:1rem;font-weight:900;color:rgba(255,255,255,.5);letter-spacing:.15em}
-.result-cards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:440px;padding:0 12px}
+.result-title{font-size:1rem;font-weight:900;color:rgba(255,255,255,.5);letter-spacing:.15em;flex-shrink:0;padding:14px 0 8px}
+.result-cards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:440px;padding:0 12px;overflow-y:auto;max-height:calc(100vh - 160px);width:100%;-webkit-overflow-scrolling:touch}
 .rc{width:100px;height:140px;perspective:500px;cursor:pointer;flex-shrink:0}
 .rc-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1);border-radius:9px}
 .rc.done .rc-inner{transform:rotateY(180deg)}
@@ -621,6 +621,11 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
       <div style="font-size:1.05rem;font-weight:900;color:var(--text)">📦 発送依頼</div>
       <div style="font-size:.78rem;color:var(--text3);margin-top:2px">送料無料・最短翌日発送</div>
+    </div>
+    <!-- 登録済み住所選択エリア -->
+    <div id="saved-address-area" style="display:none;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(201,168,76,.05)">
+      <div style="font-size:.72rem;font-weight:900;color:var(--gold2);margin-bottom:8px;letter-spacing:.05em">📮 登録済みの住所から選択</div>
+      <div id="saved-address-list"></div>
     </div>
     <div class="ship-form">
       <div id="ship-items-list" style="margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px"></div>
@@ -1132,35 +1137,33 @@ function showResultCards(results,pack){
   if(isList){
     const rarLabel2={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C'};
     const tierBg={sar:'#e8380d',sr:'#7c3aed',rr:'#2563eb',r:'#6b7280',c:'#9ca3af'};
-    document.getElementById('result-screen').style.background='#f0f0f0';
-    document.getElementById('result-title').style.cssText='color:#1a1a1a;font-size:1.05rem;font-weight:900;padding:14px 0 6px';
-    document.getElementById('result-cards').innerHTML=`
-      <div style="width:100%;max-width:460px;overflow-y:auto;max-height:72vh;padding:0;display:flex;flex-direction:column;gap:10px;padding:0 12px">
-        ${results.map((r,i)=>{
+    document.getElementById('result-screen').style.background='#f2f2f7';
+    document.getElementById('result-title').style.cssText='color:#1a1a1a;font-size:1.05rem;font-weight:900;padding:14px 0 4px;flex-shrink:0;width:100%;text-align:center';
+    document.getElementById('result-cards').style.cssText='width:100%;max-width:480px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;padding:0 12px 80px;display:flex;flex-direction:column;gap:10px;flex-wrap:nowrap;justify-content:flex-start;max-height:none;height:calc(100vh - 130px)';
+    document.getElementById('result-cards').innerHTML=results.map((r,i)=>{
           const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
           const imgUrl=prizeData?.image_url||'';
           const convertCoin=prizeData?.value_jp||0;
           return `
-          <div style="background:#fff;border-radius:14px;display:flex;align-items:stretch;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden">
-            <div style="width:110px;min-height:110px;background:#e8e8e8;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <div style="background:#fff;border-radius:14px;display:flex;align-items:stretch;box-shadow:0 2px 10px rgba(0,0,0,.1);overflow:hidden;min-height:90px">
+            <div style="width:90px;min-height:90px;background:#e8e8e8;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden">
               ${imgUrl
                 ?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover">`
-                :`<span style="font-size:3rem">${pack?.emoji||'🎴'}</span>`}
+                :`<span style="font-size:2.8rem">${pack?.emoji||'🎴'}</span>`}
             </div>
-            <div style="flex:1;min-width:0;padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
-              <div style="font-size:1rem;font-weight:900;color:#1a1a1a;margin-bottom:8px;line-height:1.3">${r.prize.name}</div>
-              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                <span style="background:${tierBg[r.prize.tier]||'#888'};color:#fff;font-size:.7rem;font-weight:900;padding:3px 12px;border-radius:20px">${r.prize.tier_label||rarLabel2[r.prize.tier]||r.prize.tier}</span>
-                ${convertCoin>0?`<span style="font-size:.8rem;color:#c8860a;font-weight:900;background:#fff8e6;padding:3px 10px;border-radius:8px">🪙 ${convertCoin}コイン</span>`:''}
+            <div style="flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;justify-content:center;gap:6px">
+              <div style="font-size:.95rem;font-weight:900;color:#1a1a1a;line-height:1.3">${r.prize.name}</div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span style="background:${tierBg[r.prize.tier]||'#888'};color:#fff;font-size:.68rem;font-weight:900;padding:3px 12px;border-radius:20px">${r.prize.tier_label||rarLabel2[r.prize.tier]||r.prize.tier}</span>
+                ${convertCoin>0?`<span style="font-size:.75rem;color:#c8860a;font-weight:900;background:#fff8e6;padding:3px 10px;border-radius:8px">🪙 ${convertCoin}コイン</span>`:''}
               </div>
             </div>
           </div>`;
-        }).join('')}
-      </div>`;
+        }).join('');
     document.getElementById('result-screen').classList.add('show');
     resultFlipped=resultTotal;
     document.getElementById('result-done').classList.add('show');
-    document.getElementById('result-done').style.cssText='display:block;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;padding:14px 48px;border-radius:12px;margin-top:12px;box-shadow:0 4px 14px rgba(201,168,76,.3)';
+    document.getElementById('result-done').style.cssText='display:block;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;padding:14px 48px;border-radius:12px;margin-top:0;box-shadow:0 4px 14px rgba(201,168,76,.3);position:fixed;bottom:20px;left:50%;transform:translateX(-50%);white-space:nowrap;z-index:700';
     return;
   }
 
@@ -1216,6 +1219,7 @@ function closeResult(){
   rs.style.background='';
   document.getElementById('result-title').style.cssText='';
   document.getElementById('result-done').style.cssText='';
+  document.getElementById('result-cards').style.cssText='';
   renderPacks();renderItemsPage();
 }
 
@@ -1437,11 +1441,15 @@ function renderPackCards(list){
         <div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>
         ${p.remaining<=0?
           `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(201,168,76,.5);font-weight:700;letter-spacing:.08em">— ありがとうございました —</div>`:
-          `<div class="pc-btns">
-            <button class="pc-btn-1" onclick="drawDirect('${p.id}',1)">1回</button>
-            <button class="pc-btn-5" onclick="drawDirect('${p.id}',10)">10連</button>
-            ${p.draw_options&&JSON.parse(p.draw_options).d100?'<button class="pc-btn-100" onclick="drawDirect(\''+p.id+'\',100)">100連</button>':''}
-          </div>`
+          `<div class="pc-btns">${(()=>{
+            let opts={d1:true,d10:true,d100:false};
+            try{if(p.draw_options)opts={...opts,...JSON.parse(p.draw_options)};}catch(e){}
+            const btns=[];
+            if(opts.d1)btns.push(`<button class="pc-btn-1" onclick="drawDirect('${p.id}',1)">1回</button>`);
+            if(opts.d10)btns.push(`<button class="pc-btn-5" onclick="drawDirect('${p.id}',10)">10連</button>`);
+            if(opts.d100)btns.push(`<button class="pc-btn-100" onclick="drawDirect('${p.id}',100)">100連</button>`);
+            return btns.join('');
+          })()}</div>`
         }
       </div>
     </div>`;
@@ -1607,11 +1615,55 @@ async function bulkConvert(){
 
 /* ══ 発送 ══ */
 let pendingShipResultId=null;
-function openShippingModal(dbId){
+async function openShippingModal(dbId){
   if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
   pendingShipResultId=dbId;
+
+  // フォームクリア
+  ['ship-name','ship-zip','ship-city','ship-building','ship-tel'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('ship-pref').value='';
   document.getElementById('ship-items-list').innerHTML=`<div style="font-size:.82rem;font-weight:700;color:var(--text)">📦 発送商品確認済み</div>`;
+
+  // 登録済み住所をDBから取得
+  const{data:addresses}=await db.from('shipping_addresses').select('*').eq('user_id',state.user.id).order('is_default',{ascending:false});
+  const area=document.getElementById('saved-address-area');
+  const list=document.getElementById('saved-address-list');
+  if(addresses&&addresses.length>0){
+    area.style.display='block';
+    list.innerHTML=addresses.map(a=>`
+      <div onclick="fillShippingForm(${JSON.stringify(a).replace(/"/g,'&quot;')})"
+        style="background:rgba(255,255,255,.05);border:1.5px solid rgba(201,168,76,.2);border-radius:10px;padding:10px 14px;margin-bottom:8px;cursor:pointer;transition:.15s;active:background:rgba(201,168,76,.1)">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+          <span style="font-size:.85rem;font-weight:900;color:var(--text)">${a.name}</span>
+          ${a.is_default?`<span style="font-size:.58rem;background:var(--gold);color:#1a0a00;padding:1px 7px;border-radius:3px;font-weight:900">デフォルト</span>`:''}
+        </div>
+        <div style="font-size:.75rem;color:var(--text2)">〒${a.zip} ${a.prefecture}${a.city}${a.building?' '+a.building:''}</div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:2px">📞 ${a.tel}</div>
+        <div style="margin-top:6px;text-align:right;font-size:.7rem;color:var(--gold2);font-weight:700">この住所を使う ›</div>
+      </div>`).join('');
+    // デフォルト住所があれば自動入力
+    const def=addresses.find(a=>a.is_default)||addresses[0];
+    if(def)fillShippingForm(def);
+  } else {
+    area.style.display='none';
+  }
   document.getElementById('shipping-modal').classList.add('show');
+}
+
+function fillShippingForm(a){
+  document.getElementById('ship-name').value=a.name||'';
+  document.getElementById('ship-zip').value=a.zip||'';
+  document.getElementById('ship-city').value=a.city||'';
+  document.getElementById('ship-building').value=a.building||'';
+  document.getElementById('ship-tel').value=a.tel||'';
+  const prefSel=document.getElementById('ship-pref');
+  if(prefSel){
+    const opt=Array.from(prefSel.options).find(o=>o.value===a.prefecture||o.text===a.prefecture);
+    if(opt)prefSel.value=opt.value;
+  }
+  showToast('✅ 住所を入力しました');
 }
 async function submitShipping(){
   const name=document.getElementById('ship-name').value.trim();
