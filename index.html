@@ -1364,10 +1364,10 @@ async function saveDrawSession(packId,results,totalCost){
       server_seed:generateSeed(),results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
     }).select('id').single();
     if(error){showToast('⚠️ 保存エラー: '+error.message,4000);return;}
-    await db.from('transactions').insert({
+    try{await db.from('transactions').insert({
       user_id:state.user.id,type:'draw',amount:-totalCost,currency:'coin',
       description:`${state.activePack?.name} × ${results.length}回`,
-    }).catch(()=>{});
+    });}catch(e2){console.error(e2);}
   }catch(e){showToast('⚠️ エラー: '+e.message,4000);}
 }
 
@@ -1380,7 +1380,7 @@ async function saveTenjoCount(packId,count){
     if(existing.data){
       await db.from('transactions').update({amount:state.tenjoCount[packId]}).eq('id',existing.data.id);
     } else {
-      await db.from('transactions').insert({user_id:state.user.id,type:'tenjo',amount:state.tenjoCount[packId],currency:'coin',description:packId}).catch(()=>{});
+      try{await db.from('transactions').insert({user_id:state.user.id,type:'tenjo',amount:state.tenjoCount[packId],currency:'coin',description:packId});}catch(e){}
     }
   }
 }
@@ -1638,7 +1638,7 @@ async function bulkConvert(){
         is_converted:res.converted||false,is_shipped:res.shipped||false,
       }));
       await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId);
-      db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`}).catch(()=>{});
+      try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`});}catch(e){}
     }catch(e){console.error(e);}
   }
   if(totalBonus>0){
@@ -1992,8 +1992,8 @@ async function buyShopItem(itemId, itemNameEncoded, price){
     });
     if(r2.error){alert('注文エラー: '+r2.error.message);return;}
 
-    db.from('transactions').insert({user_id:state.user.id,type:'shop_purchase',
-      amount:-Number(price),currency:'coin',description:'交換所: '+itemName}).catch(()=>{});
+    try{await db.from('transactions').insert({user_id:state.user.id,type:'shop_purchase',
+      amount:-Number(price),currency:'coin',description:'交換所: '+itemName});}catch(e){}
 
     loadShopPage();
     showToast('✅ 購入完了！',2000);
@@ -2115,7 +2115,7 @@ async function submitInquiry(){
   const subject=document.getElementById('inq-subject')?.value;
   const body=document.getElementById('inq-body')?.value;
   if(!name||!email||!subject||!body){showToast('⚠️ 全項目を入力してください');return;}
-  await db.from('inquiries').insert({user_id:state.user?.id||null,email,subject,body,status:'open'}).catch(()=>{});
+  try{await db.from('inquiries').insert({user_id:state.user?.id||null,email,subject,body,status:'open'});}catch(e){}
   document.getElementById('inq-name').value='';
   document.getElementById('inq-email').value='';
   document.getElementById('inq-subject').value='';
@@ -2149,7 +2149,7 @@ async function convertToPoints(dbId){
     }));
     await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId);
     // transactionsに記録
-    db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`}).catch(()=>{});
+    try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`});}catch(e){}
   }catch(e){console.error(e);}
   showToast(`🪙 +${bonus}コインに還元しました！`,2500);
   renderItemsPage();
