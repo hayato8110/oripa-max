@@ -1976,24 +1976,22 @@ async function buyShopItem(itemId, itemNameEncoded, price){
   // コイン消費
   const newCoin=state.coin-Number(price);
   const{error:coinErr}=await db.from('users').update({coin_points:newCoin}).eq('id',state.user.id);
-  if(coinErr){showToast('⚠️ エラー: '+coinErr.message,4000);return;}
+  if(coinErr){alert('コインエラー: '+coinErr.message);return;}
   state.coin=newCoin;
   updateHeaderPts();
 
   // 在庫を減らす
-  await db.rpc('decrement_shop_stock',{item_id:itemId}).catch(e=>console.error(e));
+  await db.rpc('decrement_shop_stock',{item_id:itemId}).catch(e=>alert('在庫エラー: '+e.message));
 
   // 注文を保存
   const{data:orderData,error:orderErr}=await db.from('shop_orders').insert({
     user_id:state.user.id,item_id:itemId,item_name:itemName,price:Number(price),status:'pending'
   }).select().single();
-  if(orderErr)console.error('order error:',orderErr.message);
+  if(orderErr){alert('注文エラー: '+orderErr.message+'\n詳細: '+JSON.stringify(orderErr));return;}
 
   db.from('transactions').insert({user_id:state.user.id,type:'shop_purchase',amount:-Number(price),currency:'coin',description:`交換所: ${itemName}`}).catch(()=>{});
 
   loadShopPage();
-
-  // 購入後すぐに発送先入力モーダルを表示
   showToast(`✅ 購入完了！発送先を入力してください`,3000);
   setTimeout(()=>openShopShippingModal(orderData?.id, itemName),500);
 }
