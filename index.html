@@ -1379,10 +1379,29 @@ async function loadHistoryFromDB(){
   if(!state.user)return;
   const{data}=await db.from('draw_sessions').select(`id,pack_id,draw_count,total_cost,created_at,results,packs(name,emoji)`).eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
   if(!data)return;
+  // 発送依頼済みのresult_idsを取得（追跡番号も含む）
+  const{data:shipData}=await db.from('shipping_requests').select('result_ids,status,tracking_number,shipped_at').eq('user_id',state.user.id);
+  const waitingIds=new Set((shipData||[]).filter(s=>s.status==='pending').flatMap(s=>s.result_ids||[]));
+  // 発送済みはtracking_numberも紐付け
+  const shippedMap=new Map();
+  (shipData||[]).filter(s=>s.status==='shipped').forEach(s=>{
+    (s.result_ids||[]).forEach(id=>{
+      shippedMap.set(id,{tracking:s.tracking_number||null,shippedAt:s.shipped_at||null});
+    });
+  });
   state.sessions=data.map(s=>({
     id:s.id,packId:s.pack_id,packName:s.packs?.name||'—',packEmoji:s.packs?.emoji||'🎴',
     cost:s.total_cost,currency:'coin',
-    results:(s.results||[]).map((r,i)=>({dbId:s.id+'_'+i,sessionId:s.id,resultIndex:i,prize:{name:r.prize_name,tier:r.prize_tier},converted:r.is_converted||false,shipped:r.is_shipped||false})),
+    results:(s.results||[]).map((r,i)=>{
+      const dbId=s.id+'_'+i;
+      const shipInfo=shippedMap.get(dbId);
+      return{dbId,sessionId:s.id,resultIndex:i,prize:{name:r.prize_name,tier:r.prize_tier},
+        converted:r.is_converted||false,
+        shipped:r.is_shipped||!!shipInfo||false,
+        waiting:waitingIds.has(dbId)||false,
+        trackingNumber:shipInfo?.tracking||null,
+        shippedAt:shipInfo?.shippedAt||null};
+    }),
     date:new Date(s.created_at).toLocaleString('ja-JP'),shipped:false,
   }));
 }
@@ -1502,29 +1521,34 @@ function renderHistory(){
 }
 
 /* ══ 獲得商品 ══ */
-let itemsTab='pending'; // pending | shipped | converted
+let itemsTab='unselected'; // unselected | waiting | shipped | converted
 function renderItemsPage(tab){
   if(tab)itemsTab=tab;
   const content=document.getElementById('items-content');
 
-  // 全アイテムを3分類
+  // 全アイテムを分類
   const allItems=state.sessions.flatMap(s=>
     s.results.map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,sessionId:s.id,packId:s.packId}))
   );
-  const pendingItems=allItems.filter(r=>!r.shipped&&!r.converted);
+  // 未選択：発送依頼も還元もしていない
+  const unselectedItems=allItems.filter(r=>!r.shipped&&!r.converted&&!r.waiting);
+  // 発送待ち：発送依頼済みだが管理者がまだ発送していない（r.waiting=true）
+  const waitingItems=allItems.filter(r=>r.waiting&&!r.shipped);
+  // 発送済み：管理者が発送処理済み
   const shippedItems=allItems.filter(r=>r.shipped);
+  // 還元済み
   const convertedItems=allItems.filter(r=>r.converted);
 
   const tabList=[
-    {key:'pending',label:'📦 発送待ち',count:pendingItems.length,color:'var(--gold2)'},
-    {key:'shipped',label:'🚚 発送済み',count:shippedItems.length,color:'var(--green)'},
-    {key:'converted',label:'🪙 還元済み',count:convertedItems.length,color:'#60a5fa'},
+    {key:'unselected',label:'未選択',count:unselectedItems.length,color:'var(--text2)'},
+    {key:'waiting',label:'発送待ち',count:waitingItems.length,color:'#f59e0b'},
+    {key:'shipped',label:'発送済み',count:shippedItems.length,color:'var(--green)'},
   ];
 
-  const showItems=itemsTab==='pending'?pendingItems:itemsTab==='shipped'?shippedItems:convertedItems;
+  const showItems=itemsTab==='unselected'?unselectedItems:itemsTab==='waiting'?waitingItems:shippedItems;
 
-  // 還元可能な商品（pending中でship_only以外）
-  const convertible=pendingItems.filter(r=>{
+  // 還元可能な商品
+  const convertible=unselectedItems.filter(r=>{
     const pack=state.packs.find(p=>p.id===r.packId);
     const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
     return (prizeData?.exchange_type||'both')!=='ship_only';
@@ -1532,16 +1556,16 @@ function renderItemsPage(tab){
 
   content.innerHTML=`
     <div class="items-page">
-      <!-- タブ -->
-      <div style="display:flex;gap:6px;margin-bottom:12px">
+      <!-- タブ（オリパワン風） -->
+      <div style="display:flex;border-bottom:2px solid var(--border);margin-bottom:12px">
         ${tabList.map(t=>`
-          <button onclick="renderItemsPage('${t.key}')" style="flex:1;padding:8px 4px;border-radius:8px;font-size:.72rem;font-weight:900;border:1.5px solid ${itemsTab===t.key?t.color:'rgba(255,255,255,.1)'};background:${itemsTab===t.key?'rgba(201,168,76,.12)':'transparent'};color:${itemsTab===t.key?t.color:'var(--text3)'};cursor:pointer;transition:.15s">
+          <button onclick="renderItemsPage('${t.key}')" style="flex:1;padding:12px 4px;font-size:.82rem;font-weight:900;border:none;background:none;color:${itemsTab===t.key?t.color:'var(--text3)'};border-bottom:2px solid ${itemsTab===t.key?t.color:'transparent'};margin-bottom:-2px;cursor:pointer;transition:.15s;position:relative">
             ${t.label}
-            <span style="margin-left:4px;background:${itemsTab===t.key?t.color:'rgba(255,255,255,.15)'};color:${itemsTab===t.key?'#1a0a00':'var(--text3)'};font-size:.65rem;padding:1px 6px;border-radius:999px">${t.count}</span>
+            ${t.count>0?`<span style="margin-left:4px;background:${itemsTab===t.key?t.color:'rgba(255,255,255,.15)'};color:${itemsTab===t.key?'#1a0a00':'var(--text3)'};font-size:.62rem;padding:1px 6px;border-radius:999px;font-weight:900">${t.count}</span>`:''}
           </button>`).join('')}
       </div>
 
-      ${itemsTab==='pending'&&convertible.length>0?`
+      ${itemsTab==='unselected'&&convertible.length>0?`
       <!-- 一括操作バー -->
       <div style="background:var(--bg2);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem;font-weight:700;color:var(--text)">
@@ -1555,8 +1579,8 @@ function renderItemsPage(tab){
 
       ${showItems.length===0?`
         <div style="text-align:center;padding:48px 16px;color:var(--text3)">
-          <div style="font-size:2.5rem;margin-bottom:12px">${itemsTab==='shipped'?'🚚':itemsTab==='converted'?'🪙':'📦'}</div>
-          <div style="font-weight:700;color:var(--text2)">${itemsTab==='shipped'?'発送済みの商品はありません':itemsTab==='converted'?'還元済みの商品はありません':'獲得商品はありません'}</div>
+          <div style="font-size:2.5rem;margin-bottom:12px">${itemsTab==='shipped'?'🚚':itemsTab==='waiting'?'📬':'📦'}</div>
+          <div style="font-weight:700;color:var(--text2)">${itemsTab==='shipped'?'発送済みの商品はありません':itemsTab==='waiting'?'発送待ちの商品はありません':'未選択の獲得商品がありません'}</div>
         </div>`:''}
 
       ${showItems.map(r=>{
@@ -1564,17 +1588,26 @@ function renderItemsPage(tab){
         const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
         const convertCoin=prizeData?.value_jp||0;
         const exType=prizeData?.exchange_type||'both';
-        const showShip=itemsTab==='pending'&&exType!=='coin_only';
-        const showCoin=itemsTab==='pending'&&exType!=='ship_only'&&convertCoin>0;
-        // ステータスバッジ
+        const showShip=itemsTab==='unselected'&&exType!=='coin_only';
+        const showCoin=itemsTab==='unselected'&&exType!=='ship_only'&&convertCoin>0;
         const statusBadge=itemsTab==='shipped'
           ?`<span style="font-size:.65rem;font-weight:900;background:#22c55e;color:#fff;padding:2px 8px;border-radius:20px">🚚 発送済み</span>`
-          :itemsTab==='converted'
-          ?`<span style="font-size:.65rem;font-weight:900;background:#3b82f6;color:#fff;padding:2px 8px;border-radius:20px">🪙 還元済み</span>`
+          :itemsTab==='waiting'
+          ?`<span style="font-size:.65rem;font-weight:900;background:#f59e0b;color:#1a0a00;padding:2px 8px;border-radius:20px">📬 発送待ち</span>`
+          :'';
+        // 追跡番号表示
+        const trackingHtml=itemsTab==='shipped'&&r.trackingNumber
+          ?`<div style="margin-top:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:6px 10px">
+              <div style="font-size:.62rem;color:var(--green);font-weight:900;margin-bottom:2px">📦 追跡番号</div>
+              <div style="font-size:.82rem;font-weight:900;color:var(--text);letter-spacing:.05em">${r.trackingNumber}</div>
+              ${r.shippedAt?`<div style="font-size:.62rem;color:var(--text3);margin-top:2px">発送日: ${new Date(r.shippedAt).toLocaleDateString('ja-JP')}</div>`:''}
+            </div>`
+          :itemsTab==='shipped'&&!r.trackingNumber
+          ?`<div style="margin-top:4px;font-size:.65rem;color:var(--text3)">追跡番号なし</div>`
           :'';
         return `
         <div class="item-card" data-dbid="${r.dbId}">
-          ${itemsTab==='pending'&&exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" onchange="updateSelectedCount()" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--gold2);cursor:pointer">`:'<div style="width:18px;flex-shrink:0"></div>'}
+          ${itemsTab==='unselected'&&exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" onchange="updateSelectedCount()" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--gold2);cursor:pointer">`:'<div style="width:18px;flex-shrink:0"></div>'}
           <div class="ic-left">
             ${prizeData?.image_url
               ?`<img src="${prizeData.image_url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#e8e8e8">`
@@ -1583,8 +1616,9 @@ function renderItemsPage(tab){
               <div class="ic-name">${r.prize.name}</div>
               <div class="ic-pack">${r.packName} · ${prizeData?.tier_label||rarLabel[r.prize.tier]||r.prize.tier}</div>
               ${statusBadge?`<div style="margin-top:4px">${statusBadge}</div>`:''}
-              ${itemsTab==='pending'&&exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900;margin-top:2px">📦 発送専用</div>':''}
-              ${itemsTab==='pending'&&showCoin?`<div style="font-size:.62rem;color:var(--gold2);font-weight:700;margin-top:2px">🪙 ${convertCoin}コイン</div>`:''}
+              ${trackingHtml}
+              ${itemsTab==='unselected'&&exType==='ship_only'?'<div style="font-size:.62rem;color:var(--primary);font-weight:900;margin-top:2px">📦 発送専用</div>':''}
+              ${itemsTab==='unselected'&&showCoin?`<div style="font-size:.62rem;color:var(--gold2);font-weight:700;margin-top:2px">🪙 ${convertCoin}コイン</div>`:''}
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
@@ -1710,10 +1744,10 @@ async function submitShipping(){
     const[sessionId]=pendingShipResultId.split('_');
     const sess=state.sessions.find(s=>s.id===sessionId);
 
-    // ローカル状態を先に更新
+    // ローカル状態を先に更新（発送待ちへ移動）
     if(sess){
       const r=sess.results.find(r=>r.dbId===pendingShipResultId);
-      if(r)r.shipped=true;
+      if(r)r.waiting=true;
     }
 
     // draw_sessionsのis_shippedをDBに確実に書き込む（awaitで待つ）
