@@ -1188,9 +1188,13 @@ async function togglePack(id,current){
 }
 
 async function deletePack(id){
-  await db.from('prizes').delete().eq('pack_id',id);
-  await db.from('packs').delete().eq('id',id);
-  showToast('🗑️ 削除しました');loadPacks();
+  confirmDelete('このオリパを削除します',async()=>{
+    const r1=await db.from('prizes').delete().eq('pack_id',id);
+    if(r1.error){showToast('⚠️ 賞品削除エラー: '+r1.error.message);return;}
+    const r2=await db.from('packs').delete().eq('id',id);
+    if(r2.error){showToast('⚠️ 削除エラー: '+r2.error.message);return;}
+    showToast('🗑️ 削除しました');loadPacks();
+  });
 }
 
 /* ══ BANNERS ══ */
@@ -1337,7 +1341,7 @@ async function saveBanner(){
   loadBanners();
 }
 
-async function deleteBanner(id){await db.from('banners').delete().eq('id',id);showToast('🗑️ 削除しました');loadBanners();}
+async function deleteBanner(id){confirmDelete('このバナーを削除します',async()=>{await db.from('banners').delete().eq('id',id);showToast('🗑️ 削除しました');loadBanners();});}
 
 /* ══ VIDEOS ══ */
 async function loadVideos(){
@@ -1388,7 +1392,7 @@ async function uploadVideoFile(input){
 function openVideoModal(){editingVideoId=null;document.getElementById('video-modal-title').textContent='🎬 動画追加';['vd-name','vd-url'].forEach(i=>document.getElementById(i).value='');document.getElementById('vd-tier').value='sar';document.getElementById('vd-default').checked=false;document.getElementById('vd-upload-progress').style.display='none';document.getElementById('vd-preview').style.display='none';document.getElementById('vd-progress-bar').style.width='0%';document.getElementById('video-modal').classList.add('show');}
 function editVideo(id){const v=allVideos.find(x=>x.id===id);if(!v)return;editingVideoId=id;document.getElementById('video-modal-title').textContent='🎬 動画編集';document.getElementById('vd-name').value=v.name||'';document.getElementById('vd-tier').value=v.tier||'sar';document.getElementById('vd-url').value=v.video_url||'';document.getElementById('vd-default').checked=v.is_default||false;document.getElementById('vd-upload-progress').style.display='none';const prev=document.getElementById('vd-preview');const vid=document.getElementById('vd-preview-video');if(v.video_url){prev.style.display='block';vid.src=v.video_url;}else{prev.style.display='none';}document.getElementById('video-modal').classList.add('show');}
 async function saveVideo(){const videoData={name:document.getElementById('vd-name').value,tier:document.getElementById('vd-tier').value,video_url:document.getElementById('vd-url').value,is_default:document.getElementById('vd-default').checked};if(editingVideoId)await db.from('gacha_videos').update(videoData).eq('id',editingVideoId);else await db.from('gacha_videos').insert(videoData);closeModal('video-modal');showToast('✅ 保存しました');loadVideos();}
-async function deleteVideo(id){await db.from('gacha_videos').delete().eq('id',id);showToast('🗑️ 削除しました');loadVideos();}
+async function deleteVideo(id){confirmDelete('この動画を削除します',async()=>{await db.from('gacha_videos').delete().eq('id',id);showToast('🗑️ 削除しました');loadVideos();});}
 
 /* ══ USERS ══ */
 async function loadUsers(){
@@ -1607,7 +1611,7 @@ async function saveCoupon(){
   else await db.from('coupons').insert(couponData);
   closeModal('coupon-modal');showToast('✅ クーポンを保存しました');loadCoupons();
 }
-async function deleteCoupon(id){await db.from('coupons').delete().eq('id',id);showToast('🗑️ 削除しました');loadCoupons();}
+async function deleteCoupon(id){confirmDelete('このクーポンを削除します',async()=>{await db.from('coupons').delete().eq('id',id);showToast('🗑️ 削除しました');loadCoupons();});}
 
 /* ══ PUSH ══ */
 async function loadPush(){
@@ -1632,7 +1636,7 @@ async function savePush(){
   await db.from('notices').insert({title,body:document.getElementById('pn-body').value,type:'info',is_active:true}).catch(()=>{});
   closeModal('push-modal');showToast('✅ 通知を送信しました');loadPush();
 }
-async function deletePush(id){await db.from('push_notifications').delete().eq('id',id);showToast('🗑️ 削除しました');loadPush();}
+async function deletePush(id){confirmDelete('この通知を削除します',async()=>{await db.from('push_notifications').delete().eq('id',id);showToast('🗑️ 削除しました');loadPush();});}
 
 /* ══ NOTICES ══ */
 async function loadNotices(){
@@ -1653,7 +1657,7 @@ async function loadNotices(){
 function openNoticeModal(){editingNoticeId=null;document.getElementById('notice-modal-title').textContent='📢 お知らせ作成';['nc-title','nc-body'].forEach(i=>document.getElementById(i).value='');document.getElementById('nc-type').value='info';document.getElementById('notice-modal').classList.add('show');}
 function editNotice(id){const n=allNotices.find(x=>x.id===id);if(!n)return;editingNoticeId=id;document.getElementById('notice-modal-title').textContent='📢 お知らせ編集';document.getElementById('nc-title').value=n.title||'';document.getElementById('nc-body').value=n.body||'';document.getElementById('nc-type').value=n.type||'info';document.getElementById('notice-modal').classList.add('show');}
 async function saveNotice(){const noticeData={title:document.getElementById('nc-title').value,body:document.getElementById('nc-body').value,type:document.getElementById('nc-type').value,is_active:true};if(editingNoticeId)await db.from('notices').update(noticeData).eq('id',editingNoticeId);else await db.from('notices').insert(noticeData);closeModal('notice-modal');showToast('✅ 保存しました');loadNotices();}
-async function deleteNotice(id){await db.from('notices').delete().eq('id',id);showToast('🗑️ 削除しました');loadNotices();}
+async function deleteNotice(id){confirmDelete('このお知らせを削除します',async()=>{await db.from('notices').delete().eq('id',id);showToast('🗑️ 削除しました');loadNotices();});}
 
 /* ══ INQUIRIES ══ */
 async function loadInquiries(status='all'){
@@ -1796,6 +1800,26 @@ function showToast(msg){
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
+
+function confirmDelete(message, onConfirm){
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(320px,92vw);text-align:center">
+    <div style="font-size:1.5rem;margin-bottom:10px">🗑️</div>
+    <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">削除の確認</div>
+    <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">${message||'本当に削除しますか？'}</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary" style="flex:1">キャンセル</button>
+      <button id="confirm-delete-ok" class="btn btn-danger" style="flex:1">削除する</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById('confirm-delete-ok').addEventListener('click',()=>{
+    modal.remove();
+    onConfirm();
+  });
+}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 document.querySelectorAll('.modal-overlay').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('show');});
@@ -1934,23 +1958,37 @@ async function saveShopItem(){
 }
 
 async function soldOutShopItem(id){
-  
   await db.from('shop_items').update({stock:0}).eq('id',id);
   showToast('完売にしました');
   loadShopItems();
 }
 async function restoreShopItem(id){
-  const stock=prompt('復活させる在庫数を入力してください:','1');
-  if(!stock)return;
-  await db.from('shop_items').update({stock:parseInt(stock)||1}).eq('id',id);
-  showToast('✅ 在庫を復活しました');
-  loadShopItems();
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(300px,92vw)">
+    <div style="font-size:.95rem;font-weight:900;margin-bottom:12px">在庫数を入力</div>
+    <input class="form-input" id="restore-stock-input" type="number" value="1" min="1">
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary" style="flex:1">キャンセル</button>
+      <button id="restore-ok" class="btn btn-success" style="flex:1">復活</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById('restore-ok').addEventListener('click',async()=>{
+    const stock=parseInt(document.getElementById('restore-stock-input').value)||1;
+    modal.remove();
+    await db.from('shop_items').update({stock}).eq('id',id);
+    showToast('✅ 在庫を復活しました');
+    loadShopItems();
+  });
 }
 async function deleteShopItem(id){
-  
-  await db.from('shop_items').delete().eq('id',id);
-  showToast('🗑️ 削除しました');
-  loadShopItems();
+  confirmDelete('この商品を削除します',async()=>{
+    await db.from('shop_items').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    loadShopItems();
+  });
 }
 
 async function uploadShopImage(input){
@@ -2005,10 +2043,11 @@ async function doCompleteShipOrder(id, btn){
 }
 
 async function deleteShopOrder(id){
-  
-  await db.from('shop_orders').delete().eq('id',id);
-  showToast('🗑️ 削除しました');
-  loadShopOrders();
+  confirmDelete('この注文を削除します',async()=>{
+    await db.from('shop_orders').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    loadShopOrders();
+  });
 }
 </script>
 </body>
