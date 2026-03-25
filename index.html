@@ -1369,7 +1369,7 @@ function showResultDetail(session){
     convBtn.style.background=hasConvert?'#fff8e6':'#fff';
     convBtn.style.color=hasConvert?'#c8860a':'#bbb';
     convBtn.style.borderColor=hasConvert?'#f0d060':'#e0e0e0';
-    convBtn.style.cursor=hasConvert?'pointer':'default';
+    convBtn.textContent=convertSelected.size>0?'🪙 コインに交換 ('+convertSelected.size+'件)':'コインに交換';
 
     // 発送依頼ボタン
     shipBtn.style.background=canShip?'linear-gradient(135deg,#c8860a,#ffd700)':'#f0d080';
@@ -1417,7 +1417,9 @@ function showResultDetail(session){
         +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem">'+(pack?.emoji||'🎴')+'</div>')
         +'</div>'
         +'<div style="flex:1;padding:14px 14px 14px 16px;display:flex;flex-direction:column;justify-content:center;position:relative">'
-        +'<div style="position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:4px;color:#bbb;font-size:.72rem;font-weight:700">'+(isSel?'<span style="color:#f0b800">選択中</span>':isConvSel?'<span style="color:#22c55e">還元選択</span>':'未選択')+'<div style="width:20px;height:20px;border-radius:50%;background:'+(isSel?'#f0b800':isConvSel?'#22c55e':'#e0e0e0')+';display:flex;align-items:center;justify-content:center;font-size:.7rem;color:'+(isSel||isConvSel?'#fff':'#bbb')+'">'+(isSel?'✓':isConvSel?'✓':'◉')+'</div></div>'
+        +'<div style="position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700">'
+        +(isSel?'<span style="color:#f0b800">発送選択</span>':isConvSel?'<span style="color:#22c55e">還元選択</span>':'<span style="color:#bbb">未選択</span>')
+        +'<div style="width:22px;height:22px;border-radius:50%;background:'+(isSel?'#f0b800':isConvSel?'#22c55e':'#e0e0e0')+';display:flex;align-items:center;justify-content:center;font-size:.75rem;color:'+(isSel||isConvSel?'#fff':'#bbb')+'">'+(isSel?'✓':isConvSel?'✓':'◉')+'</div></div>'
         +'<div style="font-size:1rem;font-weight:900;color:#1a1a1a;margin-bottom:8px;padding-right:60px">'+r.prize.name+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px">'
         +'<span style="background:'+tierBg[r.prize.tier]+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||rarLabel[r.prize.tier]||r.prize.tier)+'賞</span>'
@@ -1425,16 +1427,22 @@ function showResultDetail(session){
         +'</div>'
         +'</div></div>';
 
-      // タップイベント
+      // タップイベント：発送→還元→未選択の順に切り替え
       card.addEventListener('click',()=>{
         if(!canShip&&!canConvert)return;
-        // 発送可能→発送選択。還元のみ→還元選択
-        if(canShip){
+        if(canShip&&canConvert){
+          // 両方できる場合：未→発送→還元→未
+          if(isSel){selected.delete(dbId);convertSelected.add(dbId);}
+          else if(isConvSel){convertSelected.delete(dbId);}
+          else{selected.add(dbId);}
+        } else if(canShip){
+          // 発送のみ：未→発送→未
           if(isSel){selected.delete(dbId);}
-          else{selected.add(dbId);convertSelected.delete(dbId);}
+          else{selected.add(dbId);}
         } else if(canConvert){
+          // 還元のみ：未→還元→未
           if(isConvSel){convertSelected.delete(dbId);}
-          else{convertSelected.add(dbId);selected.delete(dbId);}
+          else{convertSelected.add(dbId);}
         }
         renderCards();
       });
