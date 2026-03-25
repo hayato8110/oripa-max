@@ -1660,13 +1660,14 @@ async function bulkShip(){
       <input type="text" class="ship-input" id="bs-building" placeholder="〇〇マンション101">
       <label class="ship-label">電話番号 *</label>
       <input type="tel" class="ship-input" id="bs-tel" placeholder="090-1234-5678">
-      <button onclick="submitBulkShip(${JSON.stringify(selected).replace(/"/g,'&quot;')},this)"
+      <button id="bulk-ship-submit-btn"
         style="width:100%;margin-top:14px;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:.95rem;font-weight:900">📦 ${selected.length}件まとめて発送依頼する</button>
       <button onclick="this.closest('.modal-overlay').remove()" style="width:100%;padding:12px;margin-top:6px;background:none;color:rgba(255,255,255,.5);font-size:.85rem">キャンセル</button>
     </div>
   </div>`;
   modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
   document.body.appendChild(modal);
+  document.getElementById('bulk-ship-submit-btn').addEventListener('click',function(){submitBulkShip(selected,this);});
 
   // デフォルト住所を自動入力
   const def=addresses?.find(a=>a.is_default)||addresses?.[0];
