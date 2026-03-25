@@ -1494,9 +1494,12 @@ function showResultDetail(session){
         const[sid]=dbId.split('_');
         const sess=state.sessions.find(s=>s.id===sid);
         const res=sess?.results.find(x=>x.dbId===dbId);
+        // session.resultsの参照も更新
+        const sessionRes=session.results.find(x=>x.dbId===dbId);
         if(!res||res.converted===true)continue;
         const c=coin(res);
         res.converted=true;
+        if(sessionRes) sessionRes.converted=true;
         total+=c;
         selected.delete(dbId);
         try{
