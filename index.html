@@ -1402,7 +1402,7 @@ async function executeDraw(){
       session.results.forEach((r,i)=>{r.sessionId=sess.id;r.dbId=sess.id+'_'+i;});
     }
   }catch(e){console.error('DB save error:',e);}
-  startGachaAnimation(results,pack);
+  startGachaAnimation(session.results,pack);
 }
 
 async function saveDrawSession(packId,results,totalCost){
