@@ -1312,8 +1312,7 @@ function closeResult(){
 function showResultDetail(session){
   const pack=state.activePack||state.packs.find(p=>p.id===session.packId);
   const prizes=pack?.prizes||[];
-  console.log('showResultDetail pack:', pack?.name, 'prizes:', prizes.length, prizes.map(p=>p.name+'/'+p.exchange_type+'/'+p.value_jp));
-  console.log('session results:', session.results.map(r=>r.prize.name+' converted='+r.converted+' dbId='+r.dbId));
+  showToast('pack:'+pack?.name+' prizes:'+prizes.length+' ex:'+(prizes[0]?.exchange_type||'none'),5000);
 
   document.querySelectorAll('.rd-modal').forEach(m=>m.remove());
   const rs=document.getElementById('result-screen');
