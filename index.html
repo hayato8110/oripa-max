@@ -1521,24 +1521,10 @@ let itemsTab='unselected';
 function renderItemsPage(tab){
   if(tab)itemsTab=tab;
   const content=document.getElementById('items-content');
-  // 交換所購入品を発送待ち・発送済みに追加
-  const shopPending=state.shopOrders.filter(o=>o.status==='pending').map(o=>({
-    isShopOrder:true,id:o.id,name:o.item_name,price:o.price,
-    status:'unselected',createdAt:o.created_at,imageUrl:o.imageUrl
-  }));
-  const shopWaiting=state.shopOrders.filter(o=>o.status==='address_submitted').map(o=>({
-    isShopOrder:true,id:o.id,name:o.item_name,price:o.price,
-    status:'waiting',address:o.address,createdAt:o.created_at,imageUrl:o.imageUrl
-  }));
-  const shopShipped=state.shopOrders.filter(o=>o.status==='shipped'||o.status==='completed').map(o=>({
-    isShopOrder:true,id:o.id,name:o.item_name,price:o.price,
-    status:'shipped',trackingNumber:o.tracking_number,shippedAt:o.shipped_at,createdAt:o.created_at,imageUrl:o.imageUrl
-  }));
-
   const allItems=state.sessions.flatMap(s=>s.results.map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,sessionId:s.id,packId:s.packId})));
-  const unselectedItems=[...allItems.filter(r=>!r.shipped&&!r.converted&&!r.waiting),...shopPending];
-  const waitingItems=[...allItems.filter(r=>r.waiting&&!r.shipped),...shopWaiting];
-  const shippedItems=[...allItems.filter(r=>r.shipped),...shopShipped];
+  const unselectedItems=allItems.filter(r=>!r.shipped&&!r.converted&&!r.waiting);
+  const waitingItems=allItems.filter(r=>r.waiting&&!r.shipped);
+  const shippedItems=allItems.filter(r=>r.shipped);
   const tabList=[
     {key:'unselected',label:'未選択',count:unselectedItems.length,color:'#ffffff'},
     {key:'waiting',label:'発送待ち',count:waitingItems.length,color:'#f59e0b'},
@@ -1569,37 +1555,6 @@ function renderItemsPage(tab){
       </div>`:''}
       ${showItems.length===0?`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">${itemsTab==='shipped'?'🚚':itemsTab==='waiting'?'📬':'📦'}</div><div style="font-weight:700;color:var(--text2)">${itemsTab==='shipped'?'発送済みの商品はありません':itemsTab==='waiting'?'発送待ちの商品はありません':'未選択の獲得商品がありません'}</div></div>`:''}
       ${showItems.map(r=>{
-        // 交換所購入品の場合
-        if(r.isShopOrder){
-          const trackHtml=itemsTab==='shipped'&&r.trackingNumber
-            ?`<div style="margin-top:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:8px 12px">
-                <div style="font-size:.62rem;color:var(--green);font-weight:900;margin-bottom:3px">📦 追跡番号</div>
-                <a href="https://trackings.post.japanpost.jp/services/srv/search/?requestNo1=${r.trackingNumber}" target="_blank"
-                  style="font-size:.9rem;font-weight:900;color:var(--green);text-decoration:underline;display:block">${r.trackingNumber}</a>
-              </div>`
-            :itemsTab==='shipped'?`<div style="font-size:.68rem;color:var(--text3);margin-top:4px">追跡番号なし</div>`:'';
-          const badge=itemsTab==='waiting'
-            ?`<span style="font-size:.65rem;font-weight:900;background:#f59e0b;color:#1a0a00;padding:2px 8px;border-radius:20px">📬 発送待ち</span>`
-            :itemsTab==='shipped'
-            ?`<span style="font-size:.65rem;font-weight:900;background:#22c55e;color:#fff;padding:2px 8px;border-radius:20px">🚚 発送済み</span>`
-            :'';
-          const shipBtn=itemsTab==='unselected'
-            ?`<div style="margin-top:8px"><button onclick="openShopShippingModal('${r.id}','${(r.name||'').replace(/'/g,'&#39;')}')" class="ic-ship-btn">発送依頼</button></div>`
-            :'';
-          return `
-          <div class="item-card" style="flex-direction:column;align-items:stretch;padding:0;overflow:hidden;margin-bottom:10px">
-            <div style="display:flex;align-items:stretch">
-              <div style="width:120px;min-height:120px;flex-shrink:0;background:#1a1a2e;display:flex;align-items:center;justify-content:center;overflow:hidden">${r.imageUrl?`<img src="${r.imageUrl}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:3rem">🛒</span>`}</div>
-              <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:6px">
-                <div style="font-size:1.05rem;font-weight:900;color:#fff">${r.name}</div>
-                <div style="font-size:.78rem;color:rgba(255,255,255,.6)">交換所 · ${r.price?.toLocaleString()}コイン</div>
-                ${badge?`<div>${badge}</div>`:''}
-                ${trackHtml}
-                ${shipBtn}
-              </div>
-            </div>
-          </div>`;
-        }
         // ガチャ獲得品の場合（従来通り）
         const pack=state.packs.find(p=>p.id===r.packId);
         const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
@@ -1664,6 +1619,7 @@ async function bulkConvert(){
   const selected=Array.from(document.querySelectorAll('.item-cb:checked')).map(cb=>cb.dataset.dbid);
   if(!selected.length){showToast('⚠️ 商品を選択してください');return;}
   let totalBonus=0;
+  let skipped=0;
   for(const dbId of selected){
     const[sessionId]=dbId.split('_');
     const sess=state.sessions.find(s=>s.id===sessionId);
@@ -1672,7 +1628,7 @@ async function bulkConvert(){
     const pack=state.packs.find(p=>p.id===sess.packId);
     const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
     const bonus=prizeData?.value_jp||0;
-    if(bonus<=0)continue;
+    if(bonus<=0){skipped++;continue;}
     r.converted=true;
     state.coin+=bonus;
     totalBonus+=bonus;
@@ -1688,7 +1644,9 @@ async function bulkConvert(){
   if(totalBonus>0){
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
     updateHeaderPts();
-    showToast(`🪙 合計 +${totalBonus}コインに還元しました！`,3000);
+    showToast(`🪙 +${totalBonus}コイン還元しました！${skipped>0?`（${skipped}件は還元設定なしでスキップ）`:''}`,3500);
+  } else {
+    showToast(`⚠️ 還元できる商品がありません。管理画面で還元コインを設定してください`,4000);
   }
   renderItemsPage();
 }
