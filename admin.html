@@ -1836,7 +1836,8 @@ async function loadShopItems(){
 }
 
 async function loadShopOrders(){
-  const{data}=await db.from('shop_orders').select('*').order('created_at',{ascending:false});
+  const{data,error}=await db.from('shop_orders').select('*').order('created_at',{ascending:false});
+  if(error){showToast('⚠️ 取得エラー: '+error.message);return;}
   const orders=data||[];
   // ユーザー情報を別途取得
   const userIds=[...new Set(orders.map(o=>o.user_id).filter(Boolean))];
