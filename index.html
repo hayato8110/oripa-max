@@ -1103,8 +1103,15 @@ function showGachaResult(results,pack,topTier){
   document.getElementById('gacha-screen').classList.remove('show');
   document.getElementById('gacha-video-wrap').style.display='none';
   document.getElementById('gacha-pack').style.display='flex';
-  if(topTier==='sar')showJackpot(results[0].prize.name,()=>showResultCards(results,pack));
-  else showResultCards(results,pack);
+  // 演出後は直接結果詳細ページへ
+  const latestSession=state.sessions[0];
+  if(latestSession){
+    showResultDetail(latestSession);
+  } else if(topTier==='sar'){
+    showJackpot(results[0].prize.name,()=>showResultCards(results,pack));
+  } else {
+    showResultCards(results,pack);
+  }
 }
 async function skipGacha(){
   gachaSkipped=true;
@@ -1113,7 +1120,10 @@ async function skipGacha(){
   document.getElementById('gacha-screen').classList.remove('show');
   document.getElementById('gacha-video-wrap').style.display='none';
   document.getElementById('gacha-pack').style.display='flex';
-  if(gachaResults.length){
+  const latestSession=state.sessions[0];
+  if(latestSession){
+    showResultDetail(latestSession);
+  } else if(gachaResults.length){
     const topTier=gachaResults.reduce((best,r)=>{
       const order={c:0,r:1,rr:2,sr:3,sar:4};
       return(order[r.prize.tier]||0)>(order[best]||0)?r.prize.tier:best;
