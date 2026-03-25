@@ -573,7 +573,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     <div class="bs-section-label">🎲 引く枚数を選ぶ</div>
     <div class="count-opts" id="count-opts"></div>
     <button class="bs-draw-btn" onclick="executeDraw()">🎴 ガチャを引く！</button>
-    <button class="bs-cancel-btn" onclick="closeDrawModal()">キャンセル</button>
+    <button class="bs-cancel-btn" onclick="closeAllModals()">キャンセル</button>
   </div>
 </div>
 
@@ -883,8 +883,7 @@ async function doRegister(){
   showToast(`🎉 登録完了！`,3000);
 }
 async function doForgotPassword(){
-  const email=prompt('登録済みのメールアドレスを入力:');
-  if(!email)return;
+  const email=state.user?.email||'';
   await db.auth.resetPasswordForEmail(email,{redirectTo:'https://oripa-max.netlify.app'});
   showToast('📧 パスワードリセットメールを送信しました',3000);
 }
@@ -1727,7 +1726,7 @@ async function submitBulkShip(dbIds, btn){
         prize_name:res.prize.name,prize_tier:res.prize.tier,
         is_converted:res.converted||false,is_shipped:res.waiting||res.shipped||false,
       }));
-      await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId).catch(()=>{});
+      try{await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId);}catch(e){}
     }
   }
 
@@ -2403,11 +2402,26 @@ function openAddressManager(){
   });
 }
 async function deleteAddress(id){
-  if(!confirm('この住所を削除しますか？'))return;
-  await db.from('shipping_addresses').delete().eq('id',id);
-  showToast('🗑️ 削除しました');
-  document.querySelector('.modal-overlay.show')?.remove();
-  openAddressManager();
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.style.zIndex='10000';
+  modal.innerHTML=`<div style="background:#1a1a2e;border-radius:16px;padding:20px;width:min(300px,92vw);text-align:center">
+    <div style="font-size:1.4rem;margin-bottom:8px">🗑️</div>
+    <div style="font-size:.9rem;font-weight:900;color:#fff;margin-bottom:6px">この住所を削除しますか？</div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="this.closest('.modal-overlay').remove()" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700">キャンセル</button>
+      <button id="del-addr-ok" style="flex:1;padding:10px;border-radius:8px;background:#ef4444;color:#fff;font-weight:900">削除する</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById('del-addr-ok').addEventListener('click',async()=>{
+    modal.remove();
+    await db.from('shipping_addresses').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    document.querySelector('.modal-overlay.show')?.remove();
+    openAddressManager();
+  });
 }
 
 /* ══ 連続開封アニメーション ══ */
