@@ -1271,7 +1271,6 @@ async function drawDirect(packId,count){
   const cost=pack.price*count;
   if(state.coin<cost){showToast('🪙 コインが不足しています');openPurchase();return;}
   if((pack.remaining||0)<count){showToast('⚠️ 残り口数が不足しています');return;}
-  if(!confirm(`${count}回ガチャを引きますか？\n${cost.toLocaleString()}コインを消費します`))return;
   state.activePack=pack;
   state.drawCount=count;
   await executeDraw();
@@ -1664,7 +1663,6 @@ async function bulkConvert(){
   if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
   const selected=Array.from(document.querySelectorAll('.item-cb:checked')).map(cb=>cb.dataset.dbid);
   if(!selected.length){showToast('⚠️ 商品を選択してください');return;}
-  if(!confirm(`${selected.length}件の商品をまとめてコインに還元しますか？`))return;
   let totalBonus=0;
   for(const dbId of selected){
     const[sessionId]=dbId.split('_');
@@ -2074,7 +2072,6 @@ async function confirmBuyShopItem(itemId, itemNameEncoded, price, btn){
     const modal=btn.closest('.modal-overlay');
     const maxStock=modal?._max||1;
     if(Number(state.coin)<totalPrice){showToast('⚠️ コインが不足しています');return;}
-    if(!confirm(`「${itemName}」を${qty}個 (${totalPrice.toLocaleString()}コイン) で購入しますか？`))return;
     modal.remove();_shopQty=1;
     showToast('処理中...',2000);
 
@@ -2235,12 +2232,10 @@ async function submitInquiry(){
 /* ══ ポイント還元 ══ */
 async function convertToPoints(dbId){
   if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
-  if(!confirm('この商品をポイントに還元しますか？'))return;
   const[sessionId]=dbId.split('_');
   const sess=state.sessions.find(s=>s.id===sessionId);
   const r=sess?.results.find(r=>r.dbId===dbId);
   if(!r)return;
-  // 管理画面で設定したvalue_jpを還元コインとして使う
   const pack=state.packs.find(p=>p.id===sess.packId);
   const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
   const bonus=prizeData?.value_jp||0;
@@ -2250,13 +2245,11 @@ async function convertToPoints(dbId){
   updateHeaderPts();
   try{
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-    // draw_sessionsのis_convertedをDBに確実に書き込む
     const updatedResults=sess.results.map(res=>({
       prize_name:res.prize.name,prize_tier:res.prize.tier,
       is_converted:res.converted||false,is_shipped:res.shipped||false,
     }));
     await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId);
-    // transactionsに記録
     try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`});}catch(e){}
   }catch(e){console.error(e);}
   showToast(`🪙 +${bonus}コインに還元しました！`,2500);
