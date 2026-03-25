@@ -1369,7 +1369,8 @@ function showResultDetail(session){
     convBtn.style.background=hasConvert?'#fff8e6':'#fff';
     convBtn.style.color=hasConvert?'#c8860a':'#bbb';
     convBtn.style.borderColor=hasConvert?'#f0d060':'#e0e0e0';
-    convBtn.textContent=convertSelected.size>0?'🪙 コインに交換 ('+convertSelected.size+'件)':'コインに交換';
+    convBtn.style.cursor=hasConvert?'pointer':'default';
+    convBtn.textContent=hasConvert?'🪙 コインに交換 ('+convertSelected.size+'件)':'コインに交換';
 
     // 発送依頼ボタン
     shipBtn.style.background=canShip?'linear-gradient(135deg,#c8860a,#ffd700)':'#f0d080';
@@ -1384,7 +1385,8 @@ function showResultDetail(session){
       const pd=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
       return (pd?.exchange_type||'both')!=='coin_only'&&!(r.shipped||r.waiting)&&r.dbId;
     });
-    allBtn.textContent=selected.size===shippable.length&&shippable.length>0?'リセット':'全て選択';
+    const allSel=shippable.length>0&&shippable.every(r=>selected.has(r.dbId));
+    allBtn.textContent=allSel?'全解除':'全て選択';
   }
 
   function renderCards(){
@@ -1505,7 +1507,14 @@ function showResultDetail(session){
       const pd=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
       return (pd?.exchange_type||'both')!=='coin_only'&&!(r.shipped||r.waiting)&&r.dbId;
     });
-    shippable.forEach(r=>{selected.add(r.dbId);convertSelected.delete(r.dbId);});
+    const allSelected=shippable.every(r=>selected.has(r.dbId));
+    if(allSelected){
+      // 全解除
+      selected.clear();
+    } else {
+      // 全選択
+      shippable.forEach(r=>{selected.add(r.dbId);convertSelected.delete(r.dbId);});
+    }
     renderCards();
   });
   resetBtn.addEventListener('click',()=>{selected.clear();convertSelected.clear();renderCards();});
