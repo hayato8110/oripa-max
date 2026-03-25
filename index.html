@@ -1414,6 +1414,8 @@ function showResultDetail(session){
       card.addEventListener('click',()=>{
         if(selected.has(dbId)){selected.delete(dbId);}
         else{selected.add(dbId);}
+        // デバッグ
+        const _pd=pd(r);showToast('ex='+ex(r)+' coin='+coin(r)+' conv='+r.converted+' pd='+(_pd?'ok':'null')+' prizes='+prizes.length,4000);
         renderCards();
       });
       scroll.appendChild(card);
