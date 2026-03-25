@@ -2055,7 +2055,6 @@ async function confirmBuyShopItem(itemId, itemNameEncoded, price, btn){
     try{await db.from('transactions').insert({user_id:state.user.id,type:'shop_purchase',amount:-totalPrice,currency:'coin',description:'交換所: '+itemName+' ×'+qty});}catch(e){}
 
     loadShopPage();
-    renderItemsPage();
     showToast('✅ 購入完了！発送先を入力してください',3000);
     if(lastOrderId)setTimeout(()=>openShopShippingModal(lastOrderId,itemName),800);
   }catch(e){alert('エラー: '+e.message);}
@@ -2159,8 +2158,7 @@ async function submitShopShipping(orderId, btn){
   }
 
   btn.closest('.modal-overlay').remove();
-  showToast('📦 発送依頼を受け付けました！',3000);
-  renderItemsPage('waiting');
+  showToast('📦 発送依頼を受け付けました！管理者が発送します',3000);
 }
 
 /* ══ SNSシェア ══ */
