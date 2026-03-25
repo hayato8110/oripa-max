@@ -1327,8 +1327,8 @@ function showResultDetail(session){
   function getPrizeData(r){return (pack?.prizes||[]).find(p=>p.name===r.prize.name);}
   function getCoin(r){return getPrizeData(r)?.value_jp||0;}
   function getEx(r){return getPrizeData(r)?.exchange_type||'both';}
-  function canShip(r){return getEx(r)!=='coin_only'&&!(r.shipped||r.waiting);}
-  function canConvert(r){return getEx(r)!=='ship_only'&&getCoin(r)>0&&!r.converted;}
+  function canShip(r){return getEx(r)!=='coin_only'&&!r.shipped&&!r.waiting;}
+  function canConvert(r){return getEx(r)!=='ship_only'&&getCoin(r)>0&&r.converted!==true;}
 
   function getItems(){
     return session.results.filter(r=>{
@@ -1544,9 +1544,12 @@ async function drawDirect(packId,count){
   const cost=pack.price*count;
   if(state.coin<cost){showToast('🪙 コインが不足しています');openPurchase();return;}
   if((pack.remaining||0)<count){showToast('⚠️ 残り口数が不足しています');return;}
+  const label=count===1?'1回':count===10?'10連':'100連';
+  confirmAction(label+'ガチャを引きますか？\n'+cost.toLocaleString()+'コイン消費します',async()=>{
   state.activePack=pack;
   state.drawCount=count;
   await executeDraw();
+  });
 }
 
 function openDrawModal(packId,defaultCount){
