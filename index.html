@@ -1596,9 +1596,13 @@ async function openBulkShipFromResult(dbIds){
     const address={name,zip,prefecture:pref,city,building,tel};
     const{error}=await db.from('shipping_requests').insert({user_id:state.user.id,result_ids:dbIds,address,status:'pending'});
     if(error){showToast('⚠️ エラー: '+error.message);return;}
-    for(const dbId of dbIds){
-      const r=session?.results?.find(x=>x.dbId===dbId);
-      if(r)r.waiting=true;
+    // waiting フラグ更新
+    const currentSession=state.sessions.find(s=>s.results?.some(r=>r.dbId===dbIds[0]));
+    if(currentSession){
+      for(const dbId of dbIds){
+        const r=currentSession.results?.find(x=>x.dbId===dbId);
+        if(r)r.waiting=true;
+      }
     }
     modal.remove();
     showToast('📦 発送依頼を受け付けました！',3000);
