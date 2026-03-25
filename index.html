@@ -636,8 +636,8 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
       <div style="font-size:.75rem;color:var(--text3);margin-top:2px">1コイン = 1円相当</div>
     </div>
     <div style="padding:12px 16px" id="purchase-plans"></div>
-    <div style="padding:0 16px">
-      <button onclick="closePurchase()" style="width:100%;padding:11px;background:#f5f5f5;border-radius:10px;color:var(--text3);font-weight:700;font-size:.85rem;border:1px solid var(--border)">閉じる</button>
+    <div style="padding:8px 16px 20px">
+      <button onclick="closePurchase()" style="width:100%;padding:13px;background:rgba(255,255,255,.12);border-radius:10px;color:#fff;font-weight:900;font-size:.9rem;border:1.5px solid rgba(255,255,255,.2)">✕ 閉じる</button>
     </div>
   </div>
 </div>
@@ -2494,6 +2494,7 @@ function renderMyPage(){
     </linearGradient>
   </defs>
 </svg></span>コインをチャージ<span class="mp-menu-arrow">›</span></div>
+      <div class="mp-menu-item" onclick="openUserMessages()"><span class="mp-menu-icon">🔔</span>お知らせ<span id="msg-badge" style="display:none;background:var(--primary);color:#fff;font-size:.55rem;font-weight:900;padding:1px 6px;border-radius:999px;margin-left:4px">0</span><span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openCoinHistory()"><span class="mp-menu-icon">📊</span>コイン購入履歴<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="showPage('items',document.querySelector('[data-page=items]'))"><span class="mp-menu-icon">📦</span>獲得商品・発送依頼<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="openAddressManager()"><span class="mp-menu-icon">📮</span>発送先住所管理<span class="mp-menu-arrow">›</span></div>
@@ -2518,7 +2519,45 @@ function renderMyPage(){
 }
 
 
-/* ══ お気に入り ══ */
+/* ══ お知らせ（user_messages） ══ */
+async function loadUserMessageBadge(){
+  if(!state.user)return;
+  const{data}=await db.from('user_messages').select('id').eq('user_id',state.user.id).eq('is_read',false);
+  const count=(data||[]).length;
+  const badge=document.getElementById('msg-badge');
+  if(badge){
+    if(count>0){badge.style.display='inline';badge.textContent=count;}
+    else{badge.style.display='none';}
+  }
+}
+async function openUserMessages(){
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
+  const{data:msgs}=await db.from('user_messages').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false});
+  // 全部既読に
+  await db.from('user_messages').update({is_read:true}).eq('user_id',state.user.id).eq('is_read',false);
+  loadUserMessageBadge();
+
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  const list=(msgs||[]).map(m=>`
+    <div style="background:${m.is_read?'var(--bg2)':'rgba(201,168,76,.06)'};border:1px solid ${m.is_read?'rgba(255,255,255,.07)':'rgba(201,168,76,.2)'};border-radius:10px;padding:14px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        ${!m.is_read?'<span style="width:7px;height:7px;border-radius:50%;background:var(--primary);flex-shrink:0"></span>':''}
+        <div style="font-size:.88rem;font-weight:900;color:#fff">${m.title||'お知らせ'}</div>
+      </div>
+      <div style="font-size:.82rem;color:rgba(255,255,255,.75);line-height:1.6;white-space:pre-wrap">${m.body||''}</div>
+      <div style="font-size:.68rem;color:rgba(255,255,255,.35);margin-top:6px">${new Date(m.created_at).toLocaleString('ja-JP')}</div>
+    </div>`).join('') || '<div style="text-align:center;padding:40px;color:rgba(255,255,255,.3)"><div style="font-size:2rem;margin-bottom:8px">🔔</div>お知らせはありません</div>';
+
+  modal.innerHTML=`<div class="bottom-sheet" style="max-height:88vh">
+    <div class="bs-drag"></div>
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:1.05rem;font-weight:900;color:var(--text)">🔔 お知らせ</div>
+    <div style="padding:12px 16px;overflow-y:auto;max-height:calc(88vh - 60px)">${list}</div>
+    <button class="bs-cancel-btn" onclick="this.closest('.modal-overlay').remove()">閉じる</button>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+}
 let favorites=new Set();
 async function loadFavorites(){
   if(!state.user)return;
@@ -2907,13 +2946,15 @@ async function submitInquiry(){
   const subject=document.getElementById('inq-subject')?.value;
   const body=document.getElementById('inq-body')?.value;
   if(!name||!email||!subject||!body){showToast('⚠️ 全項目を入力してください');return;}
-  try{await db.from('inquiries').insert({user_id:state.user?.id||null,email,subject,body,status:'open'});}catch(e){}
-  document.getElementById('inq-name').value='';
-  document.getElementById('inq-email').value='';
-  document.getElementById('inq-subject').value='';
-  document.getElementById('inq-body').value='';
-  showToast('✅ お問い合わせを送信しました！',3000);
-  showPage('gacha',document.querySelector('[data-page=gacha]'));
+  confirmAction('お問い合わせを送信しますか？',async()=>{
+    try{await db.from('inquiries').insert({user_id:state.user?.id||null,name,email,subject,body,status:'open'});}catch(e){}
+    document.getElementById('inq-name').value='';
+    document.getElementById('inq-email').value='';
+    document.getElementById('inq-subject').value='';
+    document.getElementById('inq-body').value='';
+    showToast('✅ お問い合わせを送信しました！',3000);
+    showPage('gacha',document.querySelector('[data-page=gacha]'));
+  });
 }
 
 /* ══ ポイント還元 ══ */
@@ -3002,12 +3043,14 @@ function openAddressManager(){
   if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
   loadAddresses().then(()=>{
     const list=savedAddresses.map((a,i)=>`
-      <div style="background:#f8f8f8;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
         <div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--text)">${a.name} ${a.is_default?'<span style="font-size:.62rem;color:var(--green);font-weight:900">デフォルト</span>':''}</div>
-          <div style="font-size:.72rem;color:var(--text3)">〒${a.zip} ${a.prefecture}${a.city}</div>
+          <div style="font-size:.88rem;font-weight:900;color:#111;margin-bottom:3px">${a.name} ${a.is_default?'<span style="font-size:.62rem;color:#16a34a;font-weight:900;background:#dcfce7;padding:1px 7px;border-radius:3px">デフォルト</span>':''}</div>
+          <div style="font-size:.75rem;color:#555;margin-bottom:1px">〒${a.zip} ${a.prefecture}${a.city}${a.address?' '+a.address:''}</div>
+          ${a.building?`<div style="font-size:.72rem;color:#777">${a.building}</div>`:''}
+          <div style="font-size:.72rem;color:#666;margin-top:2px">📞 ${a.tel}</div>
         </div>
-        <button onclick="deleteAddress('${a.id}')" style="background:#fff0f0;color:var(--primary);border:1px solid #ffd9c8;border-radius:5px;padding:4px 8px;font-size:.7rem;font-weight:700">削除</button>
+        <button onclick="deleteAddress('${a.id}')" style="background:#fff0f0;color:#ef4444;border:1px solid #fecaca;border-radius:7px;padding:6px 12px;font-size:.75rem;font-weight:900;flex-shrink:0;margin-left:10px">削除</button>
       </div>`).join('');
     const modal=document.createElement('div');
     modal.className='modal-overlay show';
@@ -3083,7 +3126,7 @@ function showPage(name,el){
   if(el)el.classList.add('active');
   else{const btn=document.querySelector(`[data-page="${name}"]`);if(btn)btn.classList.add('active');}
   document.getElementById(`page-${name}`)?.classList.add('active');
-  if(name==='mypage')renderMyPage();
+  if(name==='mypage'){renderMyPage();loadUserMessageBadge();}
   if(name==='notices')renderNotices();
   if(name==='items')renderItemsPage();
   if(name==='shop')loadShopPage();
@@ -3155,6 +3198,7 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
     await loadTenjoFromDB();
     await loadFavorites();
     await loadShopOrdersToItems();
+    loadUserMessageBadge();
   }
   await Promise.all([
     loadAndRenderPacks(),
