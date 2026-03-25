@@ -342,7 +342,7 @@ input,select,textarea{font-family:inherit}
             <button class="btn btn-secondary" onclick="exportCSV('shipping')">📥 CSV</button>
           </div>
         </div>
-        <table class="tbl"><thead><tr><th>ID</th><th>ユーザー</th><th>お名前/TEL</th><th>住所</th><th>依頼日</th><th>状態</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>ID</th><th>ユーザー</th><th>お名前/TEL</th><th>住所</th><th>依頼日</th><th>商品数</th><th>状態</th><th>操作</th></tr></thead>
         <tbody id="shipping-tbl-body"></tbody></table>
       </div>
     </div>
@@ -1496,7 +1496,6 @@ async function loadShipping(status='all'){
   document.getElementById('ship-badge').textContent=pending;
   document.getElementById('stat-ship').textContent=pending;
   document.getElementById('shipping-tbl-body').innerHTML=allShipping.length?allShipping.map(s=>{
-    // address は jsonb なので s.address.name 等でアクセス
     const addr=s.address||{};
     const dispName=addr.name||s.name||'—';
     const dispTel=addr.tel||s.tel||'';
@@ -1504,6 +1503,8 @@ async function loadShipping(status='all'){
     const dispPref=addr.prefecture||s.prefecture||'';
     const dispCity=addr.city||s.city||'';
     const dispBuilding=addr.building||s.building||'';
+    const itemCount=(s.result_ids||[]).length;
+    const isBulk=itemCount>1;
     return `
     <tr>
       <td class="td-bold" style="font-size:.72rem">#${(s.id||'').slice(0,8)}</td>
@@ -1511,6 +1512,7 @@ async function loadShipping(status='all'){
       <td><div>${dispName}</div><div class="td-sub">${dispTel}</div></td>
       <td style="font-size:.72rem"><div>〒${dispZip}</div><div>${dispPref}${dispCity}</div><div class="td-sub">${dispBuilding}</div></td>
       <td style="font-size:.7rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</td>
+      <td><span class="badge" style="background:${isBulk?'rgba(99,102,241,.2)':'rgba(255,255,255,.05)'};color:${isBulk?'#818cf8':'rgba(255,255,255,.5)'};">${isBulk?'📦 まとめ '+itemCount+'件':'📦 1件'}</span></td>
       <td><span class="badge badge-${s.status==='pending'?'pending':'shipped'}">${s.status==='pending'?'発送待ち':'発送済み'}</span>${s.tracking_number?`<div class="td-sub">${s.tracking_number}</div>`:''}</td>
       <td>
         ${s.status==='pending'
@@ -1520,7 +1522,7 @@ async function loadShipping(status='all'){
         <button class="btn btn-danger" onclick="cancelShipping('${s.id}')" style="margin-left:4px">✕</button>
       </td>
     </tr>`;
-  }).join(''):'<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">発送依頼はありません</td></tr>';
+  }).join(''):'<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">発送依頼はありません</td></tr>';
 }
 async function shipOrder(id){
   const modal=document.createElement('div');
@@ -1834,21 +1836,22 @@ function showToast(msg){
 function confirmDelete(message, onConfirm){
   const modal=document.createElement('div');
   modal.className='modal-overlay show';
-  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(320px,92vw);text-align:center">
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+  const box=document.createElement('div');
+  box.style.cssText='background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;width:min(320px,92vw);text-align:center';
+  box.innerHTML=`
     <div style="font-size:1.5rem;margin-bottom:10px">🗑️</div>
     <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">削除の確認</div>
     <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">${message||'本当に削除しますか？'}</div>
     <div style="display:flex;gap:8px">
-      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary" style="flex:1">キャンセル</button>
-      <button id="confirm-delete-ok" class="btn btn-danger" style="flex:1">削除する</button>
-    </div>
-  </div>`;
+      <button id="cd-cancel" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer">キャンセル</button>
+      <button id="cd-ok" style="flex:1;padding:10px;border-radius:8px;background:#ef4444;color:#fff;font-weight:900;border:none;cursor:pointer">削除する</button>
+    </div>`;
+  modal.appendChild(box);
   modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
   document.body.appendChild(modal);
-  document.getElementById('confirm-delete-ok').addEventListener('click',()=>{
-    modal.remove();
-    onConfirm();
-  });
+  box.querySelector('#cd-cancel').addEventListener('click',()=>modal.remove());
+  box.querySelector('#cd-ok').addEventListener('click',()=>{modal.remove();onConfirm();});
 }
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 document.querySelectorAll('.modal-overlay').forEach(el=>{
