@@ -1310,11 +1310,8 @@ function closeResult(){
 }
 
 function showResultDetail(session){
-  const pack=state.packs.find(p=>p.id===session.packId);
-  // デバッグ
-  if(!pack||!pack.prizes?.length){
-    showToast('⚠️ パック情報: '+(pack?'prizes='+pack.prizes?.length:'pack not found')+' packId='+session.packId,5000);
-  }
+  const pack=state.packs.find(p=>p.id===session.packId)||state.activePack;
+  // デバッグ削除済み
   document.querySelectorAll('.rd-modal').forEach(m=>m.remove());
   const rs=document.getElementById('result-screen');
   if(rs){rs.classList.remove('show');rs.style.cssText='';}
