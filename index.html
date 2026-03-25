@@ -861,7 +861,14 @@ async function fetchVideos(){
 }
 async function checkSession(){
   const{data:{session}}=await db.auth.getSession();
-  if(session){state.session=session;await loadUserProfile(session.user.id);}
+  if(session){
+    state.session=session;
+    await loadUserProfile(session.user.id);
+    // usersテーブルにプロフィールがない場合も最低限userをセット
+    if(!state.user){
+      state.user={id:session.user.id,email:session.user.email,username:session.user.email};
+    }
+  }
 }
 async function loadUserProfile(userId){
   const{data:profile}=await db.from('users').select('*').eq('id',userId).single();
@@ -914,10 +921,8 @@ async function doForgotPassword(){
 async function doLogout(){
   confirmAction('ログアウトしますか？',async()=>{
     await db.auth.signOut();
-    state.user=null;state.coin=0;state.dp=0;
-    state.sessions=[];state.shopOrders=[];state.tenjoCount={};
-    updateHeaderPts();renderMyPage();renderItemsPage();
     showToast('ログアウトしました');
+    setTimeout(()=>location.reload(),500);
   });
 }
 
@@ -3226,6 +3231,10 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
     loadNotices(),
     loadVideos(),
   ]);
+  // セッションがある場合、パック読み込み後にitemsページを再描画（prize情報を正しく表示するため）
+  if(state.user){
+    renderItemsPage();
+  }
 })();
 </script>
 </body>
