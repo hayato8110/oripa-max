@@ -1491,7 +1491,7 @@ function showResultDetail(session){
     confirmAction(ids.length+'件を'+tprev+'コインに還元しますか？',async()=>{
       let total=0;
       for(const dbId of ids){
-        const[sid]=dbId.split('_');
+        const sid=dbId.substring(0,dbId.lastIndexOf('_'));
         const sess=state.sessions.find(s=>s.id===sid);
         const res=sess?.results.find(x=>x.dbId===dbId);
         // session.resultsの参照も更新
@@ -2012,7 +2012,7 @@ async function submitBulkShip(dbIds, btn){
   // 合計コインチェック
   let totalCoin=0;
   for(const dbId of dbIds){
-    const[sessionId]=dbId.split('_');
+    const sessionId=dbId.substring(0,dbId.lastIndexOf('_'));
     const sess=state.sessions.find(s=>s.id===sessionId);
     const r=sess?.results.find(x=>x.dbId===dbId);
     const pack=state.packs.find(p=>p.id===sess?.packId);
@@ -2038,7 +2038,7 @@ async function submitBulkShip(dbIds, btn){
 
   // ローカルのwaitingフラグを更新
   for(const dbId of resultIds){
-    const[sessionId]=dbId.split('_');
+    const sessionId=dbId.substring(0,dbId.lastIndexOf('_'));
     const sess=state.sessions.find(s=>s.id===sessionId);
     const r=sess?.results.find(r=>r.dbId===dbId);
     if(r)r.waiting=true;
@@ -2067,7 +2067,7 @@ async function bulkConvert(){
   let totalBonus=0;
   let skipped=0;
   for(const dbId of selected){
-    const[sessionId]=dbId.split('_');
+    const sessionId=dbId.substring(0,dbId.lastIndexOf('_'));
     const sess=state.sessions.find(s=>s.id===sessionId);
     const r=sess?.results.find(r=>r.dbId===dbId);
     if(!r||r.converted)continue;
@@ -2103,7 +2103,7 @@ let pendingShipResultId=null;
 async function openShippingModal(dbId){
   if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
   // 2000コイン以上チェック
-  const[sessionId]=dbId.split('_');
+  const sessionId=dbId.substring(0,dbId.lastIndexOf('_'));
   const sess=state.sessions.find(s=>s.id===sessionId);
   const r=sess?.results.find(x=>x.dbId===dbId);
   const pack=state.packs.find(p=>p.id===sess?.packId);
@@ -2160,7 +2160,7 @@ async function submitShipping(){
   if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
 
   if(pendingShipResultId&&state.user){
-    const[sessionId]=pendingShipResultId.split('_');
+    const sessionId=pendingShipResultId.substring(0,pendingShipResultId.lastIndexOf('_'));
     const sess=state.sessions.find(s=>s.id===sessionId);
 
     // ローカル状態を発送待ちに更新
@@ -2647,7 +2647,7 @@ async function submitInquiry(){
 async function convertToPoints(dbId){
   if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
   confirmAction('この商品をコインに還元しますか？',async()=>{
-  const[sessionId]=dbId.split('_');
+  const sessionId=dbId.substring(0,dbId.lastIndexOf('_'));
   const sess=state.sessions.find(s=>s.id===sessionId);
   const r=sess?.results.find(r=>r.dbId===dbId);
   if(!r)return;
