@@ -1491,21 +1491,22 @@ function showResultDetail(session){
     confirmAction(ids.length+'件を'+tprev+'コインに還元しますか？',async()=>{
       let total=0;
       for(const dbId of ids){
-        const sid=dbId.substring(0,dbId.lastIndexOf('_'));
-        const sess=state.sessions.find(s=>s.id===sid);
-        const res=sess?.results.find(x=>x.dbId===dbId);
-        // session.resultsの参照も更新
-        const sessionRes=session.results.find(x=>x.dbId===dbId);
-        if(!res||res.converted===true)continue;
-        const c=coin(res);
-        res.converted=true;
-        if(sessionRes) sessionRes.converted=true;
+        // session.resultsから直接取得して更新
+        const r=session.results.find(x=>x.dbId===dbId);
+        if(!r||r.converted===true)continue;
+        const c=coin(r);
+        r.converted=true; // 直接更新
         total+=c;
         selected.delete(dbId);
+        // DB更新
         try{
-          const upd=sess.results.map(x=>({prize_name:x.prize.name,prize_tier:x.prize.tier,is_converted:x.converted===true,is_shipped:x.shipped===true}));
-          await db.from('draw_sessions').update({results:upd}).eq('id',sid);
-          try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:c,currency:'coin',description:res.prize.name+' ポイント還元'});}catch(e2){}
+          const sid=dbId.substring(0,dbId.lastIndexOf('_'));
+          const sess=state.sessions.find(s=>s.id===sid);
+          if(sess){
+            const upd=sess.results.map(x=>({prize_name:x.prize.name,prize_tier:x.prize.tier,is_converted:x.converted===true,is_shipped:x.shipped===true}));
+            await db.from('draw_sessions').update({results:upd}).eq('id',sid);
+          }
+          try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:c,currency:'coin',description:r.prize.name+' ポイント還元'});}catch(e2){}
         }catch(e){}
       }
       if(total>0){
