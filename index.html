@@ -1312,7 +1312,6 @@ function closeResult(){
 function showResultDetail(session){
   const pack=state.activePack||state.packs.find(p=>p.id===session.packId);
   const prizes=pack?.prizes||[];
-  showToast('pack:'+pack?.name+' prizes:'+prizes.length+' ex:'+(prizes[0]?.exchange_type||'none'),5000);
 
   document.querySelectorAll('.rd-modal').forEach(m=>m.remove());
   const rs=document.getElementById('result-screen');
