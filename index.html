@@ -1345,7 +1345,7 @@ function showResultDetail(session){
     let t=0;
     selected.forEach(dbId=>{
       const r=session.results.find(x=>x.dbId===dbId);
-      if(r&&canShip(r)) t+=coin(r);
+      if(r) t+=coin(r);
     });
     return t;
   }
