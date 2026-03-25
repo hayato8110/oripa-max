@@ -725,22 +725,30 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
       <div style="font-size:1.05rem;font-weight:900;color:var(--text)">📮 発送先住所を追加</div>
     </div>
     <div style="padding:14px 16px">
-      <label class="inq-label">お名前 *</label>
-      <input type="text" class="ship-input" id="addr-name" placeholder="山田 太郎" style="margin-bottom:10px">
-      <label class="inq-label">郵便番号 *</label>
-      <input type="text" class="ship-input" id="addr-zip" placeholder="123-4567" style="margin-bottom:10px">
-      <label class="inq-label">都道府県 *</label>
-      <select class="ship-input" id="addr-pref" style="margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="ship-label">姓 <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="addr-last" placeholder="山田"></div>
+        <div><label class="ship-label">名 <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="addr-first" placeholder="太郎"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="ship-label">セイ <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="addr-last-kana" placeholder="ヤマダ"></div>
+        <div><label class="ship-label">メイ <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="addr-first-kana" placeholder="タロウ"></div>
+      </div>
+      <label class="ship-label">郵便番号 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="addr-zip" placeholder="1234567（ハイフン無し）" inputmode="numeric">
+      <label class="ship-label">都道府県 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <select class="ship-input" id="addr-pref">
         <option value="">選択</option>
         <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option><option>秋田県</option><option>山形県</option><option>福島県</option><option>茨城県</option><option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option><option>新潟県</option><option>富山県</option><option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option><option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option><option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option><option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option><option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option><option>福岡県</option><option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option><option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
       </select>
-      <label class="inq-label">市区町村・番地 *</label>
-      <input type="text" class="ship-input" id="addr-city" placeholder="渋谷区渋谷1-1-1" style="margin-bottom:10px">
-      <label class="inq-label">建物名・部屋番号</label>
-      <input type="text" class="ship-input" id="addr-building" placeholder="〇〇マンション101" style="margin-bottom:10px">
-      <label class="inq-label">電話番号 *</label>
-      <input type="tel" class="ship-input" id="addr-tel" placeholder="090-1234-5678" style="margin-bottom:10px">
-      <label class="form-check"><input type="checkbox" id="addr-default"> デフォルトの住所にする</label>
+      <label class="ship-label">市区町村 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="addr-city" placeholder="高松市元山町">
+      <label class="ship-label">番地 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="addr-address" placeholder="1-1-1">
+      <label class="ship-label">建物名・部屋番号</label>
+      <input type="text" class="ship-input" id="addr-building" placeholder="〇〇マンション101">
+      <label class="ship-label">電話番号 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="tel" class="ship-input" id="addr-tel" placeholder="09012345678">
+      <label class="form-check" style="margin-top:4px"><input type="checkbox" id="addr-default"> デフォルトの住所にする</label>
       <button class="ship-submit" style="margin-top:14px" onclick="saveAddress()">✅ 保存する</button>
       <button class="bs-cancel-btn" onclick="closeModal('address-modal')">キャンセル</button>
     </div>
@@ -2965,16 +2973,26 @@ async function loadAddresses(){
   savedAddresses=data||[];
 }
 async function saveAddress(){
-  const name=document.getElementById('addr-name').value;
-  const zip=document.getElementById('addr-zip').value;
+  const last=document.getElementById('addr-last').value.trim();
+  const first=document.getElementById('addr-first').value.trim();
+  const lastKana=document.getElementById('addr-last-kana').value.trim();
+  const firstKana=document.getElementById('addr-first-kana').value.trim();
+  const zip=document.getElementById('addr-zip').value.trim();
   const pref=document.getElementById('addr-pref').value;
-  const city=document.getElementById('addr-city').value;
-  const tel=document.getElementById('addr-tel').value;
+  const city=document.getElementById('addr-city').value.trim();
+  const address=document.getElementById('addr-address').value.trim();
+  const tel=document.getElementById('addr-tel').value.trim();
+  const building=document.getElementById('addr-building').value.trim()||'';
   const isDefault=document.getElementById('addr-default').checked;
-  if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
+  const name=last+' '+first;
+  const nameKana=lastKana+' '+firstKana;
+  if(!last||!first||!lastKana||!firstKana||!zip||!pref||!city||!address||!tel){showToast('⚠️ 必須項目を入力してください');return;}
   if(!state.user)return;
   if(isDefault){await db.from('shipping_addresses').update({is_default:false}).eq('user_id',state.user.id);}
-  await db.from('shipping_addresses').insert({user_id:state.user.id,name,zip,prefecture:pref,city,building:document.getElementById('addr-building').value,tel,is_default:isDefault});
+  await db.from('shipping_addresses').insert({
+    user_id:state.user.id,name,name_kana:nameKana,last_kana:lastKana,first_kana:firstKana,
+    zip,prefecture:pref,city,address,building,tel,is_default:isDefault
+  });
   closeModal('address-modal');
   showToast('✅ 住所を保存しました！');
   await loadAddresses();
