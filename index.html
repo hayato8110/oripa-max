@@ -1824,29 +1824,34 @@ async function loadTenjoFromDB(){
 /* ══ 当選履歴 DB取得 ══ */
 async function loadHistoryFromDB(){
   if(!state.user)return;
-  const{data}=await db.from('draw_sessions').select(`id,pack_id,draw_count,total_cost,created_at,results,packs(name,emoji)`).eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
-  if(!data)return;
+  const{data,error}=await db.from('draw_sessions').select(`id,pack_id,draw_count,total_cost,created_at,results`).eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(50);
+  if(error){console.error('loadHistoryFromDB error:',error.message);return;}
+  if(!data||!data.length)return;
   const{data:shipData}=await db.from('shipping_requests').select('result_ids,status,tracking_number,shipped_at').eq('user_id',state.user.id);
   const waitingIds=new Set((shipData||[]).filter(s=>s.status==='pending').flatMap(s=>s.result_ids||[]));
   const shippedMap=new Map();
   (shipData||[]).filter(s=>s.status==='shipped').forEach(s=>{
     (s.result_ids||[]).forEach(id=>shippedMap.set(id,{tracking:s.tracking_number||null,shippedAt:s.shipped_at||null}));
   });
-  state.sessions=data.map(s=>({
-    id:s.id,packId:s.pack_id,packName:s.packs?.name||'—',packEmoji:s.packs?.emoji||'🎴',
-    cost:s.total_cost,currency:'coin',
-    results:(s.results||[]).map((r,i)=>{
-      const dbId=s.id+'_'+i;
-      const shipInfo=shippedMap.get(dbId);
-      return{dbId,sessionId:s.id,resultIndex:i,prize:{name:r.prize_name,tier:r.prize_tier},
-        converted:r.is_converted||false,
-        shipped:r.is_shipped||!!shipInfo||false,
-        waiting:waitingIds.has(dbId)||false,
-        trackingNumber:shipInfo?.tracking||null,
-        shippedAt:shipInfo?.shippedAt||null};
-    }),
-    date:new Date(s.created_at).toLocaleString('ja-JP'),shipped:false,
-  }));
+  state.sessions=data.map(s=>{
+    // pack情報はstate.packsから取得（joinが使えないため）
+    const pack=state.packs.find(p=>p.id===s.pack_id);
+    return{
+      id:s.id,packId:s.pack_id,packName:pack?.name||'—',packEmoji:pack?.emoji||'🎴',
+      cost:s.total_cost,currency:'coin',
+      results:(s.results||[]).map((r,i)=>{
+        const dbId=s.id+'_'+i;
+        const shipInfo=shippedMap.get(dbId);
+        return{dbId,sessionId:s.id,resultIndex:i,prize:{name:r.prize_name,tier:r.prize_tier},
+          converted:r.is_converted||false,
+          shipped:r.is_shipped||!!shipInfo||false,
+          waiting:waitingIds.has(dbId)||false,
+          trackingNumber:shipInfo?.tracking||null,
+          shippedAt:shipInfo?.shippedAt||null};
+      }),
+      date:new Date(s.created_at).toLocaleString('ja-JP'),shipped:false,
+    };
+  });
 }
 
 /* ══ パック一覧 ══ */
@@ -3218,21 +3223,20 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
     showToast('決済がキャンセルされました');
   }
   await checkSession();
-  if(state.user){
-    await loadHistoryFromDB();
-    await loadTenjoFromDB();
-    await loadFavorites();
-    await loadShopOrdersToItems();
-    loadUserMessageBadge();
-  }
+  // まずパックを読み込む（loadHistoryFromDBでpack情報が必要なため）
   await Promise.all([
     loadAndRenderPacks(),
     loadBanners(),
     loadNotices(),
     loadVideos(),
   ]);
-  // セッションがある場合、パック読み込み後にitemsページを再描画（prize情報を正しく表示するため）
+  // パック読み込み後にユーザーデータを取得
   if(state.user){
+    await loadHistoryFromDB();
+    await loadTenjoFromDB();
+    await loadFavorites();
+    await loadShopOrdersToItems();
+    loadUserMessageBadge();
     renderItemsPage();
   }
 })();
