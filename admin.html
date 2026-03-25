@@ -27,10 +27,10 @@ input,select,textarea{font-family:inherit}
 .sb-logo{padding:18px 16px;font-size:1.1rem;font-weight:900;color:#e8a800;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
 .sb-logo span{color:rgba(255,255,255,.25);font-size:.65rem;display:block;font-weight:400;margin-top:2px}
 .sb-nav{flex:1;padding:8px 0}
-.sb-section{padding:14px 16px 4px;font-size:.6rem;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.2);text-transform:uppercase}
-.sb-item{display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:.83rem;font-weight:700;color:rgba(255,255,255,.4);cursor:pointer;border-left:3px solid transparent;transition:.15s;margin:1px 0}
-.sb-item:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.03)}
-.sb-item.active{color:#e8a800;border-color:#e8a800;background:rgba(232,168,0,.06)}
+.sb-section{padding:14px 16px 4px;font-size:.6rem;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.45);text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:.83rem;font-weight:700;color:rgba(255,255,255,.75);cursor:pointer;border-left:3px solid transparent;transition:.15s;margin:1px 0}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sb-item.active{color:#e8a800;border-color:#e8a800;background:rgba(232,168,0,.08)}
 .sb-icon{font-size:.95rem;width:18px;text-align:center}
 .sb-badge{margin-left:auto;background:#e82020;color:#fff;font-size:.55rem;font-weight:900;padding:1px 6px;border-radius:999px}
 .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
@@ -1575,10 +1575,11 @@ async function revertShipping(id){
   loadShipping('all');
 }
 async function cancelShipping(id){
-  
-  await db.from('shipping_requests').delete().eq('id',id);
-  showToast('🗑️ 削除しました');
-  loadShipping('all');
+  confirmDelete('この発送依頼を削除します',async()=>{
+    await db.from('shipping_requests').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    loadShipping('all');
+  });
 }
 function viewShipping(id){
   const s=allShipping.find(x=>x.id===id);if(!s)return;
