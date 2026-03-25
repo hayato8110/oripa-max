@@ -1310,8 +1310,9 @@ function closeResult(){
 }
 
 function showResultDetail(session){
-  const pack=state.packs.find(p=>p.id===session.packId)||state.activePack;
-  // デバッグ削除済み
+  const pack=state.activePack||state.packs.find(p=>p.id===session.packId);
+  const prizes=pack?.prizes||[];
+
   document.querySelectorAll('.rd-modal').forEach(m=>m.remove());
   const rs=document.getElementById('result-screen');
   if(rs){rs.classList.remove('show');rs.style.cssText='';}
@@ -1322,77 +1323,74 @@ function showResultDetail(session){
 
   const tierBg={sar:'#e8380d',sr:'#7c3aed',rr:'#2563eb',r:'#6b7280',c:'#9ca3af'};
   const rarLabel={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C'};
-  const selected=new Set(); // 選択中のdbId
+  const selected=new Set();
 
-  function getPrizeData(r){return (pack?.prizes||[]).find(p=>p.name===r.prize.name);}
-  function getCoin(r){return getPrizeData(r)?.value_jp||0;}
-  function getEx(r){return getPrizeData(r)?.exchange_type||'both';}
-  function canShip(r){return getEx(r)!=='coin_only'&&!r.shipped&&!r.waiting;}
-  function canConvert(r){return getEx(r)!=='ship_only'&&getCoin(r)>0&&r.converted!==true;}
+  function pd(r){return prizes.find(p=>p.name===r.prize.name)||null;}
+  function coin(r){return pd(r)?.value_jp||0;}
+  function ex(r){return pd(r)?.exchange_type||'both';}
+  function canShip(r){return ex(r)!=='coin_only' && r.shipped!==true && r.waiting!==true;}
+  function canConvert(r){return ex(r)!=='ship_only' && coin(r)>0 && r.converted!==true;}
 
   function getItems(){
-    return session.results.filter(r=>{
-      if(!canShip(r)&&!canConvert(r))return false;
-      return true;
-    }).sort((a,b)=>getCoin(b)-getCoin(a));
+    return session.results
+      .filter(r=>canShip(r)||canConvert(r))
+      .sort((a,b)=>coin(b)-coin(a));
   }
 
-  function getSelectedShipTotal(){
+  function shipTotal(){
     let t=0;
     selected.forEach(dbId=>{
       const r=session.results.find(x=>x.dbId===dbId);
-      if(r&&canShip(r))t+=getCoin(r);
+      if(r&&canShip(r)) t+=coin(r);
     });
     return t;
   }
 
   function updateBottom(){
-    const total=[...selected].reduce((t,dbId)=>{
+    const tot=[...selected].reduce((t,dbId)=>{
       const r=session.results.find(x=>x.dbId===dbId);
-      return t+(r?getCoin(r):0);
+      return t+(r?coin(r):0);
     },0);
-    const shipTotal=getSelectedShipTotal();
-    const canDoShip=shipTotal>=MIN_SHIP_COIN;
-    const convCount=[...selected].filter(dbId=>{
+    const st=shipTotal();
+    const shipOk=st>=MIN_SHIP_COIN;
+    const convCnt=[...selected].filter(dbId=>{
       const r=session.results.find(x=>x.dbId===dbId);
       return r&&canConvert(r);
     }).length;
-    const shipCount=[...selected].filter(dbId=>{
+    const shipCnt=[...selected].filter(dbId=>{
       const r=session.results.find(x=>x.dbId===dbId);
       return r&&canShip(r);
     }).length;
 
-    bottomCoin.innerHTML='<svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="vertical-align:middle;margin-right:4px"><circle cx="11" cy="11" r="10" fill="url(#rdba3)"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="rdba3" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient></defs></svg><span style="font-size:1.1rem;font-weight:900;color:#1a1a1a;vertical-align:middle">'+total.toLocaleString()+'コイン</span>';
+    bottomCoin.innerHTML='<svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="vertical-align:middle;margin-right:4px"><circle cx="11" cy="11" r="10" fill="url(#rdbf)"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="rdbf" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient></defs></svg><span style="font-size:1.1rem;font-weight:900;color:#1a1a1a;vertical-align:middle">'+tot.toLocaleString()+'コイン</span>';
 
     const items=getItems();
-    const allSel=items.length>0&&items.every(r=>selected.has(r.dbId));
-    allBtn.textContent=allSel?'全解除':'全て選択';
+    allBtn.textContent=(selected.size===items.length&&items.length>0)?'全解除':'全て選択';
 
-    convBtn.style.background=convCount>0?'#fff8e6':'#fff';
-    convBtn.style.color=convCount>0?'#c8860a':'#bbb';
-    convBtn.style.borderColor=convCount>0?'#f0d060':'#e0e0e0';
-    convBtn.style.cursor=convCount>0?'pointer':'default';
-    convBtn.textContent=convCount>0?'🪙 コインに交換('+convCount+'件)':'コインに交換';
+    convBtn.style.background=convCnt>0?'#fff8e6':'#fff';
+    convBtn.style.color=convCnt>0?'#c8860a':'#bbb';
+    convBtn.style.borderColor=convCnt>0?'#f0d060':'#e0e0e0';
+    convBtn.style.cursor=convCnt>0?'pointer':'default';
+    convBtn.textContent=convCnt>0?'\uD83E\uDE99 コインに交換('+convCnt+'件)':'コインに交換';
 
-    shipBtn.style.background=canDoShip?'linear-gradient(135deg,#c8860a,#ffd700)':'#f0d080';
-    shipBtn.style.opacity=canDoShip?'1':'0.6';
-    shipBtn.textContent='📦 発送依頼'+(shipCount>0?' ('+shipCount+'件)':'');
-
-    minNote.style.display=shipCount>0&&!canDoShip?'block':'none';
+    shipBtn.style.background=shipOk?'linear-gradient(135deg,#c8860a,#ffd700)':'#f0d080';
+    shipBtn.style.opacity=shipOk?'1':'0.6';
+    shipBtn.textContent='\uD83D\uDCE6 発送依頼'+(shipCnt>0?' ('+shipCnt+'件)':'');
+    minNote.style.display=(shipCnt>0&&!shipOk)?'block':'none';
   }
 
   function renderCards(){
     scroll.innerHTML='';
     const items=getItems();
     if(!items.length){
-      scroll.innerHTML='<div style="text-align:center;padding:60px 16px"><div style="font-size:2.5rem;margin-bottom:12px">🎉</div><div style="font-size:.95rem;font-weight:700;color:#666">全て処理済みです</div></div>';
+      scroll.innerHTML='<div style="text-align:center;padding:60px 16px"><div style="font-size:2.5rem;margin-bottom:12px">\uD83C\uDF89</div><div style="font-size:.95rem;font-weight:700;color:#666">全て処理済みです</div></div>';
       bottom.style.display='none';
       return;
     }
     bottom.style.display='block';
     items.forEach(r=>{
-      const img=getPrizeData(r)?.image_url||'';
-      const coin=getCoin(r);
+      const img=pd(r)?.image_url||'';
+      const c=coin(r);
       const dbId=r.dbId||'';
       const isSel=selected.has(dbId);
 
@@ -1402,16 +1400,14 @@ function showResultDetail(session){
       card.innerHTML=
         '<div style="display:flex;align-items:stretch;min-height:110px">'
         +'<div style="width:110px;flex-shrink:0;background:#f0f0f0;overflow:hidden">'
-        +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem">'+(pack?.emoji||'🎴')+'</div>')
+        +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem">'+(pack?.emoji||'\uD83C\uDFB4')+'</div>')
         +'</div>'
         +'<div style="flex:1;padding:14px;display:flex;flex-direction:column;justify-content:center;position:relative">'
-        +'<div style="position:absolute;top:10px;right:10px">'
-        +'<div style="width:24px;height:24px;border-radius:50%;background:'+(isSel?'#f0b800':'#e0e0e0')+';display:flex;align-items:center;justify-content:center;font-size:.85rem;color:'+(isSel?'#fff':'#bbb')+'">'+(isSel?'✓':'◉')+'</div>'
-        +'</div>'
+        +'<div style="position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:'+(isSel?'#f0b800':'#e0e0e0')+';display:flex;align-items:center;justify-content:center;font-size:.85rem;color:'+(isSel?'#fff':'#bbb')+'">'+(isSel?'\u2713':'\u25C9')+'</div>'
         +'<div style="font-size:1rem;font-weight:900;color:#1a1a1a;margin-bottom:8px;padding-right:36px">'+r.prize.name+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px">'
-        +'<span style="background:'+tierBg[r.prize.tier]+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||rarLabel[r.prize.tier]||r.prize.tier)+'賞</span>'
-        +(coin>0?'<span style="font-size:.85rem;color:#c8860a;font-weight:900">'+coin+'コイン</span>':'')
+        +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||rarLabel[r.prize.tier]||r.prize.tier)+'\u8CDE</span>'
+        +(c>0?'<span style="font-size:.85rem;color:#c8860a;font-weight:900">'+c+'\u30B3\u30A4\u30F3</span>':'')
         +'</div>'
         +'</div></div>';
 
@@ -1428,14 +1424,14 @@ function showResultDetail(session){
   // ヘッダー
   const header=document.createElement('div');
   header.style.cssText='background:#f8f8f8;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8e8e8;flex-shrink:0';
-  header.innerHTML='<div style="font-size:1rem;font-weight:900;color:#1a1a1a">ガチャ結果</div><button id="rd-later" style="background:none;color:#666;font-size:.9rem;font-weight:700;border:none;cursor:pointer">あとで</button>';
+  header.innerHTML='<div style="font-size:1rem;font-weight:900;color:#1a1a1a">\u30AC\u30C1\u30E3\u7D50\u679C</div><button id="rd-later" style="background:none;color:#666;font-size:.9rem;font-weight:700;border:none;cursor:pointer">\u3042\u3068\u3067</button>';
   wrap.appendChild(header);
 
   const scroll=document.createElement('div');
   scroll.style.cssText='flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px';
   wrap.appendChild(scroll);
 
-  // 下部バー
+  // 下部
   const bottom=document.createElement('div');
   bottom.style.cssText='background:#fff;border-top:1px solid #e8e8e8;padding:12px 16px;flex-shrink:0';
   const topRow=document.createElement('div');
@@ -1443,68 +1439,95 @@ function showResultDetail(session){
   const bottomCoin=document.createElement('div');
   bottomCoin.style.cssText='flex:1;display:flex;align-items:center';
   const allBtn=document.createElement('button');
-  allBtn.textContent='全て選択';
+  allBtn.textContent='\u5168\u3066\u9078\u629E';
   allBtn.style.cssText='padding:7px 14px;border-radius:8px;background:#f0f0f0;color:#333;font-size:.82rem;font-weight:900;border:none;cursor:pointer;white-space:nowrap';
   const resetBtn=document.createElement('button');
-  resetBtn.textContent='リセット';
+  resetBtn.textContent='\u30EA\u30BB\u30C3\u30C8';
   resetBtn.style.cssText='padding:7px 14px;border-radius:8px;background:#f0f0f0;color:#333;font-size:.82rem;font-weight:900;border:none;cursor:pointer;white-space:nowrap';
-  topRow.appendChild(bottomCoin);topRow.appendChild(allBtn);topRow.appendChild(resetBtn);
+  topRow.appendChild(bottomCoin);
+  topRow.appendChild(allBtn);
+  topRow.appendChild(resetBtn);
   const btnRow=document.createElement('div');
   btnRow.style.cssText='display:flex;gap:10px;margin-bottom:6px';
   const convBtn=document.createElement('button');
-  convBtn.textContent='コインに交換';
+  convBtn.textContent='\u30B3\u30A4\u30F3\u306B\u4EA4\u63DB';
   convBtn.style.cssText='flex:1;padding:13px;border-radius:10px;background:#fff;color:#bbb;font-size:.88rem;font-weight:900;border:1.5px solid #e0e0e0;cursor:default';
   const shipBtn=document.createElement('button');
-  shipBtn.textContent='📦 発送依頼';
+  shipBtn.textContent='\uD83D\uDCE6 \u767A\u9001\u4F9D\u983C';
   shipBtn.style.cssText='flex:1;padding:13px;border-radius:10px;background:#f0d080;color:#1a0a00;font-size:.88rem;font-weight:900;border:none;cursor:pointer;opacity:.6';
-  btnRow.appendChild(convBtn);btnRow.appendChild(shipBtn);
+  btnRow.appendChild(convBtn);
+  btnRow.appendChild(shipBtn);
   const minNote=document.createElement('div');
   minNote.style.cssText='font-size:.65rem;color:#999;text-align:center;display:none';
+  minNote.textContent='\u767A\u9001\u4F9D\u983C\u306B\u306F\u5408\u8A081'+MIN_SHIP_COIN.toLocaleString()+'\u30B3\u30A4\u30F3\u4EE5\u4E0A\u306E\u5546\u54C1\u9078\u629E\u304C\u5FC5\u8981\u3067\u3059';
   minNote.textContent='発送依頼には合計'+MIN_SHIP_COIN.toLocaleString()+'コイン以上の商品選択が必要です';
-  bottom.appendChild(topRow);bottom.appendChild(btnRow);bottom.appendChild(minNote);
+  bottom.appendChild(topRow);
+  bottom.appendChild(btnRow);
+  bottom.appendChild(minNote);
   wrap.appendChild(bottom);
 
+  // 全選択
   allBtn.addEventListener('click',()=>{
     const items=getItems();
-    const allSel=items.every(r=>selected.has(r.dbId));
-    if(allSel){selected.clear();}
+    if(selected.size===items.length){selected.clear();}
     else{items.forEach(r=>{if(r.dbId)selected.add(r.dbId);});}
     renderCards();
   });
+
+  // リセット
   resetBtn.addEventListener('click',()=>{selected.clear();renderCards();});
 
-  convBtn.addEventListener('click',async()=>{
+  // コインに交換
+  convBtn.addEventListener('click',()=>{
     const ids=[...selected].filter(dbId=>{
       const r=session.results.find(x=>x.dbId===dbId);
       return r&&canConvert(r);
     });
     if(!ids.length)return;
-    let total=0;
-    for(const dbId of ids){
-      const[sid]=dbId.split('_');
-      const sess=state.sessions.find(s=>s.id===sid);
-      const res=sess?.results.find(x=>x.dbId===dbId);
-      if(!res||res.converted)continue;
-      const coin=getCoin(res);
-      res.converted=true;total+=coin;selected.delete(dbId);
-      try{
-        const upd=sess.results.map(x=>({prize_name:x.prize.name,prize_tier:x.prize.tier,is_converted:x.converted||false,is_shipped:x.shipped||false}));
-        await db.from('draw_sessions').update({results:upd}).eq('id',sid);
-        try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:coin,currency:'coin',description:res.prize.name+' ポイント還元'});}catch(e){}
-      }catch(e){}
-    }
-    if(total>0){state.coin+=total;updateHeaderPts();await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);}
-    showToast('🪙 +'+total.toLocaleString()+'コインに還元しました！',2500);
-    renderCards();
+    const tprev=ids.reduce((t,dbId)=>{
+      const r=session.results.find(x=>x.dbId===dbId);
+      return t+coin(r);
+    },0);
+    confirmAction(ids.length+'件を'+tprev+'コインに還元しますか？',async()=>{
+      let total=0;
+      for(const dbId of ids){
+        const[sid]=dbId.split('_');
+        const sess=state.sessions.find(s=>s.id===sid);
+        const res=sess?.results.find(x=>x.dbId===dbId);
+        if(!res||res.converted===true)continue;
+        const c=coin(res);
+        res.converted=true;
+        total+=c;
+        selected.delete(dbId);
+        try{
+          const upd=sess.results.map(x=>({prize_name:x.prize.name,prize_tier:x.prize.tier,is_converted:x.converted===true,is_shipped:x.shipped===true}));
+          await db.from('draw_sessions').update({results:upd}).eq('id',sid);
+          try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:c,currency:'coin',description:res.prize.name+' ポイント還元'});}catch(e2){}
+        }catch(e){}
+      }
+      if(total>0){
+        state.coin+=total;
+        updateHeaderPts();
+        await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+      }
+      showToast('🪙 +'+total.toLocaleString()+'コインに還元しました！',2500);
+      renderCards();
+    });
   });
 
+  // 発送依頼
   shipBtn.addEventListener('click',()=>{
-    if(getSelectedShipTotal()<MIN_SHIP_COIN){showToast('⚠️ 合計'+MIN_SHIP_COIN.toLocaleString()+'コイン以上選択してください',3000);return;}
+    if(shipTotal()<MIN_SHIP_COIN){
+      showToast('⚠️ 合計'+MIN_SHIP_COIN.toLocaleString()+'コイン以上選択してください',3000);
+      return;
+    }
     const ids=[...selected].filter(dbId=>{
       const r=session.results.find(x=>x.dbId===dbId);
       return r&&canShip(r);
     });
-    openBulkShipFromResult(ids);
+    confirmAction(ids.length+'件を発送依頼しますか？',()=>{
+      openBulkShipFromResult(ids);
+    });
   });
 
   renderCards();
@@ -1512,11 +1535,10 @@ function showResultDetail(session){
   wrap.querySelector('#rd-later').addEventListener('click',()=>{wrap.remove();renderItemsPage();});
 }
 
-
 function rdShip(dbId){openShippingModal(dbId);}
-function rdConvert(dbId,idx,coin){convertToPoints(dbId);}
+function rdConvert(dbId,idx,c){convertToPoints(dbId);}
 
-/* ══ 抽選 ══ */
+
 function generateSeed(){return Math.random().toString(36).slice(2).repeat(3)}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 function generateCode(){return Math.random().toString(36).slice(2,8).toUpperCase()}
