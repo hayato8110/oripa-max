@@ -656,21 +656,29 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     </div>
     <div class="ship-form">
       <div id="ship-items-list" style="margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px"></div>
-      <label class="ship-label">お名前 *</label>
-      <input type="text" class="ship-input" id="ship-name" placeholder="山田 太郎">
-      <label class="ship-label">郵便番号 *</label>
-      <input type="text" class="ship-input" id="ship-zip" placeholder="123-4567">
-      <label class="ship-label">都道府県 *</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="ship-label">姓 <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="ship-last" placeholder="山田"></div>
+        <div><label class="ship-label">名 <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="ship-first" placeholder="太郎"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="ship-label">セイ <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="ship-last-kana" placeholder="ヤマダ"></div>
+        <div><label class="ship-label">メイ <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="ship-first-kana" placeholder="タロウ"></div>
+      </div>
+      <label class="ship-label">郵便番号 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="ship-zip" placeholder="1234567（ハイフン無し）" inputmode="numeric">
+      <label class="ship-label">都道府県 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
       <select class="ship-input" id="ship-pref">
         <option value="">選択</option>
         <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option><option>秋田県</option><option>山形県</option><option>福島県</option><option>茨城県</option><option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option><option>新潟県</option><option>富山県</option><option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option><option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option><option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option><option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option><option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option><option>福岡県</option><option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option><option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
       </select>
-      <label class="ship-label">市区町村・番地 *</label>
-      <input type="text" class="ship-input" id="ship-city" placeholder="渋谷区渋谷1-1-1">
+      <label class="ship-label">市区町村 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="ship-city" placeholder="高松市元山町">
+      <label class="ship-label">番地 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="ship-address" placeholder="1-1-1">
       <label class="ship-label">建物名・部屋番号</label>
       <input type="text" class="ship-input" id="ship-building" placeholder="〇〇マンション101">
-      <label class="ship-label">電話番号 *</label>
-      <input type="tel" class="ship-input" id="ship-tel" placeholder="090-1234-5678">
+      <label class="ship-label">電話番号 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="tel" class="ship-input" id="ship-tel" placeholder="09012345678">
       <button class="ship-submit" onclick="submitShipping()">📦 発送依頼を確定する</button>
       <button class="bs-cancel-btn" onclick="closeModal('shipping-modal')">キャンセル</button>
     </div>
@@ -2161,18 +2169,26 @@ async function bulkShip(){
     <div style="padding:14px 16px">
       ${addrList}
       <div style="font-size:.72rem;font-weight:900;color:rgba(255,255,255,.8);margin-bottom:10px">✏️ 直接入力</div>
-      <label class="ship-label">お名前 *</label>
-      <input type="text" class="ship-input" id="bs-name" placeholder="山田 太郎">
-      <label class="ship-label">郵便番号 *</label>
-      <input type="text" class="ship-input" id="bs-zip" placeholder="123-4567">
-      <label class="ship-label">都道府県 *</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="ship-label">姓 <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="bs-last" placeholder="山田"></div>
+        <div><label class="ship-label">名 <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="bs-first" placeholder="太郎"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="ship-label">セイ <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="bs-last-kana" placeholder="ヤマダ"></div>
+        <div><label class="ship-label">メイ <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="bs-first-kana" placeholder="タロウ"></div>
+      </div>
+      <label class="ship-label">郵便番号 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="bs-zip" placeholder="1234567（ハイフン無し）" inputmode="numeric">
+      <label class="ship-label">都道府県 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
       <select class="ship-input" id="bs-pref"><option value="">選択</option>${prefs}</select>
-      <label class="ship-label">市区町村・番地 *</label>
-      <input type="text" class="ship-input" id="bs-city" placeholder="渋谷区渋谷1-1-1">
+      <label class="ship-label">市区町村 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="bs-city" placeholder="高松市元山町">
+      <label class="ship-label">番地 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="bs-address" placeholder="1-1-1">
       <label class="ship-label">建物名・部屋番号</label>
       <input type="text" class="ship-input" id="bs-building" placeholder="〇〇マンション101">
-      <label class="ship-label">電話番号 *</label>
-      <input type="tel" class="ship-input" id="bs-tel" placeholder="090-1234-5678">
+      <label class="ship-label">電話番号 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="tel" class="ship-input" id="bs-tel" placeholder="09012345678">
       <button id="bulk-ship-submit-btn"
         style="width:100%;margin-top:14px;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:.95rem;font-weight:900">📦 ${selected.length}件まとめて発送依頼する</button>
       <button onclick="this.closest(\'.modal-overlay\').remove()" style="width:100%;padding:12px;margin-top:6px;background:none;color:rgba(255,255,255,.5);font-size:.85rem">キャンセル</button>
@@ -2186,9 +2202,14 @@ async function bulkShip(){
   const def=addresses?.find(a=>a.is_default)||addresses?.[0];
   if(def){
     setTimeout(()=>{
-      document.getElementById('bs-name').value=def.name||'';
+      const parts=(def.name||'').split(/\s+/);
+      document.getElementById('bs-last').value=parts[0]||'';
+      document.getElementById('bs-first').value=parts.slice(1).join(' ')||'';
+      document.getElementById('bs-last-kana').value=def.last_kana||'';
+      document.getElementById('bs-first-kana').value=def.first_kana||'';
       document.getElementById('bs-zip').value=def.zip||'';
       document.getElementById('bs-city').value=def.city||'';
+      document.getElementById('bs-address').value=def.address||'';
       document.getElementById('bs-building').value=def.building||'';
       document.getElementById('bs-tel').value=def.tel||'';
       const sel=document.getElementById('bs-pref');
@@ -2199,9 +2220,12 @@ async function bulkShip(){
 }
 
 function fillBulkShipForm(name,zip,pref,city,building,tel){
-  document.getElementById('bs-name').value=name;
+  const parts=(name||'').split(/\s+/);
+  document.getElementById('bs-last').value=parts[0]||'';
+  document.getElementById('bs-first').value=parts.slice(1).join(' ')||'';
   document.getElementById('bs-zip').value=zip;
   document.getElementById('bs-city').value=city;
+  document.getElementById('bs-address').value='';
   document.getElementById('bs-building').value=building||'';
   document.getElementById('bs-tel').value=tel;
   const sel=document.getElementById('bs-pref');
@@ -2210,13 +2234,19 @@ function fillBulkShipForm(name,zip,pref,city,building,tel){
 }
 
 async function submitBulkShip(dbIds, btn){
-  const name=document.getElementById('bs-name').value.trim();
+  const last=document.getElementById('bs-last').value.trim();
+  const first=document.getElementById('bs-first').value.trim();
+  const lastKana=document.getElementById('bs-last-kana').value.trim();
+  const firstKana=document.getElementById('bs-first-kana').value.trim();
   const zip=document.getElementById('bs-zip').value.trim();
   const pref=document.getElementById('bs-pref').value;
   const city=document.getElementById('bs-city').value.trim();
+  const address=document.getElementById('bs-address').value.trim();
   const tel=document.getElementById('bs-tel').value.trim();
   const building=document.getElementById('bs-building').value.trim()||'';
-  if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
+  const name=last+' '+first;
+  const nameKana=lastKana+' '+firstKana;
+  if(!last||!first||!lastKana||!firstKana||!zip||!pref||!city||!address||!tel){showToast('⚠️ 必須項目を入力してください');return;}
 
   // 合計コインチェック
   let totalCoin=0;
@@ -2233,14 +2263,14 @@ async function submitBulkShip(dbIds, btn){
     return;
   }
 
-  const address={name,zip,prefecture:pref,city,building,tel};
+  const addressObj={name,name_kana:nameKana,zip,prefecture:pref,city,address,building,tel};
   const resultIds=dbIds;
 
   // shipping_requestsに保存
   const{error}=await db.from('shipping_requests').insert({
     user_id:state.user.id,
     result_ids:resultIds,
-    address,
+    address:addressObj,
     status:'pending'
   });
   if(error){showToast('⚠️ エラー: '+error.message,4000);return;}
@@ -2323,7 +2353,7 @@ async function openShippingModal(dbId){
     return;
   }
   pendingShipResultId=dbId;
-  ['ship-name','ship-zip','ship-city','ship-building','ship-tel'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['ship-last','ship-first','ship-last-kana','ship-first-kana','ship-zip','ship-city','ship-address','ship-building','ship-tel'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ship-pref').value='';
   document.getElementById('ship-items-list').innerHTML=`<div style="font-size:.82rem;font-weight:700;color:var(--text)">📦 発送商品確認済み</div>`;
   const{data:addresses}=await db.from('shipping_addresses').select('*').eq('user_id',state.user.id).order('is_default',{ascending:false});
@@ -2350,9 +2380,15 @@ async function openShippingModal(dbId){
   document.getElementById('shipping-modal').classList.add('show');
 }
 function fillShippingForm(a){
-  document.getElementById('ship-name').value=a.name||'';
+  // 姓名分割（nameが「山田 太郎」形式の場合）
+  const parts=(a.name||'').split(/\s+/);
+  document.getElementById('ship-last').value=parts[0]||'';
+  document.getElementById('ship-first').value=parts.slice(1).join(' ')||'';
+  document.getElementById('ship-last-kana').value=a.last_kana||'';
+  document.getElementById('ship-first-kana').value=a.first_kana||'';
   document.getElementById('ship-zip').value=a.zip||'';
   document.getElementById('ship-city').value=a.city||'';
+  document.getElementById('ship-address').value=a.address||'';
   document.getElementById('ship-building').value=a.building||'';
   document.getElementById('ship-tel').value=a.tel||'';
   const prefSel=document.getElementById('ship-pref');
@@ -2360,41 +2396,40 @@ function fillShippingForm(a){
   showToast('✅ 住所を入力しました');
 }
 async function submitShipping(){
-  const name=document.getElementById('ship-name').value.trim();
+  const last=document.getElementById('ship-last').value.trim();
+  const first=document.getElementById('ship-first').value.trim();
+  const lastKana=document.getElementById('ship-last-kana').value.trim();
+  const firstKana=document.getElementById('ship-first-kana').value.trim();
   const zip=document.getElementById('ship-zip').value.trim();
   const pref=document.getElementById('ship-pref').value;
   const city=document.getElementById('ship-city').value.trim();
+  const address=document.getElementById('ship-address').value.trim();
   const tel=document.getElementById('ship-tel').value.trim();
   const building=document.getElementById('ship-building').value.trim()||'';
-  if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
+  const name=last+' '+first;
+  const nameKana=lastKana+' '+firstKana;
+  if(!last||!first||!lastKana||!firstKana||!zip||!pref||!city||!address||!tel){showToast('⚠️ 必須項目を入力してください');return;}
 
   if(pendingShipResultId&&state.user){
     const sessionId=pendingShipResultId.substring(0,pendingShipResultId.lastIndexOf('_'));
     const sess=state.sessions.find(s=>s.id===sessionId);
-
-    // ローカル状態を発送待ちに更新
     if(sess){
       const r=sess.results.find(r=>r.dbId===pendingShipResultId);
       if(r)r.waiting=true;
     }
-
-    // draw_sessionsを更新
     if(sess){
       const{error}=await db.from('draw_sessions').update({
         results:sess.results.map(r=>({
           prize_name:r.prize.name,prize_tier:r.prize.tier,
-          is_converted:r.converted||false,
-          is_shipped:r.shipped||false,
+          is_converted:r.converted||false,is_shipped:r.shipped||false,
         })),
       }).eq('id',sessionId);
       if(error)console.error('draw_sessions error:',error.message);
     }
-
-    // shipping_requestsに保存（jsonb形式）
     const{error:shipErr}=await db.from('shipping_requests').insert({
       user_id:state.user.id,
       result_ids:[pendingShipResultId||null],
-      address:{name,zip,prefecture:pref,city,building,tel},
+      address:{name,name_kana:nameKana,zip,prefecture:pref,city,address,building,tel},
       status:'pending',
     });
     if(shipErr){
@@ -2403,7 +2438,6 @@ async function submitShipping(){
       return;
     }
   }
-
   closeModal('shipping-modal');
   showToast('📦 発送依頼を受け付けました！',3000);
   renderItemsPage();
@@ -2759,18 +2793,26 @@ async function openShopShippingModal(orderId, itemName){
     <div style="padding:14px 16px">
       ${addrList}
       <div style="font-size:.72rem;font-weight:900;color:rgba(255,255,255,.8);margin-bottom:10px">✏️ 直接入力</div>
-      <label class="ship-label">お名前 *</label>
-      <input type="text" class="ship-input" id="ss-name" placeholder="山田 太郎">
-      <label class="ship-label">郵便番号 *</label>
-      <input type="text" class="ship-input" id="ss-zip" placeholder="123-4567">
-      <label class="ship-label">都道府県 *</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="ship-label">姓 <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="ss-last" placeholder="山田"></div>
+        <div><label class="ship-label">名 <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="ss-first" placeholder="太郎"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="ship-label">セイ <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="ss-last-kana" placeholder="ヤマダ"></div>
+        <div><label class="ship-label">メイ <span style="color:var(--primary);font-size:.65rem">*必須</span></label><input type="text" class="ship-input" id="ss-first-kana" placeholder="タロウ"></div>
+      </div>
+      <label class="ship-label">郵便番号 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="ss-zip" placeholder="1234567（ハイフン無し）" inputmode="numeric">
+      <label class="ship-label">都道府県 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
       <select class="ship-input" id="ss-pref"><option value="">選択</option>${prefs}</select>
-      <label class="ship-label">市区町村・番地 *</label>
-      <input type="text" class="ship-input" id="ss-city" placeholder="渋谷区渋谷1-1-1">
+      <label class="ship-label">市区町村 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="ss-city" placeholder="高松市元山町">
+      <label class="ship-label">番地 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="text" class="ship-input" id="ss-address" placeholder="1-1-1">
       <label class="ship-label">建物名・部屋番号</label>
       <input type="text" class="ship-input" id="ss-building" placeholder="〇〇マンション101">
-      <label class="ship-label">電話番号 *</label>
-      <input type="tel" class="ship-input" id="ss-tel" placeholder="090-1234-5678">
+      <label class="ship-label">電話番号 <span style="color:var(--primary);font-size:.65rem">*必須</span></label>
+      <input type="tel" class="ship-input" id="ss-tel" placeholder="09012345678">
       <button onclick="submitShopShipping('${orderId}',this)" style="width:100%;margin-top:14px;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:.95rem;font-weight:900;box-shadow:0 4px 14px rgba(201,168,76,.3)">📦 発送依頼を確定する</button>
       <button onclick="this.closest('.modal-overlay').remove()" style="width:100%;padding:12px;margin-top:6px;background:none;color:rgba(255,255,255,.5);font-size:.85rem;font-weight:700">あとで入力する</button>
     </div>
@@ -2782,9 +2824,14 @@ async function openShopShippingModal(orderId, itemName){
   const def=addresses?.find(a=>a.is_default)||addresses?.[0];
   if(def){
     setTimeout(()=>{
-      document.getElementById('ss-name').value=def.name||'';
+      const parts=(def.name||'').split(/\s+/);
+      document.getElementById('ss-last').value=parts[0]||'';
+      document.getElementById('ss-first').value=parts.slice(1).join(' ')||'';
+      document.getElementById('ss-last-kana').value=def.last_kana||'';
+      document.getElementById('ss-first-kana').value=def.first_kana||'';
       document.getElementById('ss-zip').value=def.zip||'';
       document.getElementById('ss-city').value=def.city||'';
+      document.getElementById('ss-address').value=def.address||'';
       document.getElementById('ss-building').value=def.building||'';
       document.getElementById('ss-tel').value=def.tel||'';
       const sel=document.getElementById('ss-pref');
@@ -2794,10 +2841,13 @@ async function openShopShippingModal(orderId, itemName){
 }
 
 function fillShopShipForm(el,name,zip,pref,city,building,tel){
-  document.getElementById('ss-name').value=name;
+  const parts=(name||'').split(/\s+/);
+  document.getElementById('ss-last').value=parts[0]||'';
+  document.getElementById('ss-first').value=parts.slice(1).join(' ')||'';
   document.getElementById('ss-zip').value=zip;
   document.getElementById('ss-city').value=city;
-  document.getElementById('ss-building').value=building;
+  document.getElementById('ss-address').value='';
+  document.getElementById('ss-building').value=building||'';
   document.getElementById('ss-tel').value=tel;
   const sel=document.getElementById('ss-pref');
   if(sel){const opt=Array.from(sel.options).find(o=>o.text===pref);if(opt)sel.value=opt.value;}
@@ -2805,23 +2855,29 @@ function fillShopShipForm(el,name,zip,pref,city,building,tel){
 }
 
 async function submitShopShipping(orderId, btn){
-  const name=document.getElementById('ss-name').value.trim();
+  const last=document.getElementById('ss-last').value.trim();
+  const first=document.getElementById('ss-first').value.trim();
+  const lastKana=document.getElementById('ss-last-kana').value.trim();
+  const firstKana=document.getElementById('ss-first-kana').value.trim();
   const zip=document.getElementById('ss-zip').value.trim();
   const pref=document.getElementById('ss-pref').value;
   const city=document.getElementById('ss-city').value.trim();
+  const address=document.getElementById('ss-address').value.trim();
   const tel=document.getElementById('ss-tel').value.trim();
   const building=document.getElementById('ss-building').value.trim()||'';
-  if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
+  const name=last+' '+first;
+  const nameKana=lastKana+' '+firstKana;
+  if(!last||!first||!lastKana||!firstKana||!zip||!pref||!city||!address||!tel){showToast('⚠️ 必須項目を入力してください');return;}
 
   if(orderId&&orderId!=='null'&&orderId!=='undefined'){
+    const addrObj={name,name_kana:nameKana,zip,prefecture:pref,city,address,building,tel};
     const{error}=await db.from('shop_orders').update({
-      address:{name,zip,prefecture:pref,city,building,tel},
+      address:addrObj,
       status:'address_submitted'
     }).eq('id',orderId);
     if(error){showToast('⚠️ エラー: '+error.message,4000);return;}
-    // ローカルのstate.shopOrdersも即時更新
     const o=state.shopOrders.find(x=>x.id===orderId);
-    if(o){o.status='address_submitted';o.address={name,zip,prefecture:pref,city,building,tel};}
+    if(o){o.status='address_submitted';o.address=addrObj;}
   }
 
   btn.closest('.modal-overlay').remove();
