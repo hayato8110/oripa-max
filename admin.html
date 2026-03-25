@@ -342,7 +342,7 @@ input,select,textarea{font-family:inherit}
             <button class="btn btn-secondary" onclick="exportCSV('shipping')">📥 CSV</button>
           </div>
         </div>
-        <table class="tbl"><thead><tr><th>ID</th><th>ユーザー</th><th>お名前/TEL</th><th>住所</th><th>依頼日</th><th>商品数</th><th>状態</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>ID</th><th>ユーザー</th><th>お名前/TEL</th><th>住所</th><th>発送商品</th><th>依頼日</th><th>状態</th><th>操作</th></tr></thead>
         <tbody id="shipping-tbl-body"></tbody></table>
       </div>
     </div>
@@ -1183,8 +1183,35 @@ async function savePack(){
 }
 
 async function togglePack(id,current){
-  await db.from('packs').update({is_active:!current}).eq('id',id);
-  showToast(`${!current?'✅ 公開':'⏸ 停止'}しました`);loadPacks();
+  if(current){
+    // 停止する場合のみ確認
+    const modal=document.createElement('div');
+    modal.className='modal-overlay show';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+    const box=document.createElement('div');
+    box.style.cssText='background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;width:min(320px,92vw);text-align:center';
+    box.innerHTML=`
+      <div style="font-size:1.5rem;margin-bottom:10px">⏸</div>
+      <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">本当に停止しますか？</div>
+      <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">停止するとユーザーがガチャを引けなくなります</div>
+      <div style="display:flex;gap:8px">
+        <button id="tp-cancel" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer">キャンセル</button>
+        <button id="tp-ok" style="flex:1;padding:10px;border-radius:8px;background:#f59e0b;color:#1a0a00;font-weight:900;border:none;cursor:pointer">停止する</button>
+      </div>`;
+    modal.appendChild(box);
+    modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+    document.body.appendChild(modal);
+    box.querySelector('#tp-cancel').addEventListener('click',()=>modal.remove());
+    box.querySelector('#tp-ok').addEventListener('click',async()=>{
+      modal.remove();
+      await db.from('packs').update({is_active:false}).eq('id',id);
+      showToast('⏸ 停止しました');loadPacks();
+    });
+  } else {
+    // 再開は確認なしで即実行
+    await db.from('packs').update({is_active:true}).eq('id',id);
+    showToast('✅ 公開しました');loadPacks();
+  }
 }
 
 async function deletePack(id){
@@ -1489,30 +1516,71 @@ async function loadShipping(status='all'){
   if(status!=='all')q=q.eq('status',status);
   const{data}=await q;
   allShipping=data||[];
+
+  // draw_sessionsからパック名・賞品名を取得
+  const allResultIds=allShipping.flatMap(s=>s.result_ids||[]);
+  const sessionIds=[...new Set(allResultIds.map(id=>id.substring(0,id.lastIndexOf('_'))))].filter(Boolean);
+  let sessMap={};
+  if(sessionIds.length){
+    const{data:sessions}=await db.from('draw_sessions').select('id,results,packs(name)').in('id',sessionIds);
+    (sessions||[]).forEach(s=>{sessMap[s.id]=s;});
+  }
+
   const pending=allShipping.filter(s=>s.status==='pending').length;
   const done=allShipping.filter(s=>s.status==='shipped').length;
   document.getElementById('ship-pending').textContent=pending;
   document.getElementById('ship-done').textContent=done;
   document.getElementById('ship-badge').textContent=pending;
   document.getElementById('stat-ship').textContent=pending;
+
   document.getElementById('shipping-tbl-body').innerHTML=allShipping.length?allShipping.map(s=>{
     const addr=s.address||{};
     const dispName=addr.name||s.name||'—';
+    const dispNameKana=addr.name_kana||'';
     const dispTel=addr.tel||s.tel||'';
     const dispZip=addr.zip||s.zip||'—';
     const dispPref=addr.prefecture||s.prefecture||'';
     const dispCity=addr.city||s.city||'';
+    const dispAddress=addr.address||'';
     const dispBuilding=addr.building||s.building||'';
-    const itemCount=(s.result_ids||[]).length;
-    const isBulk=itemCount>1;
+    const resultIds=s.result_ids||[];
+
+    // 商品情報を組み立て
+    const items=resultIds.map(rid=>{
+      const sessId=rid.substring(0,rid.lastIndexOf('_'));
+      const idx=parseInt(rid.substring(rid.lastIndexOf('_')+1));
+      const sess=sessMap[sessId];
+      const packName=sess?.packs?.name||'—';
+      const result=(sess?.results||[])[idx];
+      const prizeName=result?.prize_name||result?.name||'—';
+      const tier=result?.prize_tier||'';
+      const tierColor={sar:'#e8380d',sr:'#a855f7',rr:'#3b82f6',r:'#6b7280',c:'#374151'};
+      return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;background:${tierColor[tier]||'#374151'};color:#fff;padding:1px 5px;border-radius:3px;font-weight:900;flex-shrink:0">${tier.toUpperCase()||'—'}</span>
+        <span style="font-size:.72rem;color:rgba(255,255,255,.8);font-weight:700">${prizeName}</span>
+        <span style="font-size:.65rem;color:rgba(255,255,255,.4);margin-left:auto">${packName}</span>
+      </div>`;
+    }).join('');
+
     return `
     <tr>
       <td class="td-bold" style="font-size:.72rem">#${(s.id||'').slice(0,8)}</td>
       <td><div>${s.users?.username||'—'}</div><div class="td-sub">${s.users?.email||''}</div></td>
-      <td><div>${dispName}</div><div class="td-sub">${dispTel}</div></td>
-      <td style="font-size:.72rem"><div>〒${dispZip}</div><div>${dispPref}${dispCity}</div><div class="td-sub">${dispBuilding}</div></td>
+      <td>
+        <div style="font-weight:900;color:#fff">${dispName}</div>
+        ${dispNameKana?`<div class="td-sub">${dispNameKana}</div>`:''}
+        <div class="td-sub">${dispTel}</div>
+      </td>
+      <td style="font-size:.72rem">
+        <div>〒${dispZip}</div>
+        <div>${dispPref}${dispCity}${dispAddress?' '+dispAddress:''}</div>
+        ${dispBuilding?`<div class="td-sub">${dispBuilding}</div>`:''}
+      </td>
+      <td style="min-width:160px">
+        <div style="font-size:.68rem;font-weight:900;color:var(--gold);margin-bottom:4px">📦 ${resultIds.length}件</div>
+        ${items}
+      </td>
       <td style="font-size:.7rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</td>
-      <td><span class="badge" style="background:${isBulk?'rgba(99,102,241,.2)':'rgba(255,255,255,.05)'};color:${isBulk?'#818cf8':'rgba(255,255,255,.5)'};">${isBulk?'📦 まとめ '+itemCount+'件':'📦 1件'}</span></td>
       <td><span class="badge badge-${s.status==='pending'?'pending':'shipped'}">${s.status==='pending'?'発送待ち':'発送済み'}</span>${s.tracking_number?`<div class="td-sub">${s.tracking_number}</div>`:''}</td>
       <td>
         ${s.status==='pending'
