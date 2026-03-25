@@ -1551,7 +1551,10 @@ function renderItemsPage(tab){
         </label>
         <span style="color:rgba(255,255,255,.2)">|</span>
         <span id="selected-count" style="font-size:.78rem;color:rgba(255,255,255,.6)">0件選択中</span>
-        <button onclick="bulkConvert()" style="margin-left:auto;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:7px 16px;border-radius:8px;font-size:.78rem;font-weight:900;cursor:pointer"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#mcg1a)" stroke="url(#mcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="mcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="mcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> 一括還元</button>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button onclick="bulkShip()" style="background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:7px 12px;border-radius:8px;font-size:.78rem;font-weight:900;cursor:pointer">📦 一括発送</button>
+          <button onclick="bulkConvert()" style="background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;padding:7px 12px;border-radius:8px;font-size:.78rem;font-weight:900;cursor:pointer"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#mcg1a)" stroke="url(#mcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="mcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="mcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> 一括還元</button>
+        </div>
       </div>`:''}
       ${showItems.length===0?`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">${itemsTab==='shipped'?'🚚':itemsTab==='waiting'?'📬':'📦'}</div><div style="font-weight:700;color:var(--text2)">${itemsTab==='shipped'?'発送済みの商品はありません':itemsTab==='waiting'?'発送待ちの商品はありません':'未選択の獲得商品がありません'}</div></div>`:''}
       ${showItems.map(r=>{
@@ -1612,6 +1615,124 @@ function updateSelectedCount(){
 function toggleSelectAll(checked){
   document.querySelectorAll('.item-cb').forEach(cb=>cb.checked=checked);
   updateSelectedCount();
+}
+
+async function bulkShip(){
+  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
+  const selected=Array.from(document.querySelectorAll('.item-cb:checked')).map(cb=>cb.dataset.dbid);
+  if(!selected.length){showToast('⚠️ 商品を選択してください');return;}
+
+  // 選択された商品をまとめて一括発送依頼モーダル表示
+  const{data:addresses}=await db.from('shipping_addresses').select('*').eq('user_id',state.user.id).order('is_default',{ascending:false});
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  const prefs=['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'].map(p=>`<option>${p}</option>`).join('');
+  const addrList=addresses&&addresses.length>0?`
+    <div style="margin-bottom:14px">
+      <div style="font-size:.72rem;font-weight:900;color:var(--gold2);margin-bottom:8px">📮 登録済み住所から選択</div>
+      ${addresses.map(a=>`
+        <div onclick="fillBulkShipForm('${a.name}','${a.zip}','${a.prefecture}','${a.city}','${a.building||''}','${a.tel}')"
+          style="background:rgba(255,255,255,.05);border:1.5px solid rgba(201,168,76,.2);border-radius:10px;padding:10px 14px;margin-bottom:8px;cursor:pointer">
+          <div style="font-size:.85rem;font-weight:900;color:#fff">${a.name}${a.is_default?' <span style="font-size:.58rem;background:var(--gold);color:#1a0a00;padding:1px 7px;border-radius:3px">デフォルト</span>':''}</div>
+          <div style="font-size:.75rem;color:rgba(255,255,255,.7)">〒${a.zip} ${a.prefecture}${a.city}</div>
+          <div style="font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px;text-align:right">この住所を使う ›</div>
+        </div>`).join('')}
+    </div>`:'';
+
+  modal.innerHTML=`<div class="bottom-sheet" style="max-height:92vh;overflow-y:auto">
+    <div class="bs-drag"></div>
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+      <div style="font-size:1.05rem;font-weight:900;color:#fff">📦 一括発送依頼</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.6);margin-top:2px">${selected.length}件まとめて発送依頼</div>
+    </div>
+    <div style="padding:14px 16px">
+      ${addrList}
+      <div style="font-size:.72rem;font-weight:900;color:rgba(255,255,255,.8);margin-bottom:10px">✏️ 直接入力</div>
+      <label class="ship-label">お名前 *</label>
+      <input type="text" class="ship-input" id="bs-name" placeholder="山田 太郎">
+      <label class="ship-label">郵便番号 *</label>
+      <input type="text" class="ship-input" id="bs-zip" placeholder="123-4567">
+      <label class="ship-label">都道府県 *</label>
+      <select class="ship-input" id="bs-pref"><option value="">選択</option>${prefs}</select>
+      <label class="ship-label">市区町村・番地 *</label>
+      <input type="text" class="ship-input" id="bs-city" placeholder="渋谷区渋谷1-1-1">
+      <label class="ship-label">建物名・部屋番号</label>
+      <input type="text" class="ship-input" id="bs-building" placeholder="〇〇マンション101">
+      <label class="ship-label">電話番号 *</label>
+      <input type="tel" class="ship-input" id="bs-tel" placeholder="090-1234-5678">
+      <button onclick="submitBulkShip(${JSON.stringify(selected).replace(/"/g,'&quot;')},this)"
+        style="width:100%;margin-top:14px;padding:14px;border-radius:10px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:.95rem;font-weight:900">📦 ${selected.length}件まとめて発送依頼する</button>
+      <button onclick="this.closest('.modal-overlay').remove()" style="width:100%;padding:12px;margin-top:6px;background:none;color:rgba(255,255,255,.5);font-size:.85rem">キャンセル</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+
+  // デフォルト住所を自動入力
+  const def=addresses?.find(a=>a.is_default)||addresses?.[0];
+  if(def){
+    setTimeout(()=>{
+      document.getElementById('bs-name').value=def.name||'';
+      document.getElementById('bs-zip').value=def.zip||'';
+      document.getElementById('bs-city').value=def.city||'';
+      document.getElementById('bs-building').value=def.building||'';
+      document.getElementById('bs-tel').value=def.tel||'';
+      const sel=document.getElementById('bs-pref');
+      if(sel){const opt=Array.from(sel.options).find(o=>o.text===def.prefecture);if(opt)sel.value=opt.value;}
+    },100);
+  }
+}
+
+function fillBulkShipForm(name,zip,pref,city,building,tel){
+  document.getElementById('bs-name').value=name;
+  document.getElementById('bs-zip').value=zip;
+  document.getElementById('bs-city').value=city;
+  document.getElementById('bs-building').value=building||'';
+  document.getElementById('bs-tel').value=tel;
+  const sel=document.getElementById('bs-pref');
+  if(sel){const opt=Array.from(sel.options).find(o=>o.text===pref);if(opt)sel.value=opt.value;}
+  showToast('✅ 住所を入力しました');
+}
+
+async function submitBulkShip(dbIds, btn){
+  const name=document.getElementById('bs-name').value.trim();
+  const zip=document.getElementById('bs-zip').value.trim();
+  const pref=document.getElementById('bs-pref').value;
+  const city=document.getElementById('bs-city').value.trim();
+  const tel=document.getElementById('bs-tel').value.trim();
+  const building=document.getElementById('bs-building').value.trim()||'';
+  if(!name||!zip||!pref||!city||!tel){showToast('⚠️ 必須項目を入力してください');return;}
+
+  const address={name,zip,prefecture:pref,city,building,tel};
+  const resultIds=dbIds;
+
+  // shipping_requestsに保存
+  const{error}=await db.from('shipping_requests').insert({
+    user_id:state.user.id,
+    result_ids:resultIds,
+    address,
+    status:'pending'
+  });
+  if(error){showToast('⚠️ エラー: '+error.message,4000);return;}
+
+  // ローカルのwaitingフラグを更新
+  for(const dbId of resultIds){
+    const[sessionId]=dbId.split('_');
+    const sess=state.sessions.find(s=>s.id===sessionId);
+    const r=sess?.results.find(r=>r.dbId===dbId);
+    if(r)r.waiting=true;
+    if(sess){
+      const updatedResults=sess.results.map(res=>({
+        prize_name:res.prize.name,prize_tier:res.prize.tier,
+        is_converted:res.converted||false,is_shipped:res.waiting||res.shipped||false,
+      }));
+      await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId).catch(()=>{});
+    }
+  }
+
+  btn.closest('.modal-overlay').remove();
+  showToast(`📦 ${resultIds.length}件の発送依頼を送りました！`,3000);
+  renderItemsPage('waiting');
 }
 
 async function bulkConvert(){
