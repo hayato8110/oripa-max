@@ -1333,7 +1333,11 @@ function showResultDetail(session){
 
   function getItems(){
     return session.results
-      .filter(r=>canShip(r)||canConvert(r))
+      .filter(r=>{
+        if(r.converted===true)return false; // 還元済みは除外
+        if(r.shipped===true||r.waiting===true)return false; // 発送済みも除外
+        return canShip(r)||canConvert(r);
+      })
       .sort((a,b)=>coin(b)-coin(a));
   }
 
