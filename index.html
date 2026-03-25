@@ -1345,6 +1345,9 @@ function showResultDetail(session){
       const exType=prizeData?.exchange_type||'both';
       const showShip=exType!=='coin_only'&&!r.shipped&&!r.waiting;
       const showCoin=exType!=='ship_only'&&convertCoin>0&&!r.converted;
+      // 発送専用で発送済み、またはコイン専用で還元済みは非表示
+      const allDone=(exType==='ship_only'&&(r.shipped||r.waiting))||(exType==='coin_only'&&r.converted)||(exType==='both'&&r.converted&&(r.shipped||r.waiting));
+      if(allDone)return;
       const dbId=r.dbId||'';
 
       const card=document.createElement('div');
@@ -1362,8 +1365,7 @@ function showResultDetail(session){
         +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.7rem;font-weight:900;padding:3px 12px;border-radius:20px">'+(r.prize.tier_label||rarLabel[r.prize.tier]||r.prize.tier)+'</span>'
         +(convertCoin>0?'<span style="font-size:.78rem;color:#c8860a;font-weight:900;background:#fff8e6;padding:3px 10px;border-radius:8px">'+convertCoin+'コイン</span>':'')
         +'</div>'
-        +(r.converted?'<span style="font-size:.72rem;color:#c8860a;font-weight:700">✅ 還元済み</span>':'')
-        +(r.shipped||r.waiting?'<span style="font-size:.72rem;color:#16a34a;font-weight:700">📦 発送依頼済み</span>':'')
+        
         +'</div></div>';
       card.appendChild(top);
 
@@ -1383,7 +1385,7 @@ function showResultDetail(session){
         if(showCoin){
           const btn=document.createElement('button');
           btn.style.cssText='flex:1;padding:10px;border-radius:8px;background:#fff8e6;color:#c8860a;font-size:.85rem;font-weight:900;border:1px solid #f0d070;cursor:pointer';
-          btn.textContent='MAX 還元';
+          btn.textContent='🪙 コイン還元';
           btn.onclick=async()=>{
             const[sessionId]=dbId.split('_');
             const sess=state.sessions.find(s=>s.id===sessionId);
