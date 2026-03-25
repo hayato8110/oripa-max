@@ -630,7 +630,25 @@ input,select,textarea{font-family:inherit}
       <div class="form-group" style="margin-bottom:10px"><label class="form-label">レア度</label>
         <select class="form-select" id="vd-tier"><option value="sar">SAR</option><option value="sr">SR</option><option value="rr">RR</option><option value="r">R</option><option value="c">C</option><option value="all">共通</option></select>
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label class="form-label">動画URL</label><input class="form-input" id="vd-url" placeholder="https://..."></div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">動画ファイル</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" id="vd-url" placeholder="https://..." style="flex:1">
+          <label style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;color:rgba(255,255,255,.7)">
+            📤 アップロード
+            <input type="file" accept="video/*,video/mp4" style="display:none" onchange="uploadVideoFile(this)">
+          </label>
+        </div>
+        <div id="vd-upload-progress" style="display:none;margin-top:8px">
+          <div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden">
+            <div id="vd-progress-bar" style="height:100%;background:var(--gold2);width:0%;transition:.3s"></div>
+          </div>
+          <div id="vd-upload-status" style="font-size:.72rem;color:var(--text3);margin-top:4px">アップロード中...</div>
+        </div>
+        <div id="vd-preview" style="display:none;margin-top:8px">
+          <video id="vd-preview-video" controls style="width:100%;max-height:160px;border-radius:8px;background:#000"></video>
+        </div>
+      </div>
       <label class="form-check"><input type="checkbox" id="vd-default"> デフォルト演出にする</label>
     </div>
     <div class="modal-footer">
@@ -1340,8 +1358,36 @@ async function loadVideos(){
     </tr>`).join('');
 }
 
-function openVideoModal(){editingVideoId=null;document.getElementById('video-modal-title').textContent='🎬 動画追加';['vd-name','vd-url'].forEach(i=>document.getElementById(i).value='');document.getElementById('vd-tier').value='sar';document.getElementById('vd-default').checked=false;document.getElementById('video-modal').classList.add('show');}
-function editVideo(id){const v=allVideos.find(x=>x.id===id);if(!v)return;editingVideoId=id;document.getElementById('video-modal-title').textContent='🎬 動画編集';document.getElementById('vd-name').value=v.name||'';document.getElementById('vd-tier').value=v.tier||'sar';document.getElementById('vd-url').value=v.video_url||'';document.getElementById('vd-default').checked=v.is_default||false;document.getElementById('video-modal').classList.add('show');}
+async function uploadVideoFile(input){
+  const file=input.files[0];if(!file)return;
+  // ファイルサイズ確認（50MB上限）
+  if(file.size>50*1024*1024){showToast('⚠️ ファイルサイズは50MB以下にしてください');return;}
+  document.getElementById('vd-upload-progress').style.display='block';
+  document.getElementById('vd-upload-status').textContent='アップロード中...';
+  document.getElementById('vd-progress-bar').style.width='30%';
+  const ext=file.name.split('.').pop()||'mp4';
+  const path=`videos/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const{data,error}=await db.storage.from('videos').upload(path,file,{upsert:true,contentType:file.type||'video/mp4'});
+  if(error){
+    document.getElementById('vd-upload-status').textContent='❌ エラー: '+error.message;
+    document.getElementById('vd-progress-bar').style.width='0%';
+    showToast('⚠️ アップロード失敗: '+error.message);
+    return;
+  }
+  document.getElementById('vd-progress-bar').style.width='100%';
+  const{data:urlData}=db.storage.from('videos').getPublicUrl(path);
+  const url=urlData.publicUrl;
+  document.getElementById('vd-url').value=url;
+  document.getElementById('vd-upload-status').textContent='✅ アップロード完了！';
+  // プレビュー表示
+  const prev=document.getElementById('vd-preview');
+  const vid=document.getElementById('vd-preview-video');
+  prev.style.display='block';
+  vid.src=url;
+  showToast('✅ 動画アップロード完了！');
+}
+function openVideoModal(){editingVideoId=null;document.getElementById('video-modal-title').textContent='🎬 動画追加';['vd-name','vd-url'].forEach(i=>document.getElementById(i).value='');document.getElementById('vd-tier').value='sar';document.getElementById('vd-default').checked=false;document.getElementById('vd-upload-progress').style.display='none';document.getElementById('vd-preview').style.display='none';document.getElementById('vd-progress-bar').style.width='0%';document.getElementById('video-modal').classList.add('show');}
+function editVideo(id){const v=allVideos.find(x=>x.id===id);if(!v)return;editingVideoId=id;document.getElementById('video-modal-title').textContent='🎬 動画編集';document.getElementById('vd-name').value=v.name||'';document.getElementById('vd-tier').value=v.tier||'sar';document.getElementById('vd-url').value=v.video_url||'';document.getElementById('vd-default').checked=v.is_default||false;document.getElementById('vd-upload-progress').style.display='none';const prev=document.getElementById('vd-preview');const vid=document.getElementById('vd-preview-video');if(v.video_url){prev.style.display='block';vid.src=v.video_url;}else{prev.style.display='none';}document.getElementById('video-modal').classList.add('show');}
 async function saveVideo(){const videoData={name:document.getElementById('vd-name').value,tier:document.getElementById('vd-tier').value,video_url:document.getElementById('vd-url').value,is_default:document.getElementById('vd-default').checked};if(editingVideoId)await db.from('gacha_videos').update(videoData).eq('id',editingVideoId);else await db.from('gacha_videos').insert(videoData);closeModal('video-modal');showToast('✅ 保存しました');loadVideos();}
 async function deleteVideo(id){if(!confirm('削除しますか？'))return;await db.from('gacha_videos').delete().eq('id',id);showToast('🗑️ 削除しました');loadVideos();}
 
@@ -1790,21 +1836,29 @@ async function loadShopItems(){
 }
 
 async function loadShopOrders(){
-  const{data}=await db.from('shop_orders').select('*,users(username,email)').order('created_at',{ascending:false});
+  const{data}=await db.from('shop_orders').select('*').order('created_at',{ascending:false});
   const orders=data||[];
+  // ユーザー情報を別途取得
+  const userIds=[...new Set(orders.map(o=>o.user_id).filter(Boolean))];
+  let userMap={};
+  if(userIds.length){
+    const{data:users}=await db.from('users').select('id,username,email').in('id',userIds);
+    (users||[]).forEach(u=>{userMap[u.id]=u;});
+  }
   document.getElementById('shop-orders-tbl').innerHTML=orders.length?orders.map(o=>{
+    const u=userMap[o.user_id]||{};
     const addr=o.address||{};
     return `
     <tr>
       <td class="td-bold" style="font-size:.72rem">#${(o.id||'').slice(0,8)}</td>
-      <td><div>${o.users?.username||'—'}</div><div class="td-sub">${o.users?.email||''}</div></td>
+      <td><div>${u.username||u.email?.split('@')[0]||'—'}</div><div class="td-sub">${u.email||''}</div></td>
       <td>${o.item_name||'—'}</td>
       <td style="color:var(--gold2);font-weight:900">${(o.price||0).toLocaleString()}コイン</td>
       <td style="font-size:.7rem">${new Date(o.created_at).toLocaleDateString('ja-JP')}</td>
       <td>
         ${addr.name?`<div style="font-size:.72rem"><div style="font-weight:700">${addr.name} / ${addr.tel||''}</div><div class="td-sub">〒${addr.zip||''} ${addr.prefecture||''}${addr.city||''}${addr.building?' '+addr.building:''}</div></div>`:'<span style="color:rgba(255,255,255,.3);font-size:.7rem">住所未入力</span>'}
       </td>
-      <td><span class="badge badge-${o.status==='pending'||o.status==='address_submitted'?'pending':'shipped'}">${o.status==='pending'?'住所待ち':o.status==='address_submitted'?'発送待ち':'完了'}</span></td>
+      <td><span class="badge badge-${o.status==='completed'?'shipped':'pending'}">${o.status==='pending'?'住所待ち':o.status==='address_submitted'?'発送待ち':o.status==='completed'?'完了':'処理中'}</span></td>
       <td>
         ${o.status!=='completed'?`<button class="btn btn-success" onclick="completeShopOrder('${o.id}')">✅ 完了</button>`:''}
         <button class="btn btn-danger" onclick="deleteShopOrder('${o.id}')" style="margin-left:4px">✕</button>
@@ -1922,8 +1976,9 @@ function previewShopImage(url){
 }
 
 async function completeShopOrder(id){
-  await db.from('shop_orders').update({status:'completed'}).eq('id',id);
-  showToast('✅ 注文を完了にしました');
+  const tracking=prompt('追跡番号を入力（任意、スキップはOK）:')||'';
+  await db.from('shop_orders').update({status:'shipped',tracking_number:tracking||null,shipped_at:new Date().toISOString()}).eq('id',id);
+  showToast('✅ 発送処理完了');
   loadShopOrders();
 }
 
