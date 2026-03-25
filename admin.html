@@ -1458,7 +1458,7 @@ async function grantPoints(){
   if(!user){showToast('⚠️ ユーザーが見つかりません');return;}
   const field=type==='coin'?'coin_points':'dp_points';
   await db.from('users').update({[field]:(user[field]||0)+amount}).eq('id',user.id);
-  await db.from('transactions').insert({user_id:user.id,type:'bonus',amount,currency:type,description:reason||'管理者付与'}).catch(()=>{});
+  try{await db.from('transactions').insert({user_id:user.id,type:'bonus',amount,currency:type,description:reason||'管理者付与'});}catch(e){}
   showToast(`✅ ${amount.toLocaleString()} ${type.toUpperCase()}を付与しました`);
 }
 
@@ -1523,18 +1523,48 @@ async function loadShipping(status='all'){
   }).join(''):'<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">発送依頼はありません</td></tr>';
 }
 async function shipOrder(id){
-  const tracking=prompt('追跡番号を入力（任意、スキップはOK）:')||'';
-  await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking||null,shipped_at:new Date().toISOString()}).eq('id',id);
-  showToast('✅ 発送処理完了');
-  loadShipping('all');
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(360px,95vw)">
+    <div style="font-size:1rem;font-weight:900;margin-bottom:14px">✅ 発送処理</div>
+    <label class="form-label">追跡番号（任意）</label>
+    <input class="form-input" id="ship-tracking-input" placeholder="例: 1234567890123">
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button id="ship-order-ok" class="btn btn-success btn-lg" style="flex:1">✅ 発送完了にする</button>
+      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary">キャンセル</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById('ship-order-ok').addEventListener('click',async()=>{
+    const tracking=document.getElementById('ship-tracking-input').value.trim()||null;
+    modal.remove();
+    await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking,shipped_at:new Date().toISOString()}).eq('id',id);
+    showToast('✅ 発送処理完了');
+    loadShipping('all');
+  });
 }
 async function editShipOrder(id){
   const s=allShipping.find(x=>x.id===id);if(!s)return;
-  const tracking=prompt('追跡番号を修正（空欄で削除）:',s.tracking_number||'');
-  if(tracking===null)return; // キャンセル
-  await db.from('shipping_requests').update({tracking_number:tracking||null}).eq('id',id);
-  showToast('✅ 追跡番号を更新しました');
-  loadShipping('all');
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(360px,95vw)">
+    <div style="font-size:1rem;font-weight:900;margin-bottom:14px">✏️ 追跡番号を修正</div>
+    <input class="form-input" id="edit-tracking-input" value="${s.tracking_number||''}" placeholder="追跡番号">
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button id="edit-tracking-ok" class="btn btn-primary btn-lg" style="flex:1">✅ 更新する</button>
+      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary">キャンセル</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById('edit-tracking-ok').addEventListener('click',async()=>{
+    const tracking=document.getElementById('edit-tracking-input').value.trim()||null;
+    modal.remove();
+    await db.from('shipping_requests').update({tracking_number:tracking}).eq('id',id);
+    showToast('✅ 追跡番号を更新しました');
+    loadShipping('all');
+  });
 }
 async function revertShipping(id){
   
@@ -1633,7 +1663,7 @@ async function savePush(){
   const pushData={title,body:document.getElementById('pn-body').value,target:document.getElementById('pn-target').value,is_sent:true,sent_at:new Date().toISOString()};
   await db.from('push_notifications').insert(pushData);
   // お知らせとしても登録
-  await db.from('notices').insert({title,body:document.getElementById('pn-body').value,type:'info',is_active:true}).catch(()=>{});
+  try{await db.from('notices').insert({title,body:document.getElementById('pn-body').value,type:'info',is_active:true});}catch(e){}
   closeModal('push-modal');showToast('✅ 通知を送信しました');loadPush();
 }
 async function deletePush(id){confirmDelete('この通知を削除します',async()=>{await db.from('push_notifications').delete().eq('id',id);showToast('🗑️ 削除しました');loadPush();});}
