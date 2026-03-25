@@ -1160,9 +1160,11 @@ function showResultCards(results,pack){
     const rarLabel2={sar:'SAR✨',sr:'SR',rr:'RR',r:'R',c:'C'};
     const tierBg={sar:'linear-gradient(135deg,#e8380d,#ff6b35)',sr:'linear-gradient(135deg,#7c3aed,#a855f7)',rr:'linear-gradient(135deg,#2563eb,#3b82f6)',r:'linear-gradient(135deg,#4b5563,#6b7280)',c:'linear-gradient(135deg,#374151,#4b5563)'};
     document.getElementById('result-screen').style.background='rgba(10,10,10,.97)';
-    document.getElementById('result-title').style.cssText='color:#fff;font-size:1.05rem;font-weight:900;padding:14px 0 6px';
+    document.getElementById('result-screen').style.overflowY='auto';
+    document.getElementById('result-title').style.cssText='color:#fff;font-size:1.05rem;font-weight:900;padding:14px 0 6px;flex-shrink:0';
+    document.getElementById('result-cards').style.cssText='width:100%;max-width:460px;overflow:visible;max-height:none;padding-bottom:100px';
     document.getElementById('result-cards').innerHTML=`
-      <div style="width:100%;max-width:460px;overflow-y:auto;max-height:72vh;padding:0 12px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;flex-direction:column;gap:10px;padding:0 12px">
         ${results.map((r,i)=>{
           const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
           const imgUrl=prizeData?.image_url||'';
@@ -1188,7 +1190,7 @@ function showResultCards(results,pack){
     document.getElementById('result-screen').classList.add('show');
     resultFlipped=resultTotal;
     document.getElementById('result-done').classList.add('show');
-    document.getElementById('result-done').style.cssText='display:block;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;padding:14px 48px;border-radius:12px;margin-top:12px;box-shadow:0 4px 14px rgba(201,168,76,.3)';
+    document.getElementById('result-done').style.cssText='display:block;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;padding:14px 48px;border-radius:12px;box-shadow:0 4px 14px rgba(201,168,76,.3);z-index:700;white-space:nowrap';
     return;
   }
 
@@ -1242,8 +1244,10 @@ function closeResult(){
   const rs=document.getElementById('result-screen');
   rs.classList.remove('show');
   rs.style.background='';
+  rs.style.overflowY='';
   document.getElementById('result-title').style.cssText='';
   document.getElementById('result-done').style.cssText='';
+  document.getElementById('result-cards').style.cssText='';
   renderPacks();renderItemsPage();
 }
 
