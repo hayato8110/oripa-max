@@ -884,6 +884,10 @@ async function doLogin(){
   await loadUserProfile(data.user.id);
   await loadHistoryFromDB();
   await loadTenjoFromDB();
+  await loadFavorites();
+  await loadShopOrdersToItems();
+  loadUserMessageBadge();
+  updateHeaderPts();renderMyPage();renderItemsPage();
   closeAllModals();showToast('✅ ログインしました！');
 }
 async function doRegister(){
@@ -918,7 +922,9 @@ async function doLogout(){
   confirmAction('ログアウトしますか？',async()=>{
     await db.auth.signOut();
     state.user=null;state.coin=0;state.dp=0;
-    updateHeaderPts();renderMyPage();showToast('ログアウトしました');
+    state.sessions=[];state.shopOrders=[];state.tenjoCount={};
+    updateHeaderPts();renderMyPage();renderItemsPage();
+    showToast('ログアウトしました');
   });
 }
 
