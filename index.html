@@ -1723,6 +1723,11 @@ async function drawDirect(packId,count){
   const cost=pack.price*count;
   if(state.coin<cost){showToast('🪙 コインが不足しています');openPurchase();return;}
   if((pack.remaining||0)<count){showToast('⚠️ 残り口数が不足しています');return;}
+  // 1人1回チェック
+  if(pack.max_draws_per_user===1){
+    const already=state.sessions.some(s=>s.packId===pack.id);
+    if(already){showToast('⚠️ このガチャは1人1回限定です');return;}
+  }
   const label=count===1?'1回':count===10?'10連':'100連';
   confirmAction(label+'ガチャを引きますか？\n'+cost.toLocaleString()+'コイン消費します',async()=>{
   state.activePack=pack;
@@ -1992,6 +1997,7 @@ function renderPackCards(list){
           ${p.image_url?`<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">`:''}
         </div>
         <div class="pcb-char">${p.image_url?'':p.emoji||'🎴'}</div>
+        ${p.is_new_user_only?`<div style="position:absolute;top:8px;left:8px;z-index:5;background:linear-gradient(135deg,#e8380d,#ff6b35);color:#fff;font-size:.6rem;font-weight:900;padding:3px 8px;border-radius:4px;letter-spacing:.06em">🆕 新規限定</div>`:''}
         <button onclick="event.stopPropagation();toggleFavorite('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.4);border:none;font-size:1.1rem;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff">${isFav?'★':'☆'}</button>
         ${p.remaining<=0?`
         <div style="position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.62);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
