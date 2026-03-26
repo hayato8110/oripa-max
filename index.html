@@ -894,8 +894,17 @@ async function doLogin(){
   showToast('ログイン中...');
   const{data,error}=await db.auth.signInWithPassword({email,password:pass});
   if(error){showToast('⚠️ '+error.message);return;}
+  await loadUserProfile(data.user.id);
+  await loadHistoryFromDB();
+  await loadTenjoFromDB();
+  await loadFavorites();
+  await loadShopOrdersToItems();
+  loadUserMessageBadge();
+  updateHeaderPts();
+  renderMyPage();
+  renderItemsPage();
+  closeAllModals();
   showToast('✅ ログインしました！');
-  setTimeout(()=>location.reload(),800);
 }
 async function doRegister(){
   const name=document.getElementById('reg-name').value;
