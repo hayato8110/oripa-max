@@ -1517,13 +1517,20 @@ async function loadShipping(status='all'){
   const{data}=await q;
   allShipping=data||[];
 
-  // draw_sessionsからパック名・賞品名を取得
+  // draw_sessionsからパック名・賞品名を取得（JOINなし）
   const allResultIds=allShipping.flatMap(s=>s.result_ids||[]);
   const sessionIds=[...new Set(allResultIds.map(id=>id.substring(0,id.lastIndexOf('_'))))].filter(Boolean);
   let sessMap={};
   if(sessionIds.length){
-    const{data:sessions}=await db.from('draw_sessions').select('id,results,packs(name)').in('id',sessionIds);
-    (sessions||[]).forEach(s=>{sessMap[s.id]=s;});
+    const{data:sessions}=await db.from('draw_sessions').select('id,results,pack_id').in('id',sessionIds);
+    // pack_idからパック名を取得
+    const packIds=[...new Set((sessions||[]).map(s=>s.pack_id).filter(Boolean))];
+    let packMap={};
+    if(packIds.length){
+      const{data:packs}=await db.from('packs').select('id,name').in('id',packIds);
+      (packs||[]).forEach(p=>{packMap[p.id]=p.name;});
+    }
+    (sessions||[]).forEach(s=>{sessMap[s.id]={...s,packName:packMap[s.pack_id]||'—'};});
   }
 
   const pending=allShipping.filter(s=>s.status==='pending').length;
@@ -1550,7 +1557,7 @@ async function loadShipping(status='all'){
       const sessId=rid.substring(0,rid.lastIndexOf('_'));
       const idx=parseInt(rid.substring(rid.lastIndexOf('_')+1));
       const sess=sessMap[sessId];
-      const packName=sess?.packs?.name||'—';
+      const packName=sess?.packName||'—';
       const result=(sess?.results||[])[idx];
       const prizeName=result?.prize_name||result?.name||'—';
       const tier=result?.prize_tier||'';
