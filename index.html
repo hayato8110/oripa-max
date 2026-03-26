@@ -2185,9 +2185,15 @@ function renderItemsPage(tab){
 
 function updateSelectedCount(){
   const cbs=document.querySelectorAll('.item-cb');
-  const checked=Array.from(cbs).filter(cb=>cb.checked).length;
+  const checkedCbs=Array.from(cbs).filter(cb=>cb.checked);
+  const checked=checkedCbs.length;
+  const totalCoin=checkedCbs.reduce((t,cb)=>t+Number(cb.dataset.coin||0),0);
   const countEl=document.getElementById('selected-count');
-  if(countEl)countEl.textContent=`${checked}件選択中`;
+  if(countEl){
+    countEl.innerHTML=checked===0
+      ?'<span style="color:rgba(255,255,255,.5)">0件選択中</span>'
+      :`<span style="color:#fff;font-weight:900">${checked}件選択中</span>　<span style="color:var(--gold2);font-weight:900"><svg width="14" height="14" viewBox="0 0 22 22" fill="none" style="vertical-align:middle;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#sccg)"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="sccg" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient></defs></svg>${totalCoin.toLocaleString()}コイン</span>`;
+  }
   const allCb=document.getElementById('select-all-cb');
   if(allCb)allCb.checked=checked===cbs.length&&cbs.length>0;
 }
