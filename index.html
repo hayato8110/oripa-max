@@ -1016,8 +1016,12 @@ async function loadVideos(){
   state.videos=videos;
 }
 function getVideoForTier(tier){
-  const v=state.videos.find(v=>v.tier===tier&&v.is_default&&v.video_url);
-  if(!v)state.videos.find(v=>v.tier==='all'&&v.video_url);
+  // 指定tierのデフォルト動画を探す
+  let v=state.videos.find(v=>v.tier===tier&&v.is_default&&v.video_url);
+  // なければ同tierの任意の動画
+  if(!v)v=state.videos.find(v=>v.tier===tier&&v.video_url);
+  // なければ共通動画
+  if(!v)v=state.videos.find(v=>v.tier==='all'&&v.video_url);
   return v?.video_url||null;
 }
 
