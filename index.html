@@ -531,26 +531,33 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="bnav-btn active" data-page="gacha"><span class="bnav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <ellipse cx="12" cy="12" rx="9" ry="9" fill="url(#cap-bg)" stroke="url(#cap-stroke)" stroke-width="1.2"/>
-  <path d="M3 12 Q3 3 12 3 Q21 3 21 12 Z" fill="url(#cap-top)"/>
-  <line x1="3" y1="12" x2="21" y2="12" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/>
-  <ellipse cx="9" cy="8.5" rx="2" ry="1.2" fill="rgba(255,255,255,0.35)" transform="rotate(-20 9 8.5)"/>
+  <button class="bnav-btn active" data-page="gacha"><span class="bnav-icon"><svg width="22" height="28" viewBox="0 0 22 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="cap-bg" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="card-bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#fff3a0"/>
       <stop offset="50%" stop-color="#ffd700"/>
       <stop offset="100%" stop-color="#c8860a"/>
     </linearGradient>
-    <linearGradient id="cap-top" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ff4444"/>
-      <stop offset="100%" stop-color="#cc0000"/>
+    <linearGradient id="card-inner" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a0a00"/>
+      <stop offset="100%" stop-color="#2a1400"/>
     </linearGradient>
-    <linearGradient id="cap-stroke" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fff3a0"/>
-      <stop offset="100%" stop-color="#8a6020"/>
-    </linearGradient>
+    <filter id="card-glow"><feGaussianBlur stdDeviation="1" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
+  <!-- カード外枠 -->
+  <rect x="1" y="1" width="20" height="26" rx="3" fill="url(#card-bg)"/>
+  <!-- カード内側 -->
+  <rect x="2.5" y="2.5" width="17" height="23" rx="2" fill="url(#card-inner)"/>
+  <!-- 内枠ライン -->
+  <rect x="3.5" y="3.5" width="15" height="21" rx="1.5" fill="none" stroke="rgba(201,168,76,.4)" stroke-width="0.6"/>
+  <!-- MAXテキスト -->
+  <text x="11" y="16" text-anchor="middle" font-size="5" font-weight="900" font-family="Cinzel,serif" fill="url(#card-bg)" letter-spacing="0.5" filter="url(#card-glow)">MAX</text>
+  <!-- 上部装飾ライン -->
+  <line x1="5" y1="8" x2="17" y2="8" stroke="rgba(201,168,76,.3)" stroke-width="0.5"/>
+  <!-- 下部装飾ライン -->
+  <line x1="5" y1="20" x2="17" y2="20" stroke="rgba(201,168,76,.3)" stroke-width="0.5"/>
+  <!-- 星マーク -->
+  <text x="11" y="7" text-anchor="middle" font-size="3.5" fill="rgba(201,168,76,.7)">★</text>
 </svg></span>ガチャ</button>
   <button class="bnav-btn" data-page="items"><span class="bnav-icon">📦</span>獲得商品</button>
   <button class="bnav-btn" data-page="shop"><span class="bnav-icon">🛒</span>交換所</button>
