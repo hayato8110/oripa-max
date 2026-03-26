@@ -7,45 +7,45 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#07080f;color:#f0eadc;font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding:0 0 40px}
-.header{background:rgba(7,8,15,.98);border-bottom:1px solid rgba(201,168,76,.25);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
-.back-btn{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:#e8c96a;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
-.header-title{font-size:.95rem;font-weight:900;color:#e8c96a}
-.content{padding:16px}
-h1{font-size:1rem;font-weight:900;color:#e8c96a;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid rgba(201,168,76,.2)}
-table{width:100%;border-collapse:collapse;margin-bottom:20px}
-table tr{border-bottom:1px solid rgba(255,255,255,.06)}
-table th{padding:12px 10px;text-align:left;font-size:.78rem;font-weight:700;color:rgba(201,168,76,.8);background:rgba(201,168,76,.05);width:38%;vertical-align:top}
-table td{padding:12px 10px;font-size:.8rem;color:rgba(240,234,220,.8);line-height:1.7}
-.note{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:12px 14px;font-size:.75rem;color:rgba(240,234,220,.6);line-height:1.7;margin-top:16px}
+body{background:#0a0a0f;color:#f0eadc;font-family:'Noto Sans JP',sans-serif;min-height:100vh;padding-bottom:40px}
+.header{background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 16px;gap:12px;position:sticky;top:0;z-index:100}
+.back-btn{background:none;border:none;color:rgba(240,234,220,.6);font-size:1.4rem;cursor:pointer;padding:4px 8px;display:flex;align-items:center}
+.header-title{font-size:.95rem;font-weight:900;color:#f0eadc}
+.container{max-width:480px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.1rem;font-weight:900;color:#f0eadc;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid rgba(201,168,76,.2)}
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+th,td{padding:12px 14px;font-size:.82rem;line-height:1.7;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top;text-align:left}
+th{width:38%;color:rgba(201,168,76,.8);font-weight:700;background:rgba(201,168,76,.05)}
+td{color:rgba(240,234,220,.85)}
+.note{font-size:.72rem;color:rgba(255,255,255,.4);line-height:1.7;margin-top:8px;padding:12px 14px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.06)}
 </style>
 </head>
 <body>
-<div class="header">
-  <a href="/" class="back-btn">← 戻る</a>
+<header class="header">
+  <button class="back-btn" onclick="history.back()">‹</button>
   <span class="header-title">特定商取引法に基づく表記</span>
-</div>
-<div class="content">
+</header>
+<div class="container">
   <h1>特定商取引法に基づく表記</h1>
   <table>
     <tr><th>販売業者</th><td>片山駿斗</td></tr>
     <tr><th>運営責任者</th><td>片山駿斗</td></tr>
-    <tr><th>所在地</th><td>香川県高松市<br>※請求があれば速やかに開示いたします</td></tr>
-    <tr><th>電話番号</th><td>※請求があれば速やかに開示いたします</td></tr>
+    <tr><th>所在地</th><td>〒761-0104<br>香川県高松市高松町873-11</td></tr>
+    <tr><th>電話番号</th><td>090-1327-0810</td></tr>
     <tr><th>メールアドレス</th><td>oripamax8110@gmail.com</td></tr>
-    <tr><th>古物商許可番号</th><td>申請中（許可取得次第、速やかに掲載いたします）</td></tr>
-    <tr><th>販売URL</th><td>https://oripa-max.netlify.app</td></tr>
-    <tr><th>販売価格</th><td>各オリパページに記載の価格（コイン制・1コイン＝1円相当）</td></tr>
+    <tr><th>古物商許可番号</th><td>申請中<br><span style="font-size:.72rem;color:rgba(255,255,255,.4)">※許可取得次第、速やかに掲載いたします</span></td></tr>
+    <tr><th>販売URL</th><td>https://oripa-max.vercel.app</td></tr>
+    <tr><th>販売価格</th><td>各オリパページに記載の価格<br>（コイン制・1コイン＝1円相当）</td></tr>
     <tr><th>商品代金以外の費用</th><td>送料：無料（当社負担）<br>インターネット接続料金等はお客様負担</td></tr>
-    <tr><th>支払方法</th><td>クレジットカード（VISA・Mastercard・JCB・American Express等）</td></tr>
+    <tr><th>支払方法</th><td>クレジットカード<br>（VISA・Mastercard・JCB・American Express等）</td></tr>
     <tr><th>支払時期</th><td>コイン購入時に即時決済</td></tr>
     <tr><th>商品の引渡し時期</th><td>発送依頼受付後、10営業日以内に発送</td></tr>
-    <tr><th>返品・キャンセル</th><td>デジタルコンテンツの性質上、ガチャ実行後の返品・キャンセルはお受けできません。商品に明らかな瑕疵がある場合はこの限りではありません。</td></tr>
+    <tr><th>返品・キャンセル</th><td>デジタルコンテンツの性質上、ガチャ実行後の返品・キャンセルはお受けできません。<br>商品に明らかな瑕疵がある場合はこの限りではありません。</td></tr>
     <tr><th>動作環境</th><td>インターネットに接続できるスマートフォン・PC<br>推奨：Chrome・Safari最新版</td></tr>
     <tr><th>利用可能年齢</th><td>18歳以上の方のみご利用いただけます</td></tr>
   </table>
   <div class="note">
-    ※古物商許可証取得後、速やかに許可番号・所在地・電話番号を更新いたします。<br>
+    ※古物商許可証取得後、速やかに許可番号を更新いたします。<br>
     ※お問い合わせはメール（oripamax8110@gmail.com）にてお受けしております。
   </div>
 </div>
