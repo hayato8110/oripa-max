@@ -7,78 +7,101 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#07080f;color:#f0eadc;font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding:0 0 40px}
-.header{background:rgba(7,8,15,.98);border-bottom:1px solid rgba(201,168,76,.25);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
-.back-btn{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:#e8c96a;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:700;text-decoration:none;display:inline-block}
-.header-title{font-size:.95rem;font-weight:900;color:#e8c96a}
-.content{padding:16px}
-h1{font-size:1rem;font-weight:900;color:#e8c96a;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(201,168,76,.2)}
-h2{font-size:.88rem;font-weight:900;color:#e8c96a;margin:20px 0 8px}
-p{font-size:.8rem;color:rgba(240,234,220,.8);line-height:1.8;margin-bottom:8px}
-ul{padding-left:16px;margin-bottom:8px}
-li{font-size:.8rem;color:rgba(240,234,220,.8);line-height:1.8}
-.updated{font-size:.72rem;color:rgba(240,234,220,.4);margin-bottom:20px}
+body{background:#0a0a0f;color:#f0eadc;font-family:'Noto Sans JP',sans-serif;min-height:100vh;padding-bottom:40px}
+.header{background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 16px;gap:12px;position:sticky;top:0;z-index:100}
+.back-btn{background:none;border:none;color:rgba(240,234,220,.6);font-size:1.4rem;cursor:pointer;padding:4px 8px}
+.header-title{font-size:.95rem;font-weight:900;color:#f0eadc}
+.container{max-width:480px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.1rem;font-weight:900;color:#f0eadc;margin-bottom:6px}
+.updated{font-size:.72rem;color:rgba(255,255,255,.35);margin-bottom:8px}
+.intro{font-size:.82rem;color:rgba(240,234,220,.7);line-height:1.8;margin-bottom:24px;padding:14px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.06)}
+.section{margin-bottom:20px}
+h2{font-size:.88rem;font-weight:900;color:rgba(201,168,76,.9);margin-bottom:8px;padding:8px 12px;background:rgba(201,168,76,.06);border-left:3px solid rgba(201,168,76,.4);border-radius:0 6px 6px 0}
+p,li{font-size:.82rem;color:rgba(240,234,220,.75);line-height:1.8}
+ul{padding-left:16px;margin-top:4px}
+li{margin-bottom:3px}
+.contact{margin-top:24px;padding:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;font-size:.82rem;color:rgba(240,234,220,.7);line-height:1.8}
 </style>
 </head>
 <body>
-<div class="header">
-  <a href="/" class="back-btn">← 戻る</a>
+<header class="header">
+  <button class="back-btn" onclick="history.back()">‹</button>
   <span class="header-title">プライバシーポリシー</span>
-</div>
-<div class="content">
+</header>
+<div class="container">
   <h1>プライバシーポリシー</h1>
-  <p class="updated">最終更新日：2026年3月15日</p>
-  <p>片山駿斗（以下「当社」）は、オリパMAX（以下「本サービス」）における個人情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。</p>
+  <div class="updated">最終更新日：2026年3月15日</div>
+  <div class="intro">オリパMAX（以下「当社」）は、オリパMAX（以下「本サービス」）における個人情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。</div>
 
-  <h2>第1条（収集する個人情報）</h2>
-  <p>本サービスでは、以下の個人情報を収集します。</p>
-  <ul>
-    <li>メールアドレス</li>
-    <li>ユーザー名</li>
-    <li>生年月日</li>
-    <li>発送先住所・氏名・電話番号（発送依頼時のみ）</li>
-    <li>決済情報（当社は保持せず、決済代行会社が管理します）</li>
-    <li>利用履歴・ガチャ結果</li>
-  </ul>
+  <div class="section">
+    <h2>第1条（収集する個人情報）</h2>
+    <p>本サービスでは、以下の個人情報を収集します。</p>
+    <ul>
+      <li>メールアドレス</li>
+      <li>ユーザー名</li>
+      <li>生年月日</li>
+      <li>発送先住所・氏名・電話番号（発送依頼時のみ）</li>
+      <li>決済情報（当社は保持せず、決済代行会社が管理します）</li>
+      <li>利用履歴・ガチャ結果</li>
+    </ul>
+  </div>
 
-  <h2>第2条（個人情報の利用目的）</h2>
-  <ul>
-    <li>本サービスの提供・運営</li>
-    <li>商品の発送</li>
-    <li>お問い合わせへの対応</li>
-    <li>サービス改善・統計分析</li>
-    <li>不正利用の防止</li>
-    <li>法令に基づく対応</li>
-  </ul>
+  <div class="section">
+    <h2>第2条（個人情報の利用目的）</h2>
+    <ul>
+      <li>本サービスの提供・運営</li>
+      <li>商品の発送</li>
+      <li>お問い合わせへの対応</li>
+      <li>サービス改善・統計分析</li>
+      <li>不正利用の防止</li>
+      <li>法令に基づく対応</li>
+    </ul>
+  </div>
 
-  <h2>第3条（第三者への提供）</h2>
-  <p>当社は、以下の場合を除き、ユーザーの個人情報を第三者に提供しません。</p>
-  <ul>
-    <li>ユーザーの同意がある場合</li>
-    <li>法令に基づく場合</li>
-    <li>人命・財産の保護のために必要な場合</li>
-  </ul>
+  <div class="section">
+    <h2>第3条（第三者への提供）</h2>
+    <p>当社は、以下の場合を除き、ユーザーの個人情報を第三者に提供しません。</p>
+    <ul>
+      <li>ユーザーの同意がある場合</li>
+      <li>法令に基づく場合</li>
+      <li>人命・財産の保護のために必要な場合</li>
+    </ul>
+  </div>
 
-  <h2>第4条（業務委託）</h2>
-  <p>当社は、サービス提供に必要な範囲で業務を外部委託する場合があります。委託先には適切な個人情報管理を義務付けます。</p>
+  <div class="section">
+    <h2>第4条（業務委託）</h2>
+    <p>当社は、サービス提供に必要な範囲で業務を外部委託する場合があります。委託先には適切な個人情報管理を義務付けます。</p>
+  </div>
 
-  <h2>第5条（Cookie・アクセス解析）</h2>
-  <p>本サービスでは、サービス改善のためにCookieを使用する場合があります。ブラウザの設定によりCookieを無効にすることができますが、一部機能が制限される場合があります。</p>
+  <div class="section">
+    <h2>第5条（Cookie・アクセス解析）</h2>
+    <p>本サービスでは、サービス改善のためにCookieを使用する場合があります。ブラウザの設定によりCookieを無効にすることができますが、一部機能が制限される場合があります。</p>
+  </div>
 
-  <h2>第6条（個人情報の管理）</h2>
-  <p>当社は、個人情報の漏洩・紛失・改ざんを防ぐため、適切なセキュリティ対策を実施します。</p>
+  <div class="section">
+    <h2>第6条（個人情報の管理）</h2>
+    <p>当社は、個人情報の漏洩・紛失・改ざんを防ぐため、適切なセキュリティ対策を実施します。</p>
+  </div>
 
-  <h2>第7条（開示・訂正・削除）</h2>
-  <p>ユーザーは、自身の個人情報の開示・訂正・削除を要求できます。ご要望はoripamax8110@gmail.comまでご連絡ください。</p>
+  <div class="section">
+    <h2>第7条（開示・訂正・削除）</h2>
+    <p>ユーザーは、自身の個人情報の開示・訂正・削除を要求できます。ご要望はoripamax8110@gmail.comまでご連絡ください。</p>
+  </div>
 
-  <h2>第8条（未成年者）</h2>
-  <p>本サービスは18歳以上の方を対象としています。18歳未満の方はご利用いただけません。</p>
+  <div class="section">
+    <h2>第8条（未成年者）</h2>
+    <p>本サービスは18歳以上の方を対象としています。18歳未満の方はご利用いただけません。</p>
+  </div>
 
-  <h2>第9条（ポリシーの変更）</h2>
-  <p>当社は、必要に応じて本ポリシーを変更することがあります。重要な変更がある場合は、本サービス上でお知らせします。</p>
+  <div class="section">
+    <h2>第9条（ポリシーの変更）</h2>
+    <p>当社は、必要に応じて本ポリシーを変更することがあります。重要な変更がある場合は、本サービス上でお知らせします。</p>
+  </div>
 
-  <h2>第10条（お問い合わせ）</h2>
-  <p>メール：oripamax8110@gmail.com</p>
+  <div class="contact">
+    <strong>第10条（お問い合わせ）</strong><br>
+    メール：oripamax8110@gmail.com
+  </div>
 </div>
 </body>
 </html>
