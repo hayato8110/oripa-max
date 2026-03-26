@@ -444,6 +444,8 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 <!-- PAGE: ガチャ -->
 <div id="page-gacha" class="page active">
   <!-- BANNERS（常時表示） -->
+  <!-- 新規登録限定バナー -->
+  <div id="new-user-banner" style="display:none"></div>
   <div id="banners-section">
     <div class="banners-wrap" id="banners-wrap">
       <div class="banners-track" id="banners-track"></div>
@@ -908,6 +910,7 @@ async function doLogin(){
   updateHeaderPts();
   renderMyPage();
   renderItemsPage();
+  renderNewUserBanner();
   closeAllModals();
   showToast('✅ ログインしました！');
 }
@@ -1917,6 +1920,46 @@ async function loadAndRenderPacks(){
   const packs=await fetchPacks();
   state.packs=packs;
   renderPacks();
+}
+
+function renderNewUserBanner(){
+  const banner=document.getElementById('new-user-banner');
+  if(!banner)return;
+  if(!state.user){banner.style.display='none';return;}
+  // 登録から24時間以内か確認
+  const createdAt=new Date(state.user.created_at||state.user.inserted_at||Date.now());
+  const hoursElapsed=(Date.now()-createdAt.getTime())/(1000*60*60);
+  if(hoursElapsed>24){banner.style.display='none';return;}
+  // 新規限定パックを取得
+  const newUserPacks=state.packs.filter(p=>p.is_new_user_only&&p.is_active!==false);
+  if(!newUserPacks.length){banner.style.display='none';return;}
+  const hoursLeft=Math.ceil(24-hoursElapsed);
+  banner.style.display='block';
+  banner.innerHTML=`
+    <div style="margin:10px 8px;background:linear-gradient(135deg,#1a0a00,#2a1400,#1a0a00);border:2px solid rgba(232,168,0,.5);border-radius:14px;overflow:hidden;position:relative">
+      <div style="background:linear-gradient(90deg,rgba(232,168,0,.15),rgba(232,56,13,.1));padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:.65rem;font-weight:900;color:#e8380d;letter-spacing:.1em;margin-bottom:2px">🎁 新規登録限定</div>
+          <div style="font-size:1rem;font-weight:900;color:#ffd700">ウェルカムガチャ</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:2px">残り <span style="color:#ef4444;font-weight:900">${hoursLeft}時間</span> で終了</div>
+        </div>
+        <div style="font-size:2.5rem">🎴</div>
+      </div>
+      <div style="padding:8px 12px 12px;display:flex;flex-direction:column;gap:8px">
+        ${newUserPacks.map(p=>`
+          <div onclick="openPackDetail('${p.id}')" style="background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;active:opacity:.8">
+            <div style="display:flex;align-items:center;gap:10px">
+              ${p.image_url?`<img src="${p.image_url}" style="width:50px;height:50px;object-fit:cover;border-radius:6px">`:`<div style="width:50px;height:50px;background:rgba(201,168,76,.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.8rem">${p.emoji||'🎴'}</div>`}
+              <div>
+                <div style="font-size:.88rem;font-weight:900;color:#fff">${p.name}</div>
+                <div style="font-size:.72rem;color:var(--gold2);font-weight:700;margin-top:2px">${p.price}コイン / 1回</div>
+              </div>
+            </div>
+            <div style="font-size:.7rem;color:rgba(255,255,255,.4)">›</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
 }
 
 function renderPacks(){
@@ -3295,6 +3338,7 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
     loadNotices(),
     loadVideos(),
   ]);
+  renderNewUserBanner();
   // パック読み込み後にユーザーデータを取得
   if(state.user){
     await loadHistoryFromDB();
