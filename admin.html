@@ -1030,7 +1030,7 @@ function addPrizeBlock(prize){
     <!-- レア度 -->
     <div style="margin-bottom:8px">
       <select class="form-select prize-tier" style="width:100%;padding:5px 8px;font-size:.8rem;font-weight:900;color:${tc.color};border-color:${tc.border}" onchange="updateBlockStyle(this)">
-        ${Object.entries(TIER_CONFIG).map(([v,t])=>`<option value="${v}" ${tier===v?'selected':''}>${t.label}（${v.toUpperCase()}）</option>`).join('')}
+        ${Object.entries(TIER_CONFIG).map(([v,t])=>`<option value="${v}" ${tier===v?'selected':''}>${t.label}</option>`).join('')}
       </select>
     </div>
 
@@ -1374,7 +1374,7 @@ async function deleteBanner(id){confirmDelete('このバナーを削除します
 async function loadVideos(){
   const{data}=await db.from('gacha_videos').select('*').order('created_at');
   allVideos=data||[];
-  const tierLabel={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C',all:'共通'};
+  const tierLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'D賞',all:'共通'};
   document.getElementById('videos-tbl-body').innerHTML=allVideos.map(v=>`
     <tr>
       <td><span class="badge badge-gold">${tierLabel[v.tier]||v.tier}</span></td>
@@ -1561,9 +1561,10 @@ async function loadShipping(status='all'){
       const result=(sess?.results||[])[idx];
       const prizeName=result?.prize_name||result?.name||'—';
       const tier=result?.prize_tier||'';
+      const tierLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'D賞'};
       const tierColor={sar:'#e8380d',sr:'#a855f7',rr:'#3b82f6',r:'#6b7280',c:'#374151'};
       return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-        <span style="font-size:.65rem;background:${tierColor[tier]||'#374151'};color:#fff;padding:1px 5px;border-radius:3px;font-weight:900;flex-shrink:0">${tier.toUpperCase()||'—'}</span>
+        <span style="font-size:.65rem;background:${tierColor[tier]||'#374151'};color:#fff;padding:1px 5px;border-radius:3px;font-weight:900;flex-shrink:0">${tierLabel[tier]||tier||'—'}</span>
         <span style="font-size:.72rem;color:rgba(255,255,255,.8);font-weight:700">${prizeName}</span>
         <span style="font-size:.65rem;color:rgba(255,255,255,.4);margin-left:auto">${packName}</span>
       </div>`;
