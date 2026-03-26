@@ -535,6 +535,7 @@ input,select,textarea{font-family:inherit}
         <label class="form-check"><input type="checkbox" id="pm-loop"> 🔄 ループオリパ</label>
         <label class="form-check"><input type="checkbox" id="pm-new-user"> 🆕 新規限定</label>
         <label class="form-check"><input type="checkbox" id="pm-100x"> 💯 100倍アド確定</label>
+        <label class="form-check"><input type="checkbox" id="pm-one-per-user"> 🔒 1人1回限定</label>
         <label class="form-check"><input type="checkbox" id="pm-active" checked> 🟢 公開</label>
       </div>
       <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
@@ -870,7 +871,7 @@ function renderPacks(packs){
   document.getElementById('packs-tbl-body').innerHTML=packs.map(p=>{
     const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     return`<tr>
-      <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}${p.is_loop?'<span class="badge badge-active" style="margin-left:4px">ループ</span>':''}${p.is_new_user_only?'<span class="badge badge-gold" style="margin-left:4px">新規限定</span>':''}${p.is_100x_ad?'<span class="badge badge-hot" style="margin-left:4px">100倍アド</span>':''}</div></td>
+      <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}${p.is_loop?'<span class="badge badge-active" style="margin-left:4px">ループ</span>':''}${p.is_new_user_only?'<span class="badge badge-gold" style="margin-left:4px">新規限定</span>':''}${p.max_draws_per_user===1?'<span class="badge badge-hot" style="margin-left:4px">1人1回</span>':''}${p.is_100x_ad?'<span class="badge badge-hot" style="margin-left:4px">100倍アド</span>':''}</div></td>
       <td>${p.category||'—'}</td>
       <td>${(p.price||0).toLocaleString()}🪙</td>
       <td>${(p.remaining||0).toLocaleString()}/${(p.total_slots||0).toLocaleString()}<br><span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span></td>
@@ -895,7 +896,7 @@ function openPackModal(){
   document.getElementById('pm-ribbon-type').value='hot';
   document.getElementById('pm-tenjo').value='0';
   document.getElementById('pm-order').value='0';
-  ['pm-hot','pm-new','pm-ad','pm-limit','pm-loop','pm-new-user','pm-100x'].forEach(id=>document.getElementById(id).checked=false);
+  ['pm-hot','pm-new','pm-ad','pm-limit','pm-loop','pm-new-user','pm-100x','pm-one-per-user'].forEach(id=>document.getElementById(id).checked=false);
   document.getElementById('pm-active').checked=true;
   document.getElementById('pm-draw-1').checked=true;
   document.getElementById('pm-draw-10').checked=true;
@@ -936,6 +937,7 @@ async function editPack(id){
   document.getElementById('pm-loop').checked=pack.is_loop||false;
   document.getElementById('pm-new-user').checked=pack.is_new_user_only||false;
   document.getElementById('pm-100x').checked=pack.is_100x_ad||false;
+  document.getElementById('pm-one-per-user').checked=(pack.max_draws_per_user===1)||false;
   document.getElementById('pm-active').checked=pack.is_active!==false;
   document.getElementById('prizes-blocks').innerHTML='';
   (pack.prizes||[]).forEach(pr=>addPrizeBlock(pr));
@@ -1162,7 +1164,7 @@ async function savePack(){
   const name=document.getElementById('pm-name').value;
   if(!name){showToast('⚠️ パック名を入力してください');return;}
   const total=parseInt(document.getElementById('pm-total').value)||0;
-  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,return_rate:parseFloat(document.getElementById('pm-rate').value)||null,odds_text:document.getElementById('pm-odds').value,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,min_guarantee:parseInt(document.getElementById('pm-min-guarantee').value)||0,ribbon_text:document.getElementById('pm-ribbon').value,ribbon_type:document.getElementById('pm-ribbon-type').value,bg_style:document.getElementById('pm-bg').value,image_url:document.getElementById('pm-image-url').value||null,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_hot:document.getElementById('pm-hot').checked,is_new:document.getElementById('pm-new').checked,is_ad_confirm:document.getElementById('pm-ad').checked,is_limited:document.getElementById('pm-limit').checked,is_loop:document.getElementById('pm-loop').checked,is_new_user_only:document.getElementById('pm-new-user').checked,is_100x_ad:document.getElementById('pm-100x').checked,is_active:document.getElementById('pm-active').checked,draw_options:JSON.stringify({d1:document.getElementById('pm-draw-1').checked,d10:document.getElementById('pm-draw-10').checked,d100:document.getElementById('pm-draw-100').checked})};
+  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,return_rate:parseFloat(document.getElementById('pm-rate').value)||null,odds_text:document.getElementById('pm-odds').value,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,min_guarantee:parseInt(document.getElementById('pm-min-guarantee').value)||0,ribbon_text:document.getElementById('pm-ribbon').value,ribbon_type:document.getElementById('pm-ribbon-type').value,bg_style:document.getElementById('pm-bg').value,image_url:document.getElementById('pm-image-url').value||null,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_hot:document.getElementById('pm-hot').checked,is_new:document.getElementById('pm-new').checked,is_ad_confirm:document.getElementById('pm-ad').checked,is_limited:document.getElementById('pm-limit').checked,is_loop:document.getElementById('pm-loop').checked,is_new_user_only:document.getElementById('pm-new-user').checked,is_100x_ad:document.getElementById('pm-100x').checked,max_draws_per_user:document.getElementById('pm-one-per-user').checked?1:0,is_active:document.getElementById('pm-active').checked,draw_options:JSON.stringify({d1:document.getElementById('pm-draw-1').checked,d10:document.getElementById('pm-draw-10').checked,d100:document.getElementById('pm-draw-100').checked})};
   if(!editingPackId)packData.remaining=total;
   let packId=editingPackId;
   if(editingPackId){
