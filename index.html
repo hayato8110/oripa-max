@@ -2816,14 +2816,34 @@ async function applyCoupon(){
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
   const{data:coupon}=await db.from('coupons').select('*').eq('code',code).eq('is_active',true).single();
   if(!coupon){showToast('⚠️ 無効なクーポンコードです');return;}
+
+  // 配布数上限チェック
+  if(coupon.max_total_uses>0&&(coupon.total_used||0)>=coupon.max_total_uses){
+    showToast('⚠️ このクーポンは配布上限に達しました');return;
+  }
+
+  // 1人1回チェック
+  const{data:alreadyUsed}=await db.from('coupon_uses').select('id').eq('coupon_id',coupon.id).eq('user_id',state.user.id).single();
+  if(alreadyUsed){showToast('⚠️ このクーポンはすでに使用済みです');return;}
+
+  // 使用履歴を記録
+  const{error:useError}=await db.from('coupon_uses').insert({coupon_id:coupon.id,user_id:state.user.id});
+  if(useError){showToast('⚠️ クーポンの使用に失敗しました');return;}
+
+  // 使用回数更新
+  await db.from('coupons').update({
+    used_count:(coupon.used_count||0)+1,
+    total_used:(coupon.total_used||0)+1,
+  }).eq('id',coupon.id);
+
   if(coupon.discount_type==='coin'){
     state.coin+=coupon.discount_amount;
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
-    await db.from('coupons').update({used_count:(coupon.used_count||0)+1}).eq('id',coupon.id);
     updateHeaderPts();
     document.getElementById('coupon-code-input').value='';
     showToast(`🎟️ クーポン適用！+${coupon.discount_amount}コイン！`,3000);
   } else {
+    document.getElementById('coupon-code-input').value='';
     showToast(`🎟️ ${coupon.discount_amount}%OFFクーポンを適用しました！`,3000);
   }
 }
