@@ -1988,14 +1988,16 @@ function renderPackCards(list){
     const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
     const tiers=prizes.map(pr=>`<span class="tier-pill ${tierPillClass[pr.tier]}">${pr.tier_label} ${pr.quantity}枚</span>`).join('');
     const isFav=favorites.has(p.id);
+    const drawnAlready=p.max_draws_per_user===1&&state.sessions.some(s=>s.packId===p.id);
     return `
-    <div class="pack-card">
+    <div class="pack-card" style="${drawnAlready?'opacity:.55;':''}">
       <div class="pc-banner" onclick="openPackDetail('${p.id}')">
         <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(145deg,#1a1a3a,#2a1a1a)'}">
           ${p.image_url?`<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">`:''}
         </div>
         <div class="pcb-char">${p.image_url?'':p.emoji||'🎴'}</div>
-        <button onclick="event.stopPropagation();toggleFavorite('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.4);border:none;font-size:1.1rem;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff">${isFav?'★':'☆'}</button>
+        ${drawnAlready?`<div style="position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center"><div style="background:rgba(0,0,0,.7);color:rgba(255,255,255,.7);font-size:.85rem;font-weight:900;padding:8px 18px;border-radius:20px;border:1px solid rgba(255,255,255,.2)">✅ 引き済み</div></div>`:''}
+        <button onclick="event.stopPropagation();toggleFavorite('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:15;background:rgba(0,0,0,.4);border:none;font-size:1.1rem;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff">${isFav?'★':'☆'}</button>
         ${p.remaining<=0?`
         <div style="position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.62);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
           <div style="font-size:1.9rem;font-weight:900;letter-spacing:.12em;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.8);font-style:italic;border:3px solid rgba(255,255,255,.7);padding:6px 22px;border-radius:4px;background:rgba(0,0,0,.3)">完売御礼</div>
@@ -2010,18 +2012,23 @@ function renderPackCards(list){
           ${!p.is_new_user_only?`<span class="pc-remain">${p.remaining<=0?'<b style="color:rgba(201,168,76,.7)">完売御礼</b>':`残り<b>${(p.remaining||0).toLocaleString()}</b>&#47;${(p.total_slots||0).toLocaleString()}口`}</span>`:''}
         </div>
         ${!p.is_new_user_only?`<div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>`:''}
-        ${p.remaining<=0?
-          `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(201,168,76,.5);font-weight:700;letter-spacing:.08em">— ありがとうございました —</div>`:
-          `<div class="pc-btns">${(()=>{
+        ${(()=>{
+          // 1人1回チェック
+          const drawnAlready=p.max_draws_per_user===1&&state.sessions.some(s=>s.packId===p.id);
+          if(p.remaining<=0){
+            return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(201,168,76,.5);font-weight:700;letter-spacing:.08em">— ありがとうございました —</div>`;
+          } else if(drawnAlready){
+            return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(255,255,255,.3);font-weight:700;background:rgba(255,255,255,.05);border-radius:8px;margin:0 0 8px">✅ 引き済み（1人1回限定）</div>`;
+          } else {
             let opts={d1:true,d10:true,d100:false};
             try{if(p.draw_options)opts={...opts,...JSON.parse(p.draw_options)};}catch(e){}
             const btns=[];
             if(opts.d1)btns.push('<button class="pc-btn-1" onclick="drawDirect(\''+p.id+'\',1)">1回ガチャ</button>');
             if(opts.d10)btns.push('<button class="pc-btn-5" onclick="drawDirect(\''+p.id+'\',10)">10連ガチャ</button>');
             if(opts.d100)btns.push('<button class="pc-btn-100" onclick="drawDirect(\''+p.id+'\',100)">100連ガチャ</button>');
-            return btns.join('');
-          })()}</div>`
-        }
+            return `<div class="pc-btns">${btns.join('')}</div>`;
+          }
+        })()}
       </div>
     </div>`;
   }).join('');
