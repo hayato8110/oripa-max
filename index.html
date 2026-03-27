@@ -908,6 +908,7 @@ async function doLogin(){
   updateHeaderPts();
   renderMyPage();
   renderItemsPage();
+  renderPacks();
   renderNewUserBanner();
   closeAllModals();
   showToast('✅ ログインしました！');
@@ -3368,8 +3369,6 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
     loadNotices(),
     loadVideos(),
   ]);
-  renderNewUserBanner();
-  // パック読み込み後にユーザーデータを取得
   if(state.user){
     await loadHistoryFromDB();
     await loadTenjoFromDB();
@@ -3377,6 +3376,8 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
     await loadShopOrdersToItems();
     loadUserMessageBadge();
     renderItemsPage();
+    renderPacks(); // 引き済みガチャのグレーアウト反映
+    renderNewUserBanner();
   }
 })();
 </script>
