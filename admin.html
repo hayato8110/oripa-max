@@ -675,7 +675,8 @@ input,select,textarea{font-family:inherit}
           <select class="form-select" id="cp-type"><option value="coin">コイン付与</option><option value="percent">割引%</option></select>
         </div>
         <div class="form-group"><label class="form-label">割引量</label><input type="number" class="form-input" id="cp-amount" placeholder="500"></div>
-        <div class="form-group"><label class="form-label">最大使用回数</label><input type="number" class="form-input" id="cp-max" value="100"></div>
+        <div class="form-group"><label class="form-label">最大使用回数（総数）</label><input type="number" class="form-input" id="cp-max" value="100"></div>
+        <div class="form-group"><label class="form-label">配布数上限（0=無制限）</label><input type="number" class="form-input" id="cp-max-total" value="0" placeholder="0=無制限"></div>
         <div class="form-group"><label class="form-label">有効期限</label><input type="datetime-local" class="form-input" id="cp-expires"></div>
       </div>
       <div style="margin-top:10px"><label class="form-check"><input type="checkbox" id="cp-active" checked> 有効にする</label></div>
@@ -1701,7 +1702,7 @@ async function loadCoupons(){
     <tr>
       <td class="td-bold" style="font-family:monospace;letter-spacing:.08em">${c.code}</td>
       <td>${c.discount_type==='coin'?`🪙 ${c.discount_amount}`:`${c.discount_amount}%OFF`}</td>
-      <td>${c.used_count||0} / ${c.max_uses||'∞'}</td>
+      <td>${c.used_count||0} / ${c.max_uses||'∞'}<br><span style="font-size:.7rem;color:rgba(255,255,255,.4)">配布：${c.total_used||0}/${c.max_total_uses||'∞'}</span></td>
       <td style="font-size:.72rem">${c.expires_at?new Date(c.expires_at).toLocaleDateString('ja-JP'):'無期限'}</td>
       <td><span class="badge ${c.is_active?'badge-active':'badge-pause'}">${c.is_active?'有効':'無効'}</span></td>
       <td>
@@ -1711,13 +1712,13 @@ async function loadCoupons(){
     </tr>`).join('');
 }
 
-function openCouponModal(){editingCouponId=null;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン作成';document.getElementById('cp-code').value='';document.getElementById('cp-amount').value='';document.getElementById('cp-max').value='100';document.getElementById('cp-expires').value='';document.getElementById('cp-type').value='coin';document.getElementById('cp-active').checked=true;document.getElementById('coupon-modal').classList.add('show');}
+function openCouponModal(){editingCouponId=null;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン作成';document.getElementById('cp-code').value='';document.getElementById('cp-amount').value='';document.getElementById('cp-max').value='100';document.getElementById('cp-max-total').value='0';document.getElementById('cp-expires').value='';document.getElementById('cp-type').value='coin';document.getElementById('cp-active').checked=true;document.getElementById('coupon-modal').classList.add('show');}
 function generateCouponCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';for(let i=0;i<8;i++)code+=chars[Math.floor(Math.random()*chars.length)];document.getElementById('cp-code').value=code;}
-function editCoupon(id){const c=allCoupons.find(x=>x.id===id);if(!c)return;editingCouponId=id;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン編集';document.getElementById('cp-code').value=c.code||'';document.getElementById('cp-type').value=c.discount_type||'coin';document.getElementById('cp-amount').value=c.discount_amount||0;document.getElementById('cp-max').value=c.max_uses||100;document.getElementById('cp-expires').value=c.expires_at?new Date(c.expires_at).toISOString().slice(0,16):'';document.getElementById('cp-active').checked=c.is_active!==false;document.getElementById('coupon-modal').classList.add('show');}
+function editCoupon(id){const c=allCoupons.find(x=>x.id===id);if(!c)return;editingCouponId=id;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン編集';document.getElementById('cp-code').value=c.code||'';document.getElementById('cp-type').value=c.discount_type||'coin';document.getElementById('cp-amount').value=c.discount_amount||0;document.getElementById('cp-max').value=c.max_uses||100;document.getElementById('cp-max-total').value=c.max_total_uses||0;document.getElementById('cp-expires').value=c.expires_at?new Date(c.expires_at).toISOString().slice(0,16):'';document.getElementById('cp-active').checked=c.is_active!==false;document.getElementById('coupon-modal').classList.add('show');}
 async function saveCoupon(){
   const code=document.getElementById('cp-code').value.trim().toUpperCase();
   if(!code){showToast('⚠️ コードを入力してください');return;}
-  const couponData={code,discount_type:document.getElementById('cp-type').value,discount_amount:parseInt(document.getElementById('cp-amount').value)||0,max_uses:parseInt(document.getElementById('cp-max').value)||100,expires_at:document.getElementById('cp-expires').value||null,is_active:document.getElementById('cp-active').checked};
+  const couponData={code,discount_type:document.getElementById('cp-type').value,discount_amount:parseInt(document.getElementById('cp-amount').value)||0,max_uses:parseInt(document.getElementById('cp-max').value)||100,max_total_uses:parseInt(document.getElementById('cp-max-total').value)||0,expires_at:document.getElementById('cp-expires').value||null,is_active:document.getElementById('cp-active').checked};
   if(editingCouponId)await db.from('coupons').update(couponData).eq('id',editingCouponId);
   else await db.from('coupons').insert(couponData);
   closeModal('coupon-modal');showToast('✅ クーポンを保存しました');loadCoupons();
