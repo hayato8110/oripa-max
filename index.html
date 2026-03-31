@@ -249,6 +249,9 @@ input,select,textarea{font-family:inherit;outline:none}
 .result-done-btn{background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:.95rem;font-weight:900;padding:13px 48px;border-radius:12px;box-shadow:0 4px 16px rgba(201,168,76,.35);display:none}
 .result-done-btn.show{display:block;animation:pop .3s ease-out}
 @keyframes rainbow-shift{0%{background-position:0% center}100%{background-position:200% center}}
+@keyframes nu-pulse{0%,100%{box-shadow:0 0 8px #ff0080,0 0 16px #ff8c00,0 0 24px #ffe600}33%{box-shadow:0 0 8px #00ff88,0 0 16px #00cfff,0 0 24px #8000ff}66%{box-shadow:0 0 8px #ff0080,0 0 16px #ffe600,0 0 24px #00ff88}}
+@keyframes nu-text-glow{0%,100%{text-shadow:0 0 6px #ff0080,0 0 12px #ff8c00}50%{text-shadow:0 0 6px #00cfff,0 0 12px #8000ff,0 0 20px #ffe600}}
+@keyframes nu-shine{0%{left:-60%}100%{left:130%}}
 
 /* ══ JACKPOT ══ */
 .jackpot-overlay{position:fixed;inset:0;z-index:700;background:radial-gradient(ellipse at 50% 50%,rgba(232,56,13,.15) 0%,#0a0a0a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:.3s}
@@ -2024,12 +2027,19 @@ function renderPackCards(list){
         const m=Math.floor((msLeft%3600000)/60000);
         const s=Math.floor((msLeft%60000)/1000);
         const timeStr=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        newUserBadge=`<div id="nu-countdown-${p.id}" data-expire="${expireAt.getTime()}" style="margin:4px 0 0;border-radius:8px;padding:3px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff,#ff0080);background-size:200% auto;animation:rainbow-shift 2s linear infinite">
-          <div style="background:rgba(10,10,20,0.85);border-radius:6px;padding:5px 12px;display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:.6rem;font-weight:900;color:#fff;letter-spacing:.05em">🎁 新規24時間限定</span>
-            <div style="display:flex;align-items:center;gap:3px">
-              <span style="font-size:.6rem;color:rgba(255,255,255,.6)">残り</span>
-              <span class="nu-time" style="font-size:.88rem;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 8px rgba(255,255,255,.6)">${timeStr}</span>
+        newUserBadge=`<div id="nu-countdown-${p.id}" data-expire="${expireAt.getTime()}" style="margin:4px 0 0;border-radius:10px;padding:3px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff,#ff0080);background-size:200% auto;animation:rainbow-shift 1.5s linear infinite,nu-pulse 2s ease-in-out infinite;position:relative;overflow:hidden">
+          <div style="position:relative;background:linear-gradient(135deg,#0a0018,#140020,#001a14);border-radius:8px;padding:6px 14px;display:flex;align-items:center;justify-content:space-between;overflow:hidden">
+            <div style="position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:nu-shine 2s ease-in-out infinite;pointer-events:none"></div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <span style="font-size:1rem">🎁</span>
+              <div>
+                <div style="font-size:.55rem;font-weight:900;letter-spacing:.08em;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:rainbow-shift 1.5s linear infinite">✨ 新規登録限定</span>
+                <div style="font-size:.68rem;font-weight:900;color:#fff;letter-spacing:.05em">24時間以内限定ガチャ</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.4);border-radius:6px;padding:3px 8px">
+              <span style="font-size:.58rem;color:rgba(255,255,255,.6)">残り</span>
+              <span class="nu-time" style="font-size:1rem;font-weight:900;font-variant-numeric:tabular-nums;background:linear-gradient(90deg,#ffe600,#fff,#ffe600);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:rainbow-shift 1s linear infinite,nu-text-glow 1.5s ease-in-out infinite;letter-spacing:.03em">${timeStr}</span>
             </div>
           </div>
         </div>`;
