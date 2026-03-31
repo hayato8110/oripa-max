@@ -923,6 +923,7 @@ async function doRegister(){
     id:data.user.id,email,username:name,
     password_hash:'supabase_auth',coin_points:0,
     birth_date:birth,
+    created_at:new Date().toISOString(),
   });
   state.session=data.session;
   await loadUserProfile(data.user.id);
@@ -1944,7 +1945,9 @@ function renderNewUserBanner(){
   const banner=document.getElementById('new-user-banner');
   if(!banner)return;
   if(!state.user){banner.style.display='none';return;}
-  const createdAt=new Date(state.session?.user?.created_at||state.user.created_at||Date.now());
+  // usersテーブルのcreated_at優先（authのcreated_atはUTCでJSTと9時間ずれるため）
+  const rawCreated=state.user.created_at||state.session?.user?.created_at;
+  const createdAt=rawCreated?new Date(rawCreated):new Date();
   const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
   const msLeft=expireAt-Date.now();
   if(msLeft<=0){banner.style.display='none';return;}
@@ -2024,7 +2027,8 @@ function renderPackCards(list){
     // 新規限定のカウントダウン
     let newUserBadge='';
     if(p.is_new_user_only&&state.user){
-      const createdAt=new Date(state.session?.user?.created_at||state.user.created_at||Date.now());
+      const rawCreated2=state.user.created_at||state.session?.user?.created_at;
+      const createdAt=rawCreated2?new Date(rawCreated2):new Date();
       const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
       const msLeft=expireAt-Date.now();
       if(msLeft>0){
