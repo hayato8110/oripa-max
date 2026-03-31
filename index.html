@@ -1818,7 +1818,7 @@ async function executeDraw(){
     const{data:sess}=await db.from('draw_sessions').insert({
       user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
       server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
-      expires_at:new Date(Date.now()+14*24*60*60*1000).toISOString(),
+      expires_at:new Date(Date.now()+7*24*60*60*1000).toISOString(),
     }).select('id').single();
     if(sess?.id){
       session.id=sess.id;
@@ -1875,7 +1875,7 @@ async function loadHistoryFromDB(){
   // 期限切れセッションを自動コイン変換
   const now=new Date();
   for(const s of data){
-    const expiresAt=s.expires_at?new Date(s.expires_at):new Date(new Date(s.created_at).getTime()+14*24*60*60*1000);
+    const expiresAt=s.expires_at?new Date(s.expires_at):new Date(new Date(s.created_at).getTime()+7*24*60*60*1000);
     if(now>expiresAt){
       // 未変換・未発送の賞品をコイン変換
       const results=s.results||[];
@@ -1910,7 +1910,7 @@ async function loadHistoryFromDB(){
   });
   state.sessions=data.map(s=>{
     const pack=state.packs.find(p=>p.id===s.pack_id);
-    const expiresAt=s.expires_at?new Date(s.expires_at):new Date(new Date(s.created_at).getTime()+14*24*60*60*1000);
+    const expiresAt=s.expires_at?new Date(s.expires_at):new Date(new Date(s.created_at).getTime()+7*24*60*60*1000);
     const daysLeft=Math.ceil((expiresAt-new Date())/(1000*60*60*24));
     return{
       id:s.id,packId:s.pack_id,packName:pack?.name||'—',packEmoji:pack?.emoji||'🎴',
