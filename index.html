@@ -1947,10 +1947,8 @@ function renderNewUserBanner(){
   if(!state.user){banner.style.display='none';return;}
   // usersテーブルのcreated_at優先（authのcreated_atはUTCでJSTと9時間ずれるため）
   const rawCreated=state.user.created_at||state.session?.user?.created_at;
-  // DBはUTC保存。JSTで登録しているためUTC+9時間に変換して期限計算
   const createdAt=rawCreated?new Date(rawCreated.replace(' ','T')):new Date();
-  const createdAtJST=new Date(createdAt.getTime()+9*60*60*1000);
-  const expireAt=new Date(createdAtJST.getTime()+24*60*60*1000);
+  const expireAt=new Date(createdAt.getTime()+24*60*60*1000-9*60*60*1000);
   const msLeft=expireAt-Date.now();
   if(msLeft<=0){banner.style.display='none';return;}
   const newUserPacks=state.packs.filter(p=>p.is_new_user_only&&p.is_active!==false);
@@ -2019,8 +2017,7 @@ function renderPackCards(list){
     if(p.is_new_user_only&&state.user){
       const rawCreated2=state.user.created_at||state.session?.user?.created_at;
       const createdAt=rawCreated2?new Date(rawCreated2.replace(' ','T')):new Date();
-      const createdAtJST=new Date(createdAt.getTime()+9*60*60*1000);
-      const expireAt=new Date(createdAtJST.getTime()+24*60*60*1000);
+      const expireAt=new Date(createdAt.getTime()+24*60*60*1000-9*60*60*1000);
       const msLeft=expireAt-Date.now();
       if(msLeft>0){
         const h=Math.floor(msLeft/3600000);
