@@ -951,9 +951,7 @@ async function doForgotPassword(){
 }
 function linkLine(){
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  const lineState=Math.random().toString(36).slice(2);
-  localStorage.setItem('line_state',lineState);
-  localStorage.setItem('line_user_id',state.user.id);
+  const lineState=btoa(state.user.id); // ユーザーIDをbase64エンコードしてstateに埋め込む
   const redirectUri=encodeURIComponent(`${location.origin}/line-callback.html`);
   const url=`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2009627127&redirect_uri=${redirectUri}&state=${lineState}&scope=profile`;
   location.href=url;
