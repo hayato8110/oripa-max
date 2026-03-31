@@ -1947,7 +1947,8 @@ function renderNewUserBanner(){
   if(!state.user){banner.style.display='none';return;}
   // usersテーブルのcreated_at優先（authのcreated_atはUTCでJSTと9時間ずれるため）
   const rawCreated=state.user.created_at||state.session?.user?.created_at;
-  const createdAt=rawCreated?new Date(rawCreated):new Date();
+  // PostgreSQLの「2026-03-17 19:35:09+00」形式をISO形式に変換
+  const createdAt=rawCreated?new Date(rawCreated.replace(' ','T')):new Date();
   const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
   const msLeft=expireAt-Date.now();
   if(msLeft<=0){banner.style.display='none';return;}
@@ -2028,7 +2029,7 @@ function renderPackCards(list){
     let newUserBadge='';
     if(p.is_new_user_only&&state.user){
       const rawCreated2=state.user.created_at||state.session?.user?.created_at;
-      const createdAt=rawCreated2?new Date(rawCreated2):new Date();
+      const createdAt=rawCreated2?new Date(rawCreated2.replace(' ','T')):new Date();
       const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
       const msLeft=expireAt-Date.now();
       if(msLeft>0){
