@@ -2027,7 +2027,7 @@ function renderPackCards(list){
         const m=Math.floor((msLeft%3600000)/60000);
         const s=Math.floor((msLeft%60000)/1000);
         const timeStr=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        newUserBadge=`<div id="nu-countdown-${p.id}" data-expire="${expireAt.getTime()}" style="margin:4px 0 6px;border-radius:10px;padding:3px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff,#ff0080);background-size:200% auto;animation:rainbow-shift 1.5s linear infinite,nu-pulse 2s ease-in-out infinite;position:relative;overflow:hidden">
+        newUserBadge=`<div id="nu-countdown-${p.id}" data-expire="${expireAt.getTime()}" style="margin:4px 0 0;border-radius:10px 10px 0 0;padding:3px 3px 0 3px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff,#ff0080);background-size:200% auto;animation:rainbow-shift 1.5s linear infinite,nu-pulse 2s ease-in-out infinite;position:relative;overflow:hidden">
           <div style="position:relative;background:linear-gradient(135deg,#0a0018,#140020,#001a14);border-radius:8px;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;overflow:hidden">
             <div style="position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:nu-shine 2s ease-in-out infinite;pointer-events:none"></div>
             <div style="display:flex;align-items:center;gap:5px">
@@ -2046,7 +2046,7 @@ function renderPackCards(list){
       }
     }
     return `${newUserBadge}
-    <div class="pack-card" style="${drawnAlready?'opacity:.55;':''}">
+    <div class="pack-card" style="${drawnAlready?'opacity:.55;':''}${newUserBadge?'border-radius:0 0 14px 14px;margin-top:0;border-top:none;box-shadow:0 4px 24px rgba(0,0,0,.5),0 -1px 0 rgba(201,168,76,.1);':''}">
       <div class="pc-banner" onclick="openPackDetail('${p.id}')">
         <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(145deg,#1a1a3a,#2a1a1a)'}">
           ${p.image_url?`<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">`:''}
