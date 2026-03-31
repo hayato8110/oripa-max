@@ -226,7 +226,7 @@ input,select,textarea{font-family:inherit}
           <span class="table-title">全パック一覧</span>
           <input class="search-input" placeholder="🔍 パック名で検索" oninput="filterPacks(this.value)">
         </div>
-        <table class="tbl"><thead><tr><th>パック名</th><th>カテゴリ</th><th>価格</th><th>残り/全</th><th>還元率</th><th>状態</th><th>操作</th></tr></thead>
+        <table class="tbl"><thead><tr><th>パック名</th><th>カテゴリ</th><th>価格</th><th>残り/全</th><th>状態</th><th>操作</th></tr></thead>
         <tbody id="packs-tbl-body"></tbody></table>
       </div>
     </div>
@@ -516,25 +516,13 @@ input,select,textarea{font-family:inherit}
         <div class="form-group"><label class="form-label">絵文字</label><input class="form-input" id="pm-emoji" placeholder="🔥" maxlength="2"></div>
         <div class="form-group"><label class="form-label">価格 *</label><input type="number" class="form-input" id="pm-price" placeholder="3000"></div>
         <div class="form-group"><label class="form-label">全口数 *</label><input type="number" class="form-input" id="pm-total" placeholder="500"></div>
-        <div class="form-group"><label class="form-label">還元率（%）</label><input type="number" class="form-input" id="pm-rate" placeholder="98"></div>
-        <div class="form-group"><label class="form-label">確率テキスト</label><input class="form-input" id="pm-odds" placeholder="1/3でアド確定"></div>
         <div class="form-group"><label class="form-label">天井回数（0=なし）</label><input type="number" class="form-input" id="pm-tenjo" value="0"></div>
-        <div class="form-group"><label class="form-label">最低保証（コイン・0=なし）</label><input type="number" class="form-input" id="pm-min-guarantee" value="0" placeholder="例: 1000"></div>
-        <div class="form-group"><label class="form-label">リボンテキスト</label><input class="form-input" id="pm-ribbon" placeholder="人気No.1"></div>
-        <div class="form-group"><label class="form-label">リボンタイプ</label>
-          <select class="form-select" id="pm-ribbon-type"><option value="hot">🔥 HOT</option><option value="new">✨ NEW</option><option value="limit">⏳ LIMIT</option></select>
-        </div>
         <div class="form-group form-full"><label class="form-label">背景CSS（省略可）</label><input class="form-input" id="pm-bg" placeholder="radial-gradient(...)"></div>
         <div class="form-group"><label class="form-label">表示順</label><input type="number" class="form-input" id="pm-order" value="0"></div>
       </div>
       <div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">
-        <label class="form-check"><input type="checkbox" id="pm-hot"> 🔥 HOT</label>
-        <label class="form-check"><input type="checkbox" id="pm-new"> ✨ NEW</label>
-        <label class="form-check"><input type="checkbox" id="pm-ad"> ✅ アド確定</label>
-        <label class="form-check"><input type="checkbox" id="pm-limit"> ⏳ 残りわずか</label>
         <label class="form-check"><input type="checkbox" id="pm-loop"> 🔄 ループオリパ</label>
         <label class="form-check"><input type="checkbox" id="pm-new-user"> 🆕 新規限定</label>
-        <label class="form-check"><input type="checkbox" id="pm-100x"> 💯 100倍アド確定</label>
         <label class="form-check"><input type="checkbox" id="pm-one-per-user"> 🔒 1人1回限定</label>
         <label class="form-check"><input type="checkbox" id="pm-active" checked> 🟢 公開</label>
       </div>
@@ -675,7 +663,6 @@ input,select,textarea{font-family:inherit}
           <select class="form-select" id="cp-type"><option value="coin">コイン付与</option><option value="percent">割引%</option></select>
         </div>
         <div class="form-group"><label class="form-label">割引量</label><input type="number" class="form-input" id="cp-amount" placeholder="500"></div>
-        <div class="form-group"><label class="form-label">最大使用回数（総数）</label><input type="number" class="form-input" id="cp-max" value="100"></div>
         <div class="form-group"><label class="form-label">配布数上限（0=無制限）</label><input type="number" class="form-input" id="cp-max-total" value="0" placeholder="0=無制限"></div>
         <div class="form-group"><label class="form-label">有効期限</label><input type="datetime-local" class="form-input" id="cp-expires"></div>
       </div>
@@ -872,11 +859,10 @@ function renderPacks(packs){
   document.getElementById('packs-tbl-body').innerHTML=packs.map(p=>{
     const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     return`<tr>
-      <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}${p.is_loop?'<span class="badge badge-active" style="margin-left:4px">ループ</span>':''}${p.is_new_user_only?'<span class="badge badge-gold" style="margin-left:4px">新規限定</span>':''}${p.max_draws_per_user===1?'<span class="badge badge-hot" style="margin-left:4px">1人1回</span>':''}${p.is_100x_ad?'<span class="badge badge-hot" style="margin-left:4px">100倍アド</span>':''}</div></td>
+      <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}${p.is_loop?'<span class="badge badge-active" style="margin-left:4px">ループ</span>':''}${p.is_new_user_only?'<span class="badge badge-gold" style="margin-left:4px">新規限定</span>':''}${p.max_draws_per_user===1?'<span class="badge badge-hot" style="margin-left:4px">1人1回</span>':''}</div></td>
       <td>${p.category||'—'}</td>
       <td>${(p.price||0).toLocaleString()}🪙</td>
       <td>${(p.remaining||0).toLocaleString()}/${(p.total_slots||0).toLocaleString()}<br><span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span></td>
-      <td>${p.return_rate||'—'}%</td>
       <td><span class="badge ${p.is_active?'badge-active':'badge-pause'}">${p.is_active?'公開中':'停止中'}</span></td>
       <td style="white-space:nowrap">
         <button class="btn btn-edit" onclick="editPack('${p.id}')">編集</button>
@@ -892,12 +878,11 @@ function openPackModal(){
   editingPackId=null;prizeBlockCount=0;
   document.getElementById('pack-modal-title').textContent='🎴 新規オリパ作成';
   document.getElementById('prizes-blocks').innerHTML='';
-  ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-rate','pm-odds','pm-ribbon','pm-bg','pm-image-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-bg','pm-image-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   previewPackImage('');
-  document.getElementById('pm-ribbon-type').value='hot';
   document.getElementById('pm-tenjo').value='0';
   document.getElementById('pm-order').value='0';
-  ['pm-hot','pm-new','pm-ad','pm-limit','pm-loop','pm-new-user','pm-100x','pm-one-per-user'].forEach(id=>document.getElementById(id).checked=false);
+  ['pm-loop','pm-new-user','pm-one-per-user'].forEach(id=>document.getElementById(id).checked=false);
   document.getElementById('pm-active').checked=true;
   document.getElementById('pm-draw-1').checked=true;
   document.getElementById('pm-draw-10').checked=true;
@@ -916,14 +901,9 @@ async function editPack(id){
   document.getElementById('pm-emoji').value=pack.emoji||'';
   document.getElementById('pm-price').value=pack.price||'';
   document.getElementById('pm-total').value=pack.total_slots||'';
-  document.getElementById('pm-rate').value=pack.return_rate||'';
-  document.getElementById('pm-odds').value=pack.odds_text||'';
   document.getElementById('pm-tenjo').value=pack.tenjo_limit||'0';
-  document.getElementById('pm-min-guarantee').value=pack.min_guarantee||'0';
-  document.getElementById('pm-ribbon').value=pack.ribbon_text||'';
   document.getElementById('pm-bg').value=pack.bg_style||'';
   document.getElementById('pm-cat').value=pack.category||'pokemon';
-  document.getElementById('pm-ribbon-type').value=pack.ribbon_type||'hot';
   document.getElementById('pm-order').value=pack.sort_order||'0';
   document.getElementById('pm-image-url').value=pack.image_url||'';
   previewPackImage(pack.image_url||'');
@@ -931,13 +911,8 @@ async function editPack(id){
   document.getElementById('pm-draw-1').checked=drawOpts.d1!==false;
   document.getElementById('pm-draw-10').checked=drawOpts.d10||false;
   document.getElementById('pm-draw-100').checked=drawOpts.d100||false;
-  document.getElementById('pm-hot').checked=pack.is_hot||false;
-  document.getElementById('pm-new').checked=pack.is_new||false;
-  document.getElementById('pm-ad').checked=pack.is_ad_confirm||false;
-  document.getElementById('pm-limit').checked=pack.is_limited||false;
   document.getElementById('pm-loop').checked=pack.is_loop||false;
   document.getElementById('pm-new-user').checked=pack.is_new_user_only||false;
-  document.getElementById('pm-100x').checked=pack.is_100x_ad||false;
   document.getElementById('pm-one-per-user').checked=(pack.max_draws_per_user===1)||false;
   document.getElementById('pm-active').checked=pack.is_active!==false;
   document.getElementById('prizes-blocks').innerHTML='';
@@ -1165,7 +1140,7 @@ async function savePack(){
   const name=document.getElementById('pm-name').value;
   if(!name){showToast('⚠️ パック名を入力してください');return;}
   const total=parseInt(document.getElementById('pm-total').value)||0;
-  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,return_rate:parseFloat(document.getElementById('pm-rate').value)||null,odds_text:document.getElementById('pm-odds').value,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,min_guarantee:parseInt(document.getElementById('pm-min-guarantee').value)||0,ribbon_text:document.getElementById('pm-ribbon').value,ribbon_type:document.getElementById('pm-ribbon-type').value,bg_style:document.getElementById('pm-bg').value,image_url:document.getElementById('pm-image-url').value||null,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_hot:document.getElementById('pm-hot').checked,is_new:document.getElementById('pm-new').checked,is_ad_confirm:document.getElementById('pm-ad').checked,is_limited:document.getElementById('pm-limit').checked,is_loop:document.getElementById('pm-loop').checked,is_new_user_only:document.getElementById('pm-new-user').checked,is_100x_ad:document.getElementById('pm-100x').checked,max_draws_per_user:document.getElementById('pm-one-per-user').checked?1:0,is_active:document.getElementById('pm-active').checked,draw_options:JSON.stringify({d1:document.getElementById('pm-draw-1').checked,d10:document.getElementById('pm-draw-10').checked,d100:document.getElementById('pm-draw-100').checked})};
+  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,bg_style:document.getElementById('pm-bg').value,image_url:document.getElementById('pm-image-url').value||null,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_loop:document.getElementById('pm-loop').checked,is_new_user_only:document.getElementById('pm-new-user').checked,max_draws_per_user:document.getElementById('pm-one-per-user').checked?1:0,is_active:document.getElementById('pm-active').checked,draw_options:JSON.stringify({d1:document.getElementById('pm-draw-1').checked,d10:document.getElementById('pm-draw-10').checked,d100:document.getElementById('pm-draw-100').checked})};
   if(!editingPackId)packData.remaining=total;
   let packId=editingPackId;
   if(editingPackId){
@@ -1702,7 +1677,7 @@ async function loadCoupons(){
     <tr>
       <td class="td-bold" style="font-family:monospace;letter-spacing:.08em">${c.code}</td>
       <td>${c.discount_type==='coin'?`🪙 ${c.discount_amount}`:`${c.discount_amount}%OFF`}</td>
-      <td>${c.used_count||0} / ${c.max_uses||'∞'}<br><span style="font-size:.7rem;color:rgba(255,255,255,.4)">配布：${c.total_used||0}/${c.max_total_uses||'∞'}</span></td>
+      <td>配布：${c.total_used||0}/${c.max_total_uses||'∞'}</td>
       <td style="font-size:.72rem">${c.expires_at?new Date(c.expires_at).toLocaleDateString('ja-JP'):'無期限'}</td>
       <td><span class="badge ${c.is_active?'badge-active':'badge-pause'}">${c.is_active?'有効':'無効'}</span></td>
       <td>
@@ -1712,18 +1687,18 @@ async function loadCoupons(){
     </tr>`).join('');
 }
 
-function openCouponModal(){editingCouponId=null;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン作成';document.getElementById('cp-code').value='';document.getElementById('cp-amount').value='';document.getElementById('cp-max').value='100';document.getElementById('cp-max-total').value='0';document.getElementById('cp-expires').value='';document.getElementById('cp-type').value='coin';document.getElementById('cp-active').checked=true;document.getElementById('coupon-modal').classList.add('show');}
+function openCouponModal(){editingCouponId=null;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン作成';document.getElementById('cp-code').value='';document.getElementById('cp-amount').value='';document.getElementById('cp-max-total').value='0';document.getElementById('cp-expires').value='';document.getElementById('cp-type').value='coin';document.getElementById('cp-active').checked=true;document.getElementById('coupon-modal').classList.add('show');}
 function generateCouponCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';for(let i=0;i<8;i++)code+=chars[Math.floor(Math.random()*chars.length)];document.getElementById('cp-code').value=code;}
-function editCoupon(id){const c=allCoupons.find(x=>x.id===id);if(!c)return;editingCouponId=id;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン編集';document.getElementById('cp-code').value=c.code||'';document.getElementById('cp-type').value=c.discount_type||'coin';document.getElementById('cp-amount').value=c.discount_amount||0;document.getElementById('cp-max').value=c.max_uses||100;document.getElementById('cp-max-total').value=c.max_total_uses||0;document.getElementById('cp-expires').value=c.expires_at?new Date(c.expires_at).toISOString().slice(0,16):'';document.getElementById('cp-active').checked=c.is_active!==false;document.getElementById('coupon-modal').classList.add('show');}
+function editCoupon(id){const c=allCoupons.find(x=>x.id===id);if(!c)return;editingCouponId=id;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン編集';document.getElementById('cp-code').value=c.code||'';document.getElementById('cp-type').value=c.discount_type||'coin';document.getElementById('cp-amount').value=c.discount_amount||0;document.getElementById('cp-max-total').value=c.max_total_uses||0;document.getElementById('cp-expires').value=c.expires_at?new Date(c.expires_at).toISOString().slice(0,16):'';document.getElementById('cp-active').checked=c.is_active!==false;document.getElementById('coupon-modal').classList.add('show');}
 async function saveCoupon(){
   const code=document.getElementById('cp-code').value.trim().toUpperCase();
   if(!code){showToast('⚠️ コードを入力してください');return;}
-  const couponData={code,discount_type:document.getElementById('cp-type').value,discount_amount:parseInt(document.getElementById('cp-amount').value)||0,max_uses:parseInt(document.getElementById('cp-max').value)||100,max_total_uses:parseInt(document.getElementById('cp-max-total').value)||0,expires_at:document.getElementById('cp-expires').value||null,is_active:document.getElementById('cp-active').checked};
+  const couponData={code,discount_type:document.getElementById('cp-type').value,discount_amount:parseInt(document.getElementById('cp-amount').value)||0,max_total_uses:parseInt(document.getElementById('cp-max-total').value)||0,expires_at:document.getElementById('cp-expires').value||null,is_active:document.getElementById('cp-active').checked};
   if(editingCouponId)await db.from('coupons').update(couponData).eq('id',editingCouponId);
   else await db.from('coupons').insert(couponData);
   closeModal('coupon-modal');showToast('✅ クーポンを保存しました');loadCoupons();
 }
-async function deleteCoupon(id){confirmDelete('このクーポンを削除します',async()=>{await db.from('coupons').delete().eq('id',id);showToast('🗑️ 削除しました');loadCoupons();});}
+async function deleteCoupon(id){confirmDelete('このクーポンを削除します',async()=>{await db.from('coupon_uses').delete().eq('coupon_id',id);await db.from('coupons').delete().eq('id',id);showToast('🗑️ 削除しました');loadCoupons();});}
 
 /* ══ PUSH ══ */
 async function loadPush(){
