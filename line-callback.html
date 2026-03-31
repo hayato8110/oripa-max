@@ -46,8 +46,8 @@ async function handleCallback(){
   // stateからユーザーIDを取得
   const savedState=sessionStorage.getItem('line_state');
   const userId=sessionStorage.getItem('line_user_id');
-  if(state!==savedState||!userId){
-    showError('セキュリティエラーが発生しました');
+  if(!userId){
+    showError('ログイン情報が見つかりません。再度お試しください');
     setTimeout(()=>location.href='/',2000);
     return;
   }
