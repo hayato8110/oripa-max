@@ -55,16 +55,13 @@ async function handleCallback(){
   try{
     document.getElementById('msg').textContent='LINEアカウントを確認中...';
 
-    // LINEのアクセストークンを取得
-    const tokenRes=await fetch('https://api.line.me/oauth2/v2.1/token',{
+    // LINEのアクセストークンをAPI Route経由で取得（Client Secretをフロントに露出させない）
+    const tokenRes=await fetch('/api/line-token',{
       method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:new URLSearchParams({
-        grant_type:'authorization_code',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
         code,
         redirect_uri:`${location.origin}/line-callback.html`,
-        client_id:LINE_CLIENT_ID,
-        client_secret:'2685ccf02cd1826302e01183b9cb6988',
       })
     });
     const tokenData=await tokenRes.json();
