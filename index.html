@@ -1924,7 +1924,8 @@ async function loadHistoryFromDB(){
           shipped:r.is_shipped||!!shipInfo||false,
           waiting:waitingIds.has(dbId)||false,
           trackingNumber:shipInfo?.tracking||null,
-          shippedAt:shipInfo?.shippedAt||null};
+          shippedAt:shipInfo?.shippedAt||null,
+          expiresAt,daysLeft};
       }),
       date:new Date(s.created_at).toLocaleString('ja-JP'),shipped:false,
     };
