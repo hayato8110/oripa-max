@@ -1944,7 +1944,7 @@ function renderNewUserBanner(){
   const banner=document.getElementById('new-user-banner');
   if(!banner)return;
   if(!state.user){banner.style.display='none';return;}
-  const createdAt=new Date(state.user.created_at||state.user.inserted_at||Date.now());
+  const createdAt=new Date(state.session?.user?.created_at||state.user.created_at||Date.now());
   const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
   const msLeft=expireAt-Date.now();
   if(msLeft<=0){banner.style.display='none';return;}
@@ -1952,41 +1952,24 @@ function renderNewUserBanner(){
   if(!newUserPacks.length){banner.style.display='none';return;}
   banner.style.display='block';
   banner.innerHTML=`
-    <div style="margin:10px 8px;background:linear-gradient(135deg,#0a0a14,#14001a,#0a0a14);border:2px solid transparent;border-radius:14px;overflow:hidden;position:relative;background-clip:padding-box">
-      <div style="position:absolute;inset:0;border-radius:14px;padding:2px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff,#ff0080);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;background-size:200% auto;animation:rainbow-shift 2s linear infinite;pointer-events:none"></div>
-      <div style="padding:12px 16px 8px">
-        <div style="font-size:.65rem;font-weight:900;letter-spacing:.1em;margin-bottom:4px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:rainbow-shift 2s linear infinite">🎁 新規登録24時間限定</div>
-        <div style="font-size:1rem;font-weight:900;color:#fff;margin-bottom:6px">ウェルカムガチャ</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-          <span style="font-size:.62rem;color:rgba(255,255,255,.5);font-weight:700">残り時間</span>
-          <span id="new-user-countdown" style="font-size:1.1rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:rainbow-shift 2s linear infinite;letter-spacing:.05em">--:--:--</span>
+    <div style="margin:8px 8px 0;position:relative">
+      <div style="position:absolute;inset:0;border-radius:12px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff,#ff0080);background-size:200% auto;animation:rainbow-shift 2s linear infinite;z-index:0;padding:2px;border-radius:12px"></div>
+      <div style="position:relative;z-index:1;background:linear-gradient(135deg,#0a0a14,#14001a);border-radius:11px;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;margin:2px">
+        <div>
+          <div style="font-size:.6rem;font-weight:900;letter-spacing:.1em;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:rainbow-shift 2s linear infinite">🎁 新規登録24時間限定</div>
+          <div style="font-size:.78rem;font-weight:900;color:#fff;margin-top:1px">ウェルカムガチャ</div>
         </div>
-      </div>
-      <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
-        ${newUserPacks.map(p=>`
-          <div onclick="openPackDetail('${p.id}')" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
-            <div style="display:flex;align-items:center;gap:10px">
-              ${p.image_url?`<img src="${p.image_url}" style="width:50px;height:50px;object-fit:cover;border-radius:6px">`:`<div style="width:50px;height:50px;background:rgba(201,168,76,.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.8rem">${p.emoji||'🎴'}</div>`}
-              <div>
-                <div style="font-size:.88rem;font-weight:900;color:#fff">${p.name}</div>
-                <div style="font-size:.72rem;color:var(--gold2);font-weight:700;margin-top:2px">${p.price}コイン / 1回　<span style="color:rgba(255,255,255,.5)">残り${(p.remaining||0).toLocaleString()}口</span></div>
-              </div>
-            </div>
-            <div style="font-size:.7rem;color:rgba(255,255,255,.4)">›</div>
-          </div>
-        `).join('')}
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">残り</span>
+          <span id="new-user-countdown" style="font-size:1rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:rainbow-shift 2s linear infinite;letter-spacing:.05em;font-variant-numeric:tabular-nums">--:--:--</span>
+        </div>
       </div>
     </div>`;
 
-  // カウントダウンタイマー
   if(window._newUserTimer)clearInterval(window._newUserTimer);
   function updateCountdown(){
     const left=expireAt-Date.now();
-    if(left<=0){
-      clearInterval(window._newUserTimer);
-      banner.style.display='none';
-      return;
-    }
+    if(left<=0){clearInterval(window._newUserTimer);banner.style.display='none';return;}
     const h=Math.floor(left/3600000);
     const m=Math.floor((left%3600000)/60000);
     const s=Math.floor((left%60000)/1000);
@@ -2015,6 +1998,20 @@ function renderPacks(){
     return;
   }
   container.innerHTML=renderPackCards(list);
+  // 新規限定カウントダウンタイマー起動
+  if(window._nuTimer)clearInterval(window._nuTimer);
+  window._nuTimer=setInterval(()=>{
+    document.querySelectorAll('[id^="nu-countdown-"]').forEach(el=>{
+      const expire=parseInt(el.dataset.expire);
+      const left=expire-Date.now();
+      if(left<=0){el.style.display='none';return;}
+      const h=Math.floor(left/3600000);
+      const m=Math.floor((left%3600000)/60000);
+      const s=Math.floor((left%60000)/1000);
+      const t=el.querySelector('.nu-time');
+      if(t)t.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    });
+  },1000);
 }
 
 function renderPackCards(list){
@@ -2024,7 +2021,24 @@ function renderPackCards(list){
     const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
     const isFav=favorites.has(p.id);
     const drawnAlready=p.max_draws_per_user===1&&state.sessions.some(s=>s.packId===p.id);
-    return `
+    // 新規限定のカウントダウン
+    let newUserBadge='';
+    if(p.is_new_user_only&&state.user){
+      const createdAt=new Date(state.session?.user?.created_at||state.user.created_at||Date.now());
+      const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
+      const msLeft=expireAt-Date.now();
+      if(msLeft>0){
+        const h=Math.floor(msLeft/3600000);
+        const m=Math.floor((msLeft%3600000)/60000);
+        const s=Math.floor((msLeft%60000)/1000);
+        const timeStr=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        newUserBadge=`<div id="nu-countdown-${p.id}" data-expire="${expireAt.getTime()}" style="margin:4px 0 0;background:linear-gradient(135deg,#0a0a14,#14001a);border:1.5px solid;border-image:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff) 1;border-radius:8px;padding:5px 12px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:.6rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">🎁 新規24時間限定</span>
+          <span class="nu-time" style="font-size:.88rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-variant-numeric:tabular-nums">${timeStr}</span>
+        </div>`;
+      }
+    }
+    return `${newUserBadge}
     <div class="pack-card" style="${drawnAlready?'opacity:.55;':''}">
       <div class="pc-banner" onclick="openPackDetail('${p.id}')">
         <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(145deg,#1a1a3a,#2a1a1a)'}">
