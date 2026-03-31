@@ -941,6 +941,16 @@ async function doForgotPassword(){
     showToast('📧 パスワードリセットメールを送信しました',3000);
   });
 }
+function linkLine(){
+  if(!state.user){showToast('⚠️ ログインが必要です');return;}
+  const lineState=Math.random().toString(36).slice(2);
+  sessionStorage.setItem('line_state',lineState);
+  sessionStorage.setItem('line_user_id',state.user.id);
+  const redirectUri=encodeURIComponent(`${location.origin}/line-callback.html`);
+  const url=`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2009627127&redirect_uri=${redirectUri}&state=${lineState}&scope=profile`;
+  location.href=url;
+}
+
 async function doLogout(){
   confirmAction('ログアウトしますか？',async()=>{
     await db.auth.signOut();
@@ -2655,6 +2665,10 @@ function renderMyPage(){
       <div class="mp-menu-item" onclick="openAddressManager()"><span class="mp-menu-icon">📮</span>発送先住所管理<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="showPage('inquiry',null)"><span class="mp-menu-icon">💬</span>お問い合わせ<span class="mp-menu-arrow">›</span></div>
       <div class="mp-menu-item" onclick="doForgotPassword()"><span class="mp-menu-icon">🔑</span>パスワードリセット<span class="mp-menu-arrow">›</span></div>
+      ${state.user?.line_id
+        ?`<div class="mp-menu-item" style="cursor:default"><span class="mp-menu-icon">✅</span>LINE連携済み<span style="font-size:.7rem;color:rgba(255,255,255,.4);margin-left:auto">連携中</span></div>`
+        :`<div class="mp-menu-item" onclick="linkLine()" style="color:#06c755"><span class="mp-menu-icon">💚</span>LINEと連携する<span class="mp-menu-arrow">›</span></div>`
+      }
       <div class="mp-menu-item" onclick="doLogout()"><span class="mp-menu-icon">🚪</span>ログアウト<span class="mp-menu-arrow">›</span></div>
     </div>
 
@@ -2825,6 +2839,12 @@ async function applyCoupon(){
   const code=document.getElementById('coupon-code-input')?.value?.trim()?.toUpperCase();
   if(!code){showToast('⚠️ クーポンコードを入力してください');return;}
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
+  // LINE連携チェック
+  if(!state.user.line_id){
+    showToast('⚠️ クーポン使用にはLINE連携が必要です');
+    setTimeout(()=>showPage('mypage',document.querySelector('[data-page=mypage]')),1500);
+    return;
+  }
   const{data:coupon}=await db.from('coupons').select('*').eq('code',code).eq('is_active',true).single();
   if(!coupon){showToast('⚠️ 無効なクーポンコードです');return;}
 
