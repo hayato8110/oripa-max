@@ -43,9 +43,13 @@ async function handleCallback(){
     return;
   }
 
-  // stateからユーザーIDを取得
-  const savedState=localStorage.getItem('line_state');
-  const userId=localStorage.getItem('line_user_id');
+  // stateにユーザーIDが埋め込まれている
+  let userId;
+  try{
+    userId=atob(state); // base64デコードしてユーザーIDを取得
+  }catch(e){
+    userId=null;
+  }
   if(!userId){
     showError('ログイン情報が見つかりません。再度お試しください');
     setTimeout(()=>location.href='/',2000);
@@ -107,9 +111,6 @@ async function handleCallback(){
     document.getElementById('spinner').style.display='none';
     document.getElementById('msg').textContent='✅ LINE連携が完了しました！';
     document.getElementById('msg').style.color='#4ade80';
-
-    localStorage.removeItem('line_state');
-    localStorage.removeItem('line_user_id');
 
     setTimeout(()=>location.href='/',2000);
 
