@@ -429,7 +429,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     </linearGradient>
   </defs>
 </svg>
-    <span class="h-coin-val" id="h-coin">500</span>
+    <span class="h-coin-val" id="h-coin">0</span>
     <button class="h-coin-plus" onclick="event.stopPropagation();openPurchase()">＋</button>
   </div>
   <button class="h-account" onclick="state.user?showPage('mypage',document.querySelector('[data-page=mypage]')):document.getElementById('auth-modal').classList.add('show')" id="h-account-btn" style="display:flex;align-items:center;justify-content:center;color:rgba(240,234,220,.6)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2708,7 +2708,7 @@ function renderMyPage(){
       <div class="mp-menu-item" onclick="doForgotPassword()"><span class="mp-menu-icon">🔑</span>パスワードリセット<span class="mp-menu-arrow">›</span></div>
       ${state.user?.line_id
         ?`<div class="mp-menu-item" style="cursor:default"><span class="mp-menu-icon">✅</span>LINE連携済み<span style="font-size:.7rem;color:rgba(255,255,255,.4);margin-left:auto">連携中</span></div>`
-        :`<div class="mp-menu-item" onclick="linkLine()" style="color:#06c755"><span class="mp-menu-icon">💚</span>LINEと連携する<span class="mp-menu-arrow">›</span></div>`
+        :`<div class="mp-menu-item" onclick="linkLine()" style="color:#06c755"><span class="mp-menu-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="22" height="22" rx="5" fill="#06C755"/><path d="M11 4.5C7.41 4.5 4.5 7.02 4.5 10.13c0 2.78 2.46 5.1 5.79 5.55.23.05.54.15.62.34.07.17.05.44.02.61l-.1.6c-.03.17-.14.68.6.37.73-.31 3.97-2.34 5.41-4.01A4.94 4.94 0 0 0 17.5 10.13C17.5 7.02 14.59 4.5 11 4.5Z" fill="white"/><path d="M9.17 11.84H8.1a.2.2 0 0 1-.2-.2V8.96c0-.11.09-.2.2-.2h.37c.11 0 .2.09.2.2v2.32h.5c.11 0 .2.09.2.2v.36c0 .11-.09.2-.2.2ZM10.3 11.84h-.37a.2.2 0 0 1-.2-.2V8.96c0-.11.09-.2.2-.2h.37c.11 0 .2.09.2.2v2.68c0 .11-.09.2-.2.2ZM13.23 11.84h-.37a.2.2 0 0 1-.16-.08l-1.22-1.65v1.53c0 .11-.09.2-.2.2h-.37a.2.2 0 0 1-.2-.2V8.96c0-.11.09-.2.2-.2h.37c.06 0 .12.03.16.08l1.22 1.65V8.96c0-.11.09-.2.2-.2h.37c.11 0 .2.09.2.2v2.68c0 .11-.09.2-.2.2ZM14.98 9.52h-.9v.52h.9c.11 0 .2.09.2.2v.36c0 .11-.09.2-.2.2h-.9v.52h.9c.11 0 .2.09.2.2v.36c0 .11-.09.2-.2.2h-1.47a.2.2 0 0 1-.2-.2V8.96c0-.11.09-.2.2-.2h1.47c.11 0 .2.09.2.2v.36c0 .11-.09.2-.2.2Z" fill="#06C755"/></svg></span>LINEと連携する<span class="mp-menu-arrow">›</span></div>`
       }
       <div class="mp-menu-item" onclick="doLogout()"><span class="mp-menu-icon">🚪</span>ログアウト<span class="mp-menu-arrow">›</span></div>
     </div>
