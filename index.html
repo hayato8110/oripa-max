@@ -84,23 +84,9 @@ input,select,textarea{font-family:inherit;outline:none}
 .pcb-char{position:absolute;right:14px;bottom:52px;z-index:3;font-size:5.5rem;line-height:1;filter:drop-shadow(2px 8px 18px rgba(0,0,0,.5));animation:flt 3.5s ease-in-out infinite}
 @keyframes flt{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
 .pcb-content{position:relative;z-index:4;padding:10px 12px 10px;display:flex;flex-direction:column;gap:4px}
-.pcb-ribbon{display:inline-flex;align-items:center;font-size:.6rem;font-weight:900;letter-spacing:.06em;padding:2px 10px 2px 8px;border-radius:2px;align-self:flex-start;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 50%,calc(100% - 5px) 100%,0 100%)}
-.ribbon-hot{background:var(--primary);color:#fff}
-.ribbon-new{background:#2563eb;color:#fff}
-.ribbon-limit{background:#7c3aed;color:#fff}
-.pcb-top-row{display:flex;align-items:flex-end;justify-content:space-between;gap:6px}
-.pcb-name{font-size:1.45rem;font-weight:900;color:#fff;line-height:1.15;text-shadow:1px 2px 8px rgba(0,0,0,.5)}
-.pcb-series{font-size:.68rem;color:rgba(255,255,255,.65);margin-top:1px}
-
 .pcb-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
 .pcb-chip{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.45);border-radius:4px;padding:2px 8px;backdrop-filter:blur(4px)}
 .pcb-chip span{font-size:.63rem;font-weight:700;color:rgba(255,255,255,.85)}
-.pcb-tiers{display:flex;gap:3px;flex-wrap:wrap;margin-top:2px}
-.tier-pill{font-size:.56rem;font-weight:900;padding:2px 7px;border-radius:3px}
-.tp-s{background:rgba(232,56,13,.9);color:#fff}
-.tp-a{background:rgba(124,58,237,.85);color:#fff}
-.tp-b{background:rgba(37,99,235,.85);color:#fff}
-.tp-c{background:rgba(0,0,0,.4);color:rgba(255,255,255,.7)}
 
 /* ══ PACK BOTTOM ══ */
 .pc-bottom{padding:10px 12px 14px;background:var(--card-bg);border-top:1px solid rgba(201,168,76,.1)}
@@ -1063,7 +1049,6 @@ function getVideoForTier(tier){
 const rfClass={sar:'rf-sar',sr:'rf-sr',rr:'rf-rr',r:'rf-r',c:'rf-c'};
 const rarLabel={sar:'SAR ✨',sr:'SR 💜',rr:'RR 💙',r:'R',c:'C'};
 const tierPillClass={sar:'tp-s',sr:'tp-a',rr:'tp-b',r:'tp-c',c:'tp-c'};
-const ribbonClass={hot:'ribbon-hot',new:'ribbon-new',limit:'ribbon-limit'};
 const TIER_TO_COLOR={c:'white',r:'blue',rr:'green',sr:'red',sar:'gold'};
 let gachaResults=[],gachaSkipped=false;
 
@@ -1806,6 +1791,13 @@ async function executeDraw(){
   if(packInState){
     packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
     packInState.remaining=Math.max(0,(packInState.remaining||0)-results.length);
+
+    // ループオリパ：売り切れたら自動リセット
+    if(packInState.is_loop&&packInState.remaining<=0){
+      packInState.remaining=packInState.total_slots||0;
+      packInState.prizes=packInState.prizes.map(p=>({...p,remaining_qty:p.quantity||0}));
+      showToast('🔄 ループ！次のラウンドが始まりました',2000);
+    }
   }
 
   const sessionId=generateSeed().slice(0,8);
@@ -1818,7 +1810,11 @@ async function executeDraw(){
 
   try{
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
-    await db.from('packs').update({remaining:packInState?.remaining||0}).eq('id',pack.id);
+    const newRemaining=packInState?.remaining||0;
+    await db.from('packs').update({
+      remaining:newRemaining,
+      draw_count:(pack.draw_count||0)+results.length,
+    }).eq('id',pack.id);
     const{data:sess}=await db.from('draw_sessions').insert({
       user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
       server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
@@ -1987,8 +1983,6 @@ function renderPacks(){
   if(state.currentCat!=='all')list=list.filter(p=>p.category===state.currentCat);
   if(state.currentSort==='hot')list.sort((a,b)=>(b.draw_count||0)-(a.draw_count||0));
   else if(state.currentSort==='cheap')list.sort((a,b)=>a.price-b.price);
-  else if(state.currentSort==='ad')list=list.filter(p=>p.is_ad_confirmed);
-  else if(state.currentSort==='rate')list.sort((a,b)=>(b.return_rate||0)-(a.return_rate||0));
   else list.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   // SOLD OUTを常に一番下に
   list.sort((a,b)=>{
@@ -2009,7 +2003,6 @@ function renderPackCards(list){
     const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     const barClass=pct<10?'danger':pct<30?'warn':'';
     const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
-    const tiers=prizes.map(pr=>`<span class="tier-pill ${tierPillClass[pr.tier]}">${pr.tier_label} ${pr.quantity}枚</span>`).join('');
     const isFav=favorites.has(p.id);
     const drawnAlready=p.max_draws_per_user===1&&state.sessions.some(s=>s.packId===p.id);
     return `
