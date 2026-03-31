@@ -44,8 +44,8 @@ async function handleCallback(){
   }
 
   // stateからユーザーIDを取得
-  const savedState=sessionStorage.getItem('line_state');
-  const userId=sessionStorage.getItem('line_user_id');
+  const savedState=localStorage.getItem('line_state');
+  const userId=localStorage.getItem('line_user_id');
   if(!userId){
     showError('ログイン情報が見つかりません。再度お試しください');
     setTimeout(()=>location.href='/',2000);
@@ -108,8 +108,8 @@ async function handleCallback(){
     document.getElementById('msg').textContent='✅ LINE連携が完了しました！';
     document.getElementById('msg').style.color='#4ade80';
 
-    sessionStorage.removeItem('line_state');
-    sessionStorage.removeItem('line_user_id');
+    localStorage.removeItem('line_state');
+    localStorage.removeItem('line_user_id');
 
     setTimeout(()=>location.href='/',2000);
 
