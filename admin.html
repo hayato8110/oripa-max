@@ -485,7 +485,7 @@ input,select,textarea{font-family:inherit}
       <div class="form-grid">
         <div class="form-group form-full"><label class="form-label">パック名 *</label><input class="form-input" id="pm-name" placeholder="例: リザードン伝説オリパ"></div>
         <div class="form-group form-full">
-          <label class="form-label">サムネイル画像</label>
+          <label class="form-label">サムネイル画像 <span style="font-size:.68rem;color:rgba(255,200,50,.7);font-weight:400">推奨: 750×420px / 16:9 / JPG・PNG・WebP / 2MB以下</span></label>
           <!-- プレビューエリア（クリックでアップロード） -->
           <label for="pm-image-file" style="display:block;cursor:pointer">
             <div id="pm-image-preview-wrap" style="width:100%;height:120px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:6px;transition:.2s;position:relative"
@@ -550,7 +550,7 @@ input,select,textarea{font-family:inherit}
 
       <!-- 画像アップロード（メイン） -->
       <div style="margin-bottom:14px">
-        <label class="form-label" style="margin-bottom:6px;display:block">📷 バナー画像</label>
+        <label class="form-label" style="margin-bottom:6px;display:block">📷 バナー画像 <span style="font-size:.68rem;color:rgba(255,200,50,.7);font-weight:400">推奨: 1200×400px / 3:1 / JPG・PNG・WebP / 2MB以下</span></label>
 
         <!-- ファイル選択ボタン（スマホでも確実に動く） -->
         <label for="bn-file" style="display:block;width:100%;cursor:pointer">
@@ -628,6 +628,7 @@ input,select,textarea{font-family:inherit}
             <input type="file" accept="video/*,video/mp4" style="display:none" onchange="uploadVideoFile(this)">
           </label>
         </div>
+        <div style="font-size:.65rem;color:rgba(255,200,50,.7);margin-top:4px">推奨: MP4 / 縦向き9:16 または 横向き16:9 / 30秒以内 / 50MB以下</div>
         <div id="vd-upload-progress" style="display:none;margin-top:8px">
           <div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden">
             <div id="vd-progress-bar" style="height:100%;background:var(--gold2);width:0%;transition:.3s"></div>
@@ -1026,6 +1027,7 @@ function addPrizeBlock(prize){
       </div>
       <input type="file" accept="image/*" style="display:none" id="prize-file-${idx}" onchange="uploadBlockImage(this,${idx})">
       <input class="form-input prize-img" id="prize-img-${idx}" style="padding:4px 8px;font-size:.62rem;width:100%" placeholder="または画像URLを貼り付け" value="${prize?.image_url||''}" oninput="previewBlockImage(this,${idx})">
+      <div style="font-size:.6rem;color:rgba(255,200,50,.7);margin-top:3px">推奨: 400×400px / 1:1 / JPG・PNG / 1MB以下</div>
     </div>
 
     <!-- 賞品名 -->
