@@ -1954,21 +1954,9 @@ function renderNewUserBanner(){
   if(msLeft<=0){banner.style.display='none';return;}
   const newUserPacks=state.packs.filter(p=>p.is_new_user_only&&p.is_active!==false);
   if(!newUserPacks.length){banner.style.display='none';return;}
-  banner.style.display='block';
-  banner.innerHTML=`
-    <div style="margin:8px 8px 0;position:relative">
-      <div style="position:absolute;inset:0;border-radius:12px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff,#ff0080);background-size:200% auto;animation:rainbow-shift 2s linear infinite;z-index:0;padding:2px;border-radius:12px"></div>
-      <div style="position:relative;z-index:1;background:linear-gradient(135deg,#0a0a14,#14001a);border-radius:11px;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;margin:2px">
-        <div>
-          <div style="font-size:.6rem;font-weight:900;letter-spacing:.1em;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:rainbow-shift 2s linear infinite">🎁 新規登録24時間限定</div>
-          <div style="font-size:.78rem;font-weight:900;color:#fff;margin-top:1px">ウェルカムガチャ</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px">
-          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">残り</span>
-          <span id="new-user-countdown" style="font-size:1rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:rainbow-shift 2s linear infinite;letter-spacing:.05em;font-variant-numeric:tabular-nums">--:--:--</span>
-        </div>
-      </div>
-    </div>`;
+  // 上バナーは非表示（パックカード側に統合）
+  banner.style.display='none';
+  banner.innerHTML='';
 
   if(window._newUserTimer)clearInterval(window._newUserTimer);
   function updateCountdown(){
@@ -2037,9 +2025,14 @@ function renderPackCards(list){
         const m=Math.floor((msLeft%3600000)/60000);
         const s=Math.floor((msLeft%60000)/1000);
         const timeStr=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        newUserBadge=`<div id="nu-countdown-${p.id}" data-expire="${expireAt.getTime()}" style="margin:4px 0 0;background:linear-gradient(135deg,#0a0a14,#14001a);border:1.5px solid;border-image:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff) 1;border-radius:8px;padding:5px 12px;display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:.6rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">🎁 新規24時間限定</span>
-          <span class="nu-time" style="font-size:.88rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-variant-numeric:tabular-nums">${timeStr}</span>
+        newUserBadge=`<div id="nu-countdown-${p.id}" data-expire="${expireAt.getTime()}" style="margin:4px 0 0;border-radius:8px;padding:2px;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff,#ff0080);background-size:200% auto;animation:rainbow-shift 2s linear infinite">
+          <div style="background:#0a0a14;border-radius:6px;padding:5px 12px;display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:.6rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">🎁 新規24時間限定</span>
+            <div style="display:flex;align-items:center;gap:3px">
+              <span style="font-size:.6rem;color:rgba(255,255,255,.5)">残り</span>
+              <span class="nu-time" style="font-size:.88rem;font-weight:900;background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-variant-numeric:tabular-nums">${timeStr}</span>
+            </div>
+          </div>
         </div>`;
       }
     }
