@@ -1795,13 +1795,12 @@ async function executeDraw(){
 
   // stateを更新
   const packInState=state.packs.find(p=>p.id===pack.id);
+  const newRemaining=freshPrizes.filter(p=>p.is_active!==false).reduce((sum,p)=>sum+prizeStock[p.id],0);
   if(packInState){
     packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
-    packInState.remaining=Math.max(0,(packInState.remaining||0)-results.length);
-
+    packInState.remaining=newRemaining;
     // ONの在庫が全部0になったらSOLD OUT
-    const hasActiveStock=freshPrizes.some(p=>p.is_active!==false&&prizeStock[p.id]>0);
-    if(!hasActiveStock){
+    if(newRemaining<=0){
       showToast('📦 このオリパは完売しました！',2000);
     }
   }
@@ -1816,7 +1815,6 @@ async function executeDraw(){
 
   try{
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
-    const newRemaining=packInState?.remaining||0;
     await db.from('packs').update({
       remaining:newRemaining,
       draw_count:(pack.draw_count||0)+results.length,
