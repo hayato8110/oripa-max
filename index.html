@@ -856,7 +856,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 <script>
 /* ══ SUPABASE ══ */
 async function fetchPacks(){
-  const{data}=await db.from('packs').select('*,prizes(*)').eq('is_active',true).order('sort_order');
+  const{data}=await db.from('packs').select('*,prizes(*)').order('sort_order');
   return data||[];
 }
 async function fetchBanners(){
@@ -1802,8 +1802,6 @@ async function executeDraw(){
     // ONの在庫が全部0になったらSOLD OUT
     const hasActiveStock=freshPrizes.some(p=>p.is_active!==false&&prizeStock[p.id]>0);
     if(!hasActiveStock){
-      await db.from('packs').update({is_active:false}).eq('id',pack.id);
-      packInState.is_active=false;
       showToast('📦 このオリパは完売しました！',2000);
     }
   }
@@ -1955,7 +1953,7 @@ function renderNewUserBanner(){
   // usersテーブルのcreated_at優先（authのcreated_atはUTCでJSTと9時間ずれるため）
   const rawCreated=state.user.created_at||state.session?.user?.created_at;
   const createdAt=rawCreated?new Date(rawCreated.replace(' ','T')):new Date();
-  const expireAt=new Date(createdAt.getTime()+24*60*60*1000-9*60*60*1000);
+  const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
   const msLeft=expireAt-Date.now();
   if(msLeft<=0){banner.style.display='none';return;}
   const newUserPacks=state.packs.filter(p=>p.is_new_user_only&&p.is_active!==false);
@@ -1980,12 +1978,14 @@ function renderNewUserBanner(){
 
 function renderPacks(){
   let list=[...state.packs];
+  // 管理者が非公開にしたパック（在庫あり）は非表示。完売（remaining=0）は表示
+  list=list.filter(p=>p.is_active!==false||(p.remaining||0)<=0);
   if(state.currentCat!=='all')list=list.filter(p=>p.category===state.currentCat);
   // 新規限定パック：ログイン済みで期限切れなら非表示（未ログインは表示）
   if(state.user){
     const rawCreated=state.user.created_at||state.session?.user?.created_at;
     const createdAt=rawCreated?new Date(rawCreated.replace(' ','T')):new Date();
-    const expireAt=new Date(createdAt.getTime()+24*60*60*1000-9*60*60*1000);
+    const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
     const msLeft=expireAt-Date.now();
     if(msLeft<=0)list=list.filter(p=>!p.is_new_user_only);
   }
@@ -2032,7 +2032,7 @@ function renderPackCards(list){
     if(p.is_new_user_only&&state.user){
       const rawCreated2=state.user.created_at||state.session?.user?.created_at;
       const createdAt=rawCreated2?new Date(rawCreated2.replace(' ','T')):new Date();
-      const expireAt=new Date(createdAt.getTime()+24*60*60*1000-9*60*60*1000);
+      const expireAt=new Date(createdAt.getTime()+24*60*60*1000);
       const msLeft=expireAt-Date.now();
       if(msLeft>0){
         const h=Math.floor(msLeft/3600000);
