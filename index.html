@@ -644,9 +644,9 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     </linearGradient>
   </defs>
 </svg> コインをチャージ</div>
-      <div style="font-size:.75rem;color:var(--text3);margin-top:2px">1コイン = 1円相当</div>
+      <div style="font-size:.75rem;color:#fff;margin-top:2px;opacity:.8">1コイン = 1円相当</div>
     </div>
-    <div style="padding:12px 16px" id="purchase-plans"></div>
+    <div style="padding:12px 16px;list-style:none" id="purchase-plans"></div>
     <div style="padding:8px 16px 20px">
       <button onclick="closePurchase()" style="width:100%;padding:13px;background:rgba(255,255,255,.12);border-radius:10px;color:#fff;font-weight:900;font-size:.9rem;border:1.5px solid rgba(255,255,255,.2)">✕ 閉じる</button>
     </div>
@@ -2845,7 +2845,7 @@ function openPurchase(){
     `+plans.map(p=>`
     <div class="plan-item" id="plan-${p.price}" onclick="selectPlan(${p.price},${p.coins})">
       <div style="display:flex;align-items:center;gap:10px">
-        <div id="radio-${p.price}" style="width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.3);flex-shrink:0;transition:.15s"></div>
+        <div id="radio-${p.price}" style="width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);flex-shrink:0;transition:.15s;box-sizing:border-box"></div>
         <div class="plan-jp"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;flex-shrink:0;margin-right:2px"><circle cx="11" cy="11" r="10" fill="url(#mcg1a)" stroke="url(#mcg1b)" stroke-width="1"/><circle cx="11" cy="11" r="7.5" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="mcg1a" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="mcg1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg> ${p.coins.toLocaleString()}コイン</div>
       </div>
       <div class="plan-price">¥${p.price.toLocaleString()}</div>
@@ -3270,8 +3270,8 @@ async function openCoinHistory(){
   document.getElementById('coin-history-list').innerHTML=(data||[]).map(t=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border)">
       <div>
-        <div style="font-size:.82rem;font-weight:700;color:var(--text)">${typeLabel[t.type]||t.type}</div>
-        <div style="font-size:.7rem;color:var(--text3)">${t.description||'—'} · ${new Date(t.created_at).toLocaleDateString('ja-JP')}</div>
+        <div style="font-size:.82rem;font-weight:700;color:#fff">${typeLabel[t.type]||t.type}</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.6)">${t.description||'—'} · ${new Date(t.created_at).toLocaleDateString('ja-JP')}</div>
       </div>
       <div style="font-size:.9rem;font-weight:900;color:${t.amount>0?'var(--green)':'var(--primary)'}">${t.amount>0?'+':''}${t.amount.toLocaleString()}</div>
     </div>`).join('')||'<div style="padding:40px;text-align:center;color:var(--text3)">履歴がありません</div>';
