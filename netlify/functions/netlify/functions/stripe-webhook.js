@@ -6,19 +6,24 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-exports.handler = async (event) => {
-  const sig = event.headers['stripe-signature'];
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  const sig = req.headers['stripe-signature'];
   let stripeEvent;
 
   try {
+    const rawBody = await getRawBody(req);
     stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
     console.error('Webhook signature error:', err.message);
-    return { statusCode: 400, body: `Webhook Error: ${err.message}` };
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (stripeEvent.type === 'checkout.session.completed') {
@@ -26,7 +31,6 @@ exports.handler = async (event) => {
     const { userId, planId, coin, bonus } = session.metadata;
 
     try {
-      // ユーザーのコインを取得
       const { data: user, error: userError } = await supabase
         .from('users')
         .select('coin_points')
@@ -35,19 +39,17 @@ exports.handler = async (event) => {
 
       if (userError || !user) {
         console.error('User not found:', userId);
-        return { statusCode: 400, body: 'User not found' };
+        return res.status(400).send('User not found');
       }
 
       const totalCoin = parseInt(coin) + parseInt(bonus);
       const newCoin = (user.coin_points || 0) + totalCoin;
 
-      // コインを付与
       await supabase
         .from('users')
         .update({ coin_points: newCoin })
         .eq('id', userId);
 
-      // 購入履歴を保存
       await supabase
         .from('point_purchases')
         .insert({
@@ -59,7 +61,6 @@ exports.handler = async (event) => {
           stripe_session_id: session.id,
         });
 
-      // トランザクション記録
       await supabase
         .from('transactions')
         .insert({
@@ -73,9 +74,25 @@ exports.handler = async (event) => {
       console.log(`✅ コイン付与完了: ${userId} → +${totalCoin}コイン`);
     } catch (error) {
       console.error('Database error:', error);
-      return { statusCode: 500, body: 'Database error' };
+      return res.status(500).send('Database error');
     }
   }
 
-  return { statusCode: 200, body: JSON.stringify({ received: true }) };
+  return res.status(200).json({ received: true });
+}
+
+// Vercelではbodyのraw取得が必要
+async function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; });
+    req.on('end', () => resolve(data));
+    req.on('error', reject);
+  });
+}
+
+export const config = {
+  api: {
+    bodyParser: false, // Stripe署名検証のためraw bodyが必要
+  },
 };
