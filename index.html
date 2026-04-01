@@ -1789,18 +1789,22 @@ async function executeDraw(){
 
   if(!results.length){showToast('⚠️ 在庫がありません');return;}
 
-  // DBの在庫を更新
-  await Promise.all(freshPrizes.map(p=>
-    db.from('prizes').update({remaining_qty:prizeStock[p.id]}).eq('id',p.id)
+  // DBの在庫を更新（引いた賞品のみ減算）
+  const usedPrizes={};
+  results.forEach(r=>{usedPrizes[r.prize.id]=(usedPrizes[r.prize.id]||0)+1;});
+  await Promise.all(Object.entries(usedPrizes).map(([id,used])=>
+    db.from('prizes').update({remaining_qty:Math.max(0,prizeStock[id])}).eq('id',id)
   ));
 
   // stateを更新
   const packInState=state.packs.find(p=>p.id===pack.id);
-  const newRemaining=Math.max(0,(packInState?.remaining||pack.remaining||0)-results.length);
+  const onStockTotal=freshPrizes.filter(p=>p.is_active!==false).reduce((s,p)=>s+prizeStock[p.id],0);
+  const newRemaining=onStockTotal<=0?0:Math.max(0,(packInState?.remaining||pack.remaining||0)-results.length);
   if(packInState){
     packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
     packInState.remaining=newRemaining;
     packInState.draw_count=(packInState.draw_count||0)+results.length;
+    if(newRemaining<=0)showToast('📦 このオリパは完売しました！',2000);
   }
 
   const sessionId=generateSeed().slice(0,8);
