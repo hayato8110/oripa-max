@@ -1977,6 +1977,14 @@ function renderNewUserBanner(){
 function renderPacks(){
   let list=[...state.packs];
   if(state.currentCat!=='all')list=list.filter(p=>p.category===state.currentCat);
+  // 新規限定パック：ログイン済みで期限切れなら非表示（未ログインは表示）
+  if(state.user){
+    const rawCreated=state.user.created_at||state.session?.user?.created_at;
+    const createdAt=rawCreated?new Date(rawCreated.replace(' ','T')):new Date();
+    const expireAt=new Date(createdAt.getTime()+24*60*60*1000-9*60*60*1000);
+    const msLeft=expireAt-Date.now();
+    if(msLeft<=0)list=list.filter(p=>!p.is_new_user_only);
+  }
   if(state.currentSort==='hot')list.sort((a,b)=>(b.draw_count||0)-(a.draw_count||0));
   else if(state.currentSort==='cheap')list.sort((a,b)=>a.price-b.price);
   else list.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
