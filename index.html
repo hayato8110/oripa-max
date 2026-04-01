@@ -856,7 +856,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 <script>
 /* ══ SUPABASE ══ */
 async function fetchPacks(){
-  const{data}=await db.from('packs').select('*,prizes(*)').eq('is_active',true).order('sort_order');
+  const{data}=await db.from('packs').select('*,prizes(*)').order('sort_order');
   return data||[];
 }
 async function fetchBanners(){
@@ -1972,6 +1972,7 @@ function renderNewUserBanner(){
 
 function renderPacks(){
   let list=[...state.packs];
+  list=list.filter(p=>p.is_active!==false||(p.remaining||0)<=0);
   if(state.currentCat!=='all')list=list.filter(p=>p.category===state.currentCat);
   // 新規限定パック：ログイン済みで期限切れなら非表示（未ログインは表示）
   if(state.user){
