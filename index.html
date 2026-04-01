@@ -1602,7 +1602,7 @@ function showResultDetail(session){
 
   renderCards();
   document.body.appendChild(wrap);
-  wrap.querySelector('#rd-later').addEventListener('click',()=>{wrap.remove();renderItemsPage();});
+  wrap.querySelector('#rd-later').addEventListener('click',()=>{wrap.remove();renderPacks();renderItemsPage();});
 }
 
 function rdShip(dbId){openShippingModal(dbId);}
@@ -1833,6 +1833,7 @@ async function executeDraw(){
       session.results.forEach((r,i)=>{r.sessionId=sess.id;r.dbId=sess.id+'_'+i;});
     }
   }catch(e){console.error('DB save error:',e);}
+  renderPacks();
   startGachaAnimation(session.results,pack);
 }
 
