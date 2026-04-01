@@ -1475,6 +1475,7 @@ function showResultDetail(session){
         +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||rarLabel[r.prize.tier]||r.prize.tier)+'\u8CDE</span>'
         +(c>0?'<span style="font-size:.85rem;color:#c8860a;font-weight:900">'+c+'\u30B3\u30A4\u30F3</span>':'')
         +'</div>'
+        +(session.expiresAt?'<div style="font-size:.68rem;font-weight:700;color:#999;margin-top:4px">交換期限：'+(()=>{var d=new Date(session.expiresAt);return d.getFullYear()+'/'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'/'+( d.getDate()<10?'0':'')+d.getDate();})()+'</div>':'')
         +'</div></div>';
 
       card.addEventListener('click',()=>{
@@ -1805,16 +1806,18 @@ async function executeDraw(){
     id:sessionId,packId:pack.id,packName:pack.name,packEmoji:pack.emoji||'🎴',
     results:results.map((r,i)=>({dbId:sessionId+'_'+i,sessionId,resultIndex:i,prize:r.prize,converted:false,shipped:false})),
     cost,date:new Date().toLocaleString('ja-JP'),shipped:false,
+    expiresAt:new Date(Date.now()+7*24*60*60*1000),daysLeft:7,
   };
   state.sessions.unshift(session);
 
   try{
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
     const newRemaining=packInState?.remaining||0;
-    await db.from('packs').update({
+    const{error:puErr}=await db.from('packs').update({
       remaining:newRemaining,
       draw_count:(pack.draw_count||0)+results.length,
     }).eq('id',pack.id);
+    if(puErr)console.error('packs update error:',puErr.message);
     const{data:sess}=await db.from('draw_sessions').insert({
       user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
       server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
