@@ -1445,6 +1445,7 @@ function showResultDetail(session){
     minNote.style.display=(shipCnt>0&&!shipOk)?'block':'none';
   }
 
+  function fmtDate(d){const dt=new Date(d);return dt.getFullYear()+'/'+String(dt.getMonth()+1).padStart(2,'0')+'/'+String(dt.getDate()).padStart(2,'0');}
   function renderCards(){
     scroll.innerHTML='';
     const items=getItems();
@@ -1465,7 +1466,7 @@ function showResultDetail(session){
 
       card.innerHTML=
         '<div style="display:flex;align-items:stretch;min-height:110px">'
-        +'<div style="width:110px;flex-shrink:0;background:#f0f0f0;overflow:hidden">'
+        +'<div style="width:120px;min-height:120px;flex-shrink:0;background:#f0f0f0;overflow:hidden">'
         +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem">'+(pack?.emoji||'\uD83C\uDFB4')+'</div>')
         +'</div>'
         +'<div style="flex:1;padding:14px;display:flex;flex-direction:column;justify-content:center;position:relative">'
@@ -1475,6 +1476,7 @@ function showResultDetail(session){
         +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||rarLabel[r.prize.tier]||r.prize.tier)+'\u8CDE</span>'
         +(c>0?'<span style="font-size:.85rem;color:#c8860a;font-weight:900">'+c+'\u30B3\u30A4\u30F3</span>':'')
         +'</div>'
+        +(session.expiresAt?'<div style="font-size:.68rem;font-weight:700;color:#999;margin-top:6px">交換期限：'+fmtDate(session.expiresAt)+'</div>':'')
         +'</div></div>';
 
       card.addEventListener('click',()=>{
@@ -1799,6 +1801,7 @@ async function executeDraw(){
   if(packInState){
     packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
     packInState.remaining=newRemaining;
+    packInState.draw_count=(packInState.draw_count||0)+results.length;
     // ONの在庫が全部0になったらSOLD OUT
     if(newRemaining<=0){
       showToast('📦 このオリパは完売しました！',2000);
@@ -1810,15 +1813,17 @@ async function executeDraw(){
     id:sessionId,packId:pack.id,packName:pack.name,packEmoji:pack.emoji||'🎴',
     results:results.map((r,i)=>({dbId:sessionId+'_'+i,sessionId,resultIndex:i,prize:r.prize,converted:false,shipped:false})),
     cost,date:new Date().toLocaleString('ja-JP'),shipped:false,
+    expiresAt:new Date(Date.now()+7*24*60*60*1000),daysLeft:7,
   };
   state.sessions.unshift(session);
 
   try{
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
-    await db.from('packs').update({
+    const{error:packUpdErr}=await db.from('packs').update({
       remaining:newRemaining,
-      draw_count:(pack.draw_count||0)+results.length,
+      draw_count:(packInState?.draw_count||pack.draw_count||0),
     }).eq('id',pack.id);
+    if(packUpdErr)console.error('packs update error:',packUpdErr);
     const{data:sess}=await db.from('draw_sessions').insert({
       user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
       server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
