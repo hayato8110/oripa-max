@@ -1779,7 +1779,7 @@ async function executeDraw(){
   // 抽選（在庫がある賞品のみ）
   const results=[];
   for(let i=0;i<state.drawCount;i++){
-    const available=freshPrizes.filter(p=>prizeStock[p.id]>0);
+    const available=freshPrizes.filter(p=>prizeStock[p.id]>0&&p.is_active!==false);
     if(!available.length)break;
     const prize=pickPrize(available,Math.random());
     results.push({prize});
@@ -1799,11 +1799,12 @@ async function executeDraw(){
     packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
     packInState.remaining=Math.max(0,(packInState.remaining||0)-results.length);
 
-    // ループオリパ：売り切れたら自動リセット
-    if(packInState.is_loop&&packInState.remaining<=0){
-      packInState.remaining=packInState.total_slots||0;
-      packInState.prizes=packInState.prizes.map(p=>({...p,remaining_qty:p.quantity||0}));
-      showToast('🔄 ループ！次のラウンドが始まりました',2000);
+    // ONの在庫が全部0になったらSOLD OUT
+    const hasActiveStock=freshPrizes.some(p=>p.is_active!==false&&prizeStock[p.id]>0);
+    if(!hasActiveStock){
+      await db.from('packs').update({is_active:false}).eq('id',pack.id);
+      packInState.is_active=false;
+      showToast('📦 このオリパは完売しました！',2000);
     }
   }
 
