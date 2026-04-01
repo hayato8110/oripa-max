@@ -1163,9 +1163,18 @@ async function savePack(){
   if(!name){showToast('⚠️ パック名を入力してください');return;}
   const total=parseInt(document.getElementById('pm-total').value)||0;
   const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,bg_style:document.getElementById('pm-bg').value,image_url:document.getElementById('pm-image-url').value||null,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_loop:false,is_new_user_only:document.getElementById('pm-new-user').checked,max_draws_per_user:document.getElementById('pm-one-per-user').checked?1:0,is_active:document.getElementById('pm-active').checked,draw_options:JSON.stringify({d1:document.getElementById('pm-draw-1').checked,d10:document.getElementById('pm-draw-10').checked,d100:document.getElementById('pm-draw-100').checked})};
-  if(!editingPackId)packData.remaining=total;
+  if(!editingPackId){
+    packData.remaining=total;
+  }
   let packId=editingPackId;
   if(editingPackId){
+    // 編集時: 現在のremainingを保持したまま更新
+    const{data:curPack}=await db.from('packs').select('remaining,total_slots').eq('id',editingPackId).single();
+    if(curPack){
+      const oldTotal=curPack.total_slots||0;
+      const diff=total-oldTotal;
+      packData.remaining=Math.max(0,(curPack.remaining||0)+diff);
+    }
     const{error}=await db.from('packs').update(packData).eq('id',editingPackId);
     if(error){showToast('⚠️ 更新失敗: '+error.message);return;}
   } else {
