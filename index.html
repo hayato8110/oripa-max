@@ -2853,8 +2853,13 @@ function closePurchase(){document.getElementById('purchase-modal').classList.rem
 async function startPurchase(amount){
   showToast('決済ページへ移動中...');
   try{
-    const{data,error}=await db.functions.invoke('create-checkout',{body:{amount,userId:state.user.id,successUrl:window.location.origin+'?payment=success',cancelUrl:window.location.origin+'?payment=cancel'}});
-    if(error||!data?.url){showToast('⚠️ 決済エラー: '+(error?.message||'不明'));return;}
+    const res=await fetch('/api/create-checkout',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({planId:'p'+amount,userId:state.user.id,userEmail:state.user.email})
+    });
+    const data=await res.json();
+    if(!data?.url){showToast('⚠️ 決済エラー: '+(data?.error||'不明'));return;}
     window.location.href=data.url;
   }catch(e){showToast('⚠️ エラー: '+e.message);}
 }
