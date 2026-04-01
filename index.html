@@ -1816,7 +1816,6 @@ async function executeDraw(){
     await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
     const{error:puErr}=await db.from('packs').update({
       remaining:newRemaining,
-      draw_count:(packInState?.draw_count||pack.draw_count||0),
     }).eq('id',pack.id);
     if(puErr)console.error('packs update error:',puErr.message);
     const{data:sess}=await db.from('draw_sessions').insert({
