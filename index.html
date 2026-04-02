@@ -1239,7 +1239,7 @@ function showResultCards(results,pack){
     document.getElementById('result-cards').innerHTML=`
       <div style="display:flex;flex-direction:column;gap:10px;padding:0 12px">
         ${results.map((r,i)=>{
-          const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+          const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
           const imgUrl=prizeData?.image_url||'';
           const convertCoin=prizeData?.value_jp||0;
           const exType=prizeData?.exchange_type||'both';
@@ -1280,7 +1280,7 @@ function showResultCards(results,pack){
 
   // カード表示（9枚以下）
   document.getElementById('result-cards').innerHTML=results.map((r,i)=>{
-    const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+    const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
     const imgUrl=prizeData?.image_url||'';
     return `
     <div class="rc" id="rc-${i}" onclick="flipResultCard(${i},'${r.prize.tier}')">
@@ -1325,7 +1325,7 @@ function flipResultCard(i,tier){
     // 各カードに発送・還元ボタンを追加
     gachaResults.forEach((r,i)=>{
       const pack=state.activePack;
-      const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+      const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
       const convertCoin=prizeData?.value_jp||0;
       const exType=prizeData?.exchange_type||'both';
       const showShip=exType!=='coin_only';
@@ -1373,7 +1373,7 @@ function closeResult(){
 
 function showResultDetail(session){
   const pack=state.activePack||state.packs.find(p=>p.id===session.packId);
-  const prizes=pack?.prizes_public||pack?.prizes||[];
+  const prizes=pack?.prizes_public||pack?.prizes_public||pack?.prizes||[];
 
   document.querySelectorAll('.rd-modal').forEach(m=>m.remove());
   const rs=document.getElementById('result-screen');
@@ -1865,7 +1865,7 @@ async function loadHistoryFromDB(){
       const updatedResults=results.map(r=>{
         if(!r.is_converted&&!r.is_shipped){
           const pack=state.packs.find(p=>p.id===s.pack_id);
-          const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize_name);
+          const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize_name);
           const bonus=prizeData?.value_jp||0;
           totalBonus+=bonus;
           return{...r,is_converted:true};
@@ -2244,7 +2244,7 @@ function renderItemsPage(tab){
   const showItems=itemsTab==='unselected'?unselectedItems:itemsTab==='waiting'?waitingItems:shippedItems;
   const convertible=unselectedItems.filter(r=>{
     const pack=state.packs.find(p=>p.id===r.packId);
-    const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+    const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
     return (prizeData?.exchange_type||'both')!=='ship_only';
   });
   content.innerHTML=`
@@ -2271,7 +2271,7 @@ function renderItemsPage(tab){
       ${showItems.map(r=>{
         // ガチャ獲得品の場合（従来通り）
         const pack=state.packs.find(p=>p.id===r.packId);
-        const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+        const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
         const convertCoin=prizeData?.value_jp||0;
         const exType=prizeData?.exchange_type||'both';
         const showShip=itemsTab==='unselected'&&exType!=='coin_only';
@@ -2455,7 +2455,7 @@ async function submitBulkShip(dbIds, btn){
     const sess=state.sessions.find(s=>s.id===sessionId);
     const r=sess?.results.find(x=>x.dbId===dbId);
     const pack=state.packs.find(p=>p.id===sess?.packId);
-    const prizeData=(pack?.prizes||[]).find(p=>p.name===r?.prize?.name);
+    const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r?.prize?.name);
     totalCoin+=(prizeData?.value_jp||0);
   }
   if(totalCoin<MIN_SHIP_COIN){
@@ -2511,7 +2511,7 @@ async function bulkConvert(){
     const r=sess?.results.find(r=>r.dbId===dbId);
     if(!r||r.converted)continue;
     const pack=state.packs.find(p=>p.id===sess.packId);
-    const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+    const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
     const bonus=prizeData?.value_jp||0;
     if(bonus<=0){skipped++;continue;}
     r.converted=true;
@@ -2546,7 +2546,7 @@ async function openShippingModal(dbId){
   const sess=state.sessions.find(s=>s.id===sessionId);
   const r=sess?.results.find(x=>x.dbId===dbId);
   const pack=state.packs.find(p=>p.id===sess?.packId);
-  const prizeData=(pack?.prizes||[]).find(p=>p.name===r?.prize?.name);
+  const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r?.prize?.name);
   const coinVal=prizeData?.value_jp||0;
   if(coinVal<MIN_SHIP_COIN){
     showToast(`⚠️ 発送依頼には${MIN_SHIP_COIN.toLocaleString()}コイン以上の商品が必要です`,3500);
@@ -3219,7 +3219,7 @@ async function convertToPoints(dbId){
   const r=sess?.results.find(r=>r.dbId===dbId);
   if(!r)return;
   const pack=state.packs.find(p=>p.id===sess.packId);
-  const prizeData=(pack?.prizes||[]).find(p=>p.name===r.prize.name);
+  const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
   const bonus=prizeData?.value_jp||0;
   if(bonus<=0){showToast('⚠️ この賞品は還元設定がありません');return;}
   r.converted=true;
