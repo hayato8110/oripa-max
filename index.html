@@ -856,7 +856,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 <script>
 /* ══ SUPABASE ══ */
 async function fetchPacks(){
-  const{data}=await db.from('packs').select('*,prizes(*)').order('sort_order');
+  const{data}=await db.from('packs').select('*,prizes_public(*)').order('sort_order');
   return data||[];
 }
 async function fetchBanners(){
