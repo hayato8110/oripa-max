@@ -1762,76 +1762,50 @@ async function executeDraw(){
   if(state.coin<cost){showToast('🪙 コインが不足しています');openPurchase();return;}
   if((pack.remaining||0)<state.drawCount){showToast('⚠️ 残り口数が不足しています');return;}
 
-  // DBから最新の賞品在庫を取得
-  const{data:freshPrizes,error:prizesErr}=await db.from('prizes').select('*').eq('pack_id',pack.id);
-  if(prizesErr||!freshPrizes?.length){showToast('⚠️ 賞品データの取得に失敗しました');return;}
+  // アクセストークン取得
+  const{data:{session:authSession}}=await db.auth.getSession();
+  if(!authSession?.access_token){showToast('⚠️ 認証エラー');return;}
 
-  // コイン消費（1回だけ）
-  state.coin-=cost;
+  // サーバーAPIで抽選
+  let apiResult;
+  try{
+    const resp=await fetch('/api/draw',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        packId:pack.id,
+        drawCount:state.drawCount,
+        userId:state.user.id,
+        userToken:authSession.access_token,
+        tenjoCount:state.tenjoCount[pack.id]||0,
+      }),
+    });
+    apiResult=await resp.json();
+    if(!resp.ok){showToast('⚠️ '+(apiResult.error||'エラーが発生しました'));return;}
+  }catch(e){showToast('⚠️ 通信エラーが発生しました');return;}
+
+  const{results,sessionId,newCoin,newRemaining,soldOut,expiresAt}=apiResult;
+
+  // stateを更新
+  state.coin=newCoin;
   state.totalSpent=(state.totalSpent||0)+cost;
   updateHeaderPts();
 
-  // 在庫コピー（idをキーに）
-  const prizeStock={};
-  freshPrizes.forEach(p=>{
-    prizeStock[p.id]=(p.remaining_qty!=null?p.remaining_qty:p.quantity)||0;
-  });
-
-  // 抽選（在庫がある賞品のみ）
-  const results=[];
-  for(let i=0;i<state.drawCount;i++){
-    const available=freshPrizes.filter(p=>prizeStock[p.id]>0&&p.is_active!==false);
-    if(!available.length)break;
-    const prize=pickPrize(available,Math.random());
-    results.push({prize});
-    prizeStock[prize.id]--;
-  }
-
-  if(!results.length){showToast('⚠️ 在庫がありません');return;}
-
-  // DBの在庫を更新（引いた賞品のみ減算）
-  const usedPrizes={};
-  results.forEach(r=>{usedPrizes[r.prize.id]=(usedPrizes[r.prize.id]||0)+1;});
-  await Promise.all(Object.entries(usedPrizes).map(([id,used])=>
-    db.from('prizes').update({remaining_qty:Math.max(0,prizeStock[id])}).eq('id',id)
-  ));
-
-  // stateを更新
   const packInState=state.packs.find(p=>p.id===pack.id);
-  const onStockTotal=freshPrizes.filter(p=>p.is_active!==false).reduce((s,p)=>s+prizeStock[p.id],0);
-  const newRemaining=onStockTotal<=0?0:Math.max(0,(packInState?.remaining||pack.remaining||0)-results.length);
   if(packInState){
-    packInState.prizes=freshPrizes.map(p=>({...p,remaining_qty:prizeStock[p.id]}));
     packInState.remaining=newRemaining;
     packInState.draw_count=(packInState.draw_count||0)+results.length;
-    if(newRemaining<=0)showToast('📦 このオリパは完売しました！',2000);
+    if(soldOut)showToast('📦 このオリパは完売しました！',2000);
   }
 
-  const sessionId=generateSeed().slice(0,8);
   const session={
     id:sessionId,packId:pack.id,packName:pack.name,packEmoji:pack.emoji||'🎴',
     results:results.map((r,i)=>({dbId:sessionId+'_'+i,sessionId,resultIndex:i,prize:r.prize,converted:false,shipped:false})),
     cost,date:new Date().toLocaleString('ja-JP'),shipped:false,
-    expiresAt:new Date(Date.now()+7*24*60*60*1000),daysLeft:7,
+    expiresAt:new Date(expiresAt),daysLeft:7,
   };
   state.sessions.unshift(session);
 
-  try{
-    await db.from('users').update({coin_points:state.coin,total_spent:state.totalSpent}).eq('id',state.user.id);
-    const{error:puErr}=await db.from('packs').update({
-      remaining:newRemaining,
-    }).eq('id',pack.id);
-    if(puErr)console.error('packs update error:',puErr.message);
-    const{data:sess}=await db.from('draw_sessions').insert({
-      user_id:state.user.id,pack_id:pack.id,draw_count:results.length,total_cost:cost,currency:'coin',
-      server_seed:sessionId,results:results.map(r=>({prize_name:r.prize.name,prize_tier:r.prize.tier,is_converted:false,is_shipped:false})),
-      expires_at:new Date(Date.now()+7*24*60*60*1000).toISOString(),
-    }).select('id').single();
-    if(sess?.id){
-      session.id=sess.id;
-      session.results.forEach((r,i)=>{r.sessionId=sess.id;r.dbId=sess.id+'_'+i;});
-    }
-  }catch(e){console.error('DB save error:',e);}
   renderPacks();
   startGachaAnimation(session.results,pack);
 }
