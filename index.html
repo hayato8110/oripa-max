@@ -1373,7 +1373,7 @@ function closeResult(){
 
 function showResultDetail(session){
   const pack=state.activePack||state.packs.find(p=>p.id===session.packId);
-  const prizes=pack?.prizes||[];
+  const prizes=pack?.prizes_public||pack?.prizes||[];
 
   document.querySelectorAll('.rd-modal').forEach(m=>m.remove());
   const rs=document.getElementById('result-screen');
@@ -2170,7 +2170,7 @@ function openPackDetail(packId){
     },
   };
 
-  const prizes=pack.prizes||[];
+  const prizes=pack.prizes_public||pack.prizes||[];
   const groups={};
   prizes.forEach(pr=>{
     const t=pr.tier||'c';
