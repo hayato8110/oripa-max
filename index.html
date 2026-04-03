@@ -1408,7 +1408,7 @@ function showResultDetail(session){
   wrap.className='rd-modal';
   wrap.style.cssText='position:fixed;inset:0;z-index:900;background:#f2f2f7;display:flex;flex-direction:column';
 
-  const tierBg={sar:'#e8380d',sr:'#7c3aed',rr:'#2563eb',r:'#6b7280',c:'#9ca3af'};
+  const tierBg={sar:'linear-gradient(135deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff)',sr:'#c8860a',rr:'#2563eb',r:'#6b7280',c:'#9ca3af'};
   const rarLabel={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C'};
   const selected=new Set();
 
@@ -1497,7 +1497,7 @@ function showResultDetail(session){
         +'<div style="position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:'+(isSel?'#f0b800':'#e0e0e0')+';display:flex;align-items:center;justify-content:center;font-size:.85rem;color:'+(isSel?'#fff':'#bbb')+'">'+(isSel?'\u2713':'\u25C9')+'</div>'
         +'<div style="font-size:1rem;font-weight:900;color:#1a1a1a;margin-bottom:8px;padding-right:36px">'+r.prize.name+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px">'
-        +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||rarLabel[r.prize.tier]||r.prize.tier)+'\u8CDE</span>'
+        +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||(rarLabel[r.prize.tier]||r.prize.tier)+'賞')+'</span>'
         +(c>0?'<span style="font-size:.85rem;color:#c8860a;font-weight:900">'+c+'\u30B3\u30A4\u30F3</span>':'')
         +'</div>'
         +(session.expiresAt?'<div style="font-size:.68rem;font-weight:700;color:#999;margin-top:4px">交換期限：'+(()=>{var d=new Date(session.expiresAt);return d.getFullYear()+'/'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'/'+( d.getDate()<10?'0':'')+d.getDate();})()+'</div>':'')
@@ -2254,10 +2254,11 @@ function openPackDetail(packId){
 
 /* ══ 獲得商品 ══ */
 let itemsTab='unselected';
+let itemsSort='date'; // 'date' or 'coin'
 function renderItemsPage(tab){
   if(tab)itemsTab=tab;
   const content=document.getElementById('items-content');
-  const allItems=state.sessions.flatMap(s=>s.results.map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,sessionId:s.id,packId:s.packId})));
+  const allItems=state.sessions.flatMap(s=>s.results.map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,sessionId:s.id,packId:s.packId,sessionDate:s.date})));
   const unselectedItems=allItems.filter(r=>!r.shipped&&!r.converted&&!r.waiting);
   const waitingItems=allItems.filter(r=>r.waiting&&!r.shipped);
   const shippedItems=allItems.filter(r=>r.shipped);
@@ -2266,7 +2267,18 @@ function renderItemsPage(tab){
     {key:'waiting',label:'発送待ち',count:waitingItems.length,color:'#f59e0b'},
     {key:'shipped',label:'発送済み',count:shippedItems.length,color:'var(--green)'},
   ];
-  const showItems=itemsTab==='unselected'?unselectedItems:itemsTab==='waiting'?waitingItems:shippedItems;
+  let showItems=itemsTab==='unselected'?unselectedItems:itemsTab==='waiting'?waitingItems:shippedItems;
+  if(itemsTab==='unselected'){
+    if(itemsSort==='coin'){
+      showItems=[...showItems].sort((a,b)=>{
+        const pa=state.packs.find(p=>p.id===a.packId);
+        const pb=state.packs.find(p=>p.id===b.packId);
+        const ca=(pa?.prizes_public||pa?.prizes||[]).find(p=>p.name===a.prize.name)?.value_jp||0;
+        const cb=(pb?.prizes_public||pb?.prizes||[]).find(p=>p.name===b.prize.name)?.value_jp||0;
+        return cb-ca;
+      });
+    }
+  }
   const convertible=unselectedItems.filter(r=>{
     const pack=state.packs.find(p=>p.id===r.packId);
     const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
@@ -2280,6 +2292,12 @@ function renderItemsPage(tab){
             ${t.label}${t.count>0?` <span style="background:${itemsTab===t.key?t.color:'rgba(255,255,255,.15)'};color:${itemsTab===t.key?'#1a0a00':'var(--text3)'};font-size:.62rem;padding:1px 6px;border-radius:999px;font-weight:900">${t.count}</span>`:''}
           </button>`).join('')}
       </div>
+      ${itemsTab==='unselected'?`
+      <div style="display:flex;gap:6px;margin-bottom:10px;justify-content:flex-end">
+        <button onclick="itemsSort='date';renderItemsPage()" style="padding:5px 12px;border-radius:20px;border:1px solid ${itemsSort==='date'?'var(--gold2)':'rgba(255,255,255,.2)'};background:${itemsSort==='date'?'rgba(201,168,76,.15)':'none'};color:${itemsSort==='date'?'var(--gold2)':'rgba(255,255,255,.6)'};font-size:.75rem;font-weight:700;cursor:pointer">獲得順</button>
+        <button onclick="itemsSort='coin';renderItemsPage()" style="padding:5px 12px;border-radius:20px;border:1px solid ${itemsSort==='coin'?'var(--gold2)':'rgba(255,255,255,.2)'};background:${itemsSort==='coin'?'rgba(201,168,76,.15)':'none'};color:${itemsSort==='coin'?'var(--gold2)':'rgba(255,255,255,.6)'};font-size:.75rem;font-weight:700;cursor:pointer">ポイント順</button>
+      </div>
+      `:''}
       ${itemsTab==='unselected'&&convertible.length>0?`
       <div style="background:var(--bg2);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem;font-weight:700;color:#ffffff">
