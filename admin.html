@@ -739,7 +739,6 @@ input,select,textarea{font-family:inherit}
 <script>
 const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
 const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
-const ADMIN_EMAILS=['csoplayer8110@yahoo.co.jp'];
 const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -751,9 +750,13 @@ async function adminLogin(){
   const email=document.getElementById('admin-email').value.trim();
   const pass=document.getElementById('admin-pass').value;
   if(!email||!pass){showErr('入力してください');return;}
-  if(!ADMIN_EMAILS.includes(email)){showErr('管理者権限がありません');return;}
   const{data,error}=await db.auth.signInWithPassword({email,password:pass});
   if(error){showErr('メールアドレスまたはパスワードが違います');return;}
+  // サーバーで管理者チェック
+  const token=data.session?.access_token;
+  const resp=await fetch('/api/admin-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+  const result=await resp.json();
+  if(!result.isAdmin){await db.auth.signOut();showErr('管理者権限がありません');return;}
   document.getElementById('login-wrap').style.display='none';
   document.getElementById('main-area').style.display='flex';
   document.getElementById('admin-user-name').textContent=email;
@@ -1955,11 +1958,15 @@ document.querySelectorAll('.modal-overlay').forEach(el=>{
 /* ══ AUTO LOGIN ══ */
 (async()=>{
   const{data:{session}}=await db.auth.getSession();
-  if(session&&ADMIN_EMAILS.includes(session.user.email)){
-    document.getElementById('login-wrap').style.display='none';
-    document.getElementById('main-area').style.display='flex';
-    document.getElementById('admin-user-name').textContent=session.user.email;
-    initDashboard();
+  if(session?.access_token){
+    const resp=await fetch('/api/admin-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:session.access_token})});
+    const result=await resp.json();
+    if(result.isAdmin){
+      document.getElementById('login-wrap').style.display='none';
+      document.getElementById('main-area').style.display='flex';
+      document.getElementById('admin-user-name').textContent=session.user.email;
+      initDashboard();
+    }
   }
 })();
 
