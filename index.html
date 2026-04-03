@@ -51,7 +51,7 @@ input,select,textarea{font-family:inherit;outline:none}
 /* ══ HEADER ══ */
 .header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 12px;gap:8px;backdrop-filter:blur(20px)}
 .h-logo{font-size:1.2rem;font-weight:900;flex:1;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
-.h-logo-text{background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.h-logo-text{background:linear-gradient(135deg,#fff8c0,#ffd700,#ffb300);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 4px rgba(255,200,0,.5))}
 .h-logo-badge{background:linear-gradient(135deg,#fff7c0,#ffd700,#c8860a);color:#cc0000;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:.12em;box-shadow:0 1px 4px rgba(201,168,76,.4);-webkit-text-fill-color:#cc0000;font-family:'Cinzel',serif}
 .h-coin-wrap{display:flex;align-items:center;gap:5px;background:rgba(201,168,76,.1);border:1.5px solid rgba(201,168,76,.3);border-radius:999px;padding:5px 12px;cursor:pointer}
 .h-coin-icon{font-size:.95rem}
@@ -316,7 +316,7 @@ input,select,textarea{font-family:inherit;outline:none}
 
 /* ══ BOTTOM NAV ══ */
 .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#111118;border-top:1px solid rgba(201,168,76,.25);display:flex;height:64px;z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,.6)}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px 8px;gap:3px;background:none;color:rgba(255,255,255,.6);font-size:.68rem;font-weight:700;transition:.15s;position:relative;letter-spacing:.03em}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px 8px;gap:3px;background:none;color:rgba(255,255,255,.9);font-size:.68rem;font-weight:900;transition:.15s;position:relative;letter-spacing:.03em}
 .bnav-btn.active{color:var(--gold2)}
 .bnav-btn.active .bnav-icon{filter:drop-shadow(0 0 6px rgba(201,168,76,.6))}
 .bnav-icon{font-size:1.35rem;line-height:1}
@@ -455,9 +455,9 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   </div>
   <!-- フッターリンク -->
   <div style="padding:16px 0 8px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap">
-    <a href="/tokushoho.html" style="font-size:.68rem;color:rgba(255,255,255,.45);text-decoration:none">特定商取引法</a>
-    <a href="/privacy.html" style="font-size:.68rem;color:rgba(255,255,255,.45);text-decoration:none">プライバシーポリシー</a>
-    <a href="/terms.html" style="font-size:.68rem;color:rgba(255,255,255,.45);text-decoration:none">利用規約</a>
+    <a href="/tokushoho.html" style="font-size:.68rem;color:rgba(255,255,255,.85);text-decoration:none">特定商取引法</a>
+    <a href="/privacy.html" style="font-size:.68rem;color:rgba(255,255,255,.85);text-decoration:none">プライバシーポリシー</a>
+    <a href="/terms.html" style="font-size:.68rem;color:rgba(255,255,255,.85);text-decoration:none">利用規約</a>
   </div>
 </div>
 
@@ -2732,9 +2732,9 @@ function renderMyPage(){
       </div>
     </div>
     <div style="margin-top:14px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;padding:8px 0">
-      <a href="/tokushoho.html" style="font-size:.7rem;color:rgba(255,255,255,.7);text-decoration:none">特定商取引法</a>
-      <a href="/privacy.html" style="font-size:.7rem;color:rgba(255,255,255,.7);text-decoration:none">プライバシーポリシー</a>
-      <a href="/terms.html" style="font-size:.7rem;color:rgba(255,255,255,.7);text-decoration:none">利用規約</a>
+      <a href="/tokushoho.html" style="font-size:.7rem;color:rgba(255,255,255,.9);text-decoration:none">特定商取引法</a>
+      <a href="/privacy.html" style="font-size:.7rem;color:rgba(255,255,255,.9);text-decoration:none">プライバシーポリシー</a>
+      <a href="/terms.html" style="font-size:.7rem;color:rgba(255,255,255,.9);text-decoration:none">利用規約</a>
     </div>
     <div style="text-align:center;padding:8px 0 4px;font-size:.65rem;color:rgba(255,255,255,.5)">© 2026 オリパMAX All Rights Reserved.</div>`;
 }
