@@ -149,6 +149,7 @@ input,select,textarea{font-family:inherit}
     <div class="sb-item active" onclick="showPage('dashboard',this)"><span class="sb-icon">📊</span>ダッシュボード</div>
     <div class="sb-section">コンテンツ</div>
     <div class="sb-item" onclick="showPage('packs',this)"><span class="sb-icon">🎴</span>オリパ管理</div>
+    <div class="sb-item" onclick="showPage('card_images',this)"><span class="sb-icon">🃏</span>カード画像ライブラリ</div>
     <div class="sb-item" onclick="showPage('banners',this)"><span class="sb-icon">🖼️</span>バナー管理</div>
     <div class="sb-item" onclick="showPage('videos',this)"><span class="sb-icon">🎬</span>演出動画管理</div>
     <div class="sb-section">ユーザー</div>
@@ -453,6 +454,34 @@ input,select,textarea{font-family:inherit}
         <div class="table-head"><span class="table-title">🔍 よく見られるページ</span></div>
         <table class="tbl"><thead><tr><th>ページ</th><th>アクセス数</th></tr></thead>
         <tbody id="analytics-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- CARD IMAGES -->
+    <div class="admin-page" id="page-card_images">
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-title">🃏 カード画像ライブラリ</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input class="form-input" id="ci-search" placeholder="カード名で検索..." style="width:200px;padding:6px 10px;font-size:.82rem" oninput="filterCardImages(this.value)">
+            <button class="btn btn-primary" onclick="document.getElementById('ci-file-input').click()">＋ 画像を追加</button>
+            <input type="file" id="ci-file-input" accept="image/*" multiple style="display:none" onchange="uploadCardImages(this)">
+          </div>
+        </div>
+        <div id="ci-drop-area" ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)'" ondragleave="this.style.borderColor='rgba(255,255,255,.1)'" ondrop="event.preventDefault();this.style.borderColor='rgba(255,255,255,.1)';handleCardImageDrop(event)" style="margin:12px 16px;border:2px dashed rgba(255,255,255,.1);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.2s" onclick="document.getElementById('ci-file-input').click()">
+          <div style="font-size:1.5rem;margin-bottom:6px">📁</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.4)">クリックまたはドラッグ&ドロップで複数枚アップロード</div>
+        </div>
+        <div id="ci-name-modal" style="display:none;margin:0 16px 16px;background:#1a1b25;border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:16px">
+          <div style="font-size:.82rem;font-weight:900;margin-bottom:10px">📝 カード名を入力してください</div>
+          <div id="ci-name-list" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-secondary" onclick="cancelCardImageUpload()">キャンセル</button>
+            <button class="btn btn-primary" onclick="saveCardImages()">✅ 保存する</button>
+          </div>
+        </div>
+        <div id="ci-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:16px"></div>
+        <div id="ci-empty" style="text-align:center;padding:40px;color:rgba(255,255,255,.2);font-size:.82rem;display:none">画像が登録されていません</div>
       </div>
     </div>
 
@@ -771,9 +800,9 @@ function showPage(name,el){
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   document.getElementById(`page-${name}`)?.classList.add('active');
   if(el)el.classList.add('active');
-  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',ranking:'🏆 ランキング',shipping:'📦 発送管理',history:'📋 当選履歴',coupons:'🎟️ クーポン管理',push:'🔔 プッシュ通知',notices:'📢 お知らせ管理',inquiries:'💬 お問い合わせ',revenue:'💰 売上・収益',analytics:'📈 アクセス解析',settings:'⚙️ サイト設定',shop:'🛒 交換所管理',shop_orders:'📋 交換所注文'};
+  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',ranking:'🏆 ランキング',shipping:'📦 発送管理',history:'📋 当選履歴',coupons:'🎟️ クーポン管理',push:'🔔 プッシュ通知',notices:'📢 お知らせ管理',inquiries:'💬 お問い合わせ',revenue:'💰 売上・収益',analytics:'📈 アクセス解析',settings:'⚙️ サイト設定',card_images:'🃏 カード画像ライブラリ',shop:'🛒 交換所管理',shop_orders:'📋 交換所注文'};
   document.getElementById('page-title').textContent=titles[name]||name;
-  const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices,coupons:loadCoupons,inquiries:()=>loadInquiries('all'),push:loadPush,ranking:()=>loadRanking('spent'),analytics:loadAnalytics,shop:loadShopItems,shop_orders:loadShopOrders};
+  const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices,coupons:loadCoupons,inquiries:()=>loadInquiries('all'),push:loadPush,ranking:()=>loadRanking('spent'),analytics:loadAnalytics,shop:loadShopItems,shop_orders:loadShopOrders,card_images:loadCardImages};
   if(loaders[name])loaders[name]();
 }
 
@@ -1029,7 +1058,7 @@ function addPrizeBlock(prize){
       </div>
       <input type="file" accept="image/*" style="display:none" id="prize-file-${idx}" onchange="uploadBlockImage(this,${idx})">
       <input class="form-input prize-img" id="prize-img-${idx}" style="padding:4px 8px;font-size:.62rem;width:100%" placeholder="または画像URLを貼り付け" value="${prize?.image_url||''}" oninput="previewBlockImage(this,${idx})">
-      <div style="font-size:.6rem;color:rgba(255,200,50,.7);margin-top:3px">推奨: 400×600px / 2:3（トレカ比率）/ JPG・PNG / 1MB以下</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:.6rem;color:rgba(255,200,50,.7)">推奨: 400×600px / 2:3 / JPG・PNG</span><button type="button" onclick="openCardLibrary(${idx})" style="font-size:.62rem;padding:3px 8px;border-radius:4px;background:rgba(201,168,76,.15);color:#e8c96a;border:1px solid rgba(201,168,76,.3);cursor:pointer">🃏 ライブラリから選ぶ</button></div>
     </div>
 
     <!-- 賞品名 -->
@@ -2185,4 +2214,126 @@ async function deleteShopOrder(id){
 }
 </script>
 </body>
-</html>
+</html><script>
+/* ══ カード画像ライブラリ ══ */
+let ciPendingFiles=[]; // アップロード待ちファイル
+let ciAllImages=[]; // 全画像キャッシュ
+
+async function loadCardImages(){
+  const{data,error}=await db.from('card_images').select('*').order('created_at',{ascending:false});
+  if(error){showToast('⚠️ 画像ライブラリ読み込みエラー');return;}
+  ciAllImages=data||[];
+  renderCardImages(ciAllImages);
+}
+
+function renderCardImages(images){
+  const grid=document.getElementById('ci-grid');
+  const empty=document.getElementById('ci-empty');
+  if(!images.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=images.map(img=>`
+    <div style="position:relative;background:#1a1b25;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.08);cursor:pointer" onclick="selectCardImage('${img.image_url}','${img.name.replace(/'/g,"\\'")}')">
+      <div style="aspect-ratio:2/3;overflow:hidden;background:#111">
+        <img src="${img.image_url}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,.2);font-size:.7rem\\'>読込失敗</div>'">
+      </div>
+      <div style="padding:5px 6px">
+        <div style="font-size:.62rem;font-weight:700;color:rgba(255,255,255,.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.name}</div>
+      </div>
+      <button onclick="event.stopPropagation();deleteCardImage('${img.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);color:#ff6060;border:1px solid rgba(255,96,96,.3);border-radius:50%;width:20px;height:20px;font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+  `).join('');
+}
+
+function filterCardImages(q){
+  if(!q.trim()){renderCardImages(ciAllImages);return;}
+  const filtered=ciAllImages.filter(img=>img.name.includes(q));
+  renderCardImages(filtered);
+}
+
+// ファイル選択 or ドロップ
+function handleCardImageDrop(event){
+  const files=Array.from(event.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+  if(!files.length)return;
+  showCardImageNameModal(files);
+}
+
+async function uploadCardImages(input){
+  const files=Array.from(input.files);
+  if(!files.length)return;
+  showCardImageNameModal(files);
+  input.value='';
+}
+
+function showCardImageNameModal(files){
+  ciPendingFiles=files;
+  const list=document.getElementById('ci-name-list');
+  list.innerHTML=files.map((f,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border-radius:8px;padding:8px">
+      <img src="${URL.createObjectURL(f)}" style="width:40px;height:60px;object-fit:cover;border-radius:4px;flex-shrink:0">
+      <div style="flex:1">
+        <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-bottom:4px">${f.name}</div>
+        <input class="form-input ci-card-name" data-idx="${i}" style="width:100%;padding:5px 8px;font-size:.82rem" placeholder="カード名を入力（例: リザードンex SAR）" value="${f.name.replace(/\.[^.]+$/,'').replace(/_/g,' ')}">
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('ci-name-modal').style.display='block';
+}
+
+function cancelCardImageUpload(){
+  ciPendingFiles=[];
+  document.getElementById('ci-name-modal').style.display='none';
+}
+
+async function saveCardImages(){
+  const nameInputs=document.querySelectorAll('.ci-card-name');
+  const btn=document.querySelector('#ci-name-modal .btn-primary');
+  btn.textContent='保存中...';btn.disabled=true;
+
+  let success=0;
+  for(let i=0;i<ciPendingFiles.length;i++){
+    const file=ciPendingFiles[i];
+    const name=nameInputs[i]?.value.trim()||file.name;
+    // Storageアップロード
+    const url=await uploadImage(file,'card-images');
+    if(!url){showToast(`⚠️ ${name} のアップロードに失敗`);continue;}
+    // DBに保存
+    const{error}=await db.from('card_images').insert({name,image_url:url});
+    if(!error)success++;
+  }
+
+  btn.textContent='✅ 保存する';btn.disabled=false;
+  document.getElementById('ci-name-modal').style.display='none';
+  ciPendingFiles=[];
+  showToast(`✅ ${success}枚登録しました！`);
+  loadCardImages();
+}
+
+async function deleteCardImage(id){
+  confirmDelete('この画像をライブラリから削除しますか？',async()=>{
+    await db.from('card_images').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    loadCardImages();
+  });
+}
+
+// 賞品ブロックから画像ライブラリを開く
+let ciTargetIdx=null;
+function openCardLibrary(idx){
+  ciTargetIdx=idx;
+  showPage('card_images',document.querySelector('[onclick="showPage(\'card_images\',this)"]'));
+  document.getElementById('ci-search').value='';
+  filterCardImages('');
+  showToast('📌 画像を選んでクリックしてください',3000);
+}
+
+function selectCardImage(url,name){
+  if(ciTargetIdx!==null){
+    // 賞品ブロックにセット
+    const imgInput=document.getElementById(`prize-img-${ciTargetIdx}`);
+    if(imgInput){imgInput.value=url;previewBlockImage(imgInput,ciTargetIdx);}
+    showToast(`✅ 「${name}」をセットしました`);
+    ciTargetIdx=null;
+    history.back();
+  }
+}
+</script>
