@@ -2547,26 +2547,38 @@ async function bulkConvert(){
   confirmAction(`${selected.length}件をまとめてコインに還元しますか？`,async()=>{
   let totalBonus=0;
   let skipped=0;
+  // セッションごとにまとめて処理
+  const sessionMap={};
   for(const dbId of selected){
     const sessionId=dbId.substring(0,dbId.lastIndexOf('_'));
+    if(!sessionMap[sessionId])sessionMap[sessionId]=[];
+    sessionMap[sessionId].push(dbId);
+  }
+  const transactions=[];
+  for(const[sessionId,dbIds] of Object.entries(sessionMap)){
     const sess=state.sessions.find(s=>s.id===sessionId);
-    const r=sess?.results.find(r=>r.dbId===dbId);
-    if(!r||r.converted)continue;
+    if(!sess)continue;
     const pack=state.packs.find(p=>p.id===sess.packId);
-    const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
-    const bonus=prizeData?.value_jp||0;
-    if(bonus<=0){skipped++;continue;}
-    r.converted=true;
-    state.coin+=bonus;
-    totalBonus+=bonus;
+    for(const dbId of dbIds){
+      const r=sess.results.find(r=>r.dbId===dbId);
+      if(!r||r.converted)continue;
+      const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
+      const bonus=prizeData?.value_jp||0;
+      if(bonus<=0){skipped++;continue;}
+      r.converted=true;
+      state.coin+=bonus;
+      totalBonus+=bonus;
+      transactions.push({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`});
+    }
+    // セッションをまとめて1回更新
     try{
-      const updatedResults=sess.results.map(res=>({
-        prize_name:res.prize.name,prize_tier:res.prize.tier,
-        is_converted:res.converted||false,is_shipped:res.shipped||false,
-      }));
+      const updatedResults=sess.results.map(res=>({prize_name:res.prize.name,prize_tier:res.prize.tier,is_converted:res.converted||false,is_shipped:res.shipped||false}));
       await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId);
-      try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`});}catch(e){}
     }catch(e){console.error(e);}
+  }
+  // トランザクションをまとめて挿入
+  if(transactions.length>0){
+    try{await db.from('transactions').insert(transactions);}catch(e){}
   }
   if(totalBonus>0){
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
