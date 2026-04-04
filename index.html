@@ -702,7 +702,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   <!-- ヘッダー（固定） -->
   <div style="flex-shrink:0;background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 12px;gap:8px;backdrop-filter:blur(20px)">
     <button onclick="closePackDetail()" style="background:none;border:none;color:var(--text2);font-size:1.4rem;padding:4px 8px;cursor:pointer;display:flex;align-items:center">‹</button>
-    <div id="pd-header-name" style="flex:1;font-size:.95rem;font-weight:900;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+    <div id="pd-header-name" style="flex:1;font-size:.95rem;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
     <button id="pd-fav-btn" onclick="toggleFavorite()" style="background:none;border:none;font-size:1.4rem;color:var(--gold2);padding:4px">☆</button>
   </div>
   <!-- スクロールエリア -->
@@ -2164,11 +2164,11 @@ function openPackDetail(packId){
     <div style="display:flex;align-items:center;gap:5px">
       <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="url(#pdfc1)"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="pdfc1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient></defs></svg>
       <span style="font-size:1.3rem;font-weight:900;color:var(--gold2)">${pack.price.toLocaleString()}</span>
-      <span style="font-size:.72rem;color:var(--text3);font-weight:700">/1回</span>
+      <span style="font-size:.78rem;color:#fff;font-weight:900">/1回</span>
     </div>
     <div style="text-align:right">
       ${pack.is_new_user_only?'':
-        `<div style="font-size:.78rem;font-weight:700;color:var(--text2)">残り<b style="font-size:.95rem;color:#fff">${(pack.remaining||0).toLocaleString()}</b>/${(pack.total_slots||0).toLocaleString()}口</div>
+        `<div style="font-size:.85rem;font-weight:900;color:#fff">残り<b style="font-size:1rem;color:#fff">${(pack.remaining||0).toLocaleString()}</b><span style="color:rgba(255,255,255,.6);font-size:.78rem">/${(pack.total_slots||0).toLocaleString()}口</span></div>
       <div class="progress-bg" style="margin:4px 0 0;width:120px"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>`
       }
     </div>`;
