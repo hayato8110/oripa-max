@@ -943,11 +943,36 @@ async function doRegister(){
   showToast(`🎉 登録完了！`,3000);
 }
 async function doForgotPassword(){
-  confirmAction('パスワードリセットメールを送信しますか？',async()=>{
-    const email=state.user?.email||'';
-    await db.auth.resetPasswordForEmail(email,{redirectTo:'https://oripa-max.vercel.app/reset-password.html'});
-    showToast('📧 パスワードリセットメールを送信しました',3000);
-  });
+  // メールアドレス入力ダイアログ
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  const prefill=state.user?.email||document.getElementById('login-email')?.value||'';
+  modal.innerHTML=`
+    <div style="background:#1a1a2e;border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:24px 20px;width:min(320px,92vw)">
+      <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">🔑 パスワードリセット</div>
+      <div style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:16px;line-height:1.6">登録済みのメールアドレスを入力してください。<br>リセット用リンクをお送りします。</div>
+      <input id="forgot-email" type="email" placeholder="example@mail.com" value="${prefill}"
+        style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;color:#fff;font-size:.9rem;margin-bottom:14px">
+      <div style="display:flex;gap:8px">
+        <button id="forgot-cancel" style="flex:1;padding:11px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer;font-size:.88rem">キャンセル</button>
+        <button id="forgot-send" style="flex:1;padding:11px;border-radius:8px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-weight:900;border:none;cursor:pointer;font-size:.88rem">送信</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#forgot-cancel').onclick=()=>modal.remove();
+  modal.querySelector('#forgot-send').onclick=async()=>{
+    const email=modal.querySelector('#forgot-email').value.trim();
+    if(!email){showToast('⚠️ メールアドレスを入力してください');return;}
+    const btn=modal.querySelector('#forgot-send');
+    btn.textContent='送信中...';btn.disabled=true;
+    const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:'https://oripa-max.vercel.app/reset-password.html'});
+    modal.remove();
+    if(error){showToast('⚠️ 送信に失敗しました: '+error.message,3500);}
+    else{showToast('📧 リセットメールを送信しました。ご確認ください',4000);}
+  };
+  // Enterキー送信
+  modal.querySelector('#forgot-email').addEventListener('keydown',e=>{if(e.key==='Enter')modal.querySelector('#forgot-send').click();});
 }
 function linkLine(){
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
