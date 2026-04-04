@@ -2168,7 +2168,7 @@ function openPackDetail(packId){
     </div>
     <div style="text-align:right">
       ${pack.is_new_user_only?'':
-        `<div style="font-size:.85rem;font-weight:900;color:#fff">残り<b style="font-size:1rem;color:#fff">${(pack.remaining||0).toLocaleString()}</b><span style="color:rgba(255,255,255,.6);font-size:.78rem">/${(pack.total_slots||0).toLocaleString()}口</span></div>
+        `<div style="font-size:.85rem;font-weight:900;color:#fff">残り<b style="font-size:1rem;color:#fff">${(pack.remaining||0).toLocaleString()}</b><span style="color:#fff;font-size:.85rem;font-weight:900">/${(pack.total_slots||0).toLocaleString()}口</span></div>
       <div class="progress-bg" style="margin:4px 0 0;width:120px"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>`
       }
     </div>`;
