@@ -2409,9 +2409,5 @@ function selectCardImage2(url,name){
   if(popup)popup.remove();
 }
 
-// ライブラリページ開いた時も画像をキャッシュ
-const _origLoadCardImages=loadCardImages;
-async function loadCardImages(){
-  await _origLoadCardImages();
-}
+
 </script>
