@@ -945,7 +945,7 @@ async function doRegister(){
 async function doForgotPassword(){
   confirmAction('パスワードリセットメールを送信しますか？',async()=>{
     const email=state.user?.email||'';
-    await db.auth.resetPasswordForEmail(email,{redirectTo:'https://oripa-max.vercel.app'});
+    await db.auth.resetPasswordForEmail(email,{redirectTo:'https://oripa-max.vercel.app/reset-password.html'});
     showToast('📧 パスワードリセットメールを送信しました',3000);
   });
 }
@@ -1820,7 +1820,6 @@ async function executeDraw(){
   if(packInState){
     packInState.remaining=newRemaining;
     packInState.draw_count=(packInState.draw_count||0)+results.length;
-    if(soldOut)showToast('📦 このオリパは完売しました！',2000);
   }
 
   const session={
