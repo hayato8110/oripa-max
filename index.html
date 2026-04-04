@@ -1632,7 +1632,7 @@ function showResultDetail(session){
         updateHeaderPts();
         await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
       }
-      showToast('🪙 +'+total.toLocaleString()+'コインに還元しました！',2500);
+      showToast('+'+total.toLocaleString()+'コインに還元しました！',2500);
       renderCards();
     });
   });
@@ -1780,7 +1780,7 @@ async function drawDirect(packId,count){
     showToast('ガチャを引くにはログインが必要です');return;
   }
   const cost=pack.price*count;
-  if(state.coin<cost){showToast('🪙 コインが不足しています');openPurchase();return;}
+  if(state.coin<cost){showToast('コインコインが不足しています');openPurchase();return;}
   if((pack.remaining||0)<count){showToast('⚠️ 残り口数が不足しています');return;}
   // 1人1回チェック
   if(pack.max_draws_per_user===1){
@@ -1810,7 +1810,7 @@ async function executeDraw(){
     showToast('ガチャを引くにはログインが必要です');return;
   }
   const cost=pack.price*state.drawCount;
-  if(state.coin<cost){showToast('🪙 コインが不足しています');openPurchase();return;}
+  if(state.coin<cost){showToast('コインコインが不足しています');openPurchase();return;}
   if((pack.remaining||0)<state.drawCount){showToast('⚠️ 残り口数が不足しています');return;}
 
   // アクセストークン取得
@@ -2609,7 +2609,7 @@ async function bulkConvert(){
   if(totalBonus>0){
     await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
     updateHeaderPts();
-    showToast(`🪙 +${totalBonus}コイン還元しました！${skipped>0?`（${skipped}件は還元設定なしでスキップ）`:''}`,3500);
+    showToast(`+${totalBonus}コイン還元しました！${skipped>0?`（${skipped}件は還元設定なしでスキップ）`:''}`,3500);
   } else {
     showToast(`⚠️ 還元できる商品がありません。管理画面で還元コインを設定してください`,4000);
   }
@@ -3314,7 +3314,7 @@ async function convertToPoints(dbId){
     await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId);
     try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`});}catch(e){}
   }catch(e){console.error(e);}
-  showToast(`🪙 +${bonus}コインに還元しました！`,2500);
+  showToast(`+${bonus}コインに還元しました！`,2500);
   renderItemsPage();
   });
 }
