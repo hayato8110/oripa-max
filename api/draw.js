@@ -92,7 +92,7 @@ export default async function handler(req, res) {
   // 在庫更新（引いた賞品のみ）
   const usedPrizes = {};
   results.forEach(r => { usedPrizes[r.prize.id] = (usedPrizes[r.prize.id] || 0) + 1; });
-  await Promise.all(Object.entries(usedPrizes).map(([id]) =>
+  await Promise.all(Object.entries(usedPrizes).map(([id, _used]) =>
     supabase.from('prizes').update({ remaining_qty: Math.max(0, prizeStock[id]) }).eq('id', id)
   ));
 
