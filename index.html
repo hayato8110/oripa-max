@@ -1104,7 +1104,7 @@ function getVideoForTier(tier){
 
 /* ══ GACHA 演出 ══ */
 const rfClass={sar:'rf-sar',sr:'rf-sr',rr:'rf-rr',r:'rf-r',c:'rf-c'};
-const rarLabel={sar:'SAR ✨',sr:'SR 💜',rr:'RR 💙',r:'R',c:'C'};
+const rarLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'};
 const tierPillClass={sar:'tp-s',sr:'tp-a',rr:'tp-b',r:'tp-c',c:'tp-c'};
 const TIER_TO_COLOR={c:'white',r:'blue',rr:'green',sr:'red',sar:'gold'};
 let gachaResults=[],gachaSkipped=false;
@@ -1280,7 +1280,7 @@ function showResultCards(results,pack){
   document.getElementById('share-btn').style.display='none';
 
   if(isList){
-    const rarLabel2={sar:'SAR✨',sr:'SR',rr:'RR',r:'R',c:'C'};
+    const rarLabel2={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'};
     const tierBg={sar:'linear-gradient(135deg,#e8380d,#ff6b35)',sr:'linear-gradient(135deg,#7c3aed,#a855f7)',rr:'linear-gradient(135deg,#2563eb,#3b82f6)',r:'linear-gradient(135deg,#4b5563,#6b7280)',c:'linear-gradient(135deg,#374151,#4b5563)'};
     document.getElementById('result-screen').style.background='rgba(10,10,10,.97)';
     document.getElementById('result-screen').style.overflowY='auto';
@@ -1359,7 +1359,7 @@ function flipResultCard(i,tier){
   if(tier==='sar'){
     const f=document.getElementById('sar-flash');
     f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
-    showToast('🎊 SAR当選！おめでとうございます！',3000);
+    showToast('🎊 S賞当選！おめでとうございます！',3000);
   }
   if(resultFlipped===resultTotal){
     document.getElementById('result-title').textContent='🎊 開封完了！';
@@ -1434,7 +1434,7 @@ function showResultDetail(session){
   wrap.style.cssText='position:fixed;inset:0;z-index:900;background:#f2f2f7;display:flex;flex-direction:column';
 
   const tierBg={sar:'linear-gradient(135deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff)',sr:'#c8860a',rr:'#2563eb',r:'#6b7280',c:'#9ca3af'};
-  const rarLabel={sar:'SAR',sr:'SR',rr:'RR',r:'R',c:'C'};
+  const rarLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'};
   const selected=new Set();
 
   function pd(r){return prizes.find(p=>p.name===r.prize.name)||null;}
@@ -1522,7 +1522,7 @@ function showResultDetail(session){
         +'<div style="position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:'+(isSel?'#f0b800':'#e0e0e0')+';display:flex;align-items:center;justify-content:center;font-size:.85rem;color:'+(isSel?'#fff':'#bbb')+'">'+(isSel?'\u2713':'\u25C9')+'</div>'
         +'<div style="font-size:1rem;font-weight:900;color:#1a1a1a;margin-bottom:8px;padding-right:36px">'+r.prize.name+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px">'
-        +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||(rarLabel[r.prize.tier]||r.prize.tier)+'賞')+'</span>'
+        +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||(rarLabel[r.prize.tier]||r.prize.tier))+'</span>'
         +(c>0?'<span style="font-size:.85rem;color:#c8860a;font-weight:900">'+c+'\u30B3\u30A4\u30F3</span>':'')
         +'</div>'
         +(session.expiresAt?'<div style="font-size:.68rem;font-weight:700;color:#999;margin-top:4px">交換期限：'+(()=>{var d=new Date(session.expiresAt);return d.getFullYear()+'/'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'/'+( d.getDate()<10?'0':'')+d.getDate();})()+'</div>':'')
@@ -2232,7 +2232,7 @@ function openPackDetail(packId){
   tierOrder.forEach(tier=>{
     const group=groups[tier];
     if(!group||!group.length)return;
-    const label=group[0].tier_label||(tier==='sar'?'SAR':tier==='sr'?'SR':tier==='rr'?'RR':tier==='r'?'R':'C')+'賞';
+    const label=group[0].tier_label||(tier==='sar'?'S賞':tier==='sr'?'A賞':tier==='rr'?'B賞':tier==='r'?'C賞':'その他');
     const ts=tierBannerStyle[tier]||tierBannerStyle.c;
     const isSingle=group.length===1;
 
