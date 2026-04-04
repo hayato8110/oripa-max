@@ -989,8 +989,8 @@ async function uploadBannerImage(input){
 const TIER_CONFIG={
   sar:{label:'S賞',color:'#e8a800',bg:'rgba(232,168,0,.1)',border:'rgba(232,168,0,.35)'},
   sr: {label:'A賞',color:'#bb88ff',bg:'rgba(187,136,255,.08)',border:'rgba(187,136,255,.3)'},
-  rr: {label:'B賞',color:'#44aaff',bg:'rgba(68,170,255,.08)',border:'rgba(68,170,255,.3)'},
-  r:  {label:'C賞',color:'#66cc99',bg:'rgba(102,204,153,.07)',border:'rgba(102,204,153,.25)'},
+  rr: {label:'B賞',color:'#ff6060',bg:'rgba(255,96,96,.08)',border:'rgba(255,96,96,.3)'},
+  r:  {label:'C賞',color:'#44cc88',bg:'rgba(68,204,136,.07)',border:'rgba(68,204,136,.25)'},
   c:  {label:'その他',color:'rgba(255,255,255,.4)',bg:'rgba(255,255,255,.03)',border:'rgba(255,255,255,.1)'},
 };
 
@@ -1574,7 +1574,7 @@ async function loadShipping(status='all'){
       const prizeName=result?.prize_name||result?.name||'—';
       const tier=result?.prize_tier||'';
       const tierLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'};
-      const tierColor={sar:'#e8380d',sr:'#a855f7',rr:'#3b82f6',r:'#6b7280',c:'#374151'};
+      const tierColor={sar:'#e8380d',sr:'#a855f7',rr:'#dc2626',r:'#16a34a',c:'#374151'};
       return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)">
         <span style="font-size:.65rem;background:${tierColor[tier]||'#374151'};color:#fff;padding:1px 5px;border-radius:3px;font-weight:900;flex-shrink:0">${tierLabel[tier]||tier||'—'}</span>
         <span style="font-size:.72rem;color:rgba(255,255,255,.8);font-weight:700">${prizeName}</span>
