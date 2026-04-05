@@ -2245,22 +2245,26 @@ function openPackDetail(packId){
     // カードグリッド（1枚→中央寄せ、2枚以上→2列）
     if(isSingle){
       const pr=group[0];
+      const isShipOnly=pr.exchange_type==='ship_only';
       html+=`<div style="display:flex;justify-content:center;margin-bottom:8px">
         <div style="width:calc(50% - 4px);border-radius:10px;overflow:hidden;position:relative;background:#111;aspect-ratio:2/3">
           ${pr.image_url
             ?`<img src="${pr.image_url}" style="width:100%;height:100%;object-fit:cover;display:block">`
             :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem">${pack.emoji||'🎴'}</div>`}
           <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);border-radius:4px;padding:2px 8px;font-size:.75rem;font-weight:900;color:#fff;${pack.is_new_user_only||tier==='c'?'display:none':''}">×${pr.quantity}</div>
+          ${isShipOnly?`<div style="position:absolute;top:52px;right:6px;background:linear-gradient(135deg,#e8380d,#cc2000);border-radius:3px;padding:2px 6px;font-size:.58rem;font-weight:900;color:#fff;letter-spacing:.03em;white-space:nowrap">発送のみ</div>`:''}
         </div>
       </div>`;
     } else {
       html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">';
       group.forEach(pr=>{
+        const isShipOnly=pr.exchange_type==='ship_only';
         html+=`<div style="border-radius:10px;overflow:hidden;position:relative;background:#111;aspect-ratio:2/3">
           ${pr.image_url
             ?`<img src="${pr.image_url}" style="width:100%;height:100%;object-fit:cover;display:block">`
             :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem">${pack.emoji||'🎴'}</div>`}
           <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);border-radius:4px;padding:2px 8px;font-size:.75rem;font-weight:900;color:#fff;${pack.is_new_user_only||tier==='c'?'display:none':''}">×${pr.quantity}</div>
+          ${isShipOnly?`<div style="position:absolute;top:52px;right:6px;background:linear-gradient(135deg,#e8380d,#cc2000);border-radius:3px;padding:2px 6px;font-size:.58rem;font-weight:900;color:#fff;letter-spacing:.03em;white-space:nowrap">発送のみ</div>`:''}
         </div>`;
       });
       html+='</div>';
