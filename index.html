@@ -1291,8 +1291,8 @@ function showResultCards(results,pack){
         ${results.map((r,i)=>{
           const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
           const imgUrl=prizeData?.image_url||'';
-          const convertCoin=prizeData?.value_jp||0;
-          const exType=prizeData?.exchange_type||'both';
+          const convertCoin=prizeData?.value_jp||r.prize.value_jp||0;
+          const exType=r.prize.exchange_type||prizeData?.exchange_type||'both';
           const sid='rls'+i;
           const dbId=r.dbId||'';
           const showShip=exType!=='coin_only';
