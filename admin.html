@@ -2393,27 +2393,36 @@ function drawPSABadge(ctx,x,y,w,h){
   ctx.fillStyle=ghl;
   ctx.fill();
 
-  // PSA文字
+  // 10文字（上・黒太字）
   ctx.save();
-  ctx.font=`900 ${w*0.22}px Arial,sans-serif`;
-  ctx.fillStyle='#7a0000';
+  ctx.font=`900 ${w*0.50}px Impact,Arial,sans-serif`;
+  ctx.fillStyle='#111111';
   ctx.textAlign='center';
-  ctx.fillText('PSA',x+w*0.5,y+h*0.35);
+  ctx.shadowColor='rgba(0,0,0,0.25)';
+  ctx.shadowBlur=w*0.04;
+  ctx.fillText('10',x+w*0.5,y+h*0.54);
+  ctx.restore();
 
   // 区切り線
-  ctx.strokeStyle='rgba(100,0,0,0.3)';
+  ctx.save();
+  ctx.strokeStyle='rgba(120,60,0,0.35)';
   ctx.lineWidth=w*0.025;
   ctx.beginPath();
-  ctx.moveTo(x+w*0.15,y+h*0.40);
-  ctx.lineTo(x+w*0.85,y+h*0.40);
+  ctx.moveTo(x+w*0.15,y+h*0.61);
+  ctx.lineTo(x+w*0.85,y+h*0.61);
   ctx.stroke();
+  ctx.restore();
 
-  // 10文字
-  ctx.font=`900 ${w*0.48}px Arial,sans-serif`;
-  ctx.fillStyle='#1a0a00';
-  ctx.shadowColor='rgba(0,0,0,0.3)';
-  ctx.shadowBlur=w*0.05;
-  ctx.fillText('10',x+w*0.5,y+h*0.78);
+  // PSA文字（下・赤オレンジグラデ）
+  ctx.save();
+  ctx.font=`900 ${w*0.22}px Impact,Arial,sans-serif`;
+  ctx.textAlign='center';
+  const psaGrad=ctx.createLinearGradient(x+w*0.2,y+h*0.65,x+w*0.8,y+h*0.82);
+  psaGrad.addColorStop(0,'#ff4400');
+  psaGrad.addColorStop(0.5,'#cc2200');
+  psaGrad.addColorStop(1,'#ff6600');
+  ctx.fillStyle=psaGrad;
+  ctx.fillText('PSA',x+w*0.5,y+h*0.80);
   ctx.restore();
 }
 
