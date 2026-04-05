@@ -2278,8 +2278,11 @@ function openPackDetail(packId){
 /* ══ 獲得商品 ══ */
 let itemsTab='unselected';
 let itemsSort='date'; // 'date' or 'coin'
+let itemsPage=1;
+const ITEMS_PER_PAGE=200;
+
 function renderItemsPage(tab){
-  if(tab)itemsTab=tab;
+  if(tab){itemsTab=tab;itemsPage=1;}
   const content=document.getElementById('items-content');
   const allItems=state.sessions.flatMap(s=>s.results.map(r=>({...r,packName:s.packName,packEmoji:s.packEmoji,sessionId:s.id,packId:s.packId,sessionDate:s.date})));
   const unselectedItems=allItems.filter(r=>!r.shipped&&!r.converted&&!r.waiting);
@@ -2302,6 +2305,11 @@ function renderItemsPage(tab){
       });
     }
   }
+
+  // ページネーション
+  const totalPages=Math.ceil(showItems.length/ITEMS_PER_PAGE)||1;
+  if(itemsPage>totalPages)itemsPage=totalPages;
+  const pagedItems=showItems.slice((itemsPage-1)*ITEMS_PER_PAGE,itemsPage*ITEMS_PER_PAGE);
   const convertible=unselectedItems.filter(r=>{
     const pack=state.packs.find(p=>p.id===r.packId);
     const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
@@ -2334,7 +2342,7 @@ function renderItemsPage(tab){
         </div>
       </div>`:''}
       ${showItems.length===0?`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2.5rem;margin-bottom:12px">${itemsTab==='shipped'?'🚚':itemsTab==='waiting'?'📬':'📦'}</div><div style="font-weight:700;color:var(--text2)">${itemsTab==='shipped'?'発送済みの商品はありません':itemsTab==='waiting'?'発送待ちの商品はありません':'未選択の獲得商品がありません'}</div></div>`:''}
-      ${showItems.map(r=>{
+      ${pagedItems.map(r=>{
         // ガチャ獲得品の場合（従来通り）
         const pack=state.packs.find(p=>p.id===r.packId);
         const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize.name);
@@ -2378,6 +2386,14 @@ function renderItemsPage(tab){
           </div>
         </div>`;
       }).join('')}
+      ${totalPages>1?`
+      <div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:16px 0;flex-wrap:wrap">
+        ${itemsPage>1?`<button onclick="itemsPage--;renderItemsPage()" style="padding:6px 12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:.82rem;font-weight:700;cursor:pointer">‹ 前へ</button>`:''}
+        ${Array.from({length:totalPages},(_,i)=>i+1).map(p=>`
+          <button onclick="itemsPage=${p};renderItemsPage()" style="width:32px;height:32px;border-radius:6px;border:1px solid ${p===itemsPage?'var(--gold2)':'rgba(255,255,255,.15)'};background:${p===itemsPage?'rgba(201,168,76,.2)':'rgba(255,255,255,.05)'};color:${p===itemsPage?'var(--gold2)':'rgba(255,255,255,.6)'};font-size:.82rem;font-weight:${p===itemsPage?'900':'700'};cursor:pointer">${p}</button>
+        `).join('')}
+        ${itemsPage<totalPages?`<button onclick="itemsPage++;renderItemsPage()" style="padding:6px 12px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:.82rem;font-weight:700;cursor:pointer">次へ ›</button>`:''}
+      </div>`:''}
     </div>`;
 }
 
