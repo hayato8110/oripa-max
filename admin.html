@@ -2425,29 +2425,11 @@ async function deleteCardImage(id){
   });
 }
 
-// 賞品ブロックから画像ライブラリを開く
-let ciTargetIdx=null;
-function openCardLibrary(idx){
-  ciTargetIdx=idx;
-  showPage('card_images',document.querySelector('[onclick="showPage(\'card_images\',this)"]'));
-  document.getElementById('ci-search').value='';
-  filterCardImages('');
-  showToast('📌 画像を選んでクリックしてください',3000);
-}
-
-function selectCardImage(url,name){
-  if(ciTargetIdx!==null){
-    // 賞品ブロックにセット
-    const imgInput=document.getElementById(`prize-img-${ciTargetIdx}`);
-    if(imgInput){imgInput.value=url;previewBlockImage(imgInput,ciTargetIdx);}
-    showToast(`✅ 「${name}」をセットしました`);
-    ciTargetIdx=null;
-    history.back();
-  }
-}
+// 賞品ブロックから画像ライブラリを開く（ポップアップ方式）
+let ciTargetIdx=null; // 後方互換用（未使用）
 </script>
 <script>
-// ライブラリポップアップを上書き
+// ライブラリポップアップ
 let ciTargetIdx2=null;
 
 // 既存のopenCardLibraryを上書き
