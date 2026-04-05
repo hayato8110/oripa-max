@@ -2252,7 +2252,7 @@ function openPackDetail(packId){
             ?`<img src="${pr.image_url}" style="width:100%;height:100%;object-fit:cover;display:block">`
             :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem">${pack.emoji||'🎴'}</div>`}
           <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);border-radius:4px;padding:2px 8px;font-size:.75rem;font-weight:900;color:#fff;${pack.is_new_user_only||tier==='c'?'display:none':''}">×${pr.quantity}</div>
-          ${isShipOnly?`<div style="position:absolute;top:52px;right:6px;background:linear-gradient(135deg,#e8380d,#cc2000);border-radius:3px;padding:2px 6px;font-size:.58rem;font-weight:900;color:#fff;letter-spacing:.03em;white-space:nowrap">発送のみ</div>`:''}
+          ${isShipOnly?`<div style="position:absolute;top:6px;right:6px;background:linear-gradient(135deg,#e8380d,#cc2000);border-radius:3px;padding:2px 5px;font-size:.55rem;font-weight:900;color:#fff;letter-spacing:.03em;white-space:nowrap;z-index:2">発送のみ</div>`:''}
         </div>
       </div>`;
     } else {
@@ -2264,7 +2264,7 @@ function openPackDetail(packId){
             ?`<img src="${pr.image_url}" style="width:100%;height:100%;object-fit:cover;display:block">`
             :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem">${pack.emoji||'🎴'}</div>`}
           <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);border-radius:4px;padding:2px 8px;font-size:.75rem;font-weight:900;color:#fff;${pack.is_new_user_only||tier==='c'?'display:none':''}">×${pr.quantity}</div>
-          ${isShipOnly?`<div style="position:absolute;top:52px;right:6px;background:linear-gradient(135deg,#e8380d,#cc2000);border-radius:3px;padding:2px 6px;font-size:.58rem;font-weight:900;color:#fff;letter-spacing:.03em;white-space:nowrap">発送のみ</div>`:''}
+          ${isShipOnly?`<div style="position:absolute;top:6px;right:6px;background:linear-gradient(135deg,#e8380d,#cc2000);border-radius:3px;padding:2px 5px;font-size:.55rem;font-weight:900;color:#fff;letter-spacing:.03em;white-space:nowrap;z-index:2">発送のみ</div>`:''}
         </div>`;
       });
       html+='</div>';
