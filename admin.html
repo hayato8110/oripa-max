@@ -2413,16 +2413,35 @@ function drawPSABadge(ctx,x,y,w,h){
   ctx.stroke();
   ctx.restore();
 
-  // PSA文字（下・赤オレンジグラデ）
+  // PSA文字（下・公式ロゴ風：青P・赤S・青A）
   ctx.save();
-  ctx.font=`900 ${w*0.22}px Impact,Arial,sans-serif`;
   ctx.textAlign='center';
-  const psaGrad=ctx.createLinearGradient(x+w*0.2,y+h*0.65,x+w*0.8,y+h*0.82);
-  psaGrad.addColorStop(0,'#ff4400');
-  psaGrad.addColorStop(0.5,'#cc2200');
-  psaGrad.addColorStop(1,'#ff6600');
-  ctx.fillStyle=psaGrad;
-  ctx.fillText('PSA',x+w*0.5,y+h*0.80);
+  ctx.shadowBlur=0;
+  const psaFontSize=w*0.24;
+  ctx.font=`900 ${psaFontSize}px Impact,Arial,sans-serif`;
+
+  // 全体幅を計算して中央寄せ
+  const pw=ctx.measureText('P').width;
+  const sw=ctx.measureText('S').width;
+  const aw=ctx.measureText('A').width;
+  const total=pw+sw+aw;
+  let lx=x+w*0.5-total/2;
+  const ly=y+h*0.81;
+
+  // P（青）
+  ctx.fillStyle='#1a3a8a';
+  ctx.fillText('P',lx+pw/2,ly);
+  lx+=pw;
+
+  // S（赤）
+  ctx.fillStyle='#cc1100';
+  ctx.fillText('S',lx+sw/2,ly);
+  lx+=sw;
+
+  // A（青）
+  ctx.fillStyle='#1a3a8a';
+  ctx.fillText('A',lx+aw/2,ly);
+
   ctx.restore();
 }
 
