@@ -2293,19 +2293,128 @@ async function saveCardImages(){
   for(let i=0;i<ciPendingFiles.length;i++){
     const file=ciPendingFiles[i];
     const name=nameInputs[i]?.value.trim()||file.name;
-    // Storageアップロード
+
+    btn.textContent=`処理中 ${i+1}/${ciPendingFiles.length}...`;
+
+    // ① 元画像をアップロード
     const url=await uploadImage(file,'card-images');
     if(!url){showToast(`⚠️ ${name} のアップロードに失敗`);continue;}
-    // DBに保存
-    const{error}=await db.from('card_images').insert({name,image_url:url});
-    if(!error)success++;
+    await db.from('card_images').insert({name,image_url:url});
+    success++;
+
+    // ② PSA10合成画像を生成してアップロード
+    try{
+      const psaBlob=await composePSA10(file);
+      if(!psaBlob){showToast('⚠️ PSA10合成失敗：Blob null',3000);continue;}
+      const psaFile=new File([psaBlob],file.name.replace(/\.[^.]+$/,'')+'-psa10.jpg',{type:'image/jpeg'});
+      const psaUrl=await uploadImage(psaFile,'card-images');
+      if(!psaUrl){showToast('⚠️ PSA10アップロード失敗',3000);continue;}
+      const{error:e2}=await db.from('card_images').insert({name:`${name} PSA10`,image_url:psaUrl});
+      if(e2){showToast('⚠️ PSA10 DB保存失敗:'+e2.message,4000);}
+      else{success++;}
+    }catch(e){showToast('⚠️ PSA10エラー:'+e.message,4000);}
   }
 
   btn.textContent='✅ 保存する';btn.disabled=false;
   document.getElementById('ci-name-modal').style.display='none';
   ciPendingFiles=[];
-  showToast(`✅ ${success}枚登録しました！`);
+  showToast(`✅ ${success}件登録しました！（元画像＋PSA10各1枚）`);
   loadCardImages();
+}
+
+/* ══ Canvas でPSA10バッジを合成 ══ */
+function composePSA10(file){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const objUrl=URL.createObjectURL(file);
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=img.width;canvas.height=img.height;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0);
+      const bw=img.width*0.22;
+      const bh=bw*1.18;
+      const bx=img.width-bw-img.width*0.03;
+      const by=img.height*0.03;
+      drawPSABadge(ctx,bx,by,bw,bh);
+      URL.revokeObjectURL(objUrl);
+      canvas.toBlob(blob=>resolve(blob),'image/jpeg',0.92);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(objUrl);resolve(null);};
+    img.src=objUrl;
+  });
+}
+
+function drawPSABadge(ctx,x,y,w,h){
+  // シールドパスを描く関数
+  function shield(ox,oy,sw,sh){
+    ctx.beginPath();
+    ctx.moveTo(ox+sw*0.5, oy+sh*0.03);
+    ctx.lineTo(ox+sw*0.97,oy+sh*0.17);
+    ctx.lineTo(ox+sw*0.97,oy+sh*0.60);
+    ctx.quadraticCurveTo(ox+sw*0.97,oy+sh*0.93,ox+sw*0.5,oy+sh*0.99);
+    ctx.quadraticCurveTo(ox+sw*0.03,oy+sh*0.93,ox+sw*0.03,oy+sh*0.60);
+    ctx.lineTo(ox+sw*0.03,oy+sh*0.17);
+    ctx.closePath();
+  }
+
+  // 影
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.65)';
+  ctx.shadowBlur=w*0.15;
+  ctx.shadowOffsetX=w*0.03;
+  ctx.shadowOffsetY=w*0.06;
+  shield(x,y,w,h);
+  ctx.fillStyle='rgba(0,0,0,0.01)';
+  ctx.fill();
+  ctx.restore();
+
+  // 本体グラデ（ゴールド）
+  const g=ctx.createLinearGradient(x,y,x,y+h);
+  g.addColorStop(0,'#ffe566');
+  g.addColorStop(0.25,'#d4920e');
+  g.addColorStop(0.6,'#a06200');
+  g.addColorStop(1,'#c88a10');
+  shield(x,y,w,h);
+  ctx.fillStyle=g;
+  ctx.fill();
+
+  // 枠線
+  shield(x,y,w,h);
+  ctx.strokeStyle='rgba(255,255,255,0.5)';
+  ctx.lineWidth=w*0.04;
+  ctx.stroke();
+
+  // 内側ハイライト
+  const ghl=ctx.createLinearGradient(x,y,x,y+h*0.45);
+  ghl.addColorStop(0,'rgba(255,255,255,0.35)');
+  ghl.addColorStop(1,'rgba(255,255,255,0)');
+  shield(x+w*0.08,y+h*0.08,w*0.84,h*0.5);
+  ctx.fillStyle=ghl;
+  ctx.fill();
+
+  // PSA文字
+  ctx.save();
+  ctx.font=`900 ${w*0.22}px Arial,sans-serif`;
+  ctx.fillStyle='#7a0000';
+  ctx.textAlign='center';
+  ctx.fillText('PSA',x+w*0.5,y+h*0.35);
+
+  // 区切り線
+  ctx.strokeStyle='rgba(100,0,0,0.3)';
+  ctx.lineWidth=w*0.025;
+  ctx.beginPath();
+  ctx.moveTo(x+w*0.15,y+h*0.40);
+  ctx.lineTo(x+w*0.85,y+h*0.40);
+  ctx.stroke();
+
+  // 10文字
+  ctx.font=`900 ${w*0.48}px Arial,sans-serif`;
+  ctx.fillStyle='#1a0a00';
+  ctx.shadowColor='rgba(0,0,0,0.3)';
+  ctx.shadowBlur=w*0.05;
+  ctx.fillText('10',x+w*0.5,y+h*0.78);
+  ctx.restore();
 }
 
 async function deleteCardImage(id){
