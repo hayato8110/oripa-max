@@ -438,7 +438,11 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
   <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
 </svg></button>
-</header>
+  <!-- 未ログイン時のみ表示：新規登録・ログインボタン -->
+  <div id="h-auth-btns" style="display:flex;gap:6px;margin-left:auto">
+    <button onclick="document.getElementById('auth-modal').classList.add('show');setTimeout(()=>document.querySelectorAll('.auth-tab')[0].click(),50)" style="padding:6px 12px;border-radius:20px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-size:.72rem;font-weight:900;border:none;cursor:pointer;white-space:nowrap">新規登録</button>
+    <button onclick="document.getElementById('auth-modal').classList.add('show');setTimeout(()=>document.querySelectorAll('.auth-tab')[1].click(),50)" style="padding:6px 12px;border-radius:20px;background:none;border:1.5px solid rgba(201,168,76,.5);color:var(--gold2);font-size:.72rem;font-weight:900;cursor:pointer;white-space:nowrap">ログイン</button>
+  </div>
 
 <!-- PAGE: ガチャ -->
 <div id="page-gacha" class="page active">
@@ -3519,6 +3523,9 @@ function updateHeaderPts(){
   if(btn){btn.innerHTML=state.user
     ?'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:var(--gold2)"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d=\"M4 20c0-4 3.6-7 8-7s8 3 8 7\" stroke="currentColor" stroke-width="1.8" stroke-linecap=\"round\"/></svg>'
     :'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:rgba(240,234,220,.6)"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d=\"M4 20c0-4 3.6-7 8-7s8 3 8 7\" stroke="currentColor" stroke-width="1.8" stroke-linecap=\"round\"/></svg>';}
+  // 未ログイン時のみ新規登録・ログインボタンを表示
+  const authBtns=document.getElementById('h-auth-btns');
+  if(authBtns)authBtns.style.display=state.user?'none':'flex';
 }
 function switchAuth(mode){
   document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0)===(mode==='login')));
