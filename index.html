@@ -159,15 +159,15 @@ input,select,textarea{font-family:inherit;outline:none}
 /* ══ AUTH ══ */
 .auth-sheet{max-height:88vh}
 .auth-tabs{display:flex;border-bottom:2px solid var(--border)}
-.auth-tab{flex:1;padding:12px;text-align:center;font-size:.9rem;font-weight:700;color:var(--text3);background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
-.auth-tab.active{color:var(--primary);border-color:var(--primary)}
+.auth-tab{flex:1;padding:12px;text-align:center;font-size:.9rem;font-weight:700;color:rgba(255,255,255,.5);background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.auth-tab.active{color:#fff;border-color:var(--primary)}
 .auth-form{padding:16px}
-.auth-label{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:4px;display:block;letter-spacing:.05em}
-.auth-input{width:100%;padding:11px 14px;border:1.5px solid rgba(201,168,76,.2);border-radius:10px;font-size:.9rem;color:var(--text);background:rgba(255,255,255,.05);transition:.2s;margin-bottom:12px}
+.auth-label{font-size:.82rem;font-weight:900;color:#fff;margin-bottom:4px;display:block;letter-spacing:.05em}
+.auth-input{width:100%;padding:11px 14px;border:1.5px solid rgba(201,168,76,.3);border-radius:10px;font-size:.9rem;color:#fff;background:rgba(255,255,255,.08);transition:.2s;margin-bottom:12px}
 .auth-input:focus{border-color:var(--gold)}
 .auth-submit{width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold),#b8832a);color:#1a0a00;font-size:.95rem;font-weight:900;margin-top:4px;transition:.1s;box-shadow:0 4px 14px rgba(201,168,76,.3)}
 .auth-submit:active{transform:scale(.98)}
-.auth-forgot{text-align:center;margin-top:10px;font-size:.78rem;color:var(--text3);cursor:pointer;text-decoration:underline}
+.auth-forgot{text-align:center;margin-top:10px;font-size:.78rem;color:rgba(255,255,255,.6);cursor:pointer;text-decoration:underline}
 
 /* ══ PURCHASE ══ */
 .plan-item{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:.15s;list-style:none}
@@ -440,8 +440,8 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 </svg></button>
   <!-- 未ログイン時のみ表示：新規登録・ログインボタン -->
   <div id="h-auth-btns" style="display:flex;gap:6px;margin-left:auto">
-    <button onclick="document.getElementById('auth-modal').classList.add('show');setTimeout(()=>document.querySelectorAll('.auth-tab')[0].click(),50)" style="padding:6px 12px;border-radius:20px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-size:.72rem;font-weight:900;border:none;cursor:pointer;white-space:nowrap">新規登録</button>
-    <button onclick="document.getElementById('auth-modal').classList.add('show');setTimeout(()=>document.querySelectorAll('.auth-tab')[1].click(),50)" style="padding:6px 12px;border-radius:20px;background:none;border:1.5px solid rgba(201,168,76,.5);color:var(--gold2);font-size:.72rem;font-weight:900;cursor:pointer;white-space:nowrap">ログイン</button>
+    <button onclick="document.getElementById('auth-modal').classList.add('show');setTimeout(()=>document.querySelectorAll('.auth-tab')[1].click(),50)" style="padding:6px 12px;border-radius:20px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-size:.72rem;font-weight:900;border:none;cursor:pointer;white-space:nowrap">新規登録</button>
+    <button onclick="document.getElementById('auth-modal').classList.add('show');setTimeout(()=>document.querySelectorAll('.auth-tab')[0].click(),50)" style="padding:6px 12px;border-radius:20px;background:none;border:1.5px solid rgba(201,168,76,.5);color:var(--gold2);font-size:.72rem;font-weight:900;cursor:pointer;white-space:nowrap">ログイン</button>
   </div>
 </header>
 
