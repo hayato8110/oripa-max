@@ -171,7 +171,6 @@ input,select,textarea{font-family:inherit}
     <div class="sb-item" onclick="showPage('revenue',this)"><span class="sb-icon">💰</span>売上・収益</div>
     <div class="sb-item" onclick="showPage('analytics',this)"><span class="sb-icon">📈</span>アクセス解析</div>
     <div class="sb-section">設定</div>
-    <div class="sb-item" onclick="showPage('settings',this)"><span class="sb-icon">⚙️</span>サイト設定</div>
     <div class="sb-item" onclick="adminLogout()"><span class="sb-icon">🚪</span>ログアウト</div>
   </nav>
 </aside>
@@ -486,22 +485,6 @@ input,select,textarea{font-family:inherit}
     </div>
 
     <!-- SETTINGS -->
-    <div class="admin-page" id="page-settings">
-      <div class="form-section">
-        <div class="form-section-title">🌐 基本設定</div>
-        <div class="form-grid">
-          <div class="form-group"><label class="form-label">サイト名</label><input class="form-input" id="s-name" value="オリパMAX"></div>
-          <div class="form-group"><label class="form-label">問い合わせメール</label><input class="form-input" id="s-email" value="oripamax8110@gmail.com"></div>
-          <div class="form-group"><label class="form-label">古物商許可番号</label><input class="form-input" id="s-license" placeholder="○○県公安委員会 第XXXXXX号"></div>
-          <div class="form-group"><label class="form-label">運営者名</label><input class="form-input" id="s-owner" value="片山駿斗"></div>
-          <div class="form-group form-full"><label class="form-label">住所（特商法）</label><input class="form-input" id="s-address" value="香川県高松市"></div>
-          <div class="form-group"><label class="form-label">電話番号</label><input class="form-input" id="s-tel"></div>
-          <div class="form-group"><label class="form-label">ログインボーナス（コイン）</label><input type="number" class="form-input" id="s-login-bonus" value="100"></div>
-          <div class="form-group"><label class="form-label">新規登録ボーナス（コイン）</label><input type="number" class="form-input" id="s-register-bonus" value="500"></div>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-lg" onclick="saveSettings()">✅ 保存</button>
-    </div>
 
   </div>
 </main>
@@ -800,7 +783,7 @@ function showPage(name,el){
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   document.getElementById(`page-${name}`)?.classList.add('active');
   if(el)el.classList.add('active');
-  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',ranking:'🏆 ランキング',shipping:'📦 発送管理',history:'📋 当選履歴',coupons:'🎟️ クーポン管理',push:'🔔 プッシュ通知',notices:'📢 お知らせ管理',inquiries:'💬 お問い合わせ',revenue:'💰 売上・収益',analytics:'📈 アクセス解析',settings:'⚙️ サイト設定',card_images:'🃏 カード画像ライブラリ',shop:'🛒 交換所管理',shop_orders:'📋 交換所注文'};
+  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',ranking:'🏆 ランキング',shipping:'📦 発送管理',history:'📋 当選履歴',coupons:'🎟️ クーポン管理',push:'🔔 プッシュ通知',notices:'📢 お知らせ管理',inquiries:'💬 お問い合わせ',revenue:'💰 売上・収益',analytics:'📈 アクセス解析',card_images:'🃏 カード画像ライブラリ',shop:'🛒 交換所管理',shop_orders:'📋 交換所注文'};
   document.getElementById('page-title').textContent=titles[name]||name;
   const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices,coupons:loadCoupons,inquiries:()=>loadInquiries('all'),push:loadPush,ranking:()=>loadRanking('spent'),analytics:loadAnalytics,shop:loadShopItems,shop_orders:loadShopOrders,card_images:loadCardImages};
   if(loaders[name])loaders[name]();
@@ -1950,7 +1933,7 @@ function exportCSV(type){
 }
 
 /* ══ SETTINGS ══ */
-function saveSettings(){showToast('✅ 設定を保存しました');}
+
 
 /* ══ UTILS ══ */
 function showToast(msg){
@@ -2309,7 +2292,7 @@ async function saveCardImages(){
       const psaFile=new File([psaBlob],file.name.replace(/\.[^.]+$/,'')+'-psa10.jpg',{type:'image/jpeg'});
       const psaUrl=await uploadImage(psaFile,'card-images');
       if(!psaUrl){showToast('⚠️ PSA10アップロード失敗',3000);continue;}
-      const{error:e2}=await db.from('card_images').insert({name:`${name} PSA10`,image_url:psaUrl});
+      const{error:e2}=await db.from('card_images').insert({name:`【PSA10】${name}`,image_url:psaUrl});
       if(e2){showToast('⚠️ PSA10 DB保存失敗:'+e2.message,4000);}
       else{success++;}
     }catch(e){showToast('⚠️ PSA10エラー:'+e.message,4000);}
