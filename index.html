@@ -2377,7 +2377,7 @@ function renderItemsPage(tab){
         const trackingHtml=itemsTab==='shipped'&&r.trackingNumber
           ?`<div style="margin-top:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:8px 12px">
               <div style="font-size:.62rem;color:var(--green);font-weight:900;margin-bottom:3px">📦 追跡番号</div>
-              <a href="https://trackings.post.japanpost.jp/services/srv/search/?requestNo1=${r.trackingNumber}" target="_blank"
+              <a href="https://trackings.post.japanpost.jp/services/srv/search/direct?reqCodeNo1=${r.trackingNumber}&requestNo1=${r.trackingNumber}&search.x=1" target="_blank"
                 style="font-size:.9rem;font-weight:900;color:var(--green);letter-spacing:.06em;text-decoration:underline;display:block">${r.trackingNumber}</a>
               <div style="font-size:.65rem;color:var(--text3);margin-top:2px">タップして追跡する →</div>
               ${r.shippedAt?`<div style="font-size:.62rem;color:var(--text3);margin-top:2px">発送日: ${new Date(r.shippedAt).toLocaleDateString('ja-JP')}</div>`:''}
