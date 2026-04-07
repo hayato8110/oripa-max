@@ -985,7 +985,7 @@ async function doForgotPassword(){
     if(!email){showToast('⚠️ メールアドレスを入力してください');return;}
     const btn=modal.querySelector('#forgot-send');
     btn.textContent='送信中...';btn.disabled=true;
-    const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:'https://oripa-max.vercel.app/reset-password.html'});
+    const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:'https://oripa-max.com/reset-password.html'});
     modal.remove();
     if(error){showToast('⚠️ 送信に失敗しました: '+error.message,3500);}
     else{showToast('📧 リセットメールを送信しました。ご確認ください',4000);}
@@ -3302,7 +3302,7 @@ async function submitShopShipping(orderId, btn){
 let lastResultForShare=null;
 function shareResult(){
   if(!lastResultForShare)return;
-  const text=`🎴 オリパMAXで「${lastResultForShare}」を当てました！\n#オリパMAX #ポケカ\nhttps://oripa-max.vercel.app`;
+  const text=`🎴 オリパMAXで「${lastResultForShare}」を当てました！\n#オリパMAX #ポケカ\nhttps://oripa-max.com`;
   window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,'_blank');
 }
 
