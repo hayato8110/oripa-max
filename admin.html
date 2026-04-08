@@ -1687,8 +1687,17 @@ function viewShipping(id){
 }
 /* ══ HISTORY ══ */
 async function loadHistory(){
-  const{data}=await db.from('draw_sessions').select('*,users(username),packs(name)').order('created_at',{ascending:false}).limit(200);
-  allHistory=data||[];renderHistory(allHistory);
+  const{data}=await db.from('draw_sessions').select('*,users(username)').order('created_at',{ascending:false}).limit(200);
+  if(!data||!data.length){allHistory=[];renderHistory([]);return;}
+  // pack_idを一括取得してパック名をマージ
+  const packIds=[...new Set(data.map(s=>s.pack_id).filter(Boolean))];
+  let packsMap={};
+  if(packIds.length){
+    const{data:packs}=await db.from('packs').select('id,name').in('id',packIds);
+    if(packs)packs.forEach(p=>packsMap[p.id]=p);
+  }
+  allHistory=data.map(s=>({...s,packs:packsMap[s.pack_id]||null}));
+  renderHistory(allHistory);
 }
 function renderHistory(data){
   const tc={sar:'#e8a800',sr:'#bb88ff',rr:'#44ccee',r:'#8899cc',c:'rgba(255,255,255,.3)'};
