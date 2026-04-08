@@ -16,22 +16,31 @@ const PLANS = [
 ];
 
 export default async function handler(req, res) {
-  // CORS対応
   res.setHeader('Access-Control-Allow-Origin', 'https://oripa-max.com');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
     const { planId, userId, userEmail } = req.body;
     const plan = PLANS.find(p => p.id === planId);
     if (!plan) return res.status(400).json({ error: 'Invalid plan' });
 
+    let customerId;
+    const existing = await stripe.customers.list({ email: userEmail, limit: 1 });
+    if (existing.data.length > 0) {
+      customerId = existing.data[0].id;
+    } else {
+      const customer = await stripe.customers.create({
+        email: userEmail,
+        metadata: { userId },
+      });
+      customerId = customer.id;
+    }
+
     const session = await stripe.checkout.sessions.create({
+      customer: customerId,
       payment_method_types: ['card', 'customer_balance'],
       payment_method_options: {
         customer_balance: {
@@ -43,7 +52,6 @@ export default async function handler(req, res) {
       mode: 'payment',
       success_url: `https://oripa-max.com/?payment=success&plan=${planId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `https://oripa-max.com/?payment=cancel`,
-      customer_email: userEmail,
       metadata: { userId, planId, coin: String(plan.coin), bonus: String(plan.bonus) },
       locale: 'ja',
     });
