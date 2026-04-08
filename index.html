@@ -908,6 +908,14 @@ async function checkSession(){
     }
   }
 }
+async function updateCoin(action,amount,type,description){
+  const res=await fetch("/api/coin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,userId:state.user.id,amount,type,description})});
+  const data=await res.json();
+  if(!res.ok||!data.success)throw new Error(data.error||"コイン更新失敗");
+  state.coin=data.newCoins;
+  updateHeaderPts();
+  return data;
+}
 async function loadUserProfile(userId){
   const{data:profile}=await db.from('users').select('*').eq('id',userId).single();
   if(!profile)return;
@@ -1650,7 +1658,7 @@ function showResultDetail(session){
       if(total>0){
         state.coin+=total;
         updateHeaderPts();
-        await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+        await updateCoin("add",total,"convert","コイン還元");
       }
       showToast('+'+total.toLocaleString()+'コインに還元しました！',2500);
       renderCards();
@@ -1946,7 +1954,7 @@ async function loadHistoryFromDB(){
         state.coin+=totalBonus;
         try{
           await db.from('draw_sessions').update({results:updatedResults}).eq('id',s.id);
-          await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+          await updateCoin("add",totalBonus,"convert","期限切れによる自動コイン変換");
           await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:totalBonus,currency:'coin',description:'期限切れによる自動コイン変換'});
         }catch(e){console.error(e);}
         s.results=updatedResults;
@@ -2641,7 +2649,7 @@ async function bulkConvert(){
     try{await db.from('transactions').insert(transactions);}catch(e){}
   }
   if(totalBonus>0){
-    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    await updateCoin("add",totalBonus,"convert","コイン一括還元");
     updateHeaderPts();
     showToast(`+${totalBonus}コイン還元しました！${skipped>0?`（${skipped}件は還元設定なしでスキップ）`:''}`,3500);
   } else {
@@ -3041,7 +3049,7 @@ async function applyCoupon(){
 
   if(coupon.discount_type==='coin'){
     state.coin+=coupon.discount_amount;
-    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    await updateCoin("add",coupon.discount_amount,"coupon","クーポン適用");
     updateHeaderPts();
     document.getElementById('coupon-code-input').value='';
     showToast(`🎟️ クーポン適用！+${coupon.discount_amount}コイン！`,3000);
@@ -3148,10 +3156,7 @@ async function confirmBuyShopItem(itemId, itemNameEncoded, price, btn){
     modal.remove();_shopQty=1;
     showToast('処理中...',2000);
 
-    const newCoin=Number(state.coin)-totalPrice;
-    const r1=await db.from('users').update({coin_points:newCoin}).eq('id',state.user.id);
-    if(r1.error){alert('コインエラー: '+r1.error.message);return;}
-    state.coin=newCoin;updateHeaderPts();
+    await updateCoin('subtract',totalPrice,'purchase','交換所購入');
 
     // 在庫を減らす
     await db.from('shop_items').update({stock:Math.max(0,maxStock-qty)}).eq('id',itemId);
@@ -3340,7 +3345,7 @@ async function convertToPoints(dbId){
   state.coin+=bonus;
   updateHeaderPts();
   try{
-    await db.from('users').update({coin_points:state.coin}).eq('id',state.user.id);
+    await updateCoin("add",bonus,"convert","コイン単品還元");
     const updatedResults=sess.results.map(res=>({
       prize_name:res.prize.name,prize_tier:res.prize.tier,
       is_converted:res.converted||false,is_shipped:res.shipped||false,
