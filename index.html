@@ -1551,10 +1551,10 @@ function showResultDetail(session){
         +'<div style="font-size:1rem;font-weight:900;color:#1a1a1a;margin-bottom:8px;padding-right:36px">'+r.prize.name+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px">'
         +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||(rarLabel[r.prize.tier]||r.prize.tier))+'</span>'
-        +(c>0?'<span style="font-size:.85rem;color:#c8860a;font-weight:900">'+c+'\u30B3\u30A4\u30F3</span>':'')
         +'</div>'
         +(session.expiresAt?'<div style="font-size:.68rem;font-weight:700;color:#999;margin-top:4px">交換期限：'+(()=>{var d=new Date(session.expiresAt);return d.getFullYear()+'/'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'/'+( d.getDate()<10?'0':'')+d.getDate();})()+'</div>':'')
-        +'</div></div>';
+        +'</div></div>'
+        +(c>0?'<div style="margin:0 12px 12px;padding:10px;border:1.5px solid #e8c84a;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;background:#fffbef"><span style="font-size:1rem">🪙</span><span style="font-size:1rem;font-weight:900;color:#c8860a">'+c+'コイン</span></div>':'<div style="margin:0 12px 12px;padding:10px;border:1.5px solid #e0e0e0;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f8f8f8"><span style="font-size:.8rem;color:#aaa;font-weight:700">コイン交換不可</span></div>');
 
       card.addEventListener('click',()=>{
         if(selected.has(dbId)){selected.delete(dbId);}
@@ -1838,14 +1838,23 @@ async function executeDraw(){
     showToast('ガチャを引くにはログインが必要です');return;
   }
   const cost=pack.price*state.drawCount;
-  if(state.coin<cost){showToast('コインコインが不足しています');openPurchase();return;}
+  if(state.coin<cost){showToast('コインが不足しています');openPurchase();return;}
   if((pack.remaining||0)<state.drawCount){showToast('⚠️ 残り口数が不足しています');return;}
 
   // アクセストークン取得
   const{data:{session:authSession}}=await db.auth.getSession();
   if(!authSession?.access_token){showToast('⚠️ 認証エラー');return;}
 
-  // サーバーAPIで抽選
+  // 演出を先に開始しつつAPIを並行処理
+  document.getElementById('gacha-screen').classList.add('show');
+  const label=document.getElementById('gacha-label-main');
+  const sub=document.getElementById('gacha-label-sub');
+  if(label)label.textContent='抽選中...';
+  if(sub)sub.textContent='運命の瞬間';
+  document.getElementById('gacha-pack').textContent=pack.emoji||'🎴';
+  setPackColor('white');
+
+  // APIを並行実行
   let apiResult;
   try{
     const resp=await fetch('/api/draw',{
@@ -1860,8 +1869,14 @@ async function executeDraw(){
       }),
     });
     apiResult=await resp.json();
-    if(!resp.ok){showToast('⚠️ '+(apiResult.error||'エラーが発生しました'));return;}
-  }catch(e){showToast('⚠️ 通信エラーが発生しました');return;}
+    if(!resp.ok){
+      document.getElementById('gacha-screen').classList.remove('show');
+      showToast('⚠️ '+(apiResult.error||'エラーが発生しました'));return;
+    }
+  }catch(e){
+    document.getElementById('gacha-screen').classList.remove('show');
+    showToast('⚠️ 通信エラーが発生しました');return;
+  }
 
   const{results,sessionId,newCoin,newRemaining,soldOut,expiresAt}=apiResult;
 
@@ -1885,6 +1900,7 @@ async function executeDraw(){
   state.sessions.unshift(session);
 
   renderPacks();
+  // 演出画面は既に表示済みなので結果を渡して演出継続
   startGachaAnimation(session.results,pack);
 }
 
@@ -2940,7 +2956,7 @@ function openPurchase(){
   ];
   let selectedPrice=null;
   document.getElementById('purchase-plans').innerHTML=`
-    <div style="display:flex;align-items:center;gap:5px;margin-bottom:10px;font-size:.75rem;color:var(--text3)">💳 クレジットカード決済（1コイン＝1円）</div>
+    <div style="display:flex;align-items:center;gap:5px;margin-bottom:10px;font-size:.75rem;color:var(--text3)">💳 クレジットカード・銀行振込・その他決済対応（1コイン＝1円）</div>
     `+plans.map(p=>`
     <div class="plan-item" id="plan-${p.price}" onclick="selectPlan(${p.price},${p.coins})">
       <div style="display:flex;align-items:center;gap:10px">
