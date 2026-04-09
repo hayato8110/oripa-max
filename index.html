@@ -3019,43 +3019,27 @@ async function applyCoupon(){
   const code=document.getElementById('coupon-code-input')?.value?.trim()?.toUpperCase();
   if(!code){showToast('⚠️ クーポンコードを入力してください');return;}
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
-  // LINE連携チェック
   if(!state.user.line_id){
     showToast('⚠️ クーポン使用にはLINE連携が必要です');
     setTimeout(()=>showPage('mypage',document.querySelector('[data-page=mypage]')),1500);
     return;
   }
-  const{data:coupon}=await db.from('coupons').select('*').eq('code',code).eq('is_active',true).single();
-  if(!coupon){showToast('⚠️ 無効なクーポンコードです');return;}
-
-  // 配布数上限チェック
-  if(coupon.max_total_uses>0&&(coupon.total_used||0)>=coupon.max_total_uses){
-    showToast('⚠️ このクーポンは配布上限に達しました');return;
-  }
-
-  // 1人1回チェック
-  const{data:alreadyUsed}=await db.from('coupon_uses').select('id').eq('coupon_id',coupon.id).eq('user_id',state.user.id).single();
-  if(alreadyUsed){showToast('⚠️ このクーポンはすでに使用済みです');return;}
-
-  // 使用履歴を記録
-  const{error:useError}=await db.from('coupon_uses').insert({coupon_id:coupon.id,user_id:state.user.id});
-  if(useError){showToast('⚠️ クーポンの使用に失敗しました');return;}
-
-  // 使用回数更新
-  await db.from('coupons').update({
-    used_count:(coupon.used_count||0)+1,
-    total_used:(coupon.total_used||0)+1,
-  }).eq('id',coupon.id);
-
-  if(coupon.discount_type==='coin'){
-    state.coin+=coupon.discount_amount;
-    await updateCoin("add",coupon.discount_amount,"coupon","クーポン適用");
+  const{data:{session}}=await db.auth.getSession();
+  const res=await fetch('/api/shop',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'coupon',userId:state.user.id,userToken:session.access_token,code})
+  });
+  const data=await res.json();
+  if(!res.ok){showToast('⚠️ '+data.error);return;}
+  if(data.discountType==='coin'){
+    state.coin=data.newCoin;
     updateHeaderPts();
     document.getElementById('coupon-code-input').value='';
-    showToast(`🎟️ クーポン適用！+${coupon.discount_amount}コイン！`,3000);
+    showToast(`🎟️ クーポン適用！+${data.discountAmount}コイン！`,3000);
   } else {
     document.getElementById('coupon-code-input').value='';
-    showToast(`🎟️ ${coupon.discount_amount}%OFFクーポンを適用しました！`,3000);
+    showToast(`🎟️ ${data.discountAmount}%OFFクーポンを適用しました！`,3000);
   }
 }
 
@@ -3156,23 +3140,18 @@ async function confirmBuyShopItem(itemId, itemNameEncoded, price, btn){
     modal.remove();_shopQty=1;
     showToast('処理中...',2000);
 
-    await updateCoin('subtract',totalPrice,'purchase','交換所購入');
-
-    // 在庫を減らす
-    await db.from('shop_items').update({stock:Math.max(0,maxStock-qty)}).eq('id',itemId);
-
-    // 注文をqty件保存
-    let lastOrderId=null;
-    let imgUrl=null;
-    try{const{data:imgData}=await db.from('shop_items').select('image_url').eq('id',itemId).single();imgUrl=imgData?.image_url||null;}catch(e){}
-    for(let i=0;i<qty;i++){
-      const oid=crypto.randomUUID();
-      if(i===qty-1)lastOrderId=oid;
-      const r2=await db.from('shop_orders').insert({id:oid,user_id:state.user.id,item_id:itemId,item_name:itemName,price:Number(price),status:'pending'});
-      if(r2.error){alert('注文エラー: '+r2.error.message);return;}
-      state.shopOrders.unshift({id:oid,item_id:itemId,item_name:itemName,price:Number(price),status:'pending',imageUrl:imgUrl,created_at:new Date().toISOString()});
-    }
-    try{await db.from('transactions').insert({user_id:state.user.id,type:'shop_purchase',amount:-totalPrice,currency:'coin',description:'交換所: '+itemName+' ×'+qty});}catch(e){}
+    const{data:{session}}=await db.auth.getSession();
+    const shopRes=await fetch('/api/shop',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'purchase',userId:state.user.id,userToken:session.access_token,itemId,qty})
+    });
+    const shopData=await shopRes.json();
+    if(!shopRes.ok){alert('購入エラー: '+shopData.error);return;}
+    state.coin=shopData.newCoin;
+    updateHeaderPts();
+    const lastOrderId=shopData.orderId;
+    state.shopOrders.unshift({id:lastOrderId,item_id:itemId,item_name:itemName,price:Number(price),status:'pending',created_at:new Date().toISOString()});
 
     loadShopPage();
     showToast('✅ 購入完了！発送先を入力してください',3000);
