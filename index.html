@@ -1332,13 +1332,13 @@ function showResultCards(results,pack){
                   ?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover">`
                   :`<span style="font-size:3rem">${pack?.emoji||'🎴'}</span>`}
               </div>
-              <div style="flex:1;min-width:0;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:8px">
+              <div style="flex:1;min-width:0;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:8px;position:relative">
                 <div style="font-size:1rem;font-weight:900;color:#fff;line-height:1.3">${r.prize.name}</div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                   <span style="background:${tierBg[r.prize.tier]||'#888'};color:#fff;font-size:.7rem;font-weight:900;padding:3px 12px;border-radius:20px">${r.prize.tier_label||rarLabel2[r.prize.tier]||r.prize.tier}</span>
-                  ${convertCoin>0?`<span style="font-size:.78rem;color:var(--gold2);font-weight:900;background:rgba(201,168,76,.1);padding:4px 12px;border-radius:8px;border:1px solid rgba(201,168,76,.35)">🪙 ${convertCoin}コイン</span>`:''}
                   ${exType==='ship_only'?`<span style="font-size:.68rem;font-weight:900;background:linear-gradient(135deg,#e8380d,#cc2000);color:#fff;padding:2px 8px;border-radius:6px">📦 発送専用</span>`:''}
                 </div>
+                ${convertCoin>0?`<div style="position:absolute;bottom:10px;right:14px;font-size:.78rem;color:var(--gold2);font-weight:900;background:rgba(201,168,76,.1);padding:4px 10px;border-radius:8px;border:1px solid rgba(201,168,76,.35)">🪙 ${convertCoin}コイン</div>`:''}
               </div>
             </div>
             ${(showShip||showCoin)&&dbId?`
@@ -1553,8 +1553,8 @@ function showResultDetail(session){
         +'<span style="background:'+(tierBg[r.prize.tier]||'#888')+';color:#fff;font-size:.72rem;font-weight:900;padding:3px 14px;border-radius:20px">'+(r.prize.tier_label||(rarLabel[r.prize.tier]||r.prize.tier))+'</span>'
         +'</div>'
         +(session.expiresAt?'<div style="font-size:.68rem;font-weight:700;color:#999;margin-top:4px">交換期限：'+(()=>{var d=new Date(session.expiresAt);return d.getFullYear()+'/'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'/'+( d.getDate()<10?'0':'')+d.getDate();})()+'</div>':'')
-        +'</div></div>'
-        +(c>0?'<div style="margin:6px 14px 14px;padding:7px 12px;border:1.5px solid #e8c84a;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;background:#fffbef"><span style="font-size:.9rem">🪙</span><span style="font-size:.9rem;font-weight:900;color:#c8860a">'+c+'コイン</span></div>':'<div style="margin:6px 14px 14px;padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#f8f8f8"><span style="font-size:.8rem;color:#aaa;font-weight:700">コイン交換不可</span></div>');
+        +(c>0?'<div style="position:absolute;bottom:10px;right:10px;font-size:.78rem;font-weight:900;color:#c8860a;background:#fffbef;padding:3px 10px;border-radius:8px;border:1.5px solid #e8c84a">🪙 '+c+'コイン</div>':'')
+        +'</div></div>';
 
       card.addEventListener('click',()=>{
         if(selected.has(dbId)){selected.delete(dbId);}
