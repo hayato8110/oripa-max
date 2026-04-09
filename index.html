@@ -1336,7 +1336,7 @@ function showResultCards(results,pack){
                 <div style="font-size:1rem;font-weight:900;color:#fff;line-height:1.3">${r.prize.name}</div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                   <span style="background:${tierBg[r.prize.tier]||'#888'};color:#fff;font-size:.7rem;font-weight:900;padding:3px 12px;border-radius:20px">${r.prize.tier_label||rarLabel2[r.prize.tier]||r.prize.tier}</span>
-                  ${convertCoin>0?`<span style="font-size:.78rem;color:var(--gold2);font-weight:900;background:rgba(201,168,76,.1);padding:3px 10px;border-radius:8px">${convertCoin}コイン</span>`:''}
+                  ${convertCoin>0?`<span style="font-size:.78rem;color:var(--gold2);font-weight:900;background:rgba(201,168,76,.1);padding:4px 12px;border-radius:8px;border:1px solid rgba(201,168,76,.35)">🪙 ${convertCoin}コイン</span>`:''}
                   ${exType==='ship_only'?`<span style="font-size:.68rem;font-weight:900;background:linear-gradient(135deg,#e8380d,#cc2000);color:#fff;padding:2px 8px;border-radius:6px">📦 発送専用</span>`:''}
                 </div>
               </div>
@@ -1554,7 +1554,7 @@ function showResultDetail(session){
         +'</div>'
         +(session.expiresAt?'<div style="font-size:.68rem;font-weight:700;color:#999;margin-top:4px">交換期限：'+(()=>{var d=new Date(session.expiresAt);return d.getFullYear()+'/'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'/'+( d.getDate()<10?'0':'')+d.getDate();})()+'</div>':'')
         +'</div></div>'
-        +(c>0?'<div style="margin:0 12px 12px;padding:10px;border:1.5px solid #e8c84a;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;background:#fffbef"><span style="font-size:1rem">🪙</span><span style="font-size:1rem;font-weight:900;color:#c8860a">'+c+'コイン</span></div>':'<div style="margin:0 12px 12px;padding:10px;border:1.5px solid #e0e0e0;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f8f8f8"><span style="font-size:.8rem;color:#aaa;font-weight:700">コイン交換不可</span></div>');
+        +(c>0?'<div style="margin:6px 14px 14px;padding:7px 12px;border:1.5px solid #e8c84a;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;background:#fffbef"><span style="font-size:.9rem">🪙</span><span style="font-size:.9rem;font-weight:900;color:#c8860a">'+c+'コイン</span></div>':'<div style="margin:6px 14px 14px;padding:7px 12px;border:1.5px solid #e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#f8f8f8"><span style="font-size:.8rem;color:#aaa;font-weight:700">コイン交換不可</span></div>');
 
       card.addEventListener('click',()=>{
         if(selected.has(dbId)){selected.delete(dbId);}
@@ -1845,16 +1845,7 @@ async function executeDraw(){
   const{data:{session:authSession}}=await db.auth.getSession();
   if(!authSession?.access_token){showToast('⚠️ 認証エラー');return;}
 
-  // 演出を先に開始しつつAPIを並行処理
-  document.getElementById('gacha-screen').classList.add('show');
-  const label=document.getElementById('gacha-label-main');
-  const sub=document.getElementById('gacha-label-sub');
-  if(label)label.textContent='抽選中...';
-  if(sub)sub.textContent='運命の瞬間';
-  document.getElementById('gacha-pack').textContent=pack.emoji||'🎴';
-  setPackColor('white');
-
-  // APIを並行実行
+  // サーバーAPIで抽選
   let apiResult;
   try{
     const resp=await fetch('/api/draw',{
@@ -1869,14 +1860,8 @@ async function executeDraw(){
       }),
     });
     apiResult=await resp.json();
-    if(!resp.ok){
-      document.getElementById('gacha-screen').classList.remove('show');
-      showToast('⚠️ '+(apiResult.error||'エラーが発生しました'));return;
-    }
-  }catch(e){
-    document.getElementById('gacha-screen').classList.remove('show');
-    showToast('⚠️ 通信エラーが発生しました');return;
-  }
+    if(!resp.ok){showToast('⚠️ '+(apiResult.error||'エラーが発生しました'));return;}
+  }catch(e){showToast('⚠️ 通信エラーが発生しました');return;}
 
   const{results,sessionId,newCoin,newRemaining,soldOut,expiresAt}=apiResult;
 
@@ -1900,7 +1885,6 @@ async function executeDraw(){
   state.sessions.unshift(session);
 
   renderPacks();
-  // 演出画面は既に表示済みなので結果を渡して演出継続
   startGachaAnimation(session.results,pack);
 }
 
