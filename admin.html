@@ -1079,15 +1079,9 @@ function addPrizeBlock(prize){
     </div>
 
     <!-- 個数表示設定 -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;margin-bottom:6px">
-      <div>
-        <div style="font-size:.78rem;font-weight:700;color:#fff">フロントで個数表示（×1など）</div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.4);margin-top:2px">ONにするとユーザーに残り個数が表示されます</div>
-      </div>
-      <label style="position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0">
-        <input type="checkbox" class="prize-show-qty" style="opacity:0;width:0;height:0" ${prize?.show_quantity?'checked':''}>
-        <span style="position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.15);border-radius:999px;transition:.3s"></span>
-      </label>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;margin-bottom:6px">
+      <input type="checkbox" class="prize-show-qty" id="show-qty-${idx}" ${prize?.show_quantity?'checked':''} style="width:16px;height:16px;cursor:pointer;accent-color:var(--gold2)">
+      <label for="show-qty-${idx}" style="font-size:.78rem;font-weight:700;color:#fff;cursor:pointer">フロントで個数表示（×1など）</label>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
     </div>
