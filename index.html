@@ -101,7 +101,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .pc-btn-1:active{transform:scale(.97);background:#f0f0f0}
 .pc-btn-5{padding:13px 6px;border-radius:10px;font-size:.92rem;font-weight:900;background:linear-gradient(135deg,#cc2200,#e8380d);color:#fff;letter-spacing:.04em;transition:.15s;box-shadow:0 4px 14px rgba(232,56,13,.35);position:relative;overflow:hidden}
 .pc-btn-5:active{transform:scale(.97)}
-.progress-bg{background:rgba(255,255,255,.06);border-radius:999px;height:4px;overflow:hidden;margin-bottom:10px;width:50%;margin-left:auto}
+.progress-bg{background:rgba(255,255,255,.06);border-radius:999px;height:7px;overflow:hidden;margin-bottom:10px;width:50%;margin-left:auto}
 .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:.5s;position:relative;overflow:hidden}
 .progress-fill.warn{background:linear-gradient(90deg,#d97706,#f59e0b)}
 .progress-fill.danger{background:linear-gradient(90deg,#dc2626,#ef4444)}
@@ -2796,13 +2796,11 @@ function renderMyPage(){
     return;
   }
   content.innerHTML=`
-    <div class="mp-user-card">
+    <div class="mp-user-card" style="position:relative">
+      <button onclick="openEditUsername()" style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:3px 10px;color:rgba(255,255,255,.7);font-size:.7rem;cursor:pointer;z-index:2">編集</button>
       <div style="display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1.5px solid rgba(255,255,255,.15);margin-bottom:14px;position:relative;z-index:1">
         <div class="mp-avatar" style="display:flex;align-items:center;justify-content:center;color:rgba(240,234,220,.8);flex-shrink:0"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-        <div style="display:flex;align-items:center;gap:8px;flex:1">
-          <div class="mp-username" style="border-bottom:none;padding-bottom:0">${state.user.username}</div>
-          <button onclick="openEditUsername()" style="background:rgba(255,255,255,.1);border:none;border-radius:6px;padding:3px 8px;color:rgba(255,255,255,.6);font-size:.7rem;cursor:pointer">編集</button>
-        </div>
+        <div class="mp-username" style="border-bottom:none;padding-bottom:0">${state.user.username}</div>
       </div>
       <div class="mp-pts-row" style="position:relative;z-index:1">
         <div class="mp-pt" style="grid-column:span 2"><div class="mp-pt-label">コイン残高</div><div class="mp-pt-val">${state.coin.toLocaleString()}</div></div>
