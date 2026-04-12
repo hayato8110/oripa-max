@@ -102,7 +102,7 @@ input,select,textarea{font-family:inherit;outline:none}
 .pc-btn-5{padding:13px 6px;border-radius:10px;font-size:.92rem;font-weight:900;background:linear-gradient(135deg,#cc2200,#e8380d);color:#fff;letter-spacing:.04em;transition:.15s;box-shadow:0 4px 14px rgba(232,56,13,.35);position:relative;overflow:hidden}
 .pc-btn-5:active{transform:scale(.97)}
 .progress-bg{background:rgba(255,255,255,.06);border-radius:999px;height:7px;overflow:hidden;margin-bottom:10px;width:50%;margin-left:auto}
-.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#16a34a,#22c55e);transition:.5s;position:relative;overflow:hidden}
+.progress-fill{height:100%;border-radius:999px;background:#22c55e;transition:.5s;position:relative;overflow:hidden}
 .progress-fill.warn{background:linear-gradient(90deg,#d97706,#f59e0b)}
 .progress-fill.danger{background:linear-gradient(90deg,#dc2626,#ef4444)}
 .progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 2s infinite}
@@ -511,6 +511,11 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 </div>
 
 <!-- PAGE: マイページ -->
+<div id="maintenance-screen" style="display:none;position:fixed;inset:0;background:#0f1117;z-index:99999;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:24px">
+  <div style="font-size:4rem;margin-bottom:20px">🔧</div>
+  <div style="font-size:1.6rem;font-weight:900;margin-bottom:12px">メンテナンス中</div>
+  <div style="font-size:.95rem;color:rgba(255,255,255,.6);line-height:1.7" id="maintenance-msg">しばらくお待ちください</div>
+</div>
 <div id="page-mypage" class="page">
   <div class="mypage" id="mypage-content"></div>
 </div>
@@ -3600,6 +3605,21 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
     showToast('決済がキャンセルされました');
   }
   await checkSession();
+
+  // メンテナンスチェック
+  const{data:maintenanceData}=await db.from('notices').select('body').eq('type','maintenance').eq('is_active',true).single();
+  if(maintenanceData){
+    // 管理者はスキップ
+    const isAdmin=(await db.from('users').select('is_admin').eq('id',state.user?.id||'').single())?.data?.is_admin;
+    if(!isAdmin){
+      const ms=document.getElementById('maintenance-screen');
+      if(ms){ms.style.display='flex';}
+      const msg=document.getElementById('maintenance-msg');
+      if(msg&&maintenanceData.body)msg.textContent=maintenanceData.body;
+      return;
+    }
+  }
+
   // まずパックを読み込む（loadHistoryFromDBでpack情報が必要なため）
   await Promise.all([
     loadAndRenderPacks(),
