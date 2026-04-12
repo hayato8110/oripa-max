@@ -2044,7 +2044,7 @@ function renderPacks(){
   }
   if(state.currentSort==='hot')list.sort((a,b)=>(b.draw_count||0)-(a.draw_count||0));
   else if(state.currentSort==='cheap')list.sort((a,b)=>a.price-b.price);
-  else list.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  else list.sort((a,b)=>(a.sort_order||999)-(b.sort_order||999));
   // SOLD OUTを常に一番下に
   list.sort((a,b)=>{
     const aOut=(a.remaining||0)<=0?1:0;
