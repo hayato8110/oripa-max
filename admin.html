@@ -224,7 +224,10 @@ input,select,textarea{font-family:inherit}
       <div class="table-card">
         <div class="table-head">
           <span class="table-title">全パック一覧</span>
-          <input class="search-input" placeholder="🔍 パック名で検索" oninput="filterPacks(this.value)">
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="search-input" placeholder="🔍 パック名で検索" oninput="filterPacks(this.value)">
+            <button class="btn btn-edit" onclick="toggleSortMode()" id="sort-mode-btn">並び順変更</button>
+          </div>
         </div>
         <table class="tbl"><thead><tr><th>パック名</th><th>カテゴリ</th><th>価格</th><th>残り/全</th><th>状態</th><th>操作</th></tr></thead>
         <tbody id="packs-tbl-body"></tbody></table>
@@ -530,10 +533,9 @@ input,select,textarea{font-family:inherit}
         <div class="form-group"><label class="form-label">全口数 *</label><input type="number" class="form-input" id="pm-total" placeholder="500"></div>
         <div class="form-group"><label class="form-label">天井回数（0=なし）</label><input type="number" class="form-input" id="pm-tenjo" value="0"></div>
         <div class="form-group form-full"><label class="form-label">背景CSS（省略可）</label><input class="form-input" id="pm-bg" placeholder="radial-gradient(...)"></div>
-        <div class="form-group"><label class="form-label">表示順</label><input type="number" class="form-input" id="pm-order" value="0"></div>
+        <input type="hidden" id="pm-order" value="0">
       </div>
       <div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">
-        <label class="form-check"><input type="checkbox" id="pm-new-user"> 🆕 新規限定</label>
         <label class="form-check"><input type="checkbox" id="pm-new-user"> 🆕 新規限定</label>
         <label class="form-check"><input type="checkbox" id="pm-one-per-user"> 🔒 1人1回限定</label>
         <label class="form-check"><input type="checkbox" id="pm-active" checked> 🟢 公開</label>
@@ -871,19 +873,49 @@ async function loadPacks(){
   const{data}=await db.from('packs').select('*,prizes(*)').order('sort_order');
   allPacks=data||[];renderPacks(allPacks);
 }
+let sortMode=false;
+function toggleSortMode(){
+  sortMode=!sortMode;
+  document.getElementById('sort-mode-btn').textContent=sortMode?'並び順を保存':'並び順変更';
+  document.getElementById('sort-mode-btn').className=sortMode?'btn btn-success':'btn btn-edit';
+  if(!sortMode) saveSortOrder();
+  renderPacks(allPacks);
+}
+
+async function saveSortOrder(){
+  const updates=allPacks.map((p,i)=>db.from('packs').update({sort_order:i+1}).eq('id',p.id));
+  await Promise.all(updates);
+  showToast('✅ 並び順を保存しました！');
+}
+
+function movepack(idx,dir){
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=allPacks.length)return;
+  const tmp=allPacks[idx];
+  allPacks[idx]=allPacks[newIdx];
+  allPacks[newIdx]=tmp;
+  renderPacks(allPacks);
+}
+
 function renderPacks(packs){
-  document.getElementById('packs-tbl-body').innerHTML=packs.map(p=>{
+  document.getElementById('packs-tbl-body').innerHTML=packs.map((p,idx)=>{
     const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     return`<tr>
-      <td><div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}${p.is_new_user_only?'<span class="badge badge-gold" style="margin-left:4px">新規限定</span>':''}${p.max_draws_per_user===1?'<span class="badge badge-hot" style="margin-left:4px">1人1回</span>':''}</div></td>
+      <td>
+        ${sortMode?`<div style="display:flex;gap:4px;margin-bottom:4px">
+          <button class="btn btn-edit" onclick="movepack(${idx},-1)" style="padding:2px 6px;font-size:.7rem" ${idx===0?'disabled':''}>↑</button>
+          <button class="btn btn-edit" onclick="movepack(${idx},1)" style="padding:2px 6px;font-size:.7rem" ${idx===packs.length-1?'disabled':''}>↓</button>
+        </div>`:''}
+        <div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}${p.is_new_user_only?'<span class="badge badge-gold" style="margin-left:4px">新規限定</span>':''}${p.max_draws_per_user===1?'<span class="badge badge-hot" style="margin-left:4px">1人1回</span>':''}</div>
+      </td>
       <td>${p.category||'—'}</td>
       <td>${(p.price||0).toLocaleString()}🪙</td>
       <td>${(p.remaining||0).toLocaleString()}/${(p.total_slots||0).toLocaleString()}<br><span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span></td>
       <td><span class="badge ${p.is_active?'badge-active':'badge-pause'}">${p.is_active?'公開中':'停止中'}</span></td>
       <td style="white-space:nowrap">
-        <button class="btn btn-edit" onclick="editPack('${p.id}')">編集</button>
+        ${sortMode?'':`<button class="btn btn-edit" onclick="editPack('${p.id}')">編集</button>
         <button class="btn btn-${p.is_active?'danger':'success'}" onclick="togglePack('${p.id}',${p.is_active})" style="margin-left:4px">${p.is_active?'停止':'再開'}</button>
-        <button class="btn btn-danger" onclick="deletePack('${p.id}')" style="margin-left:4px">削除</button>
+        <button class="btn btn-danger" onclick="deletePack('${p.id}')" style="margin-left:4px">削除</button>`}
       </td>
     </tr>`;
   }).join('');
