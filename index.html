@@ -1528,8 +1528,10 @@ function showResultDetail(session){
     scroll.innerHTML='';
     const items=getItems();
     if(!items.length){
-      scroll.innerHTML='<div style="text-align:center;padding:60px 16px"><div style="font-size:2.5rem;margin-bottom:12px">\uD83C\uDF89</div><div style="font-size:.95rem;font-weight:700;color:#666">全て処理済みです</div></div>';
+      scroll.innerHTML='<div style="text-align:center;padding:60px 16px"><div style="font-size:2.5rem;margin-bottom:12px">🎉</div><div style="font-size:.95rem;font-weight:700;color:#666">全て処理済みです</div></div>';
       bottom.style.display='none';
+      const resultScreen=document.getElementById('result-screen');
+      if(resultScreen)resultScreen.classList.remove('show');
       return;
     }
     bottom.style.display='block';
