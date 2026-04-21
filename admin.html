@@ -915,6 +915,7 @@ function renderPacks(packs){
       <td style="white-space:nowrap">
         ${sortMode?'':`<button class="btn btn-edit" onclick="editPack('${p.id}')">編集</button>
         <button class="btn btn-${p.is_active?'danger':'success'}" onclick="togglePack('${p.id}',${p.is_active})" style="margin-left:4px">${p.is_active?'停止':'再開'}</button>
+        <button class="btn btn-${p.force_soldout?'warning':'secondary'}" onclick="toggleForceSoldout('${p.id}',${p.force_soldout})" style="margin-left:4px">${p.force_soldout?'🔴強制中':'SOLD OUT強制'}</button>
         <button class="btn btn-danger" onclick="deletePack('${p.id}')" style="margin-left:4px">削除</button>`}
       </td>
     </tr>`;
@@ -1245,6 +1246,12 @@ async function savePack(){
     if(error){showToast('⚠️ 賞品保存エラー: '+error.message);return;}
   }
   closeModal('pack-modal');showToast('✅ オリパを保存しました！');loadPacks();
+}
+
+async function toggleForceSoldout(id,current){
+  await db.from('packs').update({force_soldout:!current}).eq('id',id);
+  showToast(current?'✅ SOLD OUT強制解除しました':'🔴 SOLD OUT強制しました');
+  loadPacks();
 }
 
 async function togglePack(id,current){
