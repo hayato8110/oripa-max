@@ -2088,7 +2088,7 @@ function renderPacks(){
 
 function renderPackCards(list){
   return list.map(p=>{
-    const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
+    const pct=p.force_soldout?0:Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     const barClass=pct<10?'danger':pct<30?'warn':'';
     const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
     const isFav=favorites.has(p.id);
