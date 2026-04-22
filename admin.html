@@ -1088,6 +1088,7 @@ function addPrizeBlock(prize){
       <div>
         <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">枚数</div>
         <input type="number" min="1" step="1" class="form-input prize-qty" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="1" value="${parseInt(prize?.quantity)||1}">
+        ${prize?.quantity!=null?`<div style="font-size:.65rem;margin-top:3px;color:rgba(255,255,255,.4)">残り <b style="color:#e8a800">${prize.remaining_qty??prize.quantity}</b> / ${prize.quantity}</div>`:''}
       </div>
       <div>
         <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">重み（同じ数=均等）</div>
