@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     supabase.auth.getUser(userToken),
     supabase.from('packs').select('*').eq('id', packId).single(),
     supabase.from('users').select('coin_points, total_spent').eq('id', userId).single(),
-    supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, exchange_type, image_url, quantity, remaining_qty').eq('pack_id', packId).eq('is_active', true)
+    supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, exchange_type, image_url, quantity, remaining_qty, trigger_remaining').eq('pack_id', packId).eq('is_active', true)
   ]);
 
   if (authErr || !user || user.id !== userId) {
@@ -66,7 +66,12 @@ export default async function handler(req, res) {
   // 抽選
   const results = [];
   for (let i = 0; i < drawCount; i++) {
-    const available = prizes.filter(p => prizeStock[p.id] > 0);
+    const currentRemaining = (pack.remaining || 0) - i;
+    const available = prizes.filter(p => {
+      if (prizeStock[p.id] <= 0) return false;
+      if (p.trigger_remaining != null && currentRemaining > p.trigger_remaining) return false;
+      return true;
+    });
     if (!available.length) break;
     const prize = pickPrize(available, Math.random(), tenjoCount + i, pack.tenjo_limit || 0);
     results.push({ prize: { id: prize.id, name: prize.name, tier: prize.tier, tier_label: prize.tier_label, value_jp: prize.value_jp, exchange_type: prize.exchange_type, image_url: prize.image_url } });
