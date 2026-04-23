@@ -1126,6 +1126,11 @@ function addPrizeBlock(prize){
         <input type="checkbox" class="prize-is-active" ${prize?.is_active===false?'':'checked'} style="width:16px;height:16px;cursor:pointer">
         <span class="prize-active-label" style="font-size:.72rem;font-weight:900;color:${prize?.is_active===false?'#ff6060':'#00cc66'}">${prize?.is_active===false?'OFF':'ON'}</span>
       </label>
+    </div>
+    <!-- 発動残り口数 -->
+    <div style="margin-top:6px;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:6px">
+      <div style="font-size:.6rem;color:rgba(255,255,255,.4);margin-bottom:4px">🔒 発動残り口数（残りN口以下で抽選対象に入る・空白=常時）</div>
+      <input type="number" min="1" step="1" class="form-input prize-trigger-remaining" style="width:100%;padding:5px 8px;font-size:.82rem" placeholder="空白=常時抽選対象" value="${prize?.trigger_remaining??''}">
     </div>`;
   container.appendChild(div);
   // 抽選ON/OFFラベル更新
@@ -1212,7 +1217,8 @@ function getPrizeBlocksData(packId){
     const tier_label={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'}[tier]||'';
     const is_active=block.querySelector('.prize-is-active')?.checked!==false;
     const show_quantity=block.querySelector('.prize-show-qty')?.checked||false;
-    return{pack_id:packId,tier,tier_label,name,quantity:qty,remaining_qty:qty,weight,value_jp,exchange_type,image_url,is_active,show_quantity};
+    const trigger_remaining=block.querySelector('.prize-trigger-remaining')?.value!==''?parseInt(block.querySelector('.prize-trigger-remaining')?.value)||null:null;
+    return{pack_id:packId,tier,tier_label,name,quantity:qty,remaining_qty:qty,weight,value_jp,exchange_type,image_url,is_active,show_quantity,trigger_remaining};
   }).filter(p=>p.name);
 }
 
