@@ -224,20 +224,22 @@ function copyText(id){
 
 function showBankInfo(data){
   const b=data.bankInfo;
-  const zengin=b?.zengin||{};
+  const zengin=b?.zengin||b||{};
   document.getElementById('main-section').style.display='none';
   document.getElementById('notice').style.display='none';
-  document.getElementById('bank-info-section').style.display='block';
+  document.getElementById('plan-info').style.display='none';
+  const sec=document.getElementById('bank-info-section');
+  sec.style.cssText='display:block!important;margin:16px';
   document.getElementById('bi-amount').textContent=(data.amount||amount).toLocaleString();
   document.getElementById('bi-coins').textContent=coins.toLocaleString();
-  document.getElementById('bi-bank').textContent=zengin.bank_name||'-';
+  document.getElementById('bi-bank').textContent=zengin.bank_name||'GMOあおぞらネット銀行';
   document.getElementById('bi-branch').textContent=zengin.branch_name||'-';
-  document.getElementById('bi-type').textContent=zengin.account_type==='futsu'?'普通':'当座';
+  document.getElementById('bi-type').textContent='普通';
   document.getElementById('bi-number').textContent=zengin.account_number||'-';
   document.getElementById('bi-name').textContent=zengin.account_holder_name||'-';
-  // 支払い期日（7日後）
   const due=new Date();due.setDate(due.getDate()+7);
   document.getElementById('bi-due').textContent=due.toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  window.scrollTo(0,0);
 }
 
 async function init(){
@@ -291,7 +293,7 @@ async function showBankForm(){
     const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email,method:'bank'})});
     const data=await res.json();
     console.log('Bank response:', JSON.stringify(data));
-    if(data?.type==='bank'&&data?.bankInfo){
+    if(data?.type==='bank'){
       showBankInfo(data);
     }else{
       errEl.textContent=(data?.error||'振込先情報の取得に失敗しました: '+JSON.stringify(data));
