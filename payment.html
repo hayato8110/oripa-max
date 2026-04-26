@@ -159,16 +159,29 @@ async function init(){
 
     // Stripe Elements初期化
     stripeInstance = Stripe('pk_live_51TB2BeJoybCGBMPZqKp9MZ0Qv9P2ENqQlS5OTH3ac2z44AvXHPyXkZs');
-    stripeElements = stripeInstance.elements({clientSecret:data.clientSecret, locale:'ja'});
-    const paymentElement = stripeElements.create('payment');
+    const elements = stripeInstance.elements();
+    const cardElement = elements.create('card',{
+      style:{
+        base:{
+          fontSize:'16px',
+          color:'#1a1a1a',
+          fontFamily:'Noto Sans JP, sans-serif',
+          '::placeholder':{color:'#aaa'},
+        }
+      },
+      hidePostalCode:true,
+    });
 
     document.getElementById('loading-wrap').style.display = 'none';
     document.getElementById('form-wrap').style.display = 'block';
-
-    paymentElement.on('ready',()=>{
+    cardElement.mount('#payment-element');
+    cardElement.on('ready',()=>{
       document.getElementById('pay-btn').style.display = 'block';
     });
-    paymentElement.mount('#payment-element');
+
+    // 決済処理
+    window._cardElement = cardElement;
+    window._clientSecret = data.clientSecret;
 
   }catch(e){
     showToast('⚠️ エラー: '+e.message, 5000);
@@ -177,27 +190,23 @@ async function init(){
 }
 
 async function submitPayment(){
-  if(!stripeElements) return;
   const btn = document.getElementById('pay-btn');
   btn.disabled = true;
   btn.textContent = '処理中...';
   const errEl = document.getElementById('payment-error');
   errEl.style.display = 'none';
 
-  const{error} = await stripeInstance.confirmPayment({
-    elements: stripeElements,
-    confirmParams:{
-      return_url:`https://oripa-max.com/?payment=success`,
-    },
-    redirect:'if_required',
-  });
+  const{error, paymentIntent} = await stripeInstance.confirmCardPayment(
+    window._clientSecret,
+    {payment_method:{card: window._cardElement}}
+  );
 
   if(error){
     errEl.textContent = error.message;
     errEl.style.display = 'block';
     btn.disabled = false;
     btn.textContent = '購入する';
-  }else{
+  }else if(paymentIntent.status === 'succeeded'){
     showToast('🎉 決済完了！コインが付与されます',3000);
     setTimeout(()=>location.href='/?payment=success',2000);
   }
