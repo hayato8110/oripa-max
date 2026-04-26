@@ -10,206 +10,213 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0a0a0f;
-  --bg2:#111118;
-  --gold:#c9a84c;
-  --gold2:#e8c96a;
-  --gold3:#f5e090;
-  --text:#f0eadc;
-  --text2:rgba(240,234,220,.65);
-  --text3:rgba(240,234,220,.35);
-  --border:rgba(255,255,255,.08);
+  --bg:#0a0a0f;--bg2:#111118;--gold:#c9a84c;--gold2:#e8c96a;--gold3:#f5e090;
+  --text:#f0eadc;--text2:rgba(240,234,220,.65);--text3:rgba(240,234,220,.35);
 }
 html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif}
 body{max-width:480px;margin:0 auto;padding-bottom:40px}
-
-/* HEADER */
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
 .header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 16px;gap:12px;backdrop-filter:blur(20px)}
-.back-btn{background:none;border:none;color:var(--gold2);font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;padding:8px 0}
-.header-title{font-size:1rem;font-weight:900;color:var(--text)}
-
-/* PLAN INFO */
-.plan-info{margin:20px 16px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:16px}
-.plan-info-label{font-size:.75rem;color:var(--text3);margin-bottom:6px}
-.plan-info-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.plan-info-coins{display:flex;align-items:center;gap:6px;font-size:1.4rem;font-weight:900;color:var(--gold2)}
-.plan-info-price{font-size:1.1rem;font-weight:900;color:var(--text)}
-
-/* PAYMENT FORM */
-.payment-wrap{margin:0 16px}
-.payment-section-title{font-size:.85rem;font-weight:700;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
-#payment-element{background:#fff;border-radius:12px;padding:16px;min-height:200px}
-#payment-error{color:#ff6060;font-size:.82rem;margin-top:8px;display:none}
-
-/* PAY BUTTON */
-.pay-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4);display:none;transition:.15s}
-.pay-btn:active{transform:scale(.98)}
+.back-btn{background:none;border:none;color:var(--gold2);font-size:1rem;font-weight:700;cursor:pointer}
+.header-title{font-size:1rem;font-weight:900}
+.plan-info{margin:16px 16px 0;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:14px 16px}
+.plan-row{display:flex;justify-content:space-between;align-items:center}
+.plan-coins{display:flex;align-items:center;gap:6px;font-size:1.3rem;font-weight:900;color:var(--gold2)}
+.plan-price{font-size:1.1rem;font-weight:900}
+.plan-sub{font-size:.7rem;color:var(--text3);margin-top:4px}
+.section{margin:16px 16px 0}
+.section-title{font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:10px}
+.method-list{display:flex;flex-direction:column;gap:8px}
+.method-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;transition:.15s}
+.method-item.selected{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.method-radio{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.method-item.selected .method-radio{border-color:var(--gold);background:var(--gold)}
+.method-dot{width:7px;height:7px;border-radius:50%;background:#1a0a00;display:none}
+.method-item.selected .method-dot{display:block}
+.method-name{font-size:.95rem;font-weight:700}
+.method-sub{font-size:.72rem;color:var(--text3);margin-top:2px}
+.badges{display:flex;gap:3px}
+.badge{font-size:.55rem;font-weight:900;padding:2px 5px;border-radius:3px;color:#fff}
+.card-form{margin:12px 0 0;background:#fff;border-radius:12px;padding:16px;display:none}
+.field-label{font-size:.75rem;font-weight:700;color:#555;margin-bottom:6px}
+.field{margin-bottom:14px}
+.stripe-field{border:1.5px solid #ddd;border-radius:8px;padding:12px;background:#fafafa}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#card-name{width:100%;font-size:15px;color:#333;outline:none;font-family:inherit;border:1.5px solid #ddd;border-radius:8px;padding:12px;background:#fafafa}
+#card-name:focus{border-color:#c9a84c}
+.pay-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4);transition:.15s;display:none}
 .pay-btn:disabled{opacity:.6;cursor:not-allowed}
-
-/* LOADING */
-.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:12px}
+#pay-error{color:#dc2626;font-size:.82rem;margin-top:8px;display:none;padding:8px 12px;background:rgba(220,38,38,.08);border-radius:8px}
+.notice{margin:16px 16px 0;background:rgba(255,255,255,.03);border-radius:10px;padding:12px 14px}
+.notice-item{font-size:.72rem;color:var(--text3);line-height:1.9;display:flex;gap:6px}
+.notice-item::before{content:'•';color:var(--gold);flex-shrink:0}
+.loading-wrap{display:flex;align-items:center;justify-content:center;padding:60px}
 .spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(201,168,76,.1);border-top-color:var(--gold2);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:.82rem;color:var(--text3)}
-
-/* NOTICE */
-.notice{margin:16px 16px 0;background:rgba(255,255,255,.04);border-radius:10px;padding:12px 14px}
-.notice-item{font-size:.72rem;color:var(--text3);line-height:1.8;display:flex;gap:6px}
-.notice-item::before{content:'•';color:var(--gold);flex-shrink:0}
-
-/* TOAST */
 #toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap}
 #toast.show{opacity:1}
 </style>
 </head>
 <body>
-
 <div id="toast"></div>
 
-<!-- HEADER -->
 <div class="header">
   <button class="back-btn" onclick="history.back()">← 戻る</button>
   <div class="header-title">コイン購入</div>
 </div>
 
-<!-- PLAN INFO -->
 <div class="plan-info" id="plan-info" style="display:none">
-  <div class="plan-info-label">購入内容</div>
-  <div class="plan-info-row">
-    <div class="plan-info-coins">
-      <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="url(#cg1)" stroke="url(#cg2)" stroke-width="1"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00" letter-spacing="0.3">MAX</text><defs><radialGradient id="cg1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="cg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg>
+  <div class="plan-sub">購入内容</div>
+  <div class="plan-row">
+    <div class="plan-coins">
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="url(#g1)" stroke="url(#g2)" stroke-width="1"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="g1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg>
       <span id="plan-coins">-</span>コイン
     </div>
-    <div class="plan-info-price">¥<span id="plan-price">-</span></div>
+    <div class="plan-price">¥<span id="plan-price">-</span></div>
   </div>
-  <div style="font-size:.72rem;color:var(--text3);margin-top:4px">1コイン = 1円相当</div>
+  <div class="plan-sub" style="margin-top:4px">1コイン = 1円相当</div>
 </div>
 
-<!-- PAYMENT FORM -->
-<div class="payment-wrap">
-  <div class="loading-wrap" id="loading-wrap">
-    <div class="spinner"></div>
-    <div class="loading-text">決済フォームを準備中...</div>
+<div class="section" id="main-section" style="display:none">
+  <div class="section-title">💳 お支払い方法を選択</div>
+  <div class="method-list">
+    <div class="method-item" id="method-card" onclick="selectMethod('card')">
+      <div class="method-radio"><div class="method-dot"></div></div>
+      <div style="flex:1">
+        <div class="method-name">クレジットカード</div>
+        <div class="method-sub">即時反映</div>
+      </div>
+      <div class="badges">
+        <span class="badge" style="background:#1a1aff;font-style:italic">VISA</span>
+        <span class="badge" style="background:#eb001b">MC</span>
+        <span class="badge" style="background:#007b40">JCB</span>
+        <span class="badge" style="background:#016fd0">AMEX</span>
+      </div>
+    </div>
+
+    <div class="method-item" id="method-bank" onclick="selectMethod('bank')">
+      <div class="method-radio"><div class="method-dot"></div></div>
+      <div style="flex:1">
+        <div class="method-name">銀行振込</div>
+        <div class="method-sub">入金確認後に反映（1〜3営業日）</div>
+      </div>
+      <span style="font-size:1.2rem">🏦</span>
+    </div>
   </div>
 
-  <div id="form-wrap" style="display:none">
-    <div class="payment-section-title">💳 お支払い方法を選択</div>
-    <div id="payment-element"></div>
-    <div id="payment-error"></div>
-    <button class="pay-btn" id="pay-btn" onclick="submitPayment()">購入する</button>
+  <!-- カード入力フォーム -->
+  <div class="card-form" id="card-form">
+    <div class="field">
+      <div class="field-label">カード番号</div>
+      <div class="stripe-field" id="card-number-el"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">有効期限</div>
+        <div class="stripe-field" id="card-expiry-el"></div>
+      </div>
+      <div class="field">
+        <div class="field-label">セキュリティコード</div>
+        <div class="stripe-field" id="card-cvc-el"></div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">名義人</div>
+      <input type="text" id="card-name" placeholder="TARO YAMADA" autocomplete="cc-name">
+    </div>
   </div>
+
+  <div id="pay-error"></div>
+  <button class="pay-btn" id="pay-btn" onclick="submitPayment()">購入する</button>
 </div>
 
-<!-- NOTICE -->
-<div class="notice">
-  <div class="notice-item">クレジットカード・銀行振込に対応しています</div>
+<div class="notice" id="notice" style="display:none">
+  <div class="notice-item">クレジットカードは即時反映されます</div>
   <div class="notice-item">銀行振込は入金確認後にコインが付与されます（平日1〜3営業日）</div>
-  <div class="notice-item">コインの有効期限はありません</div>
+  <div class="notice-item">コインは購入から1年間有効です</div>
+</div>
+
+<div class="loading-wrap" id="loading-wrap">
+  <div class="spinner"></div>
 </div>
 
 <script>
-const SUPABASE_URL = 'https://puspoyandexokjtsmajc.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1c3BveWFuZGV4b2tqdHNtYWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NTkwNTgsImV4cCI6MjA1NzQzNTA1OH0.xyOmSPTOkMkSQ-0SIxQOtSINj8GHuL0C6oRQTLBbslI';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1c3BveWFuZGV4b2tqdHNtYWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NTkwNTgsImV4cCI6MjA1NzQzNTA1OH0.xyOmSPTOkMkSQ-0SIxQOtSINj8GHuL0C6oRQTLBbslI';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const params=new URLSearchParams(location.search);
+const planId=params.get('plan');
+const amount=parseInt(params.get('amount')||'0');
+const coins=parseInt(params.get('coins')||'0');
+let stripe=null,cardNum=null,cardExp=null,cardCvc=null;
+let currentUser=null,selectedMethod=null,cardMounted=false;
 
-const params = new URLSearchParams(location.search);
-const planId = params.get('plan');
-const amount = parseInt(params.get('amount') || '0');
-const coins = parseInt(params.get('coins') || '0');
-
-let stripeInstance = null;
-let stripeElements = null;
-let currentUser = null;
-
-function showToast(msg, dur=2200){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),dur);
-}
+function showToast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
 async function init(){
-  // セッション確認
   const{data:{session}}=await db.auth.getSession();
-  if(!session){
-    showToast('ログインが必要です');
-    setTimeout(()=>location.href='/',1500);
-    return;
-  }
-  currentUser = session.user;
+  if(!session){showToast('ログインが必要です');setTimeout(()=>location.href='/',1500);return;}
+  currentUser=session.user;
+  document.getElementById('plan-coins').textContent=coins.toLocaleString();
+  document.getElementById('plan-price').textContent=amount.toLocaleString();
+  document.getElementById('plan-info').style.display='block';
+  document.getElementById('loading-wrap').style.display='none';
+  document.getElementById('main-section').style.display='block';
+  document.getElementById('notice').style.display='block';
+  stripe=Stripe('pk_live_51TB2BeJoybCGBMPZqKp9MZ0Qv9P2ENqQlS5OTH3ac2z44AvXHPyXkZs');
+}
 
-  // プラン情報表示
-  document.getElementById('plan-coins').textContent = coins.toLocaleString();
-  document.getElementById('plan-price').textContent = amount.toLocaleString();
-  document.getElementById('plan-info').style.display = 'block';
-
-  // PaymentIntent作成
-  try{
-    const res = await fetch('/api/create-payment-intent',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({planId, userId:currentUser.id, userEmail:currentUser.email})
-    });
-    const data = await res.json();
-    console.log('API response:', data);
-    if(!data?.clientSecret){
-      showToast('⚠️ エラー: '+(data?.error||JSON.stringify(data)||'不明'), 5000);
-      document.getElementById('loading-wrap').innerHTML='<div style="color:#ff6060;padding:20px;font-size:.85rem">エラー: '+(data?.error||JSON.stringify(data))+'</div>';
-      return;
+function selectMethod(method){
+  selectedMethod=method;
+  document.querySelectorAll('.method-item').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('method-'+method).classList.add('selected');
+  const cardForm=document.getElementById('card-form');
+  const payBtn=document.getElementById('pay-btn');
+  if(method==='card'){
+    cardForm.style.display='block';
+    payBtn.textContent='カードで購入する';
+    if(!cardMounted){
+      const els=stripe.elements();
+      const style={base:{fontSize:'15px',color:'#333',fontFamily:'Noto Sans JP,sans-serif','::placeholder':{color:'#bbb'}},invalid:{color:'#dc2626'}};
+      cardNum=els.create('cardNumber',{style,showIcon:true});
+      cardExp=els.create('cardExpiry',{style});
+      cardCvc=els.create('cardCvc',{style});
+      cardNum.mount('#card-number-el');
+      cardExp.mount('#card-expiry-el');
+      cardCvc.mount('#card-cvc-el');
+      cardMounted=true;
     }
-
-    // Stripe Elements初期化
-    stripeInstance = Stripe('pk_live_51TB2BeJoybCGBMPZqKp9MZ0Qv9P2ENqQlS5OTH3ac2z44AvXHPyXkZs');
-    const elements = stripeInstance.elements();
-    const cardElement = elements.create('card',{
-      style:{
-        base:{
-          fontSize:'16px',
-          color:'#1a1a1a',
-          fontFamily:'Noto Sans JP, sans-serif',
-          '::placeholder':{color:'#aaa'},
-        }
-      },
-      hidePostalCode:true,
-    });
-
-    document.getElementById('loading-wrap').style.display = 'none';
-    document.getElementById('form-wrap').style.display = 'block';
-    cardElement.mount('#payment-element');
-    cardElement.on('ready',()=>{
-      document.getElementById('pay-btn').style.display = 'block';
-    });
-
-    // 決済処理
-    window._cardElement = cardElement;
-    window._clientSecret = data.clientSecret;
-
-  }catch(e){
-    showToast('⚠️ エラー: '+e.message, 5000);
-    document.getElementById('loading-wrap').innerHTML='<div style="color:#ff6060;padding:20px;font-size:.85rem">例外エラー: '+e.message+'</div>';
+  }else{
+    cardForm.style.display='none';
+    payBtn.textContent='銀行振込で購入する';
   }
+  payBtn.style.display='block';
 }
 
 async function submitPayment(){
-  const btn = document.getElementById('pay-btn');
-  btn.disabled = true;
-  btn.textContent = '処理中...';
-  const errEl = document.getElementById('payment-error');
-  errEl.style.display = 'none';
+  const btn=document.getElementById('pay-btn');
+  const errEl=document.getElementById('pay-error');
+  btn.disabled=true;errEl.style.display='none';
 
-  const{error, paymentIntent} = await stripeInstance.confirmCardPayment(
-    window._clientSecret,
-    {payment_method:{card: window._cardElement}}
-  );
-
-  if(error){
-    errEl.textContent = error.message;
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = '購入する';
-  }else if(paymentIntent.status === 'succeeded'){
-    showToast('🎉 決済完了！コインが付与されます',3000);
-    setTimeout(()=>location.href='/?payment=success',2000);
+  if(selectedMethod==='bank'){
+    try{
+      const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email})});
+      const data=await res.json();
+      if(data?.url){location.href=data.url;}
+      else{errEl.textContent=data?.error||'エラー';errEl.style.display='block';btn.disabled=false;}
+    }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;}
+    return;
   }
+
+  try{
+    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email})});
+    const data=await res.json();
+    if(!data?.clientSecret){errEl.textContent=data?.error||'エラー';errEl.style.display='block';btn.disabled=false;return;}
+    const name=document.getElementById('card-name').value||currentUser.email;
+    const{error,paymentIntent}=await stripe.confirmCardPayment(data.clientSecret,{payment_method:{card:cardNum,billing_details:{name}}});
+    if(error){errEl.textContent=error.message;errEl.style.display='block';btn.disabled=false;}
+    else if(paymentIntent.status==='succeeded'){showToast('🎉 決済完了！コインが付与されます',3000);setTimeout(()=>location.href='/?payment=success',2000);}
+  }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;}
 }
 
 init();
