@@ -94,16 +94,6 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
       </div>
     </div>
 
-    <div class="method-item" id="method-bank" onclick="selectMethod('bank')">
-      <div class="method-radio"><div class="method-dot"></div></div>
-      <div style="flex:1">
-        <div class="method-name">銀行振込</div>
-        <div class="method-sub">入金確認後に反映（1〜3営業日）</div>
-      </div>
-      <span style="font-size:1.2rem">🏦</span>
-    </div>
-  </div>
-
   <!-- カード入力フォーム -->
   <div class="card-form" id="card-form">
     <div class="field">
@@ -125,6 +115,15 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
       <input type="text" id="card-name" placeholder="TARO YAMADA" autocomplete="cc-name">
     </div>
   </div>
+
+    <div class="method-item" id="method-bank" onclick="selectMethod('bank')">
+      <div class="method-radio"><div class="method-dot"></div></div>
+      <div style="flex:1">
+        <div class="method-name">銀行振込</div>
+        <div class="method-sub">入金確認後に反映（1〜3営業日）</div>
+      </div>
+      <span style="font-size:1.2rem">🏦</span>
+    </div>
 
   <div id="pay-error"></div>
   <button class="pay-btn" id="pay-btn" onclick="submitPayment()">購入する</button>
@@ -163,7 +162,7 @@ async function init(){
   document.getElementById('loading-wrap').style.display='none';
   document.getElementById('main-section').style.display='block';
   document.getElementById('notice').style.display='block';
-  stripe=Stripe('pk_live_51TB2BeJoybCGBMPZqKp9MZ0Qv9P2ENqQlS5OTH3ac2z44AvXHPyXkZs');
+  stripe=Stripe('pk_live_51TB2BeJoybCGBMPZ8zckgTLwxvh5vXPYjHEWaHl9rm2QlRZj70b9sRQ9TFVa4l0Kod1zBnV3QWUofQ1sDjCbIhvM005EXcgFPF');
 }
 
 function selectMethod(method){
