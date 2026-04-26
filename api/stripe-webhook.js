@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// コイン付与共通処理
+// コイン付与共通処理（Checkout Session用）
 async function grantCoins(session) {
   const { userId, coin, bonus } = session.metadata;
 
@@ -50,6 +50,62 @@ async function grantCoins(session) {
   console.log(`✅ コイン付与完了: ${userId} → +${totalCoin}コイン`);
 }
 
+// コイン付与共通処理（PaymentIntent用）
+async function grantCoinsFromPaymentIntent(paymentIntent) {
+  const { userId, coin, bonus } = paymentIntent.metadata;
+
+  const { data: user, error: userError } = await supabase
+    .from('users')
+    .select('coin_points')
+    .eq('id', userId)
+    .single();
+
+  if (userError || !user) throw new Error('User not found: ' + userId);
+
+  // 二重付与防止：同じpaymentIntentIdで既に付与済みかチェック
+  const { data: existing } = await supabase
+    .from('point_purchases')
+    .select('id')
+    .eq('stripe_session_id', paymentIntent.id)
+    .single();
+
+  if (existing) {
+    console.log(`⚠️ 既に付与済みのPaymentIntent: ${paymentIntent.id}`);
+    return;
+  }
+
+  const totalCoin = parseInt(coin) + parseInt(bonus || 0);
+  const newCoin = (user.coin_points || 0) + totalCoin;
+
+  await supabase
+    .from('users')
+    .update({ coin_points: newCoin })
+    .eq('id', userId);
+
+  await supabase
+    .from('point_purchases')
+    .insert({
+      user_id: userId,
+      amount_jpy: paymentIntent.amount,
+      jp_points: parseInt(coin),
+      bonus_points: parseInt(bonus || 0),
+      status: 'completed',
+      stripe_session_id: paymentIntent.id,
+    });
+
+  await supabase
+    .from('transactions')
+    .insert({
+      user_id: userId,
+      type: 'purchase_coin',
+      amount: totalCoin,
+      currency: 'coin',
+      description: `コインチャージ ¥${paymentIntent.amount?.toLocaleString()}`,
+    });
+
+  console.log(`✅ コイン付与完了(PI): ${userId} → +${totalCoin}コイン`);
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -74,9 +130,8 @@ export default async function handler(req, res) {
 
   try {
     switch (stripeEvent.type) {
+      // ── Checkout Session ──
       case 'checkout.session.completed':
-        // クレカ：即時完了 → コイン付与
-        // 銀行振込：入金待ち → スキップ
         if (session.payment_status === 'paid') {
           await grantCoins(session);
         } else {
@@ -85,13 +140,23 @@ export default async function handler(req, res) {
         break;
 
       case 'checkout.session.async_payment_succeeded':
-        // 銀行振込：入金確認後 → コイン付与
         await grantCoins(session);
         break;
 
       case 'checkout.session.async_payment_failed':
-        // 銀行振込：失敗
         console.log(`❌ 銀行振込失敗: ${session.id}`);
+        break;
+
+      // ── Payment Intent（Elements用）──
+      case 'payment_intent.succeeded':
+        // metadataにuserIdがある場合のみ処理（オリパMAXからの決済）
+        if (session.metadata?.userId) {
+          await grantCoinsFromPaymentIntent(session);
+        }
+        break;
+
+      case 'payment_intent.payment_failed':
+        console.log(`❌ 決済失敗(PI): ${session.id}`);
         break;
 
       default:
