@@ -3052,17 +3052,8 @@ let stripeInstance=null;
 let stripeElements=null;
 
 async function startPurchase(amount){
-  showToast('決済ページへ移動中...');
-  try{
-    const res=await fetch('/api/create-checkout',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({planId:'p'+amount,userId:state.user.id,userEmail:state.user.email})
-    });
-    const data=await res.json();
-    if(!data?.url){showToast('⚠️ 決済エラー: '+(data?.error||'不明'));return;}
-    window.location.href=data.url;
-  }catch(e){showToast('⚠️ エラー: '+e.message);}
+  const planId='p'+amount;
+  location.href=`/payment.html?plan=${planId}&amount=${amount}&coins=${amount}`;
 }
 
 async function submitStripePayment(){
