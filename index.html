@@ -7,6 +7,7 @@
 <title>オリパMAX | ネットオリパ</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow-x:hidden}
@@ -673,6 +674,11 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
       <div style="font-size:.75rem;color:#fff;margin-top:2px;opacity:.8">1コイン = 1円相当</div>
     </div>
     <div style="padding:12px 16px;list-style:none" id="purchase-plans"></div>
+    <div id="stripe-payment-element-wrap" style="display:none;padding:0 16px 12px">
+      <div id="stripe-payment-element"></div>
+      <div id="stripe-error-msg" style="color:#ff6060;font-size:.8rem;margin-top:8px;display:none"></div>
+      <button id="stripe-pay-btn" onclick="submitStripePayment()" style="width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-size:1rem;font-weight:900;margin-top:12px;letter-spacing:.05em;box-shadow:0 4px 16px rgba(201,168,76,.4);border:none;cursor:pointer">💳 決済する</button>
+    </div>
     <div style="padding:8px 16px 20px">
       <button onclick="closePurchase()" style="width:100%;padding:13px;background:rgba(255,255,255,.12);border-radius:10px;color:#fff;font-weight:900;font-size:.9rem;border:1.5px solid rgba(255,255,255,.2)">✕ 閉じる</button>
     </div>
@@ -3027,19 +3033,64 @@ function selectPlan(price,coins){
     btn.onclick=()=>startPurchase(price);
   }
 }
-function closePurchase(){document.getElementById('purchase-modal').classList.remove('show');}
+function closePurchase(){
+  document.getElementById('purchase-modal').classList.remove('show');
+  document.getElementById('stripe-payment-element-wrap').style.display='none';
+  document.getElementById('purchase-plans').style.display='block';
+  stripeElements=null;
+}
+
+let stripeInstance=null;
+let stripeElements=null;
+
 async function startPurchase(amount){
-  showToast('決済ページへ移動中...');
+  const planId='p'+amount;
+  showToast('決済フォームを準備中...');
   try{
-    const res=await fetch('/api/create-checkout',{
+    const res=await fetch('/api/create-payment-intent',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({planId:'p'+amount,userId:state.user.id,userEmail:state.user.email})
+      body:JSON.stringify({planId,userId:state.user.id,userEmail:state.user.email})
     });
     const data=await res.json();
-    if(!data?.url){showToast('⚠️ 決済エラー: '+(data?.error||'不明'));return;}
-    window.location.href=data.url;
+    if(!data?.clientSecret){showToast('⚠️ エラー: '+(data?.error||'不明'));return;}
+    if(!stripeInstance) stripeInstance=Stripe('pk_live_51TB2BeJoybCGBMPZqKp9MZ0Qv9P2ENqQlS5OTH3ac2z44AvXHPyXkZs');
+    stripeElements=stripeInstance.elements({clientSecret:data.clientSecret,locale:'ja'});
+    const paymentElement=stripeElements.create('payment');
+    document.getElementById('purchase-plans').style.display='none';
+    const wrap=document.getElementById('stripe-payment-element-wrap');
+    wrap.style.display='block';
+    document.getElementById('stripe-payment-element').innerHTML='';
+    paymentElement.mount('#stripe-payment-element');
+    const errEl=document.getElementById('stripe-error-msg');
+    errEl.style.display='none';
   }catch(e){showToast('⚠️ エラー: '+e.message);}
+}
+
+async function submitStripePayment(){
+  if(!stripeElements){showToast('⚠️ 決済フォームが準備できていません');return;}
+  const btn=document.getElementById('stripe-pay-btn');
+  btn.disabled=true;btn.textContent='処理中...';
+  const errEl=document.getElementById('stripe-error-msg');
+  errEl.style.display='none';
+  try{
+    const{error}=await stripeInstance.confirmPayment({
+      elements:stripeElements,
+      confirmParams:{return_url:'https://oripa-max.com/?payment=success'},
+      redirect:'if_required',
+    });
+    if(error){
+      errEl.textContent=error.message;errEl.style.display='block';
+      btn.disabled=false;btn.textContent='💳 決済する';
+    }else{
+      closePurchase();
+      showToast('🎉 決済完了！コインが付与されます',3500);
+      setTimeout(()=>checkSession(),3000);
+    }
+  }catch(e){
+    errEl.textContent=e.message;errEl.style.display='block';
+    btn.disabled=false;btn.textContent='💳 決済する';
+  }
 }
 
 /* ══ 年齢確認 ══ */
