@@ -3061,7 +3061,7 @@ async function startPurchase(amount){
       body:JSON.stringify({planId,userId:state.user.id,userEmail:state.user.email})
     });
     const data=await res.json();
-    if(!data?.clientSecret){showToast('⚠️ エラー: '+(data?.error||'不明'));return;}
+    if(!data?.clientSecret){showToast('⚠️ エラー: '+(data?.error||JSON.stringify(data)||'不明'),4000);return;}
     if(!stripeInstance) stripeInstance=Stripe('pk_live_51TB2BeJoybCGBMPZqKp9MZ0Qv9P2ENqQlS5OTH3ac2z44AvXHPyXkZs');
     stripeElements=stripeInstance.elements({clientSecret:data.clientSecret,locale:'ja'});
     const paymentElement=stripeElements.create('payment');
@@ -3076,7 +3076,7 @@ async function startPurchase(amount){
     paymentElement.mount('#stripe-payment-element');
     const errEl=document.getElementById('stripe-error-msg');
     errEl.style.display='none';
-  }catch(e){showToast('⚠️ エラー: '+e.message);}
+  }catch(e){showToast('⚠️ エラー: '+e.message,4000);console.error(e);}
 }
 
 async function submitStripePayment(){
@@ -3704,4 +3704,4 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 })();
 </script>
 </body>
-</html>
+      </html>
