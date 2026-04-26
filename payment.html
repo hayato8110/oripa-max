@@ -290,10 +290,12 @@ async function showBankForm(){
   try{
     const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email,method:'bank'})});
     const data=await res.json();
+    console.log('Bank response:', JSON.stringify(data));
     if(data?.type==='bank'&&data?.bankInfo){
       showBankInfo(data);
     }else{
-      errEl.textContent=data?.error||'エラーが発生しました';errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';
+      errEl.textContent=(data?.error||'振込先情報の取得に失敗しました: '+JSON.stringify(data));
+      errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';
     }
   }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';}
 }
