@@ -3008,6 +3008,8 @@ function openPurchase(){
       </div>
       <button onclick="startPurchase(${p.price})" style="background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;border:none;border-radius:8px;padding:8px 18px;font-weight:900;font-size:.88rem;cursor:pointer;white-space:nowrap">¥${p.price.toLocaleString()}</button>
     </div>`).join('');
+  document.getElementById('purchase-plans').style.display='block';
+  document.getElementById('stripe-payment-element-wrap').style.display='none';
   document.getElementById('purchase-modal').classList.add('show');
 }
 function selectPlan(price,coins){
