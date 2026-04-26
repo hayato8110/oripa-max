@@ -11,7 +11,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0a0a0f;--bg2:#111118;--gold:#c9a84c;--gold2:#e8c96a;--gold3:#f5e090;
-  --text:#f0eadc;--text2:rgba(240,234,220,.65);--text3:rgba(240,234,220,.35);
+  --text:#f0eadc;--text2:rgba(240,234,220,.9);--text3:rgba(240,234,220,.6);
 }
 html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif}
 body{max-width:480px;margin:0 auto;padding-bottom:40px}
@@ -136,43 +136,70 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 
 <!-- 振込先情報 -->
 <div id="bank-info-section" style="display:none;margin:16px">
-  <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="font-size:.75rem;color:var(--text3);margin-bottom:8px">お振込金額</div>
-    <div style="font-size:1.5rem;font-weight:900;color:var(--gold2)">¥<span id="bi-amount">-</span></div>
+  <div style="font-size:1rem;font-weight:900;margin-bottom:16px">振込先情報</div>
+
+  <!-- ステータス -->
+  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.82rem">
+      <span style="color:var(--text3)">ステータス</span><span style="color:#f59e0b;font-weight:700">入金待ち</span>
+      <span style="color:var(--text3)">決済方法</span><span style="font-weight:700">銀行振込</span>
+      <span style="color:var(--text3)">金額</span><span style="font-weight:700">¥<span id="bi-amount">-</span></span>
+      <span style="color:var(--text3)">コイン</span><span style="font-weight:700"><span id="bi-coins">-</span>コイン</span>
+      <span style="color:var(--text3)">支払い期日</span><span style="font-weight:700;color:#f87171" id="bi-due">-</span>
+    </div>
   </div>
-  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px">
-    <div style="font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:14px">🏦 振込先口座</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:10px">
+
+  <!-- 振込先 -->
+  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="font-size:.82rem;font-weight:700;color:var(--gold2);margin-bottom:14px">振込先情報</div>
+    <div style="color:#f59e0b;font-size:.75rem;margin-bottom:12px">以下の口座へお振り込みください。入金が確認されると自動的にコインが付与されます。</div>
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
         <span style="font-size:.8rem;color:var(--text3)">銀行名</span>
-        <span style="font-size:.88rem;font-weight:700" id="bi-bank">-</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.88rem;font-weight:700" id="bi-bank">-</span>
+          <button onclick="copyText('bi-bank')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+        </div>
       </div>
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
         <span style="font-size:.8rem;color:var(--text3)">支店名</span>
-        <span style="font-size:.88rem;font-weight:700" id="bi-branch">-</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.88rem;font-weight:700" id="bi-branch">-</span>
+          <button onclick="copyText('bi-branch')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+        </div>
       </div>
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
         <span style="font-size:.8rem;color:var(--text3)">口座種別</span>
         <span style="font-size:.88rem;font-weight:700" id="bi-type">-</span>
       </div>
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
         <span style="font-size:.8rem;color:var(--text3)">口座番号</span>
-        <span style="font-size:.88rem;font-weight:700" id="bi-number">-</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.88rem;font-weight:700" id="bi-number">-</span>
+          <button onclick="copyText('bi-number')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+        </div>
       </div>
-      <div style="display:flex;justify-content:space-between">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
         <span style="font-size:.8rem;color:var(--text3)">口座名義</span>
-        <span style="font-size:.88rem;font-weight:700" id="bi-name">-</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.88rem;font-weight:700" id="bi-name">-</span>
+          <button onclick="copyText('bi-name')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+        </div>
       </div>
     </div>
   </div>
-  <div style="margin-top:12px;background:rgba(255,150,0,.08);border:1px solid rgba(255,150,0,.2);border-radius:10px;padding:12px 14px">
-    <div style="font-size:.75rem;color:rgba(255,200,100,.8);line-height:1.8">
-      ※ 入金確認後（平日1〜3営業日）にコインが付与されます<br>
+
+  <!-- 注意事項 -->
+  <div style="background:rgba(255,150,0,.06);border:1px solid rgba(255,150,0,.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+    <div style="font-size:.72rem;color:rgba(255,200,100,.8);line-height:1.9">
+      ※ 必ずご本人様名義でお振り込みください<br>
+      ※ 通常10分〜1時間程度で反映されます（最大3営業日）<br>
       ※ 土日祝は翌営業日の処理となります<br>
-      ※ 振込人名義はご登録のお名前でお願いします
+      ※ 振込金額が不足している場合、コインは反映されません
     </div>
   </div>
-  <button onclick="location.href='/'" style="width:100%;padding:14px;border-radius:12px;background:rgba(255,255,255,.1);color:var(--text);font-weight:700;font-size:.9rem;border:1px solid rgba(255,255,255,.15);margin-top:12px;cursor:pointer">トップに戻る</button>
+
+  <button onclick="location.href='/'" style="width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-weight:900;font-size:.9rem;border:none;cursor:pointer">一覧に戻る</button>
 </div>
 
 <script>
@@ -188,17 +215,28 @@ let currentUser=null,selectedMethod=null,cardMounted=false;
 
 function showToast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
+function copyText(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  navigator.clipboard.writeText(el.textContent).then(()=>showToast('コピーしました'));
+}
+
 function showBankInfo(data){
   const b=data.bankInfo;
   const zengin=b?.zengin||{};
   document.getElementById('main-section').style.display='none';
+  document.getElementById('notice').style.display='none';
   document.getElementById('bank-info-section').style.display='block';
-  document.getElementById('bi-amount').textContent=(data.amount||0).toLocaleString();
+  document.getElementById('bi-amount').textContent=(data.amount||amount).toLocaleString();
+  document.getElementById('bi-coins').textContent=coins.toLocaleString();
   document.getElementById('bi-bank').textContent=zengin.bank_name||'-';
   document.getElementById('bi-branch').textContent=zengin.branch_name||'-';
   document.getElementById('bi-type').textContent=zengin.account_type==='futsu'?'普通':'当座';
   document.getElementById('bi-number').textContent=zengin.account_number||'-';
   document.getElementById('bi-name').textContent=zengin.account_holder_name||'-';
+  // 支払い期日（7日後）
+  const due=new Date();due.setDate(due.getDate()+7);
+  document.getElementById('bi-due').textContent=due.toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 
 async function init(){
