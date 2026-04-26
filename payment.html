@@ -150,8 +150,10 @@ async function init(){
       body:JSON.stringify({planId, userId:currentUser.id, userEmail:currentUser.email})
     });
     const data = await res.json();
+    console.log('API response:', data);
     if(!data?.clientSecret){
-      showToast('⚠️ エラー: '+(data?.error||'不明'));
+      showToast('⚠️ エラー: '+(data?.error||JSON.stringify(data)||'不明'), 5000);
+      document.getElementById('loading-wrap').innerHTML='<div style="color:#ff6060;padding:20px;font-size:.85rem">エラー: '+(data?.error||JSON.stringify(data))+'</div>';
       return;
     }
 
@@ -169,7 +171,8 @@ async function init(){
     paymentElement.mount('#payment-element');
 
   }catch(e){
-    showToast('⚠️ エラー: '+e.message);
+    showToast('⚠️ エラー: '+e.message, 5000);
+    document.getElementById('loading-wrap').innerHTML='<div style="color:#ff6060;padding:20px;font-size:.85rem">例外エラー: '+e.message+'</div>';
   }
 }
 
