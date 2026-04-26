@@ -676,7 +676,7 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     <div style="padding:12px 16px;list-style:none" id="purchase-plans"></div>
     <div id="stripe-payment-element-wrap" style="display:none;padding:0 16px 12px">
       <button onclick="backToPlanSelect()" style="background:none;border:none;color:var(--gold2);font-size:.85rem;font-weight:700;cursor:pointer;padding:4px 0 12px;display:flex;align-items:center;gap:4px">← プラン選択に戻る</button>
-      <div id="stripe-payment-element"></div>
+      <div id="stripe-payment-element" style="min-height:200px"></div>
       <div id="stripe-error-msg" style="color:#ff6060;font-size:.8rem;margin-top:8px;display:none"></div>
       <button id="stripe-pay-btn" onclick="submitStripePayment()" style="display:none;width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-size:1rem;font-weight:900;margin-top:12px;letter-spacing:.05em;box-shadow:0 4px 16px rgba(201,168,76,.4);border:none;cursor:pointer">💳 決済する</button>
     </div>
