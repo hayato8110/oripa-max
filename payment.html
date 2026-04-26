@@ -122,6 +122,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 
   <div id="pay-error"></div>
   <button class="pay-btn" id="pay-btn" onclick="submitPayment()">購入する</button>
+  <button id="bank-btn" onclick="showBankForm()" style="display:none;width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4)">振込先を表示する</button>
 </div>
 
 <div class="notice" id="notice" style="display:none">
@@ -258,9 +259,12 @@ function selectMethod(method){
   document.getElementById('method-'+method).classList.add('selected');
   const cardForm=document.getElementById('card-form');
   const payBtn=document.getElementById('pay-btn');
+  const bankBtn=document.getElementById('bank-btn');
   if(method==='card'){
     cardForm.style.display='block';
+    payBtn.style.display='block';
     payBtn.textContent='カードで購入する';
+    bankBtn.style.display='none';
     if(!cardMounted){
       const els=stripe.elements();
       const style={base:{fontSize:'15px',color:'#333',fontFamily:'Noto Sans JP,sans-serif','::placeholder':{color:'#bbb'}},invalid:{color:'#dc2626'}};
@@ -274,9 +278,24 @@ function selectMethod(method){
     }
   }else{
     cardForm.style.display='none';
-    payBtn.textContent='銀行振込で購入する';
+    payBtn.style.display='none';
+    bankBtn.style.display='block';
   }
-  payBtn.style.display='block';
+}
+
+async function showBankForm(){
+  const btn=document.getElementById('bank-btn');
+  const errEl=document.getElementById('pay-error');
+  btn.disabled=true;btn.textContent='処理中...';errEl.style.display='none';
+  try{
+    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email,method:'bank'})});
+    const data=await res.json();
+    if(data?.type==='bank'&&data?.bankInfo){
+      showBankInfo(data);
+    }else{
+      errEl.textContent=data?.error||'エラーが発生しました';errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';
+    }
+  }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';}
 }
 
 async function submitPayment(){
@@ -284,18 +303,7 @@ async function submitPayment(){
   const errEl=document.getElementById('pay-error');
   btn.disabled=true;errEl.style.display='none';
 
-  if(selectedMethod==='bank'){
-    try{
-      const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email,method:'bank'})});
-      const data=await res.json();
-      if(data?.type==='bank'&&data?.bankInfo){
-        showBankInfo(data);
-      }else{
-        errEl.textContent=data?.error||'エラーが発生しました';errEl.style.display='block';btn.disabled=false;
-      }
-    }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;}
-    return;
-  }
+
 
   try{
     const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email})});
