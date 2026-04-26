@@ -58,15 +58,18 @@ export default async function handler(req, res) {
         metadata: { userId, planId, coin: String(plan.coin), bonus: '0' },
       });
 
-      // 振込先情報を取得
       const instructions = paymentIntent.next_action?.display_bank_transfer_instructions;
+      const financialAddress = instructions?.financial_addresses?.[0];
+      
+      console.log('PaymentIntent status:', paymentIntent.status);
+      console.log('Instructions:', JSON.stringify(instructions));
+
       return res.status(200).json({
         type: 'bank',
         paymentIntentId: paymentIntent.id,
-        amount: instructions?.amount_remaining,
-        bankInfo: instructions?.financial_addresses?.[0] || null,
+        amount: instructions?.amount_remaining || plan.amount,
+        bankInfo: financialAddress || null,
         reference: instructions?.reference,
-        dueDate: instructions?.hosted_instructions_url,
       });
     }
 
