@@ -3061,6 +3061,10 @@ async function startPurchase(amount){
     const wrap=document.getElementById('stripe-payment-element-wrap');
     wrap.style.display='block';
     document.getElementById('stripe-payment-element').innerHTML='';
+    document.getElementById('stripe-pay-btn').style.display='none';
+    paymentElement.on('ready',()=>{
+      document.getElementById('stripe-pay-btn').style.display='block';
+    });
     paymentElement.mount('#stripe-payment-element');
     const errEl=document.getElementById('stripe-error-msg');
     errEl.style.display='none';
