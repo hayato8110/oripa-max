@@ -45,13 +45,7 @@ export default async function handler(req, res) {
       amount: plan.amount,
       currency: 'jpy',
       customer: customerId,
-      payment_method_types: ['card', 'customer_balance'],
-      payment_method_options: {
-        customer_balance: {
-          funding_type: 'bank_transfer',
-          bank_transfer: { type: 'jp_bank_transfer' },
-        },
-      },
+      payment_method_types: ['card'],
       metadata: {
         userId,
         planId,
