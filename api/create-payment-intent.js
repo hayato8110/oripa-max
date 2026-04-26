@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { planId, userId, userEmail } = req.body;
+    const { planId, userId, userEmail, method } = req.body;
     const plan = PLANS.find(p => p.id === planId);
     if (!plan) return res.status(400).json({ error: 'Invalid plan' });
 
@@ -40,21 +40,47 @@ export default async function handler(req, res) {
       customerId = customer.id;
     }
 
-    // PaymentIntent作成
+    // 銀行振込の場合
+    if (method === 'bank') {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: plan.amount,
+        currency: 'jpy',
+        customer: customerId,
+        payment_method_types: ['customer_balance'],
+        payment_method_options: {
+          customer_balance: {
+            funding_type: 'bank_transfer',
+            bank_transfer: { type: 'jp_bank_transfer' },
+          },
+        },
+        confirm: true,
+        payment_method_data: { type: 'customer_balance' },
+        metadata: { userId, planId, coin: String(plan.coin), bonus: '0' },
+      });
+
+      // 振込先情報を取得
+      const instructions = paymentIntent.next_action?.display_bank_transfer_instructions;
+      return res.status(200).json({
+        type: 'bank',
+        paymentIntentId: paymentIntent.id,
+        amount: instructions?.amount_remaining,
+        bankInfo: instructions?.financial_addresses?.[0] || null,
+        reference: instructions?.reference,
+        dueDate: instructions?.hosted_instructions_url,
+      });
+    }
+
+    // クレカの場合
     const paymentIntent = await stripe.paymentIntents.create({
       amount: plan.amount,
       currency: 'jpy',
       customer: customerId,
       payment_method_types: ['card'],
-      metadata: {
-        userId,
-        planId,
-        coin: String(plan.coin),
-        bonus: '0',
-      },
+      metadata: { userId, planId, coin: String(plan.coin), bonus: '0' },
     });
 
     return res.status(200).json({
+      type: 'card',
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
