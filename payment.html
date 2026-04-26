@@ -223,8 +223,7 @@ function copyText(id){
 }
 
 function showBankInfo(data){
-  const b=data.bankInfo;
-  const zengin=b?.zengin||b||{};
+  const zengin=data.bankInfo||{};
   document.getElementById('main-section').style.display='none';
   document.getElementById('notice').style.display='none';
   document.getElementById('plan-info').style.display='none';
@@ -290,15 +289,10 @@ async function showBankForm(){
   const errEl=document.getElementById('pay-error');
   btn.disabled=true;btn.textContent='処理中...';errEl.style.display='none';
   try{
-    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email,method:'bank'})});
+    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email})});
     const data=await res.json();
-    console.log('Bank response:', JSON.stringify(data));
-    if(data?.type==='bank'){
-      showBankInfo(data);
-    }else{
-      errEl.textContent=(data?.error||'振込先情報の取得に失敗しました: '+JSON.stringify(data));
-      errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';
-    }
+    if(data?.url){location.href=data.url;}
+    else{errEl.textContent=data?.error||'エラー';errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';}
   }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';}
 }
 
