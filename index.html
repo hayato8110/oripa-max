@@ -3415,17 +3415,17 @@ async function convertToPoints(dbId){
   r.converted=true;
   state.coin+=bonus;
   updateHeaderPts();
-  try{
-    await updateCoin("add",bonus,"convert","コイン単品還元");
-    const updatedResults=sess.results.map(res=>({
-      prize_name:res.prize.name,prize_tier:res.prize.tier,
-      is_converted:res.converted||false,is_shipped:res.shipped||false,
-    }));
-    await db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId);
-    try{await db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`});}catch(e){}
-  }catch(e){console.error(e);}
   showToast(`+${bonus}コインに還元しました！`,2500);
   renderItemsPage();
+  const updatedResults=sess.results.map(res=>({
+    prize_name:res.prize.name,prize_tier:res.prize.tier,
+    is_converted:res.converted||false,is_shipped:res.shipped||false,
+  }));
+  Promise.all([
+    updateCoin("add",bonus,"convert","コイン単品還元"),
+    db.from('draw_sessions').update({results:updatedResults}).eq('id',sessionId),
+    db.from('transactions').insert({user_id:state.user.id,type:'convert',amount:bonus,currency:'coin',description:`${r.prize.name} ポイント還元`}),
+  ]).catch(e=>console.error(e));
   });
 }
 
