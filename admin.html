@@ -980,11 +980,15 @@ async function uploadImage(file,folder){
 
 async function uploadPackImage(input){
   const file=input.files[0];if(!file)return;
+  // 即座にローカルプレビュー表示
+  const localUrl=URL.createObjectURL(file);
+  previewPackImage(localUrl);
   showToast('📤 アップロード中...');
   const url=await uploadImage(file,'packs');
   if(url){
     document.getElementById('pm-image-url').value=url;
     previewPackImage(url);
+    URL.revokeObjectURL(localUrl);
     showToast('✅ 画像アップロード完了！');
   }
 }
@@ -992,11 +996,15 @@ async function uploadPackImage(input){
 async function handlePackDrop(event){
   const file=event.dataTransfer.files[0];
   if(!file||!file.type.startsWith('image/')){showToast('⚠️ 画像ファイルを選択してください');return;}
+  // 即座にローカルプレビュー表示
+  const localUrl=URL.createObjectURL(file);
+  previewPackImage(localUrl);
   showToast('📤 アップロード中...');
   const url=await uploadImage(file,'packs');
   if(url){
     document.getElementById('pm-image-url').value=url;
     previewPackImage(url);
+    URL.revokeObjectURL(localUrl);
     showToast('✅ 画像アップロード完了！');
   }
 }
