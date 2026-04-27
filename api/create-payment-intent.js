@@ -85,7 +85,7 @@ export default async function handler(req, res) {
         type: 'bank',
         paymentIntentId: paymentIntent.id,
         amount: instructions?.amount_remaining || plan.amount,
-        bankInfo: financialAddress?.zengin || null,
+        bankInfo: financialAddress?.zengin || financialAddress || null,
         reference: instructions?.reference,
       });
     }
