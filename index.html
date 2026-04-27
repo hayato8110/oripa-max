@@ -2235,7 +2235,7 @@ function openPackDetail(packId){
   let opts={d1:true,d10:true,d100:false};
   try{if(pack.draw_options)opts={...opts,...JSON.parse(pack.draw_options)};}catch(e){}
   const btnStyle1='flex:1;padding:13px 6px;border-radius:10px;font-size:.9rem;font-weight:900;background:#ffffff;color:#1a0a00;border:none;cursor:pointer';
-  const btnStyle10='flex:1;padding:13px 6px;border-radius:10px;font-size:.9rem;font-weight:900;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(201,168,76,.35)';
+  const btnStyle10='flex:1;padding:13px 6px;border-radius:10px;font-size:.9rem;font-weight:900;background:linear-gradient(135deg,#cc2200,#e8380d);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(232,56,13,.35)';
   const btnStyle100='flex:1;padding:13px 6px;border-radius:10px;font-size:.9rem;font-weight:900;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(201,168,76,.35)';
   const btns=[];
   if(soldOut){
@@ -2856,7 +2856,7 @@ function renderMyPage(){
         <div class="mp-username" style="border-bottom:none;padding-bottom:0">${state.user.username}</div>
       </div>
       <div class="mp-pts-row" style="position:relative;z-index:1">
-        <div class="mp-pt" style="grid-column:span 2"><div class="mp-pt-label">コイン残高</div><div class="mp-pt-val">${state.coin.toLocaleString()}</div></div>
+        <div class="mp-pt" style="grid-column:span 2"><div class="mp-pt-label">コイン残高</div><div class="mp-pt-val"><svg width="28" height="28" viewBox="0 0 22 22" fill="none" style="vertical-align:middle;margin-right:4px"><circle cx="11" cy="11" r="10" fill="url(#mpcg)"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="mpcg" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient></defs></svg>${state.coin.toLocaleString()}</div></div>
       </div>
     </div>
     <div class="mp-menu">
