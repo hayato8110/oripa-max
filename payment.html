@@ -223,6 +223,11 @@ function copyText(id){
 }
 
 function showBankInfo(data){
+  // Stripeの振込案内ページがあればそちらに遷移
+  if(data.instructionsUrl){
+    location.href=data.instructionsUrl;
+    return;
+  }
   const zengin=data.bankInfo||{};
   document.getElementById('main-section').style.display='none';
   document.getElementById('notice').style.display='none';
