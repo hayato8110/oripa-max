@@ -224,24 +224,15 @@ function copyText(id){
 
 function showBankInfo(data){
   const zengin=data.bankInfo||{};
-  // 全セクション非表示
-  document.getElementById('main-section').style.display='none';
-  document.getElementById('notice').style.display='none';
-  document.getElementById('plan-info').style.display='none';
-  document.getElementById('loading-wrap').style.display='none';
-  // 振込先セクション表示
-  document.getElementById('bank-info-section').style.display='block';
-  // データ設定
-  document.getElementById('bi-amount').textContent=(data.amount||amount).toLocaleString();
-  document.getElementById('bi-coins').textContent=coins.toLocaleString();
-  document.getElementById('bi-bank').textContent=zengin.bank_name||'-';
-  document.getElementById('bi-branch').textContent=zengin.branch_name||'-';
-  document.getElementById('bi-type').textContent='普通';
-  document.getElementById('bi-number').textContent=zengin.account_number||'-';
-  document.getElementById('bi-name').textContent=zengin.account_holder_name||'-';
-  const due=new Date();due.setDate(due.getDate()+7);
-  document.getElementById('bi-due').textContent=due.toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});
-  window.scrollTo(0,0);
+  const params=new URLSearchParams({
+    amount: data.amount||amount,
+    coins: coins,
+    bank: zengin.bank_name||'',
+    branch: zengin.branch_name||'',
+    number: zengin.account_number||'',
+    name: zengin.account_holder_name||'',
+  });
+  location.href='/bank.html?'+params.toString();
 }
 
 async function init(){
