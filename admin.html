@@ -453,9 +453,19 @@ input,select,textarea{font-family:inherit}
         <div class="stat-card stat-gold"><div class="stat-label">ガチャ回数</div><div class="stat-val" id="ana-draws">0</div></div>
         <div class="stat-card"><div class="stat-label">発送依頼数</div><div class="stat-val" id="ana-ships">0</div></div>
       </div>
-      <div class="chart-wrap" style="margin-top:14px;overflow-x:auto">
-        <div class="chart-title">📈 日別推移</div>
-        <canvas id="analytics-chart" height="120"></canvas>
+      <div class="table-card" style="margin-top:14px;overflow-x:auto">
+        <div class="table-head"><span class="table-title">📅 日別推移</span></div>
+        <table class="tbl" id="analytics-table" style="min-width:500px">
+          <thead><tr>
+            <th>日付</th>
+            <th>アクセス</th>
+            <th>ログインUU</th>
+            <th>課金者</th>
+            <th>ガチャ回数</th>
+            <th>発送依頼</th>
+          </tr></thead>
+          <tbody id="analytics-tbody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -1982,26 +1992,28 @@ async function loadAnalytics(){
   }
   const canvas=document.getElementById('analytics-chart');
   if(canvas._chart)canvas._chart.destroy();
-  const chartCfg={
-    type:'line',
-    data:{
-      labels:labels,
-      datasets:[
-        {label:'アクセス',data:accData,borderColor:'#4488ff',fill:false,tension:.3,pointRadius:2},
-        {label:'ログインUU',data:loginData,borderColor:'#50dc78',fill:false,tension:.3,pointRadius:2},
-        {label:'ガチャ回数',data:drawData,borderColor:'#ffc800',fill:false,tension:.3,pointRadius:2},
-        {label:'発送依頼',data:shipData,borderColor:'#ff6464',fill:false,tension:.3,pointRadius:2}
-      ]
-    },
-    options:{
-      plugins:{legend:{labels:{color:'#aaa',font:{size:10},boxWidth:12}}},
-      scales:{
-        x:{ticks:{color:'#555',font:{size:9},maxRotation:45}},
-        y:{ticks:{color:'#555',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}
-      }
-    }
-  };
-  canvas._chart=new Chart(canvas,chartCfg);
+  // 課金者の日別集計
+  const paidData=[];
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=new Date(yr,mo-1,d).toISOString();
+    const de=new Date(yr,mo-1,d+1).toISOString();
+    paidData.push(new Set((txns||[]).filter(t=>t.created_at>=ds&&t.created_at<de).map(t=>t.user_id).filter(Boolean)).size);
+  }
+  // 表を生成
+  const tbody=document.getElementById('analytics-tbody');
+  let rows='';
+  for(let i=0;i<daysInMonth;i++){
+    const hasData=accData[i]||loginData[i]||paidData[i]||drawData[i]||shipData[i];
+    rows+=`<tr style="${hasData?'':'opacity:.35'}">
+      <td>${labels[i]}</td>
+      <td class="td-bold" style="color:#4488ff">${accData[i]||0}</td>
+      <td class="td-bold" style="color:#50dc78">${loginData[i]||0}</td>
+      <td class="td-bold">${paidData[i]||0}</td>
+      <td class="td-bold" style="color:#ffc800">${(drawData[i]||0).toLocaleString()}</td>
+      <td class="td-bold" style="color:#ff6464">${shipData[i]||0}</td>
+    </tr>`;
+  }
+  tbody.innerHTML=rows;
 }
 
 /* ══ CSV EXPORT ══ */
