@@ -1837,7 +1837,8 @@ async function drawDirect(packId,count){
     if(already){showToast('⚠️ このガチャは1人1回限定です');return;}
   }
   const label=count===1?'1回':count===10?'10連':'100連';
-  confirmAction(label+'ガチャを引きますか？\n'+cost.toLocaleString()+'コイン消費します',async()=>{
+  const afterCoin=state.coin-cost;
+  confirmAction(label+'ガチャを引きますか？\n'+cost.toLocaleString()+'コイン消費します\n'+state.coin.toLocaleString()+' → '+afterCoin.toLocaleString()+'コイン',async()=>{
   state.activePack=pack;
   state.drawCount=count;
   await executeDraw();
