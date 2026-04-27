@@ -368,7 +368,14 @@ input,select,textarea{font-family:inherit;outline:none}
 const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
 const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
 const{createClient}=supabase;
-const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+const db=createClient(SUPABASE_URL,SUPABASE_KEY,{
+  auth:{
+    storageKey:'oripa-max-auth',
+    detectSessionInUrl:false,
+    autoRefreshToken:true,
+    persistSession:true,
+  }
+});
 const MIN_SHIP_COIN=2000; // 発送最低コイン
 const state={
   user:null,session:null,
@@ -3590,22 +3597,22 @@ document.querySelectorAll('.modal-overlay').forEach(overlay=>{
 function confirmGacha(pack, label, cost, afterCoin, onConfirm){
   const modal=document.createElement('div');
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
-  const bannerUrl=pack?.banner_url||pack?.image_url||'';
-  const coinSvg=(id)=>`<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="url(#cg${id})"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="cg${id}" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient></defs></svg>`;
-  const countLabel=`<span style="color:#e8380d;font-weight:900">${label}</span>`;
+  const bannerUrl=pack?.image_url||'';
+  const coinSvg=(id)=>`<svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="url(#cg${id})"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="cg${id}" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient></defs></svg>`;
+  const countLabel=`<span style="color:var(--gold);font-weight:900">${label}</span>`;
   const box=document.createElement('div');
-  box.style.cssText='background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;overflow:hidden;padding-bottom:env(safe-area-inset-bottom)';
+  box.style.cssText='background:linear-gradient(180deg,#1a1200 0%,#0d0d0d 100%);border-radius:20px 20px 0 0;width:100%;max-width:480px;overflow:hidden;border-top:2px solid var(--gold2)';
   box.innerHTML=`
-    ${bannerUrl?`<img src="${bannerUrl}" style="width:100%;max-height:220px;object-fit:cover;display:block">`:''}
-    <div style="padding:20px 20px 0">
-      <div style="font-size:1rem;font-weight:700;color:#1a1a1a;text-align:center;margin-bottom:16px">コインを消費して、${countLabel}ガチャを引きますか？</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:12px;background:#f5f5f5;border-radius:12px;padding:14px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:4px;font-size:1.05rem;font-weight:900;color:#1a1a1a">${coinSvg('a')} ${(afterCoin+cost).toLocaleString()}</div>
-        <span style="font-size:1.2rem;color:#bbb">›</span>
-        <div style="display:flex;align-items:center;gap:4px;font-size:1.05rem;font-weight:900;color:#e8380d">${coinSvg('b')} ${afterCoin.toLocaleString()}</div>
+    ${bannerUrl?`<div style="position:relative"><img src="${bannerUrl}" style="width:100%;max-height:200px;object-fit:cover;display:block"><div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.7))"></div></div>`:''}
+    <div style="padding:20px">
+      <div style="font-size:.95rem;font-weight:700;color:#fff;text-align:center;margin-bottom:16px;line-height:1.5">コインを消費して、${countLabel}ガチャを引きますか？</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,215,0,.2);border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:5px;font-size:1.05rem;font-weight:900;color:#fff">${coinSvg('a')} ${(afterCoin+cost).toLocaleString()}</div>
+        <span style="font-size:1.1rem;color:rgba(255,255,255,.3)">→</span>
+        <div style="display:flex;align-items:center;gap:5px;font-size:1.05rem;font-weight:900;color:var(--gold)">${coinSvg('b')} ${afterCoin.toLocaleString()}</div>
       </div>
-      <button id="cg-ok" style="width:100%;padding:16px;border-radius:12px;background:linear-gradient(135deg,#f5c518,#e8a800);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-bottom:10px">ガチャを引く</button>
-      <button id="cg-cancel" style="width:100%;padding:15px;border-radius:12px;background:#fff;color:#1a1a1a;font-size:1rem;font-weight:700;border:1.5px solid #ddd;cursor:pointer;margin-bottom:20px">キャンセル</button>
+      <button id="cg-ok" style="width:100%;padding:16px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-bottom:10px;letter-spacing:.05em;box-shadow:0 4px 15px rgba(255,215,0,.3)">⚡ ガチャを引く</button>
+      <button id="cg-cancel" style="width:100%;padding:14px;border-radius:12px;background:transparent;color:rgba(255,255,255,.5);font-size:.9rem;font-weight:600;border:1px solid rgba(255,255,255,.15);cursor:pointer;margin-bottom:8px">キャンセル</button>
     </div>`;
   modal.appendChild(box);
   modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
