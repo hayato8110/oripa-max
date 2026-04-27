@@ -757,17 +757,25 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
     <!-- 賞品グリッド -->
     <div id="pd-prizes-grid" style="padding:12px 10px 8px"></div>
     <!-- 注意事項 -->
-    <div style="margin:4px 10px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px 16px;font-size:.72rem;color:rgba(255,255,255,.45);line-height:1.8">
-      <div style="color:rgba(255,255,255,.6);font-weight:900;font-size:.75rem;margin-bottom:10px;letter-spacing:.05em">⚠️ 注意事項</div>
-      <p style="margin:0 0 10px">本サービスをご利用にあたり、以下の注意事項を必ずお読みください。購入をもって、すべての事項に同意いただいたものと致します。</p>
-      <p style="margin:0 0 6px;color:rgba(255,255,255,.55);font-weight:700">【カード・ケースの状態】</p>
-      <p style="margin:0 0 10px">オリパMAXから発送されるカードには、微細な傷や初期キズが見られる場合がございます。商品画像はイメージであり、実際のカードの状態や排出内容を保証するものではありません。鑑定済みカード（PSA等）に関し、ケース内部の微細な傷や汚れ、またケース自体の傷や小さな割れなどが存在する場合もございます。そのような場合であっても返品・交換の対応は致しかねます。</p>
-      <p style="margin:0 0 6px;color:rgba(255,255,255,.55);font-weight:700">【未開封品の取扱い】</p>
-      <p style="margin:0 0 10px">未開封品であっても、外装に軽微な傷や凹み、シュリンクの破れ、シール痕などがある場合がございます。また、BOX等の再シュリンクの可能性を完全に排除することはできません。万が一、再シュリク品・偽造品と確認できた場合に限り、返品・交換対応を致します。ただし商品到着から開封までの動画撮影をお願いいたします。</p>
-      <p style="margin:0 0 6px;color:rgba(255,255,255,.55);font-weight:700">【還元率とコイン】</p>
-      <p style="margin:0 0 10px">総還元率は、オリパを全て引いた際の理論値に基づいて算出されております。個別の抽選結果によって得られるカードの設定コイン額はランダムであり、すべての抽選で1口あたりの設定金額を保証するものではありません。</p>
-      <p style="margin:0 0 6px;color:rgba(255,255,255,.55);font-weight:700">【返品・交換】</p>
-      <p style="margin:0">本サービスの仕様上、商品の返品・交換・返金は一切できません。ただし、商品が偽造品であることが動画によって証明された場合に限り、返品・交換を受け付けます。</p>
+    <div style="margin:4px 10px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 16px;font-size:.73rem;color:rgba(255,255,255,.85);line-height:1.85">
+      <div style="color:#fff;font-weight:900;font-size:.8rem;margin-bottom:10px;letter-spacing:.05em">⚠️ 注意事項</div>
+      <p style="margin:0 0 12px">本サービスをご利用にあたり、以下の注意事項を必ずお読みください。購入をもって、すべての事項に同意いただいたものと致します。</p>
+      <p style="margin:0 0 4px;color:#fff;font-weight:700">【カード・ケースの状態】</p>
+      <p style="margin:0 0 12px">オリパMAXから発送されるカードには、微細な傷や初期キズが見られる場合がございます。商品画像はイメージであり、実際のカードの状態や排出内容を保証するものではありません。鑑定済みカード（PSA等）に関し、ケース内部の微細な傷や汚れ、またケース自体の傷や小さな割れなどが存在する場合もございます。そのような場合であっても返品・交換の対応は致しかねます。</p>
+      <p style="margin:0 0 4px;color:#fff;font-weight:700">【商品画像】</p>
+      <p style="margin:0 0 12px">掲載している画像はあくまでイメージであり、実際のカードやアイテムの状態・排出内容を保証するものではございません。表示以外のカードやアイテムが排出される可能性もあります。</p>
+      <p style="margin:0 0 4px;color:#fff;font-weight:700">【未開封品の取扱い】</p>
+      <p style="margin:0 0 12px">未開封品であっても、外装に軽微な傷や凹み、シュリンクの破れ、シール痕などがある場合がございます。また、BOX等の再シュリンクの可能性を完全に排除することはできません。弊社では未開封品に対して入念な検品を行っておりますが、万が一、再シュリンク品・偽造品と確認できた場合に限り、返品・交換対応を致します。ただし商品到着から開封までの動画撮影をお願いいたします。尚、動画撮影の際は、すべての梱包物が画面内に映るようにご配慮ください。開封時の動画がない場合、返品交換対応は致しかねます。</p>
+      <p style="margin:0 0 4px;color:#fff;font-weight:700">【還元率とコイン】</p>
+      <p style="margin:0 0 12px">総還元率は、オリパを全て引いた際の理論値に基づいて算出されております。個別の抽選結果によって得られるカードの設定コイン額はランダムであり、すべての抽選で1口あたりの設定金額を保証するものではありません。</p>
+      <p style="margin:0 0 4px;color:#fff;font-weight:700">【演出動画】</p>
+      <p style="margin:0 0 12px">抽選時の演出動画は、当選内容や等級を保証するものではありません。通信環境や端末の仕様により、演出が正しく表示されない場合がありますが、抽選結果や景品には影響はございません。再抽選・返金などの対応は致しかねます。</p>
+      <p style="margin:0 0 4px;color:#fff;font-weight:700">【エディション（1st Edition / Unlimited）】</p>
+      <p style="margin:0 0 12px">1st Edition（1ED）が存在するカードに関して、商品タイトルにエディション表記がない場合、1EDまたはアンリミテッド（1ED表記なし）を選択することはできません。商品画像が1EDのものであっても、商品タイトルにエディションの記載がなければ、どちらが排出されるかは保証できませんので、ご了承ください。</p>
+      <p style="margin:0 0 4px;color:#fff;font-weight:700">【返品・交換】</p>
+      <p style="margin:0 0 12px">本サービスの仕様上、商品の返品・交換・返金は一切できません。ただし、商品が偽造品であることが動画によって証明された場合に限り、返品・交換を受け付けます。</p>
+      <p style="margin:0 0 4px;color:#fff;font-weight:700">【販売終了】</p>
+      <p style="margin:0">商品は予告なく販売を終了することがあります。あらかじめご了承ください。</p>
     </div>
   </div>
   <!-- 固定フッター（価格＋ボタン） -->
