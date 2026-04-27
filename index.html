@@ -3599,7 +3599,7 @@ function confirmGacha(pack, label, cost, afterCoin, onConfirm){
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
   const bannerUrl=pack?.image_url||'';
   const coinSvg=(id)=>`<svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="url(#cg${id})"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="cg${id}" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient></defs></svg>`;
-  const countLabel=`<span style="color:var(--gold);font-weight:900">${label}</span>`;
+  const countLabel=`<span style="color:#fff;font-weight:900">${label}</span>`;
   const box=document.createElement('div');
   box.style.cssText='background:linear-gradient(180deg,#1a1200 0%,#0d0d0d 100%);border-radius:20px 20px 0 0;width:100%;max-width:480px;overflow:hidden;border-top:2px solid var(--gold2)';
   box.innerHTML=`
