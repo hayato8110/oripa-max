@@ -231,7 +231,7 @@ function showBankInfo(data){
   sec.style.cssText='display:block!important;margin:16px';
   document.getElementById('bi-amount').textContent=(data.amount||amount).toLocaleString();
   document.getElementById('bi-coins').textContent=coins.toLocaleString();
-  document.getElementById('bi-bank').textContent=zengin.bank_name||'GMOあおぞらネット銀行';
+  document.getElementById('bi-bank').textContent=zengin.bank_name||'-';
   document.getElementById('bi-branch').textContent=zengin.branch_name||'-';
   document.getElementById('bi-type').textContent='普通';
   document.getElementById('bi-number').textContent=zengin.account_number||'-';
@@ -292,10 +292,8 @@ async function showBankForm(){
     const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email,method:'bank'})});
     const data=await res.json();
     if(data?.type==='bank'){
-      alert('振込先データ取得成功: '+JSON.stringify(data).substring(0,200));
       showBankInfo(data);
     }else{
-      alert('エラー: '+JSON.stringify(data).substring(0,200));
       errEl.textContent=data?.error||'エラー: '+JSON.stringify(data);
       errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';
     }
