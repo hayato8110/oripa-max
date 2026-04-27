@@ -87,6 +87,7 @@ export default async function handler(req, res) {
         amount: instructions?.amount_remaining || plan.amount,
         bankInfo: financialAddress?.zengin || financialAddress || null,
         reference: instructions?.reference,
+        instructionsUrl: instructions?.hosted_instructions_url || null,
       });
     }
 
