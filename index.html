@@ -2236,7 +2236,7 @@ function openPackDetail(packId){
   try{if(pack.draw_options)opts={...opts,...JSON.parse(pack.draw_options)};}catch(e){}
   const btnStyle1='flex:1;padding:13px 6px;border-radius:10px;font-size:.9rem;font-weight:900;background:#ffffff;color:#1a0a00;border:none;cursor:pointer';
   const btnStyle10='flex:1;padding:13px 6px;border-radius:10px;font-size:.9rem;font-weight:900;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(201,168,76,.35)';
-  const btnStyle100='flex:1;padding:13px 6px;border-radius:10px;font-size:.9rem;font-weight:900;background:linear-gradient(135deg,#cc2200,#e8380d);color:#fff;border:none;cursor:pointer';
+  const btnStyle100='flex:1;padding:13px 6px;border-radius:10px;font-size:.9rem;font-weight:900;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(201,168,76,.35)';
   const btns=[];
   if(soldOut){
     btns.push(`<button style="${btnStyle10};opacity:.5;cursor:default;width:100%" disabled>完売御礼</button>`);
