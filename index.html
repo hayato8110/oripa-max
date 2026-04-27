@@ -3603,15 +3603,15 @@ function confirmGacha(pack, label, cost, afterCoin, onConfirm){
   const box=document.createElement('div');
   box.style.cssText='background:linear-gradient(180deg,#1a1200 0%,#0d0d0d 100%);border-radius:20px 20px 0 0;width:100%;max-width:480px;overflow:hidden;border-top:2px solid var(--gold2)';
   box.innerHTML=`
-    ${bannerUrl?`<div style="position:relative"><img src="${bannerUrl}" style="width:100%;max-height:200px;object-fit:cover;display:block"><div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.7))"></div></div>`:''}
+    ${bannerUrl?`<div style="background:#111;display:flex;align-items:center;justify-content:center;padding:16px"><img src="${bannerUrl}" style="max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;display:block" onerror="this.parentElement.style.display='none'"></div>`:''}
     <div style="padding:20px">
       <div style="font-size:.95rem;font-weight:700;color:#fff;text-align:center;margin-bottom:16px;line-height:1.5">コインを消費して、${countLabel}ガチャを引きますか？</div>
       <div style="display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,215,0,.2);border-radius:12px;padding:14px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:5px;font-size:1.05rem;font-weight:900;color:#fff">${coinSvg('a')} ${(afterCoin+cost).toLocaleString()}</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:1.05rem;font-weight:900;color:var(--gold)">${coinSvg('a')} ${(afterCoin+cost).toLocaleString()}</div>
         <span style="font-size:1.1rem;color:rgba(255,255,255,.3)">→</span>
-        <div style="display:flex;align-items:center;gap:5px;font-size:1.05rem;font-weight:900;color:var(--gold)">${coinSvg('b')} ${afterCoin.toLocaleString()}</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:1.05rem;font-weight:900;color:#e8380d">${coinSvg('b')} ${afterCoin.toLocaleString()}</div>
       </div>
-      <button id="cg-ok" style="width:100%;padding:16px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-bottom:10px;letter-spacing:.05em;box-shadow:0 4px 15px rgba(255,215,0,.3)">⚡ ガチャを引く</button>
+      <button id="cg-ok" style="width:100%;padding:16px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#fff;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-bottom:10px;letter-spacing:.05em;box-shadow:0 4px 15px rgba(255,215,0,.3);text-shadow:0 1px 3px rgba(0,0,0,.5)">ガチャを引く</button>
       <button id="cg-cancel" style="width:100%;padding:14px;border-radius:12px;background:transparent;color:rgba(255,255,255,.5);font-size:.9rem;font-weight:600;border:1px solid rgba(255,255,255,.15);cursor:pointer;margin-bottom:8px">キャンセル</button>
     </div>`;
   modal.appendChild(box);
