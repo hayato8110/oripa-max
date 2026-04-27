@@ -42,21 +42,38 @@ export default async function handler(req, res) {
 
     // 銀行振込の場合
     if (method === 'bank') {
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: plan.amount,
-        currency: 'jpy',
+      // 既存の未完了PaymentIntentを確認
+      const existingPIs = await stripe.paymentIntents.list({
         customer: customerId,
-        payment_method_types: ['customer_balance'],
-        payment_method_options: {
-          customer_balance: {
-            funding_type: 'bank_transfer',
-            bank_transfer: { type: 'jp_bank_transfer' },
-          },
-        },
-        confirm: true,
-        payment_method_data: { type: 'customer_balance' },
-        metadata: { userId, planId, coin: String(plan.coin), bonus: '0' },
+        limit: 5,
       });
+      
+      const existingPI = existingPIs.data.find(pi => 
+        pi.status === 'requires_action' && 
+        pi.payment_method_types.includes('customer_balance') &&
+        pi.metadata?.planId === planId
+      );
+
+      let paymentIntent;
+      if (existingPI) {
+        paymentIntent = existingPI;
+      } else {
+        paymentIntent = await stripe.paymentIntents.create({
+          amount: plan.amount,
+          currency: 'jpy',
+          customer: customerId,
+          payment_method_types: ['customer_balance'],
+          payment_method_options: {
+            customer_balance: {
+              funding_type: 'bank_transfer',
+              bank_transfer: { type: 'jp_bank_transfer' },
+            },
+          },
+          confirm: true,
+          payment_method_data: { type: 'customer_balance' },
+          metadata: { userId, planId, coin: String(plan.coin), bonus: '0' },
+        });
+      }
 
       const instructions = paymentIntent.next_action?.display_bank_transfer_instructions;
       const financialAddress = instructions?.financial_addresses?.[0];
