@@ -1340,7 +1340,7 @@ function showResultCards(results,pack){
           return `
           <div style="background:var(--card-bg);border:1px solid rgba(201,168,76,.12);border-radius:14px;display:flex;flex-direction:column;box-shadow:0 4px 16px rgba(0,0,0,.4);overflow:hidden">
             <div style="display:flex;align-items:stretch">
-              <div style="width:110px;min-height:110px;background:#111;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden">
+              <div style="width:130px;min-height:130px;background:#111;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden">
                 ${imgUrl
                   ?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover">`
                   :`<span style="font-size:3rem">${pack?.emoji||'🎴'}</span>`}
@@ -1564,7 +1564,7 @@ function showResultDetail(session){
 
       card.innerHTML=
         '<div style="display:flex;align-items:stretch;min-height:110px">'
-        +'<div style="width:110px;flex-shrink:0;background:#f0f0f0;overflow:hidden">'
+        +'<div style="width:130px;flex-shrink:0;background:#f0f0f0;overflow:hidden">'
         +(img?'<img src="'+img+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem">'+(pack?.emoji||'\uD83C\uDFB4')+'</div>')
         +'</div>'
         +'<div style="flex:1;padding:14px;display:flex;flex-direction:column;justify-content:center;position:relative">'
@@ -2415,7 +2415,7 @@ function renderItemsPage(tab){
         return `
         <div class="item-card" style="flex-direction:column;align-items:stretch;padding:0;overflow:hidden;margin-bottom:10px">
           <div style="display:flex;align-items:stretch">
-            <div style="width:100px;aspect-ratio:2/3;flex-shrink:0;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
+            <div style="width:130px;aspect-ratio:2/3;flex-shrink:0;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
               ${prizeData?.image_url?`<img src="${prizeData.image_url}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:3rem">${r.packEmoji}</span>`}
             </div>
             <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:6px;position:relative">
