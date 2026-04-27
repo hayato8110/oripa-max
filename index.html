@@ -529,17 +529,6 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   <div class="mypage" id="mypage-content"></div>
 </div>
 
-<!-- PAGE: お気に入り -->
-<div id="page-favorites" class="page">
-  <div style="padding:12px 12px 0;display:flex;align-items:center;justify-content:space-between">
-    <span style="font-size:.95rem;font-weight:900;color:var(--text)">⭐ お気に入りオリパ</span>
-  </div>
-  <div class="packs-list" id="favorites-list">
-    <div style="text-align:center;padding:48px 16px;color:var(--text3)">
-      <div style="font-size:2rem;margin-bottom:10px">⭐</div>
-      <div style="font-weight:700;color:var(--text2)">お気に入りはありません</div>
-    </div>
-  </div>
 </div>
 
 <!-- PAGE: 検索 -->
@@ -742,7 +731,6 @@ try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
   <div style="flex-shrink:0;background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 12px;gap:8px;backdrop-filter:blur(20px)">
     <button onclick="closePackDetail()" style="background:none;border:none;color:var(--text2);font-size:1.4rem;padding:4px 8px;cursor:pointer;display:flex;align-items:center">‹</button>
     <div id="pd-header-name" style="flex:1;font-size:.95rem;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
-    <button id="pd-fav-btn" onclick="toggleFavorite()" style="background:none;border:none;font-size:1.4rem;color:var(--gold2);padding:4px">☆</button>
   </div>
   <!-- スクロールエリア -->
   <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:130px">
@@ -973,7 +961,6 @@ async function doLogin(){
   await loadUserProfile(data.user.id);
   await loadHistoryFromDB();
   await loadTenjoFromDB();
-  await loadFavorites();
   await loadShopOrdersToItems();
   loadUserMessageBadge();
   updateHeaderPts();
@@ -2123,7 +2110,6 @@ function renderPackCards(list){
     const pct=p.force_soldout?0:Math.round(((p.remaining||0)/(p.total_slots||1))*100);
     const barClass=pct<10?'danger':pct<30?'warn':'';
     const prizes=(p.prizes||[]).filter(pr=>['sar','sr','rr'].includes(pr.tier));
-    const isFav=favorites.has(p.id);
     const drawnAlready=p.max_draws_per_user===1&&state.sessions.some(s=>s.packId===p.id);
     // 新規限定のカウントダウン
     let newUserBadge='';
@@ -2163,7 +2149,6 @@ function renderPackCards(list){
         </div>
         <div class="pcb-char">${p.image_url?'':p.emoji||'🎴'}</div>
         ${drawnAlready?``:''}
-        <button onclick="event.stopPropagation();toggleFavorite('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:15;background:rgba(0,0,0,.4);border:none;font-size:1.1rem;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff">${isFav?'★':'☆'}</button>
         ${(p.force_soldout||p.remaining<=0)?`
         <div style="position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.62);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
           <div style="font-size:1.9rem;font-weight:900;letter-spacing:.12em;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.8);font-style:italic;border:3px solid rgba(255,255,255,.7);padding:6px 22px;border-radius:4px;background:rgba(0,0,0,.3)">完売御礼</div>
@@ -2214,7 +2199,6 @@ function openPackDetail(packId){
 
   // ヘッダー名
   document.getElementById('pd-header-name').textContent=pack.name;
-  document.getElementById('pd-fav-btn').textContent=favorites.has(packId)?'★':'☆';
 
   // バナー画像 or 絵文字
   const bannerImg=document.getElementById('pd-banner-img');
@@ -2960,39 +2944,6 @@ async function openUserMessages(){
   modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
   document.body.appendChild(modal);
 }
-let favorites=new Set();
-async function loadFavorites(){
-  if(!state.user)return;
-  const{data}=await db.from('favorites').select('pack_id').eq('user_id',state.user.id);
-  favorites=new Set((data||[]).map(f=>f.pack_id));
-}
-async function toggleFavorite(packId){
-  if(!state.user){document.getElementById('auth-modal').classList.add('show');return;}
-  const id=packId||currentDetailPackId;
-  if(!id)return;
-  if(favorites.has(id)){
-    await db.from('favorites').delete().eq('user_id',state.user.id).eq('pack_id',id);
-    favorites.delete(id);
-    showToast('⭐ お気に入りから削除しました');
-  } else {
-    await db.from('favorites').insert({user_id:state.user.id,pack_id:id});
-    favorites.add(id);
-    showToast('⭐ お気に入りに追加しました！');
-  }
-  renderPacks();
-  if(document.getElementById('pack-detail-modal').style.display==='flex'){
-    document.getElementById('pd-fav-btn').textContent=favorites.has(id)?'★':'☆';
-  }
-}
-async function loadFavoritesPage(){
-  await loadFavorites();
-  const favPacks=state.packs.filter(p=>favorites.has(p.id));
-  if(!favPacks.length){
-    document.getElementById('favorites-list').innerHTML=`<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">⭐</div><div style="font-weight:700;color:var(--text2)">お気に入りはありません</div></div>`;
-    return;
-  }
-  document.getElementById('favorites-list').innerHTML=renderPackCards(favPacks);
-}
 
 /* ══ 検索 ══ */
 function doSearch(q){
@@ -3598,7 +3549,6 @@ function showPage(name,el){
   if(name==='notices')renderNotices();
   if(name==='items')renderItemsPage();
   if(name==='shop')loadShopPage();
-  if(name==='favorites')loadFavoritesPage();
   if(name==='inquiry'&&state.user){document.getElementById('inq-email').value=state.user.email||'';}
   if(name==='search')document.getElementById('search-input')?.focus();
 }
@@ -3723,7 +3673,6 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
   if(state.user){
     await loadHistoryFromDB();
     await loadTenjoFromDB();
-    await loadFavorites();
     await loadShopOrdersToItems();
     loadUserMessageBadge();
     renderItemsPage();
