@@ -223,17 +223,15 @@ function copyText(id){
 }
 
 function showBankInfo(data){
-  // Stripeの振込案内ページがあればそちらに遷移
-  if(data.instructionsUrl){
-    location.href=data.instructionsUrl;
-    return;
-  }
   const zengin=data.bankInfo||{};
+  // 全セクション非表示
   document.getElementById('main-section').style.display='none';
   document.getElementById('notice').style.display='none';
   document.getElementById('plan-info').style.display='none';
-  const sec=document.getElementById('bank-info-section');
-  sec.style.cssText='display:block!important;margin:16px';
+  document.getElementById('loading-wrap').style.display='none';
+  // 振込先セクション表示
+  document.getElementById('bank-info-section').style.display='block';
+  // データ設定
   document.getElementById('bi-amount').textContent=(data.amount||amount).toLocaleString();
   document.getElementById('bi-coins').textContent=coins.toLocaleString();
   document.getElementById('bi-bank').textContent=zengin.bank_name||'-';
@@ -242,7 +240,7 @@ function showBankInfo(data){
   document.getElementById('bi-number').textContent=zengin.account_number||'-';
   document.getElementById('bi-name').textContent=zengin.account_holder_name||'-';
   const due=new Date();due.setDate(due.getDate()+7);
-  document.getElementById('bi-due').textContent=due.toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('bi-due').textContent=due.toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});
   window.scrollTo(0,0);
 }
 
