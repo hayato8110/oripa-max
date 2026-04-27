@@ -1838,7 +1838,7 @@ async function drawDirect(packId,count){
   }
   const label=count===1?'1回':count===10?'10連':'100連';
   const afterCoin=state.coin-cost;
-  confirmAction(label+'ガチャを引きますか？\n'+cost.toLocaleString()+'コイン消費します\n'+state.coin.toLocaleString()+' → '+afterCoin.toLocaleString()+'コイン',async()=>{
+  confirmAction(`<div style="font-size:1rem;font-weight:900;color:#fff;margin-bottom:8px">${label}ガチャを引きますか？</div><div style="font-size:.85rem;color:rgba(255,255,255,.6);margin-bottom:10px">${cost.toLocaleString()}コイン消費します</div><div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:.9rem;font-weight:900"><span style="color:#ffd700">${state.coin.toLocaleString()}</span><span style="color:rgba(255,255,255,.4)">→</span><span style="color:#ffd700">${afterCoin.toLocaleString()}</span><span style="color:rgba(255,255,255,.5);font-size:.75rem">コイン</span></div>`,async()=>{
   state.activePack=pack;
   state.drawCount=count;
   await executeDraw();
@@ -3593,7 +3593,7 @@ function confirmAction(message, onConfirm){
   const box=document.createElement('div');
   box.style.cssText='background:#1a1a2e;border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:24px 20px;width:min(300px,92vw);text-align:center';
   box.innerHTML=`
-    <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:8px;line-height:1.4">${message}</div>
+    <div style="margin-bottom:8px;line-height:1.4">${message}</div>
     <div style="display:flex;gap:8px;margin-top:16px">
       <button id="ca-cancel" style="flex:1;padding:11px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer;font-size:.88rem">キャンセル</button>
       <button id="ca-ok" style="flex:1;padding:11px;border-radius:8px;background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));color:#1a0a00;font-weight:900;border:none;cursor:pointer;font-size:.88rem">はい</button>
