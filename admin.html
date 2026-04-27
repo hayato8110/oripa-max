@@ -1247,8 +1247,9 @@ async function savePack(){
     packId=data.id;
   }
   const prizes=getPrizeBlocksData(packId);
+  // 常に既存賞品を削除してからinsert（重複防止）
+  await db.from('prizes').delete().eq('pack_id',packId);
   if(prizes.length){
-    if(editingPackId)await db.from('prizes').delete().eq('pack_id',packId);
     const{error}=await db.from('prizes').insert(prizes);
     if(error){showToast('⚠️ 賞品保存エラー: '+error.message);return;}
   }
