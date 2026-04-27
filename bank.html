@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>振込先情報 | オリパMAX</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;color:#f0eadc;font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;padding-bottom:40px}
+.header{position:sticky;top:0;background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 16px;gap:12px}
+.back-btn{background:none;border:none;color:#e8c96a;font-size:1rem;font-weight:700;cursor:pointer}
+.header-title{font-size:1rem;font-weight:900}
+.wrap{margin:16px}
+.amount-box{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:16px;margin-bottom:12px}
+.amount-label{font-size:.72rem;color:rgba(240,234,220,.6);margin-bottom:6px}
+.amount-value{font-size:1.5rem;font-weight:900;color:#e8c96a}
+.info-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px}
+.info-title{font-size:.82rem;font-weight:700;color:#e8c96a;margin-bottom:14px}
+.info-notice{font-size:.72rem;color:#f59e0b;margin-bottom:12px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.info-row:last-child{border-bottom:none}
+.info-key{font-size:.8rem;color:rgba(240,234,220,.6)}
+.info-val-wrap{display:flex;align-items:center;gap:8px}
+.info-val{font-size:.88rem;font-weight:700}
+.copy-btn{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#e8c96a;border-radius:4px;padding:3px 10px;font-size:.65rem;cursor:pointer;white-space:nowrap}
+.warn-box{background:rgba(255,150,0,.06);border:1px solid rgba(255,150,0,.2);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.warn-text{font-size:.72rem;color:rgba(255,200,100,.8);line-height:1.9}
+.back-home{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,#f5e090,#e8c96a,#b8832a);color:#1a0a00;font-weight:900;font-size:.9rem;border:none;cursor:pointer}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="header">
+  <button class="back-btn" onclick="history.back()">← 戻る</button>
+  <div class="header-title">振込先情報</div>
+</div>
+<div class="wrap">
+  <div class="amount-box">
+    <div class="amount-label">お振込金額</div>
+    <div class="amount-value">¥<span id="bi-amount">-</span></div>
+    <div style="font-size:.72rem;color:rgba(240,234,220,.5);margin-top:4px"><span id="bi-coins">-</span>コイン付与</div>
+  </div>
+
+  <div class="info-box">
+    <div class="info-title">🏦 振込先口座</div>
+    <div class="info-notice">以下の口座へお振り込みください。入金が確認されると自動的にコインが付与されます。</div>
+    <div class="info-row">
+      <span class="info-key">銀行名</span>
+      <div class="info-val-wrap">
+        <span class="info-val" id="bi-bank">-</span>
+        <button class="copy-btn" onclick="copyVal('bi-bank')">コピー</button>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="info-key">支店名</span>
+      <div class="info-val-wrap">
+        <span class="info-val" id="bi-branch">-</span>
+        <button class="copy-btn" onclick="copyVal('bi-branch')">コピー</button>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="info-key">口座種別</span>
+      <span class="info-val">普通</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">口座番号</span>
+      <div class="info-val-wrap">
+        <span class="info-val" id="bi-number">-</span>
+        <button class="copy-btn" onclick="copyVal('bi-number')">コピー</button>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="info-key">口座名義</span>
+      <div class="info-val-wrap">
+        <span class="info-val" id="bi-name" style="font-size:.78rem">-</span>
+        <button class="copy-btn" onclick="copyVal('bi-name')">コピー</button>
+      </div>
+    </div>
+    <div class="info-row">
+      <span class="info-key">支払い期日</span>
+      <span class="info-val" id="bi-due" style="color:#f87171">-</span>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-text">
+      ※ 必ずご本人様名義でお振り込みください<br>
+      ※ 通常10分〜1時間程度で反映されます（最大3営業日）<br>
+      ※ 土日祝は翌営業日の処理となります<br>
+      ※ 振込金額が不足している場合、コインは反映されません
+    </div>
+  </div>
+
+  <button class="back-home" onclick="location.href='/'">トップに戻る</button>
+</div>
+
+<script>
+function copyVal(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  navigator.clipboard.writeText(el.textContent).then(()=>{
+    const t=document.getElementById('toast');
+    t.textContent='コピーしました';t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2000);
+  });
+}
+
+const p=new URLSearchParams(location.search);
+document.getElementById('bi-amount').textContent=parseInt(p.get('amount')||0).toLocaleString();
+document.getElementById('bi-coins').textContent=parseInt(p.get('coins')||0).toLocaleString();
+document.getElementById('bi-bank').textContent=p.get('bank')||'-';
+document.getElementById('bi-branch').textContent=p.get('branch')||'-';
+document.getElementById('bi-number').textContent=p.get('number')||'-';
+document.getElementById('bi-name').textContent=p.get('name')||'-';
+const due=new Date();due.setDate(due.getDate()+7);
+document.getElementById('bi-due').textContent=due.toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});
+</script>
+</body>
+</html>
