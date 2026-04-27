@@ -206,7 +206,14 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 <script>
 const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1c3BveWFuZGV4b2tqdHNtYWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NTkwNTgsImV4cCI6MjA1NzQzNTA1OH0.xyOmSPTOkMkSQ-0SIxQOtSINj8GHuL0C6oRQTLBbslI';
-const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
+  auth:{
+    storageKey:'oripa-max-auth',
+    detectSessionInUrl:false,
+    autoRefreshToken:true,
+    persistSession:true,
+  }
+});
 const params=new URLSearchParams(location.search);
 const planId=params.get('plan');
 const amount=parseInt(params.get('amount')||'0');
