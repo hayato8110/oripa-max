@@ -3,20 +3,6 @@
 <head>
   <meta name="google-site-verification" content="DAl65jpCfkDX7xB7Q0CXK_0631Jsd5ZNBuSwDcE8FeU" />
 <meta charset="UTF-8">
-<link rel="icon" type="image/png" href="/converted-image.png">
-<link rel="shortcut icon" href="/converted-image.png">
-<link rel="apple-touch-icon" href="/converted-image.png">
-<meta name="description" content="ポケカ・トレカのネットオリパ【オリパMAX】。24時間いつでもリアルな開封体験をオンラインで。豪華賞品が当たるガチャを今すぐ無料登録して楽しもう！">
-<meta property="og:title" content="オリパMAX | ネットオリパ">
-<meta property="og:description" content="ポケカ・トレカのネットオリパ【オリパMAX】。24時間いつでもリアルな開封体験をオンラインで。豪華賞品が当たるガチャを今すぐ無料登録して楽しもう！">
-<meta property="og:image" content="https://oripa-max.com/converted-image.png">
-<meta property="og:url" content="https://oripa-max.com">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="オリパMAX | ネットオリパ">
-<meta name="twitter:description" content="ポケカ・トレカのネットオリパ【オリパMAX】。24時間いつでもリアルな開封体験をオンラインで。豪華賞品が当たるガチャを今すぐ無料登録して楽しもう！">
-<meta name="twitter:image" content="https://oripa-max.com/converted-image.png">
-<meta name="theme-color" content="#0a0a0f">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>オリパMAX | ネットオリパ</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
@@ -2438,8 +2424,8 @@ function renderItemsPage(tab){
         return `
         <div class="item-card" style="flex-direction:column;align-items:stretch;padding:0;overflow:hidden;margin-bottom:10px">
           <div style="display:flex;align-items:stretch">
-            <div style="width:130px;aspect-ratio:2/3;flex-shrink:0;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
-              ${prizeData?.image_url?`<img src="${prizeData.image_url}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:3rem">${r.packEmoji}</span>`}
+            <div style="width:130px;flex-shrink:0;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;align-self:stretch">
+              ${prizeData?.image_url?`<img src="${prizeData.image_url}" style="width:130px;height:auto;display:block;object-fit:contain">`:`<span style="font-size:3rem">${r.packEmoji}</span>`}
             </div>
             <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:6px;position:relative">
               ${itemsTab==='unselected'&&exType!=='ship_only'?`<input type="checkbox" class="item-cb" data-dbid="${r.dbId}" data-extype="${exType}" data-coin="${convertCoin}" onchange="updateSelectedCount()" style="position:absolute;top:10px;right:10px;width:20px;height:20px;accent-color:var(--gold2);cursor:pointer">`:''}  
