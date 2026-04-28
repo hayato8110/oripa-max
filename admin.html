@@ -1990,8 +1990,7 @@ async function loadAnalytics(){
     drawData.push((sessions||[]).filter(s=>s.created_at>=ds&&s.created_at<de).reduce((sum,r)=>sum+(r.draw_count||1),0));
     shipData.push((ships||[]).filter(s=>s.created_at>=ds&&s.created_at<de).length);
   }
-  const canvas=document.getElementById('analytics-chart');
-  if(canvas._chart)canvas._chart.destroy();
+
   // 課金者の日別集計
   const paidData=[];
   for(let d=1;d<=daysInMonth;d++){
