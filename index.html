@@ -1847,12 +1847,22 @@ async function drawDirect(packId,count){
     const already=state.sessions.some(s=>s.packId===pack.id);
     if(already){showToast('⚠️ このガチャは1人1回限定です');return;}
   }
+  if(pack.is_daily_limit){
+    const today=new Date().toISOString().slice(0,10);
+    const{data:log}=await db.from('daily_gacha_log').select('drawn_date').eq('user_id',state.user.id).eq('pack_id',pack.id).eq('drawn_date',today).maybeSingle();
+    if(log){showToast('⚠️ このガチャは1日1回限定です。明日また挑戦してください！');return;}
+  }
   const label=count===1?'1回':count===10?'10連':'100連';
   const afterCoin=state.coin-cost;
   confirmGacha(pack,label,cost,afterCoin,async()=>{
   state.activePack=pack;
   state.drawCount=count;
   await executeDraw();
+  // 1日1回ガチャのログ記録
+  if(pack.is_daily_limit){
+    const today=new Date().toISOString().slice(0,10);
+    db.from('daily_gacha_log').insert({user_id:state.user.id,pack_id:pack.id,drawn_date:today}).then(()=>{});
+  }
   });
 }
 
@@ -2190,7 +2200,7 @@ let currentDetailPackId=null;
 function closePackDetail(){
   document.getElementById('pack-detail-modal').style.display='none';
 }
-function openPackDetail(packId){
+async function openPackDetail(packId){
   const pack=state.packs.find(p=>p.id===packId);if(!pack)return;
   currentDetailPackId=packId;
 
@@ -2241,9 +2251,20 @@ function openPackDetail(packId){
   if(soldOut){
     btns.push(`<button style="${btnStyle10};opacity:.5;cursor:default;width:100%" disabled>完売御礼</button>`);
   } else {
-    if(opts.d1)btns.push(`<button style="${btnStyle1}" onclick="closePackDetail();drawDirect('${pack.id}',1)">1回ガチャ</button>`);
-    if(opts.d10)btns.push(`<button style="${btnStyle10}" onclick="closePackDetail();drawDirect('${pack.id}',10)">10連ガチャ</button>`);
-    if(opts.d100)btns.push(`<button style="${btnStyle100}" onclick="closePackDetail();drawDirect('${pack.id}',100)">100連ガチャ</button>`);
+    // 1日1回限定チェック
+    let dailyLimitReached=false;
+    if(pack.is_daily_limit&&state.user){
+      const today=new Date().toISOString().slice(0,10);
+      const{data:log}=await db.from('daily_gacha_log').select('drawn_date').eq('user_id',state.user.id).eq('pack_id',pack.id).eq('drawn_date',today).maybeSingle();
+      if(log)dailyLimitReached=true;
+    }
+    if(dailyLimitReached){
+      btns.push(`<button style="flex:1;padding:13px 6px;border-radius:10px;font-size:.85rem;font-weight:900;background:rgba(255,255,255,.1);color:rgba(255,255,255,.4);border:none;cursor:default;width:100%" disabled>本日の上限に達しました</button>`);
+    } else {
+      if(opts.d1)btns.push(`<button style="${btnStyle1}" onclick="closePackDetail();drawDirect('${pack.id}',1)">1回ガチャ</button>`);
+      if(opts.d10)btns.push(`<button style="${btnStyle10}" onclick="closePackDetail();drawDirect('${pack.id}',10)">10連ガチャ</button>`);
+      if(opts.d100)btns.push(`<button style="${btnStyle100}" onclick="closePackDetail();drawDirect('${pack.id}',100)">100連ガチャ</button>`);
+    }
   }
   document.getElementById('pd-footer-btns').innerHTML=btns.join('');
 
