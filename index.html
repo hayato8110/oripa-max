@@ -2094,11 +2094,13 @@ function renderPacks(){
   if(state.currentSort==='hot')list.sort((a,b)=>(b.draw_count||0)-(a.draw_count||0));
   else if(state.currentSort==='cheap')list.sort((a,b)=>a.price-b.price);
   else list.sort((a,b)=>(a.sort_order||999)-(b.sort_order||999));
-  // SOLD OUTを常に一番下に
+  // SOLD OUTを常に一番下に、1日1回引き済みをその上（完売の手前）に
   list.sort((a,b)=>{
-    const aOut=(a.force_soldout||(a.remaining||0)<=0)?1:0;
-    const bOut=(b.force_soldout||(b.remaining||0)<=0)?1:0;
-    return aOut-bOut;
+    const aOut=(a.force_soldout||(a.remaining||0)<=0)?2:0;
+    const bOut=(b.force_soldout||(b.remaining||0)<=0)?2:0;
+    const aDaily=(a.is_daily_limit&&state.dailyDrawnPacks&&state.dailyDrawnPacks.includes(a.id))?1:0;
+    const bDaily=(b.is_daily_limit&&state.dailyDrawnPacks&&state.dailyDrawnPacks.includes(b.id))?1:0;
+    return (aOut+aDaily)-(bOut+bDaily);
   });
   const container=document.getElementById('packs-list');
   if(!list.length){
@@ -2187,7 +2189,7 @@ function renderPackCards(list){
           if(p.force_soldout||p.remaining<=0){
             return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(201,168,76,.5);font-weight:700;letter-spacing:.08em">— ありがとうございました —</div>`;
           } else if(drawnAlready){
-            return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(255,255,255,.3);font-weight:700;background:rgba(255,255,255,.05);border-radius:8px;margin:0 0 8px">✅ 引き済み（1人1回限定）</div>`;
+            return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(255,255,255,.3);font-weight:700;background:rgba(255,255,255,.05);border-radius:8px;margin:0 0 8px">上限に達しました</div>`;
           } else if(dailyLimitReached){
             return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(255,255,255,.3);font-weight:700;background:rgba(255,255,255,.05);border-radius:8px;margin:0 0 8px">本日の上限に達しました</div>`;
           } else {
