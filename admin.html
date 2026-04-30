@@ -442,20 +442,30 @@ input,select,textarea{font-family:inherit}
 
     <!-- ANALYTICS -->
     <div class="admin-page" id="page-analytics">
-      <span style="font-size:.95rem;font-weight:900;display:block;margin-bottom:14px">📈 アクセス解析</span>
-      <div class="stats-grid">
-        <div class="stat-card stat-blue"><div class="stat-label">今日のアクセス</div><div class="stat-val" id="ana-today">0</div></div>
-        <div class="stat-card"><div class="stat-label">今月のアクセス</div><div class="stat-val" id="ana-month">0</div></div>
-        <div class="stat-card stat-green"><div class="stat-label">ユニークユーザー</div><div class="stat-val" id="ana-unique">0</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:.95rem;font-weight:900">📈 アクセス解析</span>
+        <input type="month" id="ana-month-select" style="background:#1e1e2e;color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 10px;font-size:.85rem" onchange="loadAnalytics()">
       </div>
-      <div class="chart-wrap" style="margin-top:14px">
-        <div class="chart-title">📈 日別アクセス数（直近14日）</div>
-        <canvas id="analytics-chart" height="80"></canvas>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <div class="stat-card stat-blue"><div class="stat-label">アクセス数</div><div class="stat-val" id="ana-access">0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">ログインユーザー</div><div class="stat-val" id="ana-login">0</div></div>
+        <div class="stat-card"><div class="stat-label">課金者数</div><div class="stat-val" id="ana-paid">0</div></div>
+        <div class="stat-card stat-gold"><div class="stat-label">ガチャ回数</div><div class="stat-val" id="ana-draws">0</div></div>
+        <div class="stat-card"><div class="stat-label">発送依頼数</div><div class="stat-val" id="ana-ships">0</div></div>
       </div>
-      <div class="table-card" style="margin-top:14px">
-        <div class="table-head"><span class="table-title">🔍 よく見られるページ</span></div>
-        <table class="tbl"><thead><tr><th>ページ</th><th>アクセス数</th></tr></thead>
-        <tbody id="analytics-tbl-body"></tbody></table>
+      <div class="table-card" style="margin-top:14px;overflow-x:auto">
+        <div class="table-head"><span class="table-title">📅 日別推移</span></div>
+        <table class="tbl" id="analytics-table" style="min-width:500px">
+          <thead><tr>
+            <th>日付</th>
+            <th>アクセス</th>
+            <th>ログインUU</th>
+            <th>課金者</th>
+            <th>ガチャ回数</th>
+            <th>発送依頼</th>
+          </tr></thead>
+          <tbody id="analytics-tbody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -1960,34 +1970,53 @@ async function loadRevenue(){
 
 /* ══ ANALYTICS ══ */
 async function loadAnalytics(){
-  const{data:logs}=await db.from('access_logs').select('*').order('created_at',{ascending:false}).limit(1000);
-  const now=new Date();
-  const todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).toISOString();
-  const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
-  const todayLogs=(logs||[]).filter(l=>l.created_at>=todayStart);
-  const monthLogs=(logs||[]).filter(l=>l.created_at>=monthStart);
-  const uniqueUsers=new Set((logs||[]).map(l=>l.user_id).filter(Boolean)).size;
-  document.getElementById('ana-today').textContent=todayLogs.length.toLocaleString();
-  document.getElementById('ana-month').textContent=monthLogs.length.toLocaleString();
-  document.getElementById('ana-unique').textContent=uniqueUsers.toLocaleString();
-
-  // ページ別集計
-  const pageCounts={};
-  (logs||[]).forEach(l=>{if(l.page)pageCounts[l.page]=(pageCounts[l.page]||0)+1;});
-  document.getElementById('analytics-tbl-body').innerHTML=Object.entries(pageCounts).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([page,count])=>`<tr><td>${page}</td><td class="td-bold">${count.toLocaleString()}</td></tr>`).join('');
-
-  // 日別グラフ
-  const days=14;const labels=[];const data=[];
-  for(let i=days-1;i>=0;i--){
-    const d=new Date();d.setDate(d.getDate()-i);
-    labels.push(`${d.getMonth()+1}/${d.getDate()}`);
-    const ds=new Date(d.getFullYear(),d.getMonth(),d.getDate()).toISOString();
-    const de=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).toISOString();
-    data.push((logs||[]).filter(l=>l.created_at>=ds&&l.created_at<de).length);
+  const sel=document.getElementById('ana-month-select');
+  if(!sel.value){const n=new Date();sel.value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;}
+  const[yr,mo]=sel.value.split('-').map(Number);
+  const monthStart=new Date(yr,mo-1,1).toISOString();
+  const monthEnd=new Date(yr,mo,1).toISOString();
+  const daysInMonth=new Date(yr,mo,0).getDate();
+  const[{data:logs},{data:sessions},{data:ships},{data:txns}]=await Promise.all([
+    db.from('access_logs').select('created_at,user_id').gte('created_at',monthStart).lt('created_at',monthEnd),
+    db.from('draw_sessions').select('created_at,user_id,draw_count').gte('created_at',monthStart).lt('created_at',monthEnd),
+    db.from('shipping_requests').select('created_at').gte('created_at',monthStart).lt('created_at',monthEnd),
+    db.from('transactions').select('created_at,user_id').eq('type','purchase').gte('created_at',monthStart).lt('created_at',monthEnd),
+  ]);
+  const totalAccess=(logs||[]).length;
+  const loginUsers=new Set((logs||[]).map(l=>l.user_id).filter(Boolean)).size;
+  const paidUsers=new Set((txns||[]).map(t=>t.user_id).filter(Boolean)).size;
+  const totalDraws=(sessions||[]).reduce((s,r)=>s+(r.draw_count||1),0);
+  const totalShips=(ships||[]).length;
+  document.getElementById('ana-access').textContent=totalAccess.toLocaleString();
+  document.getElementById('ana-login').textContent=loginUsers.toLocaleString();
+  document.getElementById('ana-paid').textContent=paidUsers.toLocaleString();
+  document.getElementById('ana-draws').textContent=totalDraws.toLocaleString();
+  document.getElementById('ana-ships').textContent=totalShips.toLocaleString();
+  const labels=[];const accData=[],loginData=[],drawData=[],shipData=[],paidData=[];
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=new Date(yr,mo-1,d).toISOString();
+    const de=new Date(yr,mo-1,d+1).toISOString();
+    labels.push(`${mo}/${d}`);
+    accData.push((logs||[]).filter(l=>l.created_at>=ds&&l.created_at<de).length);
+    loginData.push(new Set((logs||[]).filter(l=>l.created_at>=ds&&l.created_at<de&&l.user_id).map(l=>l.user_id)).size);
+    drawData.push((sessions||[]).filter(s=>s.created_at>=ds&&s.created_at<de).reduce((sum,r)=>sum+(r.draw_count||1),0));
+    shipData.push((ships||[]).filter(s=>s.created_at>=ds&&s.created_at<de).length);
+    paidData.push(new Set((txns||[]).filter(t=>t.created_at>=ds&&t.created_at<de).map(t=>t.user_id).filter(Boolean)).size);
   }
-  const canvas=document.getElementById('analytics-chart');
-  if(canvas._chart)canvas._chart.destroy();
-  canvas._chart=new Chart(canvas,{type:'line',data:{labels,datasets:[{label:'アクセス数',data,borderColor:'rgba(68,136,255,.8)',backgroundColor:'rgba(68,136,255,.1)',fill:true,tension:.4}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}}},y:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+  const tbody=document.getElementById('analytics-tbody');
+  let rows='';
+  for(let i=0;i<daysInMonth;i++){
+    const hasData=accData[i]||loginData[i]||paidData[i]||drawData[i]||shipData[i];
+    rows+=`<tr style="${hasData?'':'opacity:.35'}">
+      <td>${labels[i]}</td>
+      <td class="td-bold" style="color:#4488ff">${accData[i]||0}</td>
+      <td class="td-bold" style="color:#50dc78">${loginData[i]||0}</td>
+      <td class="td-bold">${paidData[i]||0}</td>
+      <td class="td-bold" style="color:#ffc800">${(drawData[i]||0).toLocaleString()}</td>
+      <td class="td-bold" style="color:#ff6464">${shipData[i]||0}</td>
+    </tr>`;
+  }
+  tbody.innerHTML=rows;
 }
 
 /* ══ CSV EXPORT ══ */
