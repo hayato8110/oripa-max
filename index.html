@@ -949,6 +949,10 @@ async function loadUserProfile(userId){
   state.coin=profile.coin_points||0;
   state.totalSpent=profile.total_spent||0;
   updateHeaderPts();
+  // 1日1回引き済みパックをロード
+  const today=new Date().toISOString().slice(0,10);
+  const{data:dailyLogs}=await db.from('daily_gacha_log').select('pack_id').eq('user_id',userId).eq('drawn_date',today);
+  state.dailyDrawnPacks=(dailyLogs||[]).map(l=>l.pack_id);
 }
 
 /* ══ AUTH ══ */
@@ -1863,6 +1867,8 @@ async function drawDirect(packId,count){
   if(pack.is_daily_limit){
     const today=new Date().toISOString().slice(0,10);
     db.from('daily_gacha_log').insert({user_id:state.user.id,pack_id:pack.id,drawn_date:today}).then(()=>{});
+    if(!state.dailyDrawnPacks)state.dailyDrawnPacks=[];
+    state.dailyDrawnPacks.push(pack.id);
   }
   });
 }
@@ -2176,10 +2182,14 @@ function renderPackCards(list){
         ${(()=>{
           // 1人1回チェック
           const drawnAlready=p.max_draws_per_user===1&&state.sessions.some(s=>s.packId===p.id);
+          const today=new Date().toISOString().slice(0,10);
+          const dailyLimitReached=p.is_daily_limit&&state.dailyDrawnPacks&&state.dailyDrawnPacks.includes(p.id);
           if(p.force_soldout||p.remaining<=0){
             return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(201,168,76,.5);font-weight:700;letter-spacing:.08em">— ありがとうございました —</div>`;
           } else if(drawnAlready){
             return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(255,255,255,.3);font-weight:700;background:rgba(255,255,255,.05);border-radius:8px;margin:0 0 8px">✅ 引き済み（1人1回限定）</div>`;
+          } else if(dailyLimitReached){
+            return `<div style="text-align:center;padding:10px;font-size:.78rem;color:rgba(255,255,255,.3);font-weight:700;background:rgba(255,255,255,.05);border-radius:8px;margin:0 0 8px">本日の上限に達しました</div>`;
           } else {
             let opts={d1:true,d10:true,d100:false};
             try{if(p.draw_options)opts={...opts,...JSON.parse(p.draw_options)};}catch(e){}
