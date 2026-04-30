@@ -1289,9 +1289,28 @@ async function togglePack(id,current){
       showToast('⏸ 停止しました');loadPacks();
     });
   } else {
-    // 再開は確認なしで即実行
-    await db.from('packs').update({is_active:true}).eq('id',id);
-    showToast('✅ 公開しました');loadPacks();
+    const modal2=document.createElement('div');
+    modal2.className='modal-overlay show';
+    modal2.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+    const box2=document.createElement('div');
+    box2.style.cssText='background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;width:min(320px,92vw);text-align:center';
+    box2.innerHTML=`
+      <div style="font-size:1.5rem;margin-bottom:10px">▶️</div>
+      <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">本当に再開しますか？</div>
+      <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">再開するとユーザーがガチャを引けるようになります</div>
+      <div style="display:flex;gap:8px">
+        <button id="tp-cancel2" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer">キャンセル</button>
+        <button id="tp-ok2" style="flex:1;padding:10px;border-radius:8px;background:#00e676;color:#0f1117;font-weight:900;border:none;cursor:pointer">再開する</button>
+      </div>`;
+    modal2.appendChild(box2);
+    modal2.addEventListener('click',e=>{if(e.target===modal2)modal2.remove();});
+    document.body.appendChild(modal2);
+    box2.querySelector('#tp-cancel2').addEventListener('click',()=>modal2.remove());
+    box2.querySelector('#tp-ok2').addEventListener('click',async()=>{
+      modal2.remove();
+      await db.from('packs').update({is_active:true}).eq('id',id);
+      showToast('✅ 公開しました');loadPacks();
+    });
   }
 }
 
