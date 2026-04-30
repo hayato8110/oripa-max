@@ -2155,7 +2155,7 @@ function renderPackCards(list){
     <div class="pack-card" style="${drawnAlready?'opacity:.55;':''}">
       <div class="pc-banner" onclick="openPackDetail('${p.id}')">
         <div class="pcb-bg" style="background:${p.bg_style||'linear-gradient(145deg,#1a1a3a,#2a1a1a)'}">
-          ${p.image_url?`<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">`:''}
+          ${p.image_url?`<img src="${p.image_url}" style="width:100%;height:auto;display:block;object-fit:contain">`:''}
         </div>
         <div class="pcb-char">${p.image_url?'':p.emoji||'🎴'}</div>
         ${drawnAlready?``:''}
