@@ -1143,9 +1143,22 @@ function addPrizeBlock(prize){
     <div style="margin-top:6px;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:6px">
       <div style="font-size:.6rem;color:rgba(255,255,255,.4);margin-bottom:4px">🔒 発動残り口数（残りN口以下で抽選対象に入る・空白=常時）</div>
       <input type="number" min="1" step="1" class="form-input prize-trigger-remaining" style="width:100%;padding:5px 8px;font-size:.82rem" placeholder="空白=常時抽選対象" value="${prize?.trigger_remaining??''}">
+    </div>
+    <!-- パック詳細表示ON/OFF -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:6px">
+      <span style="font-size:.72rem;color:rgba(255,255,255,.7);font-weight:700">👁 パック詳細に表示</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" class="prize-is-visible" ${prize?.is_hidden?'':'checked'} style="width:16px;height:16px;cursor:pointer">
+        <span class="prize-visible-label" style="font-size:.72rem;font-weight:900;color:${prize?.is_hidden?'#ff6060':'#00cc66'}">${prize?.is_hidden?'OFF':'ON'}</span>
+      </label>
     </div>`;
   container.appendChild(div);
   // 抽選ON/OFFラベル更新
+  div.querySelector('.prize-is-visible')?.addEventListener('change',function(){
+    const label=this.closest('label').querySelector('.prize-visible-label');
+    label.textContent=this.checked?'ON':'OFF';
+    label.style.color=this.checked?'#00cc66':'#ff6060';
+  });
   div.querySelector('.prize-is-active')?.addEventListener('change',function(){
     const label=this.closest('label').querySelector('.prize-active-label');
     if(label){label.textContent=this.checked?'ON':'OFF';label.style.color=this.checked?'#00cc66':'#ff6060';}
@@ -1230,7 +1243,8 @@ function getPrizeBlocksData(packId){
     const is_active=block.querySelector('.prize-is-active')?.checked!==false;
     const show_quantity=block.querySelector('.prize-show-qty')?.checked||false;
     const trigger_remaining=block.querySelector('.prize-trigger-remaining')?.value!==''?parseInt(block.querySelector('.prize-trigger-remaining')?.value)||null:null;
-    return{pack_id:packId,tier,tier_label,name,quantity:qty,remaining_qty:qty,weight,value_jp,exchange_type,image_url,is_active,show_quantity,trigger_remaining};
+    const is_hidden=block.querySelector('.prize-is-visible')?.checked===false;
+    return{pack_id:packId,tier,tier_label,name,quantity:qty,remaining_qty:qty,weight,value_jp,exchange_type,image_url,is_active,show_quantity,trigger_remaining,is_hidden};
   }).filter(p=>p.name);
 }
 
