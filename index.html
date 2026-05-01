@@ -2330,7 +2330,7 @@ async function openPackDetail(packId){
     },
   };
 
-  const prizes=pack.prizes_public||pack.prizes||[];
+  const prizes=(pack.prizes_public||pack.prizes||[]).filter(pr=>!pr.is_hidden);
   const groups={};
   prizes.forEach(pr=>{
     const t=pr.tier||'c';
