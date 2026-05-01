@@ -3190,7 +3190,7 @@ async function loadShopPage(){
     const so=item.stock<=0;
     const sid=item.id.slice(0,4);
     const imgHtml=item.image_url
-      ?'<img src="'+item.image_url+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">'
+      ?'<img src="'+item.image_url+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#111">'
       :'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:3rem">🛒</div>';
     const soldHtml=so
       ?'<div style="position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="font-size:1.3rem;font-weight:900;color:#fff;border:3px solid rgba(255,255,255,.85);padding:3px 14px;border-radius:3px;background:rgba(0,0,0,.3);letter-spacing:.1em">SOLD</div><div style="font-size:1.3rem;font-weight:900;color:#fff;border:3px solid rgba(255,255,255,.85);padding:3px 14px;border-radius:3px;background:rgba(0,0,0,.3);letter-spacing:.1em">OUT</div></div>'
