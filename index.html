@@ -55,14 +55,7 @@ input,select,textarea{font-family:inherit;outline:none}
 #toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 #toast.show{opacity:1}
 
-/* ══ 年齢確認 ══ */
-.age-check-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9000;display:flex;align-items:center;justify-content:center}
-.age-check-box{background:linear-gradient(145deg,#12120e,#1a1a14);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:32px 24px;width:min(340px,90vw);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-.age-check-logo{font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,#fff3a0,#ffd700,#c8860a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;letter-spacing:.05em}
-.age-check-title{font-size:1rem;font-weight:900;margin-bottom:12px;color:rgba(255,255,255,.9);letter-spacing:.1em}
-.age-check-sub{font-size:.82rem;color:rgba(255,255,255,.55);margin-bottom:24px;line-height:1.7}
-.age-check-yes{width:100%;background:linear-gradient(135deg,#e8380d,#c82000);color:#fff;padding:14px;border-radius:12px;font-weight:900;font-size:.95rem;border:none;cursor:pointer;margin-bottom:12px;display:block;letter-spacing:.05em;box-shadow:0 4px 16px rgba(232,56,13,.3)}
-.age-check-no{width:100%;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);padding:11px;border-radius:12px;font-size:.82rem;border:1px solid rgba(255,255,255,.1);cursor:pointer;display:block}
+
 
 /* ══ HEADER ══ */
 .header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 12px;gap:8px;backdrop-filter:blur(20px)}
@@ -360,24 +353,7 @@ input,select,textarea{font-family:inherit;outline:none}
 <body>
 <div id="toast"></div>
 
-<!-- 年齢確認 -->
-<div class="age-check-overlay" id="age-check" style="display:none">
-  <div class="age-check-box">
-    <div class="age-check-logo">
-      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 10px">
-        <polygon points="24,2 44,13 44,35 24,46 4,35 4,13" fill="#1a1200" stroke="url(#ag1)" stroke-width="2"/>
-        <defs><linearGradient id="ag1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs>
-        <text x="24" y="28" text-anchor="middle" font-size="11" font-weight="900" font-family="serif" fill="url(#ag1)" letter-spacing="1">MAX</text>
-        <polygon points="24,6 26,11 31,11 27,14 29,19 24,16 19,19 21,14 17,11 22,11" fill="#ffd700" opacity=".8"/>
-      </svg>
-      オリパMAX
-    </div>
-    <div class="age-check-title">年 齢 確 認</div>
-    <div class="age-check-sub">本サービスは18歳以上の方のみ<br>ご利用いただけます。<br>あなたは18歳以上ですか？</div>
-    <button class="age-check-yes" onclick="confirmAge(true)">✅ はい、18歳以上です</button>
-    <button class="age-check-no" onclick="confirmAge(false)">いいえ、18歳未満です</button>
-  </div>
-</div>
+
 
 <script>
 const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
@@ -3119,23 +3095,9 @@ async function submitStripePayment(){
 
 /* ══ 年齢確認 ══ */
 function checkAgeVerification(){
-  if(!localStorage.getItem('age_verified')){
-    document.getElementById('age-check').style.display='flex';
-  }
+
 }
-function confirmAge(isAdult){
-  if(isAdult){
-    localStorage.setItem('age_verified','true');
-    document.getElementById('age-check').style.display='none';
-  } else {
-    document.getElementById('age-check').innerHTML=`
-      <div class="age-check-box">
-        <div style="font-size:2rem;margin-bottom:14px">🚫</div>
-        <div class="age-check-title">ご利用いただけません</div>
-        <div class="age-check-sub">本サービスは18歳以上の方のみご利用いただけます。</div>
-      </div>`;
-  }
-}
+
 
 
 
