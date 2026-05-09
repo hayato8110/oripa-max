@@ -30,12 +30,14 @@ export default async function handler(req, res) {
     { data: { user }, error: authErr },
     { data: pack, error: packErr },
     { data: userData, error: userErr },
-    { data: prizes, error: prizesErr }
+    { data: prizes, error: prizesErr },
+    { data: packVideos }
   ] = await Promise.all([
     supabase.auth.getUser(userToken),
     supabase.from('packs').select('*').eq('id', packId).single(),
     supabase.from('users').select('coin_points, total_spent').eq('id', userId).single(),
-    supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, exchange_type, image_url, quantity, remaining_qty, trigger_remaining').eq('pack_id', packId).eq('is_active', true)
+    supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, exchange_type, image_url, quantity, remaining_qty, trigger_remaining').eq('pack_id', packId).eq('is_active', true),
+    supabase.from('pack_videos').select('tier, video_url').eq('pack_id', packId).eq('is_active', true)
   ]);
 
   if (authErr || !user || user.id !== userId) {
@@ -116,5 +118,6 @@ export default async function handler(req, res) {
     newRemaining,
     soldOut: newRemaining <= 0,
     expiresAt,
+    packVideos: packVideos || [],
   });
 }
