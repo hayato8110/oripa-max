@@ -1163,7 +1163,7 @@ function getTierColor(tier){
   return TIER_TO_COLOR[tier]||'white';
 }
 
-function startGachaAnimation(results,pack){
+function startGachaAnimation(results,pack,packVideos){
   gachaResults=results;gachaSkipped=false;
   const topTier=results.reduce((best,r)=>{
     const order={c:0,r:1,rr:2,sr:3,sar:4};
@@ -1908,7 +1908,7 @@ async function executeDraw(){
     if(!resp.ok){showToast('⚠️ '+(apiResult.error||'エラーが発生しました'));return;}
   }catch(e){showToast('⚠️ 通信エラーが発生しました');return;}
 
-  const{results,sessionId,newCoin,newRemaining,soldOut,expiresAt}=apiResult;
+  const{results,sessionId,newCoin,newRemaining,soldOut,expiresAt,packVideos}=apiResult;
 
   // stateを更新
   state.coin=newCoin;
