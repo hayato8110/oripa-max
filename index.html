@@ -1170,7 +1170,7 @@ function startGachaAnimation(results,pack,packVideos){
     return(order[r.prize.tier]||0)>(order[best]||0)?r.prize.tier:best;
   },'c');
   const finalColor=getTierColor(topTier);
-  const videoUrl=getVideoForTier(topTier);
+  const videoUrl=(packVideos?.find(v=>v.tier===topTier)?.video_url)||getVideoForTier(topTier);
   document.getElementById('gacha-screen').classList.add('show');
   if(videoUrl){
     runVideoSequence(videoUrl,results,pack,topTier);
@@ -1930,7 +1930,7 @@ async function executeDraw(){
   state.sessions.unshift(session);
 
   renderPacks();
-  startGachaAnimation(session.results,pack);
+  startGachaAnimation(session.results,pack,apiResult.packVideos||[]);
 }
 
 async function saveDrawSession(packId,results,totalCost){
