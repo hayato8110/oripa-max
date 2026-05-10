@@ -555,6 +555,17 @@ input,select,textarea{font-family:inherit}
         <div style="font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:12px">🏆 賞品設定</div>
         <div id="prizes-blocks" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
         <button class="btn btn-secondary" style="margin-top:10px" onclick="addPrizeBlock()">＋ 賞品ブロック追加</button>
+        <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
+        <div style="font-size:.82rem;font-weight:900;color:#bb88ff;margin-bottom:8px">🎬 パックごとの演出動画（任意）</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-bottom:10px">設定するとこのオリパ専用の動画が優先されます。空欄はグローバル動画を使用。</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#e8a800">S賞</span><input class="form-input pv-url" data-tier="sar" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#bb88ff">A賞</span><input class="form-input pv-url" data-tier="sr" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#ff6060">B賞</span><input class="form-input pv-url" data-tier="rr" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#44cc88">C賞</span><input class="form-input pv-url" data-tier="r" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:rgba(255,255,255,.4)">その他</span><input class="form-input pv-url" data-tier="c" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
+        </div>
+      </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -977,6 +988,14 @@ async function editPack(id){
   document.getElementById('pm-active').checked=pack.is_active!==false;
   document.getElementById('prizes-blocks').innerHTML='';
   (pack.prizes||[]).forEach(pr=>addPrizeBlock(pr));
+  const{data:pvData}=await db.from('pack_videos').select('*').eq('pack_id',id);
+  document.querySelectorAll('.pv-url').forEach(input=>input.value='');
+  setTimeout(()=>{
+    (pvData||[]).forEach(v=>{
+      const el=document.querySelector(`.pv-url[data-tier="${v.tier}"]`);
+      if(el)el.value=v.video_url||'';
+    });
+  },50);
   document.getElementById('pack-modal').classList.add('show');
 }
 
@@ -1277,6 +1296,13 @@ async function savePack(){
     if(editingPackId)await db.from('prizes').delete().eq('pack_id',packId);
     const{error}=await db.from('prizes').insert(prizes);
     if(error){showToast('⚠️ 賞品保存エラー: '+error.message);return;}
+  }
+  const pvInputs=document.querySelectorAll('.pv-url');
+  for(const input of pvInputs){
+    const tier=input.dataset.tier;
+    const url=input.value.trim();
+    await db.from('pack_videos').delete().eq('pack_id',packId).eq('tier',tier);
+    if(url)await db.from('pack_videos').insert({pack_id:packId,tier,video_url:url,is_active:true});
   }
   closeModal('pack-modal');showToast('✅ オリパを保存しました！');loadPacks();
 }
