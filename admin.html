@@ -558,12 +558,12 @@ input,select,textarea{font-family:inherit}
         <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
         <div style="font-size:.82rem;font-weight:900;color:#bb88ff;margin-bottom:8px">🎬 パックごとの演出動画（任意）</div>
         <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-bottom:10px">設定するとこのオリパ専用の動画が優先されます。空欄はグローバル動画を使用。</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#e8a800">S賞</span><input class="form-input pv-url" data-tier="sar" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#bb88ff">A賞</span><input class="form-input pv-url" data-tier="sr" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#ff6060">B賞</span><input class="form-input pv-url" data-tier="rr" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#44cc88">C賞</span><input class="form-input pv-url" data-tier="r" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
-          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:rgba(255,255,255,.4)">その他</span><input class="form-input pv-url" data-tier="c" style="flex:1;padding:6px 10px;font-size:.8rem" placeholder="動画URL（空欄=グローバル動画）"></div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="pv-selects">
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#e8a800">S賞</span><select class="form-select pv-url" data-tier="sar" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#bb88ff">A賞</span><select class="form-select pv-url" data-tier="sr" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#ff6060">B賞</span><select class="form-select pv-url" data-tier="rr" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#44cc88">C賞</span><select class="form-select pv-url" data-tier="r" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:rgba(255,255,255,.4)">その他</span><select class="form-select pv-url" data-tier="c" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
         </div>
         </div>    
     </div>
@@ -959,6 +959,7 @@ function openPackModal(){
   document.getElementById('pm-draw-100').checked=false;
   // デフォルトでS賞・A賞・B賞・C賞・その他を1つずつ追加
   ['sar','sr','rr','r','c'].forEach(tier=>addPrizeBlock({tier}));
+  await loadPackVideoSelects();
   document.getElementById('pack-modal').classList.add('show');
 }
 
@@ -988,13 +989,9 @@ async function editPack(id){
   document.getElementById('prizes-blocks').innerHTML='';
   (pack.prizes||[]).forEach(pr=>addPrizeBlock(pr));
   const{data:pvData}=await db.from('pack_videos').select('*').eq('pack_id',id);
-  document.querySelectorAll('.pv-url').forEach(input=>input.value='');
-  setTimeout(()=>{
-    (pvData||[]).forEach(v=>{
-      const el=document.querySelector(`.pv-url[data-tier="${v.tier}"]`);
-      if(el)el.value=v.video_url||'';
-    });
-  },50);
+  const selectedMap={};
+  (pvData||[]).forEach(v=>{selectedMap[v.tier]=v.video_url;});
+  await loadPackVideoSelects(selectedMap);
   document.getElementById('pack-modal').classList.add('show');
 }
 
@@ -1265,7 +1262,21 @@ function getPrizeBlocksData(packId){
     return{pack_id:packId,tier,tier_label,name,quantity:qty,remaining_qty:qty,weight,value_jp,exchange_type,image_url,is_active,show_quantity,trigger_remaining,is_hidden};
   }).filter(p=>p.name);
 }
-
+async function loadPackVideoSelects(selectedMap={}){
+  const{data:vids}=await db.from('gacha_videos').select('*').order('tier');
+  const selects=document.querySelectorAll('.pv-url');
+  selects.forEach(sel=>{
+    sel.innerHTML='<option value="">グローバル動画</option>';
+    (vids||[]).forEach(v=>{
+      const opt=document.createElement('option');
+      opt.value=v.video_url;
+      const tierLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他',all:'共通'}[v.tier]||v.tier;
+      opt.textContent=`${v.name||'無名'}（${tierLabel}）`;
+      sel.appendChild(opt);
+    });
+    if(selectedMap[sel.dataset.tier])sel.value=selectedMap[sel.dataset.tier];
+  });
+}
 async function savePack(){
   const name=document.getElementById('pm-name').value;
   if(!name){showToast('⚠️ パック名を入力してください');return;}
