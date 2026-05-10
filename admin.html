@@ -944,7 +944,7 @@ function renderPacks(packs){
 }
 function filterPacks(q){renderPacks(allPacks.filter(p=>p.name.includes(q)||(p.series||'').includes(q)));}
 
-function openPackModal(){
+async function openPackModal(){ 
   editingPackId=null;prizeBlockCount=0;
   document.getElementById('pack-modal-title').textContent='🎴 新規オリパ作成';
   document.getElementById('prizes-blocks').innerHTML='';
