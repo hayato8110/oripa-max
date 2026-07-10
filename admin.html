@@ -2669,6 +2669,8 @@ function selectCardImage2(url,name){
   if(ciTargetIdx2!==null){
     const imgInput=document.getElementById(`prize-img-${ciTargetIdx2}`);
     if(imgInput){imgInput.value=url;previewBlockImage(imgInput,ciTargetIdx2);}
+    const block=document.getElementById(`prize-block-${ciTargetIdx2}`);
+    if(block){const nameInput=block.querySelector('.prize-name');if(nameInput&&!nameInput.value)nameInput.value=name;}
     showToast(`✅ 「${name}」をセットしました`);
     ciTargetIdx2=null;
   }
