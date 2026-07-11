@@ -429,13 +429,12 @@ input,select,textarea{font-family:inherit}
       <div class="chart-wrap" style="margin-top:14px">
         <div class="chart-title">📊 月別売上グラフ</div>
         <canvas id="revenue-chart" height="80"></canvas>
-      </div>
-      <div class="table-card" style="margin-top:14px">
+  <div class="table-card" style="margin-top:14px">
         <div class="table-head">
-          <span class="table-title">💰 パック別売上</span>
+          <span class="table-title">💰 パック別売上・利益率（リアルタイム）</span>
           <button class="btn btn-secondary" onclick="exportCSV('revenue')">📥 CSV出力</button>
         </div>
-        <table class="tbl"><thead><tr><th>パック名</th><th>販売数</th><th>売上</th></tr></thead>
+        <table class="tbl"><thead><tr><th>パック名</th><th>販売数</th><th>売上</th><th>推定払出</th><th>推定利益</th><th>利益率</th></tr></thead>
         <tbody id="revenue-tbl-body"></tbody></table>
       </div>
     </div>
