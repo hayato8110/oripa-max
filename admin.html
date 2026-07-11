@@ -1996,10 +1996,17 @@ async function closeInquiry(id){await db.from('inquiries').update({status:'close
 
 /* ══ REVENUE ══ */
 async function loadRevenue(){
-  const{data:packs}=await db.from('packs').select('name,price,total_slots,remaining');
+  const{data:packs}=await db.from('packs').select('name,price,total_slots,remaining,prizes(value_jp,quantity)');
   document.getElementById('revenue-tbl-body').innerHTML=(packs||[]).map(p=>{
     const sold=(p.total_slots||0)-(p.remaining||0);
-    return`<tr><td class="td-bold">${p.name}</td><td>${sold.toLocaleString()}</td><td>¥${(sold*(p.price||0)).toLocaleString()}</td></tr>`;
+    const revenue=sold*(p.price||0);
+    const totalPayout=(p.prizes||[]).reduce((sum,pr)=>sum+(pr.value_jp||0)*(pr.quantity||1),0);
+    const soldRatio=p.total_slots>0?sold/p.total_slots:0;
+    const estimatedPayout=Math.round(totalPayout*soldRatio);
+    const profit=revenue-estimatedPayout;
+    const profitRate=revenue>0?((profit/revenue)*100).toFixed(1):'0.0';
+    const profitColor=profit>=0?'#00e676':'#ff4060';
+    return`<tr><td class="td-bold">${p.name}</td><td>${sold.toLocaleString()}</td><td>¥${revenue.toLocaleString()}</td><td>¥${estimatedPayout.toLocaleString()}</td><td style="color:${profitColor}">¥${profit.toLocaleString()}</td><td style="color:${profitColor};font-weight:900">${profitRate}%</td></tr>`;
   }).join('');
 
   // 月別グラフ
