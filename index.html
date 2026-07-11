@@ -989,7 +989,7 @@ async function doRegister(){
   state.session=data.session;
   await loadUserProfile(data.user.id);
   closeAllModals();
-  showToast(`確認メールを送信しました！`,3000);
+  showToast(`🎉 登録完了しました！`,3000);
 }
 async function doForgotPassword(){
   // メールアドレス入力ダイアログ
