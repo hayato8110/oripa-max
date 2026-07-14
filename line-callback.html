@@ -25,6 +25,21 @@ const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
 const LINE_CLIENT_ID='2009627127';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
+async function logError(step,message,detail,userId){
+  try{
+    await db.from('line_error_logs').insert({
+      user_id:userId||null,
+      step,
+      message,
+      raw_detail:detail?JSON.stringify(detail).slice(0,2000):null,
+      user_agent:navigator.userAgent,
+    });
+  }catch(e){
+    // ログ保存自体が失敗しても連携フローは止めない
+    console.error('ログ保存失敗',e);
+  }
+}
+
 async function handleCallback(){
   const params=new URLSearchParams(location.search);
   const code=params.get('code');
@@ -32,12 +47,14 @@ async function handleCallback(){
   const error=params.get('error');
 
   if(error){
+    await logError('line_redirect_error','LINE認証がキャンセルされました',{error});
     showError('LINE認証がキャンセルされました');
     setTimeout(()=>location.href='/',2000);
     return;
   }
 
   if(!code){
+    await logError('missing_code','認証コードが見つかりません',{search:location.search});
     showError('認証コードが見つかりません');
     setTimeout(()=>location.href='/',2000);
     return;
@@ -51,6 +68,7 @@ async function handleCallback(){
     userId=null;
   }
   if(!userId){
+    await logError('missing_state','ログイン情報が見つかりません',{state});
     showError('ログイン情報が見つかりません。再度お試しください');
     setTimeout(()=>location.href='/',2000);
     return;
@@ -70,6 +88,7 @@ async function handleCallback(){
     });
     const tokenData=await tokenRes.json();
     if(!tokenData.access_token){
+      await logError('token_fetch_failed','LINEトークンの取得に失敗しました',{status:tokenRes.status,tokenData},userId);
       showError('LINEトークンの取得に失敗しました');
       setTimeout(()=>location.href='/',2000);
       return;
@@ -83,6 +102,7 @@ async function handleCallback(){
     const lineId=profile.userId;
 
     if(!lineId){
+      await logError('profile_fetch_failed','LINEプロフィールの取得に失敗しました',{status:profileRes.status,profile},userId);
       showError('LINEプロフィールの取得に失敗しました');
       setTimeout(()=>location.href='/',2000);
       return;
@@ -91,6 +111,7 @@ async function handleCallback(){
     // 同じLINE IDが既に別アカウントに紐付いていないか確認
     const{data:existing}=await db.from('users').select('id').eq('line_id',lineId).neq('id',userId).single();
     if(existing){
+      await logError('already_linked','このLINEアカウントは既に別のアカウントに連携されています',{lineId},userId);
       showError('このLINEアカウントは既に別のアカウントに連携されています');
       setTimeout(()=>location.href='/',3000);
       return;
@@ -103,6 +124,7 @@ async function handleCallback(){
     }).eq('id',userId);
 
     if(updateError){
+      await logError('db_update_failed','連携の保存に失敗しました',{updateError},userId);
       showError('連携の保存に失敗しました: '+updateError.message);
       setTimeout(()=>location.href='/',3000);
       return;
@@ -115,6 +137,7 @@ async function handleCallback(){
     setTimeout(()=>location.href='/',2000);
 
   }catch(e){
+    await logError('unexpected_error','予期しないエラー',{message:e.message,stack:e.stack},userId);
     showError('エラーが発生しました: '+e.message);
     setTimeout(()=>location.href='/',3000);
   }
