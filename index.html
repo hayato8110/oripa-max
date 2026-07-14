@@ -1858,10 +1858,8 @@ async function drawDirect(packId,count){
   state.activePack=pack;
   state.drawCount=count;
   await executeDraw();
-  // 1日1回ガチャのログ記録
+  // 1日1回ガチャの記録はサーバー側(draw.js)で行うため、ここではローカル表示の更新のみ
   if(pack.is_daily_limit){
-    const today=new Date().toISOString().slice(0,10);
-    db.from('daily_gacha_log').insert({user_id:state.user.id,pack_id:pack.id,drawn_date:today}).then(()=>{});
     if(!state.dailyDrawnPacks)state.dailyDrawnPacks=[];
     state.dailyDrawnPacks.push(pack.id);
   }
