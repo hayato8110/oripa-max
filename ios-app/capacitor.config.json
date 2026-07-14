@@ -1,0 +1,14 @@
+{
+  "appId": "com.oripa-max.app",
+  "appName": "オリパMAX",
+  "webDir": "www",
+  "server": {
+    "url": "https://oripa-max.com",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true
+  }
+}
