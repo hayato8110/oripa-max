@@ -1,0 +1,56 @@
+name: iOS Build Check
+
+on:
+  push:
+    paths:
+      - 'ios-app/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Node.jsセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 依存パッケージをインストール
+        working-directory: ios-app
+        run: npm install
+
+      - name: Capacitor iOSプラットフォームを追加
+        working-directory: ios-app
+        run: |
+          if [ ! -d "ios" ]; then
+            npx cap add ios
+          fi
+
+      - name: Capacitorを同期
+        working-directory: ios-app
+        run: npx cap sync ios
+
+      - name: CocoaPodsをインストール
+        working-directory: ios-app/ios/App
+        run: pod install
+
+      - name: 署名なしでビルド確認
+        working-directory: ios-app/ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: iosフォルダをアーティファクトとして保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-project
+          path: ios-app/ios
+          retention-days: 7
