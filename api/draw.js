@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   ] = await Promise.all([
     supabase.auth.getUser(userToken),
     supabase.from('packs').select('*').eq('id', packId).single(),
-    supabase.from('users').select('coin_points, total_spent').eq('id', userId).single(),
+    supabase.from('users').select('coin_points, total_spent, is_banned').eq('id', userId).single(),
     supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, exchange_type, image_url, quantity, remaining_qty, trigger_remaining').eq('pack_id', packId).eq('is_active', true),
     supabase.from('pack_videos').select('tier, video_url').eq('pack_id', packId).eq('is_active', true)
   ]);
@@ -45,6 +45,9 @@ export default async function handler(req, res) {
   }
   if (packErr || !pack) return res.status(404).json({ error: 'パックが見つかりません' });
   if (userErr || !userData) return res.status(404).json({ error: 'ユーザーが見つかりません' });
+  if (userData.is_banned) {
+    return res.status(403).json({ error: 'お客様のアカウントは制限されています' });
+  }
   if (prizesErr || !prizes?.length) {
     return res.status(400).json({ error: '賞品データの取得に失敗しました' });
   }
