@@ -1919,12 +1919,17 @@ async function executeDraw(){
     if(!resp.ok){showToast('⚠️ '+(apiResult.error||'エラーが発生しました'));return;}
   }catch(e){showToast('⚠️ 通信エラーが発生しました');return;}
 
-  const{results,sessionId,newCoin,newRemaining,soldOut,expiresAt,packVideos}=apiResult;
+  const{results,sessionId,newCoin,newRemaining,soldOut,expiresAt,packVideos,newTotalSpent,rankUp,rankRewardTotal}=apiResult;
 
   // stateを更新
   state.coin=newCoin;
-  state.totalSpent=(state.totalSpent||0)+cost;
+  state.totalSpent=newTotalSpent!=null?newTotalSpent:(state.totalSpent||0)+cost;
   updateHeaderPts();
+  if(rankUp){
+    setTimeout(()=>{
+      showToast(`🎉ランクアップ！「${rankUp}」達成！ +${rankRewardTotal.toLocaleString()}コイン獲得！`,4000);
+    },600);
+  }
 
   const packInState=state.packs.find(p=>p.id===pack.id);
   if(packInState){
