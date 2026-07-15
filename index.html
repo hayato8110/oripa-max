@@ -379,18 +379,25 @@ const state={
   activePack:null,drawCount:1,
   sessions:[],packs:[],notices:[],banners:[],videos:[],
   tenjoCount:{},shopOrders:[],shopItems:[],
-};
-const RANKS=[
-  {name:'ブロンズIV',min:0,max:1000},{name:'ブロンズIII',min:1000,max:3000},
-  {name:'ブロンズII',min:3000,max:6000},{name:'ブロンズI',min:6000,max:10000},
-  {name:'シルバーIV',min:10000,max:20000},{name:'シルバーIII',min:20000,max:35000},
-  {name:'シルバーII',min:35000,max:55000},{name:'シルバーI',min:55000,max:80000},
-  {name:'ゴールドIV',min:80000,max:120000},{name:'ゴールドI',min:120000,max:200000},
-  {name:'プラチナI',min:200000,max:500000},{name:'ダイヤI',min:500000,max:Infinity},
+};const RANKS=[
+  {name:'ランクなし',min:0,reward:0,bg:'#3a3a3d'},
+  {name:'ブロンズ',min:100000,reward:500,bg:'linear-gradient(135deg,#8a5a2e,#b8733a)'},
+  {name:'シルバー',min:500000,reward:5000,bg:'linear-gradient(135deg,#8a8c94,#c7c9cf)'},
+  {name:'ゴールド',min:1500000,reward:20000,bg:'linear-gradient(135deg,#b8942e,#e8c84c)'},
+  {name:'プラチナ',min:2500000,reward:30000,bg:'linear-gradient(135deg,#4a9ab0,#8fd6e8)'},
+  {name:'ダイヤ',min:10000000,reward:100000,bg:'linear-gradient(90deg,#ff5e5e,#ffd15e,#5eff8f,#5ec8ff,#c05eff)'},
+  {name:'シークレットVIP',min:50000000,reward:500000,bg:'blackgold'},
 ];
 function getRankInfo(spent){
   for(let i=RANKS.length-1;i>=0;i--)if(spent>=RANKS[i].min)return{rank:RANKS[i],idx:i};
   return{rank:RANKS[0],idx:0};
+}
+function getRankColorStyle(rankName){
+  const r=RANKS.find(x=>x.name===rankName)||RANKS[0];
+  if(r.bg==='blackgold'){
+    return'background:#0a0805;border:1px solid #f5e090;padding:2px 8px;border-radius:6px;display:inline-block;font-weight:900;color:transparent;background-image:linear-gradient(135deg,#0a0805,#0a0805),linear-gradient(135deg,#c9a84c,#f5e090,#c9a84c);background-clip:padding-box,text;-webkit-background-clip:padding-box,text';
+  }
+  return`background:${r.bg};padding:2px 8px;border-radius:6px;display:inline-block;color:#fff;font-weight:900;text-shadow:0 1px 3px rgba(0,0,0,.6)`;
 }
 try{state.tenjoCount=JSON.parse(localStorage.getItem('tenjo')||'{}')}catch(e){}
 </script>
