@@ -6,19 +6,39 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+// ランク階層（累計消費コイン基準）と購入時ボーナス率
+const RANKS = [
+  { name: 'ランクなし', min: 0, bonusRate: 0 },
+  { name: 'ブロンズ', min: 100000, bonusRate: 0 },
+  { name: 'シルバー', min: 500000, bonusRate: 0.005 },
+  { name: 'ゴールド', min: 1500000, bonusRate: 0.01 },
+  { name: 'プラチナ', min: 2500000, bonusRate: 0.015 },
+  { name: 'ダイヤ', min: 10000000, bonusRate: 0.02 },
+  { name: 'シークレットVIP', min: 50000000, bonusRate: 0.03 },
+];
+function getRankBonusRate(totalSpent) {
+  for (let i = RANKS.length - 1; i >= 0; i--) {
+    if ((totalSpent || 0) >= RANKS[i].min) return RANKS[i];
+  }
+  return RANKS[0];
+}
+
 // コイン付与共通処理（Checkout Session用）
 async function grantCoins(session) {
   const { userId, coin, bonus } = session.metadata;
 
   const { data: user, error: userError } = await supabase
     .from('users')
-    .select('coin_points')
+    .select('coin_points, total_spent')
     .eq('id', userId)
     .single();
 
   if (userError || !user) throw new Error('User not found: ' + userId);
 
-  const totalCoin = parseInt(coin) + parseInt(bonus);
+  const baseCoin = parseInt(coin) + parseInt(bonus);
+  const rankInfo = getRankBonusRate(user.total_spent);
+  const rankBonusCoin = Math.floor(baseCoin * rankInfo.bonusRate);
+  const totalCoin = baseCoin + rankBonusCoin;
   const newCoin = (user.coin_points || 0) + totalCoin;
 
   await supabase
@@ -32,7 +52,7 @@ async function grantCoins(session) {
       user_id: userId,
       amount_jpy: session.amount_total,
       jp_points: parseInt(coin),
-      bonus_points: parseInt(bonus),
+      bonus_points: parseInt(bonus) + rankBonusCoin,
       status: 'completed',
       stripe_session_id: session.id,
     });
@@ -44,10 +64,10 @@ async function grantCoins(session) {
       type: 'purchase_coin',
       amount: totalCoin,
       currency: 'coin',
-      description: `コインチャージ ¥${session.amount_total?.toLocaleString()}`,
+      description: `コインチャージ ¥${session.amount_total?.toLocaleString()}${rankBonusCoin > 0 ? `（${rankInfo.name}特典+${rankBonusCoin}）` : ''}`,
     });
 
-  console.log(`✅ コイン付与完了: ${userId} → +${totalCoin}コイン`);
+  console.log(`✅ コイン付与完了: ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}）`);
 }
 
 // コイン付与共通処理（PaymentIntent用）
@@ -56,7 +76,7 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
 
   const { data: user, error: userError } = await supabase
     .from('users')
-    .select('coin_points')
+    .select('coin_points, total_spent')
     .eq('id', userId)
     .single();
 
@@ -74,7 +94,10 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
     return;
   }
 
-  const totalCoin = parseInt(coin) + parseInt(bonus || 0);
+  const baseCoin = parseInt(coin) + parseInt(bonus || 0);
+  const rankInfo = getRankBonusRate(user.total_spent);
+  const rankBonusCoin = Math.floor(baseCoin * rankInfo.bonusRate);
+  const totalCoin = baseCoin + rankBonusCoin;
   const newCoin = (user.coin_points || 0) + totalCoin;
 
   await supabase
@@ -88,7 +111,7 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
       user_id: userId,
       amount_jpy: paymentIntent.amount,
       jp_points: parseInt(coin),
-      bonus_points: parseInt(bonus || 0),
+      bonus_points: parseInt(bonus || 0) + rankBonusCoin,
       status: 'completed',
       stripe_session_id: paymentIntent.id,
     });
@@ -100,10 +123,10 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
       type: 'purchase_coin',
       amount: totalCoin,
       currency: 'coin',
-      description: `コインチャージ ¥${paymentIntent.amount?.toLocaleString()}`,
+      description: `コインチャージ ¥${paymentIntent.amount?.toLocaleString()}${rankBonusCoin > 0 ? `（${rankInfo.name}特典+${rankBonusCoin}）` : ''}`,
     });
 
-  console.log(`✅ コイン付与完了(PI): ${userId} → +${totalCoin}コイン`);
+  console.log(`✅ コイン付与完了(PI): ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}）`);
 }
 
 export default async function handler(req, res) {
