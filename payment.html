@@ -304,19 +304,20 @@ async function showBankForm(){
 async function submitPayment(){
   const btn=document.getElementById('pay-btn');
   const errEl=document.getElementById('pay-error');
+  const originalText=btn.textContent;
   btn.disabled=true;errEl.style.display='none';
-
-
+  btn.textContent='処理中...';
 
   try{
     const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userEmail:currentUser.email})});
     const data=await res.json();
-    if(!data?.clientSecret){errEl.textContent=data?.error||'エラー';errEl.style.display='block';btn.disabled=false;return;}
+    if(!data?.clientSecret){errEl.textContent=data?.error||'エラー';errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;return;}
     const name=document.getElementById('card-name').value||currentUser.email;
+    btn.textContent='本人確認（3Dセキュア）を確認中です…画面の指示に従ってください';
     const{error,paymentIntent}=await stripe.confirmCardPayment(data.clientSecret,{payment_method:{card:cardNum,billing_details:{name}}});
-    if(error){errEl.textContent=error.message;errEl.style.display='block';btn.disabled=false;}
+    if(error){errEl.textContent=error.message;errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;}
     else if(paymentIntent.status==='succeeded'){showToast('🎉 決済完了！コインが付与されます',3000);setTimeout(()=>location.href='/?payment=success',2000);}
-  }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;}
+  }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;}
 }
 
 init();
