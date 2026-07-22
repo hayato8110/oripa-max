@@ -1,0 +1,2904 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>オリパMAX 管理画面</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e8e8f0;font-family:'Noto Sans JP',sans-serif;display:flex;min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#13141c}
+::-webkit-scrollbar-thumb{background:#2a2b3a;border-radius:2px}
+.login-wrap{position:fixed;inset:0;background:#0f1117;display:flex;align-items:center;justify-content:center;z-index:1000}
+.login-box{background:#13141c;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:32px;width:360px}
+.login-logo{font-size:1.4rem;font-weight:900;color:#e8a800;margin-bottom:6px}
+.login-sub{font-size:.8rem;color:rgba(255,255,255,.3);margin-bottom:24px}
+.login-input{width:100%;background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 14px;color:#e8e8f0;font-size:.9rem;margin-bottom:12px}
+.login-input:focus{outline:none;border-color:#e8a800}
+.login-btn{width:100%;background:linear-gradient(135deg,#e8a800,#c88000);color:#0f1117;font-weight:900;font-size:.95rem;padding:12px;border-radius:8px;margin-top:4px}
+.login-error{color:#ff6060;font-size:.78rem;margin-top:8px;display:none}
+.sidebar{width:220px;flex-shrink:0;background:#13141c;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:50;overflow-y:auto}
+.sb-logo{padding:18px 16px;font-size:1.1rem;font-weight:900;color:#e8a800;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.sb-logo span{color:rgba(255,255,255,.25);font-size:.65rem;display:block;font-weight:400;margin-top:2px}
+.sb-nav{flex:1;padding:8px 0}
+.sb-section{padding:14px 16px 4px;font-size:.6rem;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.45);text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 14px;font-size:.83rem;font-weight:700;color:rgba(255,255,255,.75);cursor:pointer;border-left:3px solid transparent;transition:.15s;margin:1px 0}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sb-item.active{color:#e8a800;border-color:#e8a800;background:rgba(232,168,0,.08)}
+.sb-icon{font-size:.95rem;width:18px;text-align:center}
+.sb-badge{margin-left:auto;background:#e82020;color:#fff;font-size:.55rem;font-weight:900;padding:1px 6px;border-radius:999px}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#13141c;border-bottom:1px solid rgba(255,255,255,.06);padding:12px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar-title{font-size:.95rem;font-weight:900}
+.topbar-right{display:flex;align-items:center;gap:12px;font-size:.78rem;color:rgba(255,255,255,.3)}
+.status-dot{width:6px;height:6px;background:#00e676;border-radius:50%;display:inline-block;margin-right:4px}
+.content{padding:20px;flex:1}
+.admin-page{display:none}
+.admin-page.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px}
+.stat-label{font-size:.68rem;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.stat-val{font-size:1.7rem;font-weight:900;line-height:1}
+.stat-sub{font-size:.68rem;color:rgba(255,255,255,.25);margin-top:4px}
+.stat-gold .stat-val{color:#e8a800}
+.stat-green .stat-val{color:#00e676}
+.stat-red .stat-val{color:#ff4060}
+.stat-blue .stat-val{color:#4488ff}
+.stat-purple .stat-val{color:#bb88ff}
+.table-card{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden;margin-bottom:18px}
+.table-head{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.table-title{font-size:.88rem;font-weight:900}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:9px 14px;text-align:left;font-size:.65rem;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:.08em;text-transform:uppercase;background:#14151e;white-space:nowrap}
+.tbl td{padding:11px 14px;font-size:.8rem;border-top:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.td-bold{font-weight:700}
+.td-sub{font-size:.7rem;color:rgba(255,255,255,.3);margin-top:2px}
+.badge{font-size:.58rem;font-weight:900;padding:2px 7px;border-radius:3px;display:inline-block}
+.badge-active{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
+.badge-pause{background:rgba(255,200,0,.1);color:#e8a800;border:1px solid rgba(255,200,0,.2)}
+.badge-pending{background:rgba(255,200,0,.1);color:#e8a800;border:1px solid rgba(255,200,0,.2)}
+.badge-shipped{background:rgba(0,180,255,.1);color:#44aaff;border:1px solid rgba(0,180,255,.2)}
+.badge-gold{background:rgba(232,168,0,.12);color:#e8a800;border:1px solid rgba(232,168,0,.2)}
+.badge-open{background:rgba(255,64,96,.1);color:#ff6680;border:1px solid rgba(255,64,96,.22)}
+.badge-closed{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
+.btn{padding:5px 11px;border-radius:5px;font-size:.72rem;font-weight:700;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:4px}
+.btn-primary{background:linear-gradient(135deg,#e8a800,#c88000);color:#0f1117}
+.btn-edit{background:rgba(68,136,255,.12);color:#6699ff;border:1px solid rgba(68,136,255,.22)}
+.btn-danger{background:rgba(255,64,96,.1);color:#ff6680;border:1px solid rgba(255,64,96,.22)}
+.btn-success{background:rgba(0,230,120,.1);color:#00e676;border:1px solid rgba(0,230,120,.2)}
+.btn-secondary{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1)}
+.btn-warning{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+.btn-purple{background:rgba(187,136,255,.1);color:#bb88ff;border:1px solid rgba(187,136,255,.22)}
+.btn-lg{padding:10px 20px;font-size:.85rem;border-radius:8px}
+.prog{background:rgba(255,255,255,.08);border-radius:999px;height:4px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle}
+.prog-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#00bb44,#00ee66)}
+.prog-fill.warn{background:linear-gradient(90deg,#ee8800,#ffaa00)}
+.prog-fill.danger{background:linear-gradient(90deg,#dd0000,#ff3300)}
+.form-section{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;margin-bottom:14px}
+.form-section-title{font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-label{font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.06em;text-transform:uppercase}
+.form-input,.form-select,.form-textarea{background:#111219;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 11px;color:#e8e8f0;font-size:.84rem;transition:.2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:#e8a800;outline:none}
+.form-textarea{min-height:72px;resize:vertical}
+.form-check{display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer}
+.form-check input{accent-color:#e8a800;width:14px;height:14px}
+.form-actions{display:flex;gap:8px;margin-top:14px}
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:#1a1b25;border:1px solid rgba(255,255,255,.08);border-radius:14px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;transform:scale(.96);transition:.2s}
+.modal-overlay.show .modal{transform:scale(1)}
+.modal-header{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:.95rem;font-weight:900}
+.modal-close{background:none;color:rgba(255,255,255,.3);font-size:1.2rem;cursor:pointer}
+.modal-body{padding:16px 18px}
+.modal-footer{padding:12px 18px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:8px;justify-content:flex-end}
+#admin-toast{position:fixed;bottom:24px;right:24px;background:#1a1b25;border:1px solid rgba(232,168,0,.3);color:#e8a800;padding:10px 18px;border-radius:8px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+#admin-toast.show{opacity:1}
+.win-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid rgba(255,255,255,.04);font-size:.78rem}
+.search-input{background:#111219;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:6px 11px;color:#e8e8f0;font-size:.78rem;width:180px}
+.search-input:focus{outline:none;border-color:#e8a800}
+.chart-wrap{background:#1a1b25;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;margin-bottom:18px}
+.chart-title{font-size:.88rem;font-weight:900;margin-bottom:12px}
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.04)}
+.rank-num{width:28px;font-size:.85rem;font-weight:900;text-align:center;color:var(--c,rgba(255,255,255,.3))}
+.rank-1{--c:#e8a800}
+.rank-2{--c:#aaaaaa}
+.rank-3{--c:#cc8844}
+.rank-name{flex:1;font-size:.82rem;font-weight:700}
+.rank-val{font-size:.82rem;font-weight:900;color:#e8a800}
+.inquiry-item{background:#111219;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px;margin-bottom:8px}
+.inq-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.inq-subject{font-size:.85rem;font-weight:900}
+.inq-body{font-size:.78rem;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:8px}
+.inq-meta{font-size:.7rem;color:rgba(255,255,255,.3)}
+.reply-area{background:#0f1117;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:8px;margin-top:8px}
+.reply-label{font-size:.65rem;font-weight:700;color:#e8a800;margin-bottom:4px}
+.reply-text{font-size:.78rem;color:rgba(255,255,255,.7);line-height:1.6}
+</style>
+</head>
+<body>
+<div id="admin-toast"></div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">⚡ オリパMAX</div>
+    <div class="login-sub">管理者ログイン</div>
+    <input type="email" class="login-input" id="admin-email" placeholder="メールアドレス">
+    <input type="password" class="login-input" id="admin-pass" placeholder="パスワード">
+    <button class="login-btn" onclick="adminLogin()">ログイン</button>
+    <div class="login-error" id="login-error">ログインに失敗しました</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">⚡ ORIPA MAX<span>Admin Panel v3.0</span></div>
+  <nav class="sb-nav">
+    <div class="sb-section">メイン</div>
+    <div class="sb-item active" onclick="showPage('dashboard',this)"><span class="sb-icon">📊</span>ダッシュボード</div>
+    <div class="sb-section">コンテンツ</div>
+    <div class="sb-item" onclick="showPage('packs',this)"><span class="sb-icon">🎴</span>オリパ管理</div>
+    <div class="sb-item" onclick="showPage('card_images',this)"><span class="sb-icon">🃏</span>カード画像ライブラリ</div>
+    <div class="sb-item" onclick="showPage('banners',this)"><span class="sb-icon">🖼️</span>バナー管理</div>
+    <div class="sb-item" onclick="showPage('videos',this)"><span class="sb-icon">🎬</span>演出動画管理</div>
+    <div class="sb-section">ユーザー</div>
+    <div class="sb-item" onclick="showPage('users',this)"><span class="sb-icon">👥</span>ユーザー管理</div>
+    <div class="sb-item" onclick="showPage('points',this)"><span class="sb-icon">💎</span>ポイント管理</div>
+    <div class="sb-item" onclick="showPage('ranking',this)"><span class="sb-icon">🏆</span>ランキング</div>
+    <div class="sb-section">注文・発送</div>
+    <div class="sb-item" onclick="showPage('shop',this)"><span class="sb-icon">🛒</span>交換所管理</div>
+    <div class="sb-item" onclick="showPage('shop_orders',this)"><span class="sb-icon">📋</span>交換所注文</div>
+    <div class="sb-item" onclick="showPage('shipping',this)"><span class="sb-icon">📦</span>発送管理<span class="sb-badge" id="ship-badge">0</span></div>
+    <div class="sb-item" onclick="showPage('history',this)"><span class="sb-icon">📋</span>当選履歴</div>
+    <div class="sb-section">マーケティング</div>
+    <div class="sb-item" onclick="showPage('coupons',this)"><span class="sb-icon">🎟️</span>クーポン管理</div>
+    <div class="sb-item" onclick="showPage('push',this)"><span class="sb-icon">🔔</span>プッシュ通知</div>
+    <div class="sb-item" onclick="showPage('notices',this)"><span class="sb-icon">📢</span>お知らせ管理</div>
+    <div class="sb-section">サポート</div>
+    <div class="sb-item" onclick="showPage('inquiries',this)"><span class="sb-icon">💬</span>お問い合わせ<span class="sb-badge" id="inq-badge" style="display:none">0</span></div>
+    <div class="sb-section">分析</div>
+    <div class="sb-item" onclick="showPage('revenue',this)"><span class="sb-icon">💰</span>売上・収益</div>
+    <div class="sb-item" onclick="showPage('analytics',this)"><span class="sb-icon">📈</span>アクセス解析</div>
+    <div class="sb-section">設定</div>
+    <div class="sb-item" onclick="adminLogout()"><span class="sb-icon">🚪</span>ログアウト</div>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="main-area" style="display:none">
+  <div class="topbar">
+    <span class="topbar-title" id="page-title">📊 ダッシュボード</span>
+    <div class="topbar-right">
+      <span><span class="status-dot"></span>正常稼働中</span>
+      <span id="admin-user-name">—</span>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="admin-page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card stat-gold"><div class="stat-label">累計売上</div><div class="stat-val" id="stat-sales">¥0</div><div class="stat-sub">今月: <span id="stat-sales-month">¥0</span></div></div>
+        <div class="stat-card stat-green"><div class="stat-label">累計開封数</div><div class="stat-val" id="stat-draws">0</div></div>
+        <div class="stat-card stat-blue"><div class="stat-label">累計会員数</div><div class="stat-val" id="stat-users">0</div><div class="stat-sub">今月新規: <span id="stat-new-users">0</span></div></div>
+        <div class="stat-card stat-red"><div class="stat-label">発送待ち</div><div class="stat-val" id="stat-ship">0</div></div>
+        <div class="stat-card stat-purple"><div class="stat-label">クーポン使用数</div><div class="stat-val" id="stat-coupon">0</div></div>
+        <div class="stat-card"><div class="stat-label">お問い合わせ</div><div class="stat-val" id="stat-inq" style="color:#ff8888">0</div><div class="stat-sub">未対応</div></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">📈 日別売上グラフ（直近14日）</div>
+        <canvas id="sales-chart" height="80"></canvas>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+        <div class="table-card">
+          <div class="table-head"><span class="table-title">⚡ 直近の当選</span></div>
+          <div id="dash-wins"></div>
+        </div>
+        <div class="table-card">
+          <div class="table-head"><span class="table-title">📦 最近の発送依頼</span></div>
+          <div id="dash-shipping"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACKS -->
+    <div class="admin-page" id="page-packs">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:.95rem;font-weight:900">🎴 オリパ管理</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" onclick="exportCSV('packs')">📥 CSV出力</button>
+          <button class="btn btn-primary btn-lg" onclick="openPackModal()">＋ 新規オリパ作成</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-title">全パック一覧</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="search-input" placeholder="🔍 パック名で検索" oninput="filterPacks(this.value)">
+            <button class="btn btn-edit" onclick="toggleSortMode()" id="sort-mode-btn">並び順変更</button>
+          </div>
+        </div>
+        <table class="tbl"><thead><tr><th>パック名</th><th>カテゴリ</th><th>価格</th><th>残り/全</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="packs-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- BANNERS -->
+    <div class="admin-page" id="page-banners">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:900">🖼️ バナー管理</span>
+        <button class="btn btn-primary btn-lg" onclick="openBannerModal()">＋ バナー追加</button>
+      </div>
+      <div id="banners-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
+    </div>
+
+    <!-- VIDEOS -->
+    <div class="admin-page" id="page-videos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:900">🎬 演出動画管理</span>
+        <button class="btn btn-primary btn-lg" onclick="openVideoModal()">＋ 動画追加</button>
+      </div>
+      <div style="background:rgba(232,168,0,.08);border:1px solid rgba(232,168,0,.2);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:.8rem;color:#e8a800">
+        💡 Supabase → Storage → 「videos」バケット（Public）を作成してmp4をアップロードし、URLを貼り付けてください。
+      </div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>レア度</th><th>動画名</th><th>デフォルト</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="videos-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="admin-page" id="page-users">
+      <div class="stats-grid" style="margin-bottom:14px">
+        <div class="stat-card stat-blue"><div class="stat-label">総会員数</div><div class="stat-val" id="u-total">0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">今月新規</div><div class="stat-val" id="u-new">0</div></div>
+        <div class="stat-card stat-gold"><div class="stat-label">総売上貢献</div><div class="stat-val" id="u-sales">¥0</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-title">👥 ユーザー一覧</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" onclick="exportCSV('users')">📥 CSV出力</button>
+            <input class="search-input" placeholder="🔍 名前・メール検索" oninput="filterUsers(this.value)">
+          </div>
+        </div>
+        <table class="tbl"><thead><tr><th>ユーザー名</th><th>メール</th><th>コイン</th><th>ランク</th><th>累計消費</th><th>登録日</th><th>操作</th></tr></thead>
+        <tbody id="users-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- POINTS -->
+    <div class="admin-page" id="page-points">
+      <span style="font-size:.95rem;font-weight:900;display:block;margin-bottom:14px">💎 ポイント管理</span>
+      <div class="form-section">
+        <div class="form-section-title">👤 ポイント付与・調整</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">メールアドレス</label><input type="text" class="form-input" id="pt-user" placeholder="user@example.com"></div>
+          <div class="form-group"><label class="form-label">種別</label>
+            <select class="form-select" id="pt-type"><option value="coin">コイン</option><option value="dp">DP</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">量（マイナスで減算）</label><input type="number" class="form-input" id="pt-amount" placeholder="1000"></div>
+          <div class="form-group"><label class="form-label">理由</label><input type="text" class="form-input" id="pt-reason" placeholder="キャンペーン当選"></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary btn-lg" onclick="grantPoints()">付与する</button></div>
+      </div>
+    </div>
+
+    <!-- RANKING -->
+    <div class="admin-page" id="page-ranking">
+      <span style="font-size:.95rem;font-weight:900;display:block;margin-bottom:14px">🏆 ランキング</span>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-primary" onclick="loadRanking('spent')">💰 累計消費</button>
+        <button class="btn btn-secondary" onclick="loadRanking('draws')">🎴 ガチャ回数</button>
+      </div>
+      <div class="table-card">
+        <div class="table-head"><span class="table-title" id="ranking-title">💰 累計消費ランキング</span></div>
+        <div id="ranking-list"></div>
+      </div>
+    </div>
+
+    <!-- SHOP ITEMS -->
+    <div class="admin-page" id="page-shop">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:.95rem;font-weight:900">🛒 交換所管理</span>
+        <button class="btn btn-primary btn-lg" onclick="openShopItemModal()">＋ 商品追加</button>
+      </div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>画像</th><th>商品名</th><th>価格</th><th>在庫</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="shop-items-tbl"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SHOP ORDERS -->
+    <div class="admin-page" id="page-shop_orders">
+      <div style="margin-bottom:14px"><span style="font-size:.95rem;font-weight:900">📋 交換所注文一覧</span></div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>注文ID</th><th>ユーザー</th><th>商品名</th><th>価格</th><th>日時</th><th>発送先</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="shop-orders-tbl"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SHIPPING -->
+    <div class="admin-page" id="page-shipping">
+      <div class="stats-grid" style="margin-bottom:14px">
+        <div class="stat-card stat-red"><div class="stat-label">発送待ち</div><div class="stat-val" id="ship-pending">0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">発送済み</div><div class="stat-val" id="ship-done">0</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-title">📦 発送依頼一覧</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-secondary" onclick="loadShipping('all')">すべて</button>
+            <button class="btn btn-secondary" onclick="loadShipping('pending')">未処理</button>
+            <button class="btn btn-secondary" onclick="loadShipping('shipped')">発送済み</button>
+            <button class="btn btn-secondary" onclick="exportCSV('shipping')">📥 CSV</button>
+          </div>
+        </div>
+        <table class="tbl"><thead><tr><th>ID</th><th>ユーザー</th><th>お名前/TEL</th><th>住所</th><th>発送商品</th><th>依頼日</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="shipping-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="admin-page" id="page-history">
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-title">📋 当選履歴</span>
+          <div style="display:flex;gap:8px">
+            <input class="search-input" placeholder="🔍 ユーザー名検索" oninput="filterHistory(this.value)">
+            <button class="btn btn-secondary" onclick="exportCSV('history')">📥 CSV出力</button>
+          </div>
+        </div>
+        <table class="tbl"><thead><tr><th>日時</th><th>ユーザー</th><th>パック</th><th>カード</th><th>レア度</th><th>消費PT</th></tr></thead>
+        <tbody id="history-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- COUPONS -->
+    <div class="admin-page" id="page-coupons">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:900">🎟️ クーポン管理</span>
+        <button class="btn btn-primary btn-lg" onclick="openCouponModal()">＋ クーポン作成</button>
+      </div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>コード</th><th>割引</th><th>使用数/上限</th><th>有効期限</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="coupons-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PUSH -->
+    <div class="admin-page" id="page-push">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:900">🔔 プッシュ通知</span>
+        <button class="btn btn-primary btn-lg" onclick="openPushModal()">＋ 通知作成</button>
+      </div>
+      <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:.8rem;color:#93c5fd">
+        💡 プッシュ通知はお知らせとして登録されます。PWA対応後に実際のプッシュ通知も送信できます。
+      </div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>タイトル</th><th>対象</th><th>送信日時</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="push-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- NOTICES -->
+    <div class="admin-page" id="page-notices">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:.95rem;font-weight:900">📢 お知らせ管理</span>
+        <button class="btn btn-primary btn-lg" onclick="openNoticeModal()">＋ 作成</button>
+      </div>
+      <div class="table-card">
+        <table class="tbl"><thead><tr><th>タイトル</th><th>種別</th><th>作成日</th><th>状態</th><th>操作</th></tr></thead>
+        <tbody id="notices-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- INQUIRIES -->
+    <div class="admin-page" id="page-inquiries">
+      <div class="stats-grid" style="margin-bottom:14px">
+        <div class="stat-card stat-red"><div class="stat-label">未対応</div><div class="stat-val" id="inq-open">0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">対応済み</div><div class="stat-val" id="inq-closed">0</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-secondary" onclick="loadInquiries('all')">すべて</button>
+        <button class="btn btn-danger" onclick="loadInquiries('open')">未対応</button>
+        <button class="btn btn-success" onclick="loadInquiries('closed')">対応済み</button>
+      </div>
+      <div id="inquiries-list"></div>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="admin-page" id="page-revenue">
+      <div class="stats-grid">
+        <div class="stat-card stat-gold"><div class="stat-label">累計売上</div><div class="stat-val" id="rev-total">¥0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">今月売上</div><div class="stat-val" id="rev-month">¥0</div></div>
+        <div class="stat-card"><div class="stat-label">Stripe手数料(3.6%)</div><div class="stat-val" id="rev-fee">¥0</div></div>
+        <div class="stat-card stat-purple"><div class="stat-label">推定粗利(10%)</div><div class="stat-val" id="rev-profit">¥0</div></div>
+      </div>
+      <div class="chart-wrap" style="margin-top:14px">
+        <div class="chart-title">📊 月別売上グラフ</div>
+        <canvas id="revenue-chart" height="80"></canvas>
+      </div>
+  <div class="table-card" style="margin-top:14px">
+        <div class="table-head">
+          <span class="table-title">💰 パック別売上・利益率（リアルタイム）</span>
+          <button class="btn btn-secondary" onclick="exportCSV('revenue')">📥 CSV出力</button>
+        </div>
+        <table class="tbl"><thead><tr><th>パック名</th><th>販売数</th><th>売上</th><th>推定払出</th><th>推定利益</th><th>利益率</th></tr></thead>
+        <tbody id="revenue-tbl-body"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="admin-page" id="page-analytics">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:.95rem;font-weight:900">📈 アクセス解析</span>
+        <input type="month" id="ana-month-select" style="background:#1e1e2e;color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 10px;font-size:.85rem" onchange="loadAnalytics()">
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <div class="stat-card stat-blue"><div class="stat-label">アクセス数</div><div class="stat-val" id="ana-access">0</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">ログインユーザー</div><div class="stat-val" id="ana-login">0</div></div>
+        <div class="stat-card"><div class="stat-label">課金者数</div><div class="stat-val" id="ana-paid">0</div></div>
+        <div class="stat-card stat-gold"><div class="stat-label">ガチャ回数</div><div class="stat-val" id="ana-draws">0</div></div>
+        <div class="stat-card"><div class="stat-label">発送依頼数</div><div class="stat-val" id="ana-ships">0</div></div>
+      </div>
+      <div class="table-card" style="margin-top:14px;overflow-x:auto">
+        <div class="table-head"><span class="table-title">📅 日別推移</span></div>
+        <table class="tbl" id="analytics-table" style="min-width:500px">
+          <thead><tr>
+            <th>日付</th>
+            <th>アクセス</th>
+            <th>ログインUU</th>
+            <th>課金者</th>
+            <th>ガチャ回数</th>
+            <th>発送依頼</th>
+          </tr></thead>
+          <tbody id="analytics-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CARD IMAGES -->
+    <div class="admin-page" id="page-card_images">
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-title">🃏 カード画像ライブラリ</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input class="form-input" id="ci-search" placeholder="カード名で検索..." style="width:200px;padding:6px 10px;font-size:.82rem" oninput="filterCardImages(this.value)">
+            <button class="btn btn-primary" onclick="document.getElementById('ci-file-input').click()">＋ 画像を追加</button>
+            <input type="file" id="ci-file-input" accept="image/*" multiple style="display:none" onchange="uploadCardImages(this)">
+          </div>
+        </div>
+        <div id="ci-drop-area" ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)'" ondragleave="this.style.borderColor='rgba(255,255,255,.1)'" ondrop="event.preventDefault();this.style.borderColor='rgba(255,255,255,.1)';handleCardImageDrop(event)" style="margin:12px 16px;border:2px dashed rgba(255,255,255,.1);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.2s" onclick="document.getElementById('ci-file-input').click()">
+          <div style="font-size:1.5rem;margin-bottom:6px">📁</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.4)">クリックまたはドラッグ&ドロップで複数枚アップロード</div>
+        </div>
+        <div id="ci-name-modal" style="display:none;margin:0 16px 16px;background:#1a1b25;border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:16px">
+          <div style="font-size:.82rem;font-weight:900;margin-bottom:10px">📝 カード名を入力してください</div>
+          <div id="ci-name-list" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-secondary" onclick="cancelCardImageUpload()">キャンセル</button>
+            <button class="btn btn-primary" onclick="saveCardImages()">✅ 保存する</button>
+          </div>
+        </div>
+        <div id="ci-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:16px"></div>
+        <div id="ci-empty" style="text-align:center;padding:40px;color:rgba(255,255,255,.2);font-size:.82rem;display:none">画像が登録されていません</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+
+  </div>
+</main>
+
+<!-- PACK MODAL -->
+<div class="modal-overlay" id="pack-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="pack-modal-title">🎴 オリパ作成</span><button class="modal-close" onclick="closeModal('pack-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-full"><label class="form-label">パック名 *</label><input class="form-input" id="pm-name" placeholder="例: リザードン伝説オリパ"></div>
+        <div class="form-group form-full">
+          <label class="form-label">サムネイル画像 <span style="font-size:.68rem;color:rgba(255,200,50,.7);font-weight:400">推奨: 960×400px / 2.4:1 / JPG・PNG・WebP / 2MB以下</span></label>
+          <!-- プレビューエリア（クリックでアップロード） -->
+          <label for="pm-image-file" style="display:block;cursor:pointer">
+            <div id="pm-image-preview-wrap" style="width:100%;height:120px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:6px;transition:.2s;position:relative"
+              ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)'"
+              ondragleave="this.style.borderColor='rgba(201,168,76,.3)'"
+              ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.3)';handlePackDrop(event)">
+              <div style="text-align:center;pointer-events:none">
+                <div style="font-size:1.5rem;margin-bottom:4px">📁</div>
+                <div style="font-size:.75rem;color:rgba(255,255,255,.4)">タップ or ドラッグして画像をアップ</div>
+              </div>
+            </div>
+          </label>
+          <input type="file" id="pm-image-file" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" onchange="uploadPackImage(this)">
+          <input class="form-input" id="pm-image-url" placeholder="または画像URLを貼り付け" style="width:100%" oninput="previewPackImage(this.value)">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">ガチャ回数設定</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <label class="form-check"><input type="checkbox" id="pm-draw-1" checked> 1回ガチャ</label>
+            <label class="form-check"><input type="checkbox" id="pm-draw-10"> 10連ガチャ</label>
+            <label class="form-check"><input type="checkbox" id="pm-draw-100"> 100連ガチャ</label>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">カテゴリ</label>
+          <select class="form-select" id="pm-cat"><option value="pokemon">ポケモン</option><option value="onepiece">ワンピース</option><option value="yugioh">遊戯王</option><option value="labubu">ラブブ</option><option value="hobby">ホビー</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">シリーズ名</label><input class="form-input" id="pm-series"></div>
+        <div class="form-group"><label class="form-label">絵文字</label><input class="form-input" id="pm-emoji" placeholder="🔥" maxlength="2"></div>
+        <div class="form-group"><label class="form-label">価格 *</label><input type="number" class="form-input" id="pm-price" placeholder="3000"></div>
+        <div class="form-group"><label class="form-label">全口数 *</label><input type="number" class="form-input" id="pm-total" placeholder="500"></div>
+        <div class="form-group"><label class="form-label">天井回数（0=なし）</label><input type="number" class="form-input" id="pm-tenjo" value="0"></div>
+        <div class="form-group form-full"><label class="form-label">背景CSS（省略可）</label><input class="form-input" id="pm-bg" placeholder="radial-gradient(...)"></div>
+        <input type="hidden" id="pm-order" value="0">
+      </div>
+      <div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">
+        <label class="form-check"><input type="checkbox" id="pm-new-user"> 🆕 新規限定</label>
+        <label class="form-check"><input type="checkbox" id="pm-one-per-user"> 🔒 1人1回限定</label>
+        <label class="form-check"><input type="checkbox" id="pm-daily-limit"> 1日1回限定</label>
+        <label class="form-check"><input type="checkbox" id="pm-active" checked> 🟢 公開</label>
+      </div>
+      <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
+        <div style="font-size:.82rem;font-weight:900;color:#e8a800;margin-bottom:12px">🏆 賞品設定</div>
+        <div id="prizes-blocks" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+        <button class="btn btn-secondary" style="margin-top:10px" onclick="addPrizeBlock()">＋ 賞品ブロック追加</button>
+        <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
+        <div style="font-size:.82rem;font-weight:900;color:#bb88ff;margin-bottom:8px">🎬 パックごとの演出動画（任意）</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-bottom:10px">設定するとこのオリパ専用の動画が優先されます。空欄はグローバル動画を使用。</div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="pv-selects">
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#e8a800">S賞</span><select class="form-select pv-url" data-tier="sar" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#bb88ff">A賞</span><select class="form-select pv-url" data-tier="sr" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#ff6060">B賞</span><select class="form-select pv-url" data-tier="rr" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:#44cc88">C賞</span><select class="form-select pv-url" data-tier="r" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:.72rem;font-weight:900;width:50px;text-align:right;color:rgba(255,255,255,.4)">その他</span><select class="form-select pv-url" data-tier="c" style="flex:1;padding:6px 10px;font-size:.8rem"><option value="">グローバル動画</option></select></div>
+        </div>
+          </div>
+        </div>    
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('pack-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="savePack()">✅ 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- BANNER MODAL -->
+<div class="modal-overlay" id="banner-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="banner-modal-title">🖼️ バナー追加</span><button class="modal-close" onclick="closeModal('banner-modal')">✕</button></div>
+    <div class="modal-body">
+
+      <!-- 画像URL（hidden） -->
+      <input type="hidden" id="bn-image-url-hidden" value="">
+
+      <!-- 画像アップロード（メイン） -->
+      <div style="margin-bottom:14px">
+        <label class="form-label" style="margin-bottom:6px;display:block">📷 バナー画像 <span style="font-size:.68rem;color:rgba(255,200,50,.7);font-weight:400">推奨: 960×240px / 4:1 / JPG・PNG・WebP / 2MB以下</span></label>
+
+        <!-- ファイル選択ボタン（スマホでも確実に動く） -->
+        <label for="bn-file" style="display:block;width:100%;cursor:pointer">
+          <div id="bn-img-preview"
+            ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)';this.style.background='rgba(201,168,76,.08)'"
+            ondragleave="this.style.borderColor='rgba(201,168,76,.3)';this.style.background='rgba(255,255,255,.05)'"
+            ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.3)';this.style.background='rgba(255,255,255,.05)';handleBannerDrop(event)"
+            style="width:100%;height:140px;border-radius:10px;background:rgba(255,255,255,.05);border:2px dashed rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:.2s;position:relative">
+            <div style="text-align:center;pointer-events:none">
+              <div style="font-size:2rem;margin-bottom:6px">📁</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.4)">タップ or ドラッグして画像をアップ</div>
+              <div style="font-size:.65rem;color:rgba(255,255,255,.2);margin-top:2px">JPG / PNG / WebP</div>
+            </div>
+          </div>
+        </label>
+        <input type="file" accept="image/*" id="bn-file" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" onchange="uploadBannerImageNew(this)">
+      </div>
+
+      <!-- フロントプレビュー -->
+      <div id="bn-front-preview" style="display:none;margin-bottom:14px">
+        <label class="form-label" style="margin-bottom:6px;display:block">👁️ フロント表示プレビュー</label>
+        <div style="width:100%;height:120px;border-radius:0;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.1)">
+          <img id="bn-preview-img" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+          <div style="position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.6));display:flex;align-items:flex-end;padding:12px 14px">
+            <div>
+              <div id="bn-preview-tag" style="font-size:.6rem;color:rgba(255,255,255,.8);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;display:none"></div>
+              <div id="bn-preview-title" style="font-size:1rem;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5)"></div>
+              <div id="bn-preview-sub" style="font-size:.72rem;color:rgba(255,255,255,.75);margin-top:2px;display:none"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- テキスト・リンク設定 -->
+      <details style="margin-bottom:10px">
+        <summary style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;padding:6px 0;list-style:none">▶ テキスト・リンク設定（任意）</summary>
+        <div style="padding-top:10px">
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">タイトル</label><input class="form-input" id="bn-title" placeholder="例: 銀行振込が可能になりました！" oninput="updateBannerPreview()"></div>
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">サブテキスト</label><input class="form-input" id="bn-sub" placeholder="例: 詳しくはこちら" oninput="updateBannerPreview()"></div>
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">タグ</label><input class="form-input" id="bn-tag" placeholder="例: 🎊 お知らせ" oninput="updateBannerPreview()"></div>
+          <div class="form-group" style="margin-bottom:8px"><label class="form-label">タップ先URL</label><input class="form-input" id="bn-link" placeholder="https://..."></div>
+        </div>
+      </details>
+
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <label class="form-label" style="margin:0">表示順</label>
+          <input type="number" class="form-input" id="bn-order" value="0" style="width:60px;padding:5px 8px">
+        </div>
+        <label class="form-check"><input type="checkbox" id="bn-active" checked> 公開する</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('banner-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="saveBanner()">✅ 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-overlay" id="video-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="video-modal-title">🎬 演出動画設定</span><button class="modal-close" onclick="closeModal('video-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">動画名</label><input class="form-input" id="vd-name"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">レア度</label>
+        <select class="form-select" id="vd-tier"><option value="sar">S賞</option><option value="sr">A賞</option><option value="rr">B賞</option><option value="r">C賞</option><option value="c">その他</option><option value="all">共通</option></select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="form-label">動画ファイル</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" id="vd-url" placeholder="https://..." style="flex:1">
+          <label style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;color:rgba(255,255,255,.7)">
+            📤 アップロード
+            <input type="file" accept="video/*,video/mp4" style="display:none" onchange="uploadVideoFile(this)">
+          </label>
+        </div>
+        <div style="font-size:.65rem;color:rgba(255,200,50,.7);margin-top:4px">推奨: MP4 / 縦向き9:16 または 横向き16:9 / 30秒以内 / 50MB以下</div>
+        <div id="vd-upload-progress" style="display:none;margin-top:8px">
+          <div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden">
+            <div id="vd-progress-bar" style="height:100%;background:var(--gold2);width:0%;transition:.3s"></div>
+          </div>
+          <div id="vd-upload-status" style="font-size:.72rem;color:var(--text3);margin-top:4px">アップロード中...</div>
+        </div>
+        <div id="vd-preview" style="display:none;margin-top:8px">
+          <video id="vd-preview-video" controls style="width:100%;max-height:160px;border-radius:8px;background:#000"></video>
+        </div>
+      </div>
+      <label class="form-check"><input type="checkbox" id="vd-default"> デフォルト演出にする</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('video-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="saveVideo()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- COUPON MODAL -->
+<div class="modal-overlay" id="coupon-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="coupon-modal-title">🎟️ クーポン作成</span><button class="modal-close" onclick="closeModal('coupon-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-full"><label class="form-label">クーポンコード *</label>
+          <div style="display:flex;gap:8px">
+            <input class="form-input" id="cp-code" placeholder="SUMMER2026" style="flex:1">
+            <button class="btn btn-secondary" onclick="generateCouponCode()">自動生成</button>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">割引種別</label>
+          <select class="form-select" id="cp-type"><option value="coin">コイン付与</option><option value="percent">割引%</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">割引量</label><input type="number" class="form-input" id="cp-amount" placeholder="500"></div>
+        <div class="form-group"><label class="form-label">配布数上限（0=無制限）</label><input type="number" class="form-input" id="cp-max-total" value="0" placeholder="0=無制限"></div>
+        <div class="form-group"><label class="form-label">有効期限</label><input type="datetime-local" class="form-input" id="cp-expires"></div>
+      </div>
+      <div style="margin-top:10px"><label class="form-check"><input type="checkbox" id="cp-active" checked> 有効にする</label></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('coupon-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="saveCoupon()">作成</button>
+    </div>
+  </div>
+</div>
+
+<!-- PUSH MODAL -->
+<div class="modal-overlay" id="push-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">🔔 プッシュ通知作成</span><button class="modal-close" onclick="closeModal('push-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="pn-title"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">本文</label><textarea class="form-textarea" id="pn-body"></textarea></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">送信対象</label>
+        <select class="form-select" id="pn-target"><option value="all">全ユーザー</option><option value="gold">ゴールド以上</option><option value="new">新規ユーザー</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('push-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="savePush()">送信</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTICE MODAL -->
+<div class="modal-overlay" id="notice-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="notice-modal-title">📢 お知らせ</span><button class="modal-close" onclick="closeModal('notice-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">タイトル</label><input class="form-input" id="nc-title"></div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">種別</label>
+        <select class="form-select" id="nc-type"><option value="info">お知らせ</option><option value="campaign">キャンペーン</option><option value="system">システム</option></select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px"><label class="form-label">本文</label><textarea class="form-textarea" id="nc-body"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('notice-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="saveNotice()">送信</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER MODAL -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">👤 ユーザー詳細・編集</span><button class="modal-close" onclick="closeModal('user-modal')">✕</button></div>
+    <div class="modal-body" id="user-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('user-modal')">閉じる</button>
+      <button class="btn btn-primary btn-lg" onclick="saveUser()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- GRANT PRIZE MODAL -->
+<div class="modal-overlay" id="grant-prize-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">🎁 景品を手動付与</span><button class="modal-close" onclick="closeModal('grant-prize-modal')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-bottom:12px">カード画像ライブラリから選んで付与します。ユーザーの「獲得商品」に反映され、通常の発送依頼フローがそのまま使えます。</div>
+      <input class="search-input" id="gp-search" placeholder="🔍 カード名で検索" style="width:100%;margin-bottom:10px" oninput="renderGrantPrizeCardGrid(this.value)">
+      <div id="gp-card-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;max-height:220px;overflow-y:auto;margin-bottom:12px;padding:4px;background:#111219;border-radius:8px"></div>
+      <div id="gp-selected-label" style="font-size:.78rem;font-weight:700;color:#e8a800;margin-bottom:10px">未選択</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">レア度</label>
+          <select class="form-select" id="gp-tier">
+            <option value="sar">S賞</option><option value="sr">A賞</option><option value="rr">B賞</option><option value="r" selected>C賞</option><option value="c">その他</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">還元コイン（コイン変換時の価値）</label><input type="number" class="form-input" id="gp-value" value="0"></div>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <label class="form-label">有効期限（日数、未発送のまま過ぎるとコイン変換されます）</label>
+        <input type="number" class="form-input" id="gp-days" value="30">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('grant-prize-modal')">キャンセル</button>
+      <button class="btn btn-primary btn-lg" onclick="submitGrantPrize()">付与する</button>
+    </div>
+  </div>
+</div>
+
+<!-- INQUIRY MODAL -->
+<div class="modal-overlay" id="inquiry-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">💬 お問い合わせ返信</span><button class="modal-close" onclick="closeModal('inquiry-modal')">✕</button></div>
+    <div class="modal-body" id="inquiry-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('inquiry-modal')">閉じる</button>
+      <button class="btn btn-primary btn-lg" onclick="saveInquiryReply()">返信する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
+const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
+const{createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let allPacks=[],allUsers=[],allShipping=[],allHistory=[],allBanners=[],allVideos=[],allNotices=[],allCoupons=[],allInquiries=[],allPush=[];
+let editingPackId=null,editingUserId=null,editingBannerId=null,editingVideoId=null,editingNoticeId=null,editingCouponId=null,editingInquiryId=null;
+
+/* ══ AUTH ══ */
+async function adminLogin(){
+  const email=document.getElementById('admin-email').value.trim();
+  const pass=document.getElementById('admin-pass').value;
+  if(!email||!pass){showErr('入力してください');return;}
+  try{
+    const{data,error}=await db.auth.signInWithPassword({email,password:pass});
+    if(error){showErr('①ログイン失敗: '+error.message);return;}
+    if(!data.session){showErr('②セッションが取得できません（メール未確認の可能性）');return;}
+    const token=data.session?.access_token;
+    let resp;
+    try{
+      resp=await fetch('/api/admin-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+    }catch(fetchErr){
+      showErr('③admin-check通信エラー: '+fetchErr.message);return;
+    }
+    if(!resp.ok){showErr('④admin-check応答エラー: HTTP '+resp.status);return;}
+    let result;
+    try{
+      result=await resp.json();
+    }catch(jsonErr){
+      showErr('⑤admin-check応答が不正: '+jsonErr.message);return;
+    }
+    if(!result.isAdmin){await db.auth.signOut();showErr('⑥管理者権限がありません');return;}
+    document.getElementById('login-wrap').style.display='none';
+    document.getElementById('main-area').style.display='flex';
+    document.getElementById('admin-user-name').textContent=email;
+    initDashboard();
+  }catch(e){
+    showErr('⑦予期しないエラー: '+e.message);
+  }
+}
+function showErr(msg){const e=document.getElementById('login-error');e.textContent=msg;e.style.display='block';}
+async function adminLogout(){await db.auth.signOut();location.reload();}
+
+/* ══ NAV ══ */
+function showPage(name,el){
+  document.querySelectorAll('.admin-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById(`page-${name}`)?.classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={dashboard:'📊 ダッシュボード',packs:'🎴 オリパ管理',banners:'🖼️ バナー管理',videos:'🎬 演出動画管理',users:'👥 ユーザー管理',points:'💎 ポイント管理',ranking:'🏆 ランキング',shipping:'📦 発送管理',history:'📋 当選履歴',coupons:'🎟️ クーポン管理',push:'🔔 プッシュ通知',notices:'📢 お知らせ管理',inquiries:'💬 お問い合わせ',revenue:'💰 売上・収益',analytics:'📈 アクセス解析',card_images:'🃏 カード画像ライブラリ',shop:'🛒 交換所管理',shop_orders:'📋 交換所注文'};
+  document.getElementById('page-title').textContent=titles[name]||name;
+  const loaders={packs:loadPacks,users:loadUsers,shipping:()=>loadShipping('all'),history:loadHistory,revenue:loadRevenue,banners:loadBanners,videos:loadVideos,notices:loadNotices,coupons:loadCoupons,inquiries:()=>loadInquiries('all'),push:loadPush,ranking:()=>loadRanking('spent'),analytics:loadAnalytics,shop:loadShopItems,shop_orders:loadShopOrders,card_images:loadCardImages};
+  if(loaders[name])loaders[name]();
+}
+
+/* ══ DASHBOARD ══ */
+async function initDashboard(){
+  const now=new Date();
+  const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
+  const[{count:userCount},{count:drawCount},{count:shipCount},{count:newUsers},{count:couponCount},{count:inqCount}]=await Promise.all([
+    db.from('users').select('*',{count:'exact',head:true}),
+    db.from('draw_sessions').select('*',{count:'exact',head:true}),
+    db.from('shipping_requests').select('*',{count:'exact',head:true}).eq('status','pending'),
+    db.from('users').select('*',{count:'exact',head:true}).gte('created_at',monthStart),
+    db.from('coupons').select('*',{count:'exact',head:true}),
+    db.from('inquiries').select('*',{count:'exact',head:true}).eq('status','open'),
+  ]);
+  document.getElementById('stat-users').textContent=(userCount||0).toLocaleString();
+  document.getElementById('stat-draws').textContent=(drawCount||0).toLocaleString();
+  document.getElementById('stat-ship').textContent=(shipCount||0).toLocaleString();
+  document.getElementById('stat-coupon').textContent=(couponCount||0).toLocaleString();
+  document.getElementById('stat-inq').textContent=(inqCount||0).toLocaleString();
+  document.getElementById('stat-new-users').textContent=(newUsers||0).toLocaleString();
+  document.getElementById('ship-badge').textContent=shipCount||0;
+  document.getElementById('u-total').textContent=(userCount||0).toLocaleString();
+  document.getElementById('u-new').textContent=(newUsers||0).toLocaleString();
+  if(inqCount>0){document.getElementById('inq-badge').style.display='block';document.getElementById('inq-badge').textContent=inqCount;}
+
+  const{data:txData}=await db.from('transactions').select('amount,created_at').eq('type','purchase_coin');
+  const total=(txData||[]).reduce((s,t)=>s+Math.abs(t.amount||0),0);
+  const monthTotal=(txData||[]).filter(t=>t.created_at>=monthStart).reduce((s,t)=>s+Math.abs(t.amount||0),0);
+  document.getElementById('stat-sales').textContent=`¥${total.toLocaleString()}`;
+  document.getElementById('stat-sales-month').textContent=`¥${monthTotal.toLocaleString()}`;
+  document.getElementById('rev-total').textContent=`¥${total.toLocaleString()}`;
+  document.getElementById('rev-month').textContent=`¥${monthTotal.toLocaleString()}`;
+  document.getElementById('rev-profit').textContent=`¥${Math.round(total*.1).toLocaleString()}`;
+  document.getElementById('rev-fee').textContent=`¥${Math.round(total*.036).toLocaleString()}`;
+  document.getElementById('u-sales').textContent=`¥${total.toLocaleString()}`;
+
+  // 日別グラフ
+  const days=14;
+  const labels=[];const salesData=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    labels.push(`${d.getMonth()+1}/${d.getDate()}`);
+    const dayStart=new Date(d.getFullYear(),d.getMonth(),d.getDate()).toISOString();
+    const dayEnd=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).toISOString();
+    const dayTotal=(txData||[]).filter(t=>t.created_at>=dayStart&&t.created_at<dayEnd).reduce((s,t)=>s+Math.abs(t.amount||0),0);
+    salesData.push(dayTotal);
+  }
+  new Chart(document.getElementById('sales-chart'),{type:'bar',data:{labels,datasets:[{label:'売上',data:salesData,backgroundColor:'rgba(232,168,0,.3)',borderColor:'rgba(232,168,0,.8)',borderWidth:1}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}}},y:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+
+  loadDashWins();loadDashShipping();
+}
+
+async function loadDashWins(){
+  const{data}=await db.from('draw_sessions').select('created_at,results,users(username),packs(name)').order('created_at',{ascending:false}).limit(5);
+  const tc={sar:'color:#e8a800',sr:'color:#bb88ff',rr:'color:#44ccee'};
+  const wins=[];
+  (data||[]).forEach(s=>{
+    (s.results||[]).slice(0,1).forEach(r=>{
+      wins.push({prize_name:r.prize_name,prize_tier:r.prize_tier,username:s.users?.username});
+    });
+  });
+  document.getElementById('dash-wins').innerHTML=wins.slice(0,8).map(w=>`
+    <div class="win-row">
+      <span style="font-size:.62rem;font-weight:900;width:36px;text-align:center;${tc[w.prize_tier]||''}">${(w.prize_tier||'').toUpperCase()}</span>
+      <span style="flex:1;font-weight:700;font-size:.78rem">${w.prize_name||'—'}</span>
+      <span style="color:rgba(255,255,255,.3);font-size:.7rem">${(w.username||'???').slice(0,4)}***</span>
+    </div>`).join('')||'<div style="padding:20px;text-align:center;color:rgba(255,255,255,.2);font-size:.8rem">データなし</div>';
+}
+
+async function loadDashShipping(){
+  const{data}=await db.from('shipping_requests').select('id,status,created_at,users(username)').order('created_at',{ascending:false}).limit(5);
+  document.getElementById('dash-shipping').innerHTML=(data||[]).map(s=>`
+    <div class="win-row">
+      <span style="font-size:.65rem;color:${s.status==='pending'?'#e8a800':'#00e676'}">${s.status==='pending'?'待ち':'済'}</span>
+      <span style="flex:1;font-weight:700;font-size:.78rem">${s.users?.username||'—'}</span>
+      <span style="color:rgba(255,255,255,.2);font-size:.68rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</span>
+    </div>`).join('')||'<div style="padding:20px;text-align:center;color:rgba(255,255,255,.2);font-size:.8rem">データなし</div>';
+}
+
+/* ══ PACKS ══ */
+async function loadPacks(){
+  const{data}=await db.from('packs').select('*,prizes(*)').order('sort_order');
+  allPacks=data||[];renderPacks(allPacks);
+}
+let sortMode=false;
+function toggleSortMode(){
+  sortMode=!sortMode;
+  document.getElementById('sort-mode-btn').textContent=sortMode?'並び順を保存':'並び順変更';
+  document.getElementById('sort-mode-btn').className=sortMode?'btn btn-success':'btn btn-edit';
+  if(!sortMode) saveSortOrder();
+  renderPacks(allPacks);
+}
+
+async function saveSortOrder(){
+  const updates=allPacks.map((p,i)=>db.from('packs').update({sort_order:i+1}).eq('id',p.id));
+  await Promise.all(updates);
+  showToast('✅ 並び順を保存しました！');
+}
+
+function movepack(idx,dir){
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=allPacks.length)return;
+  const tmp=allPacks[idx];
+  allPacks[idx]=allPacks[newIdx];
+  allPacks[newIdx]=tmp;
+  renderPacks(allPacks);
+}
+
+function renderPacks(packs){
+  document.getElementById('packs-tbl-body').innerHTML=packs.map((p,idx)=>{
+    const pct=Math.round(((p.remaining||0)/(p.total_slots||1))*100);
+    return`<tr>
+      <td>
+        ${sortMode?`<div style="display:flex;gap:4px;margin-bottom:4px">
+          <button class="btn btn-edit" onclick="movepack(${idx},-1)" style="padding:2px 6px;font-size:.7rem" ${idx===0?'disabled':''}>↑</button>
+          <button class="btn btn-edit" onclick="movepack(${idx},1)" style="padding:2px 6px;font-size:.7rem" ${idx===packs.length-1?'disabled':''}>↓</button>
+        </div>`:''}
+        <div class="td-bold">${p.emoji||'🎴'} ${p.name}</div><div class="td-sub">${p.series||''}${p.is_new_user_only?'<span class="badge badge-gold" style="margin-left:4px">新規限定</span>':''}${p.max_draws_per_user===1?'<span class="badge badge-hot" style="margin-left:4px">1人1回</span>':''}</div>
+      </td>
+      <td>${p.category||'—'}</td>
+      <td>${(p.price||0).toLocaleString()}🪙</td>
+      <td>${(p.remaining||0).toLocaleString()}/${(p.total_slots||0).toLocaleString()}<br><span class="prog"><span class="prog-fill ${pct<10?'danger':pct<30?'warn':''}" style="width:${pct}%"></span></span></td>
+      <td><span class="badge ${p.is_active?'badge-active':'badge-pause'}">${p.is_active?'公開中':'停止中'}</span></td>
+      <td style="white-space:nowrap">
+        ${sortMode?'':`<button class="btn btn-edit" onclick="editPack('${p.id}')">編集</button>
+        <button class="btn btn-${p.is_active?'danger':'success'}" onclick="togglePack('${p.id}',${p.is_active})" style="margin-left:4px">${p.is_active?'停止':'再開'}</button>
+        <button class="btn btn-${p.force_soldout?'warning':'secondary'}" onclick="toggleForceSoldout('${p.id}',${p.force_soldout})" style="margin-left:4px">${p.force_soldout?'🔴強制中':'SOLD OUT強制'}</button>
+        <button class="btn btn-danger" onclick="deletePack('${p.id}')" style="margin-left:4px">削除</button>`}
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterPacks(q){renderPacks(allPacks.filter(p=>p.name.includes(q)||(p.series||'').includes(q)));}
+
+async function openPackModal(){ 
+  editingPackId=null;prizeBlockCount=0;
+  document.getElementById('pack-modal-title').textContent='🎴 新規オリパ作成';
+  document.getElementById('prizes-blocks').innerHTML='';
+  ['pm-name','pm-series','pm-emoji','pm-price','pm-total','pm-bg','pm-image-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  previewPackImage('');
+  document.getElementById('pm-tenjo').value='0';
+  document.getElementById('pm-order').value='0';
+  ['pm-new-user','pm-one-per-user','pm-daily-limit'].forEach(id=>document.getElementById(id).checked=false);
+  document.getElementById('pm-active').checked=true;
+  document.getElementById('pm-draw-1').checked=true;
+  document.getElementById('pm-draw-10').checked=true;
+  document.getElementById('pm-draw-100').checked=false;
+  // デフォルトでS賞・A賞・B賞・C賞・その他を1つずつ追加
+  ['sar','sr','rr','r','c'].forEach(tier=>addPrizeBlock({tier}));
+  await loadPackVideoSelects();
+  document.getElementById('pack-modal').classList.add('show');
+}
+
+async function editPack(id){
+  const pack=allPacks.find(p=>p.id===id);if(!pack)return;
+  editingPackId=id;prizeBlockCount=0;
+  document.getElementById('pack-modal-title').textContent='🎴 オリパ編集';
+  document.getElementById('pm-name').value=pack.name||'';
+  document.getElementById('pm-series').value=pack.series||'';
+  document.getElementById('pm-emoji').value=pack.emoji||'';
+  document.getElementById('pm-price').value=pack.price||'';
+  document.getElementById('pm-total').value=pack.total_slots||'';
+  document.getElementById('pm-tenjo').value=pack.tenjo_limit||'0';
+  document.getElementById('pm-bg').value=pack.bg_style||'';
+  document.getElementById('pm-cat').value=pack.category||'pokemon';
+  document.getElementById('pm-order').value=pack.sort_order||'0';
+  document.getElementById('pm-image-url').value=pack.image_url||'';
+  previewPackImage(pack.image_url||'');
+  const drawOpts=pack.draw_options?JSON.parse(pack.draw_options):{d1:true,d10:false,d100:false};
+  document.getElementById('pm-draw-1').checked=drawOpts.d1!==false;
+  document.getElementById('pm-draw-10').checked=drawOpts.d10||false;
+  document.getElementById('pm-draw-100').checked=drawOpts.d100||false;
+  document.getElementById('pm-new-user').checked=pack.is_new_user_only||false;
+  document.getElementById('pm-one-per-user').checked=(pack.max_draws_per_user===1)||false;
+  document.getElementById('pm-daily-limit').checked=pack.is_daily_limit||false;
+  document.getElementById('pm-active').checked=pack.is_active!==false;
+  document.getElementById('prizes-blocks').innerHTML='';
+  (pack.prizes||[]).forEach(pr=>addPrizeBlock(pr));
+  const{data:pvData}=await db.from('pack_videos').select('*').eq('pack_id',id);
+  const selectedMap={};
+  (pvData||[]).forEach(v=>{selectedMap[v.tier]=v.video_url;});
+  await loadPackVideoSelects(selectedMap);
+  document.getElementById('pack-modal').classList.add('show');
+}
+
+/* ══ 画像アップロード ══ */
+async function uploadImage(file,folder){
+  const ext=file.name.split('.').pop();
+  const path=`${folder}/${Date.now()}.${ext}`;
+  const{data,error}=await db.storage.from('images').upload(path,file,{upsert:true});
+  if(error){showToast('⚠️ アップロード失敗: '+error.message);return null;}
+  const{data:{publicUrl}}=db.storage.from('images').getPublicUrl(path);
+  const cdnUrl=publicUrl.replace('https://puspoyandexokjtsmajc.supabase.co','https://cdn.oripa-max.com');
+  return cdnUrl;
+}
+
+async function uploadPackImage(input){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'packs');
+  if(url){
+    document.getElementById('pm-image-url').value=url;
+    previewPackImage(url);
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+
+async function handlePackDrop(event){
+  const file=event.dataTransfer.files[0];
+  if(!file||!file.type.startsWith('image/')){showToast('⚠️ 画像ファイルを選択してください');return;}
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'packs');
+  if(url){
+    document.getElementById('pm-image-url').value=url;
+    previewPackImage(url);
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+
+function previewPackImage(url){
+  const wrap=document.getElementById('pm-image-preview-wrap');
+  if(!wrap)return;
+  if(url){
+    wrap.innerHTML=`
+      <img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=\\'color:rgba(255,60,60,.5);font-size:.75rem\\'>読み込み失敗</div>'">
+      <button onclick="event.preventDefault();event.stopPropagation();clearPackImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:50%;width:26px;height:26px;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>`;
+  } else {
+    wrap.innerHTML=`<div style="text-align:center;pointer-events:none"><div style="font-size:1.5rem;margin-bottom:4px">📁</div><div style="font-size:.75rem;color:rgba(255,255,255,.4)">タップ or ドラッグして画像をアップ</div></div>`;
+  }
+}
+
+function clearPackImage(){
+  document.getElementById('pm-image-url').value='';
+  previewPackImage('');
+}
+
+async function uploadBannerImage(input){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'banners');
+  if(url){
+    document.getElementById('bn-image-url-hidden').value=url;
+    const prev=document.getElementById('bn-preview-img');
+    if(prev){prev.src=url;document.getElementById('bn-front-preview').style.display='block';}
+    showToast('✅ アップロード完了！');
+  }
+}
+
+/* ══ 賞品ブロック形式 ══ */
+const TIER_CONFIG={
+  sar:{label:'S賞',color:'#e8a800',bg:'rgba(232,168,0,.1)',border:'rgba(232,168,0,.35)'},
+  sr: {label:'A賞',color:'#bb88ff',bg:'rgba(187,136,255,.08)',border:'rgba(187,136,255,.3)'},
+  rr: {label:'B賞',color:'#ff6060',bg:'rgba(255,96,96,.08)',border:'rgba(255,96,96,.3)'},
+  r:  {label:'C賞',color:'#44cc88',bg:'rgba(68,204,136,.07)',border:'rgba(68,204,136,.25)'},
+  c:  {label:'その他',color:'rgba(255,255,255,.4)',bg:'rgba(255,255,255,.03)',border:'rgba(255,255,255,.1)'},
+};
+
+let prizeBlockCount=0;
+
+function addPrizeBlock(prize){
+  const idx=prizeBlockCount++;
+  const tier=prize?.tier||'c';
+  const tc=TIER_CONFIG[tier]||TIER_CONFIG.c;
+  const container=document.getElementById('prizes-blocks');
+  const div=document.createElement('div');
+  div.className='prize-block';
+  div.dataset.idx=idx;
+  div.style.cssText=`background:${tc.bg};border:2px solid ${tc.border};border-radius:12px;padding:12px;position:relative;transition:.2s`;
+  div.innerHTML=`
+    <button onclick="this.closest('.prize-block').remove()" title="削除" style="position:absolute;top:7px;right:7px;background:rgba(255,60,60,.15);color:#ff6060;border:1px solid rgba(255,60,60,.2);border-radius:4px;width:22px;height:22px;font-size:.75rem;cursor:pointer">✕</button>
+
+    <!-- レア度 -->
+    <div style="margin-bottom:8px">
+      <select class="form-select prize-tier" style="width:100%;padding:5px 8px;font-size:.8rem;font-weight:900;color:${tc.color};border-color:${tc.border}" onchange="updateBlockStyle(this)">
+        ${Object.entries(TIER_CONFIG).map(([v,t])=>`<option value="${v}" ${tier===v?'selected':''}>${t.label}</option>`).join('')}
+      </select>
+    </div>
+
+    <!-- 画像プレビュー＆アップロード -->
+    <div style="margin-bottom:8px;text-align:center">
+      <div id="prize-preview-wrap-${idx}"
+        ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.8)'"
+        ondragleave="this.style.borderColor='rgba(255,255,255,.15)'"
+        ondrop="event.preventDefault();this.style.borderColor='rgba(255,255,255,.15)';handlePrizeDrop(event,${idx})"
+        onclick="document.getElementById('prize-file-${idx}').click()"
+        style="width:100%;height:90px;border-radius:7px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:4px;cursor:pointer">
+        ${prize?.image_url
+          ?`<img src="${prize.image_url}" style="max-width:100%;max-height:100%;object-fit:contain">`
+          :`<span style="font-size:.7rem;color:rgba(255,255,255,.25)">📷 クリック or ドラッグ</span>`}
+      </div>
+      <input type="file" accept="image/*" style="display:none" id="prize-file-${idx}" onchange="uploadBlockImage(this,${idx})">
+      <input class="form-input prize-img" id="prize-img-${idx}" style="padding:4px 8px;font-size:.62rem;width:100%" placeholder="または画像URLを貼り付け" value="${prize?.image_url||''}" oninput="previewBlockImage(this,${idx})">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:.6rem;color:rgba(255,200,50,.7)">推奨: 400×600px / 2:3 / JPG・PNG</span><button type="button" onclick="openCardLibrary(${idx})" style="font-size:.62rem;padding:3px 8px;border-radius:4px;background:rgba(201,168,76,.15);color:#e8c96a;border:1px solid rgba(201,168,76,.3);cursor:pointer">🃏 ライブラリから選ぶ</button></div>
+    </div>
+
+    <!-- 賞品名 -->
+    <div style="margin-bottom:6px">
+      <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">賞品名 *</div>
+      <input class="form-input prize-name" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="例: リザードンex SAR" value="${prize?.name||''}">
+    </div>
+
+    <!-- 枚数・重み -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+      <div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">枚数</div>
+        <input type="number" min="1" step="1" class="form-input prize-qty" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="1" value="${parseInt(prize?.quantity)||1}">
+        ${prize?.quantity!=null?`<div style="font-size:.65rem;margin-top:3px;color:rgba(255,255,255,.4)">残り <b style="color:#e8a800">${prize.remaining_qty??prize.quantity}</b> / ${prize.quantity}</div>`:''}
+      </div>
+      <div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">重み（同じ数=均等）</div>
+        <input type="number" min="1" step="1" class="form-input prize-weight" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="100" value="${parseInt(prize?.weight)||100}">
+      </div>
+    </div>
+
+    <!-- 還元コイン・交換種別 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">還元コイン</div>
+        <input type="number" min="0" step="1" class="form-input prize-value" style="width:100%;padding:6px 8px;font-size:.82rem" placeholder="0" value="${parseInt(prize?.value_jp)||0}">
+      </div>
+      <div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-bottom:2px">交換種別</div>
+        <select class="form-select prize-exchange" style="width:100%;padding:5px 8px;font-size:.72rem">
+          <option value="both" ${(prize?.exchange_type||'both')==='both'?'selected':''}>発送＆還元</option>
+          <option value="ship_only" ${prize?.exchange_type==='ship_only'?'selected':''}>発送のみ</option>
+          <option value="coin_only" ${prize?.exchange_type==='coin_only'?'selected':''}>還元のみ</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 個数表示設定 -->
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;margin-bottom:6px">
+      <input type="checkbox" class="prize-show-qty" id="show-qty-${idx}" ${prize?.show_quantity?'checked':''} style="width:16px;height:16px;cursor:pointer;accent-color:var(--gold2)">
+      <label for="show-qty-${idx}" style="font-size:.78rem;font-weight:700;color:#fff;cursor:pointer">フロントで個数表示（×1など）</label>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+    </div>
+    <!-- 抽選ON/OFF -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:6px">
+      <span style="font-size:.72rem;color:rgba(255,255,255,.7);font-weight:700">🎲 抽選対象</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" class="prize-is-active" ${prize?.is_active===false?'':'checked'} style="width:16px;height:16px;cursor:pointer">
+        <span class="prize-active-label" style="font-size:.72rem;font-weight:900;color:${prize?.is_active===false?'#ff6060':'#00cc66'}">${prize?.is_active===false?'OFF':'ON'}</span>
+      </label>
+    </div>
+    <!-- 発動残り口数 -->
+    <div style="margin-top:6px;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:6px">
+      <div style="font-size:.6rem;color:rgba(255,255,255,.4);margin-bottom:4px">🔒 発動残り口数（残りN口以下で抽選対象に入る・空白=常時）</div>
+      <input type="number" min="1" step="1" class="form-input prize-trigger-remaining" style="width:100%;padding:5px 8px;font-size:.82rem" placeholder="空白=常時抽選対象" value="${prize?.trigger_remaining??''}">
+    </div>
+    <!-- パック詳細表示ON/OFF -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:6px">
+      <span style="font-size:.72rem;color:rgba(255,255,255,.7);font-weight:700">👁 パック詳細に表示</span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" class="prize-is-visible" ${prize?.is_hidden?'':'checked'} style="width:16px;height:16px;cursor:pointer">
+        <span class="prize-visible-label" style="font-size:.72rem;font-weight:900;color:${prize?.is_hidden?'#ff6060':'#00cc66'}">${prize?.is_hidden?'OFF':'ON'}</span>
+      </label>
+    </div>`;
+  container.appendChild(div);
+  // 抽選ON/OFFラベル更新
+  div.querySelector('.prize-is-visible')?.addEventListener('change',function(){
+    const label=this.closest('label').querySelector('.prize-visible-label');
+    label.textContent=this.checked?'ON':'OFF';
+    label.style.color=this.checked?'#00cc66':'#ff6060';
+  });
+  div.querySelector('.prize-is-active')?.addEventListener('change',function(){
+    const label=this.closest('label').querySelector('.prize-active-label');
+    if(label){label.textContent=this.checked?'ON':'OFF';label.style.color=this.checked?'#00cc66':'#ff6060';}
+  });
+}
+
+function updateBlockStyle(sel){
+  const block=sel.closest('.prize-block');
+  const tc=TIER_CONFIG[sel.value]||TIER_CONFIG.c;
+  block.style.background=tc.bg;
+  block.style.borderColor=tc.border;
+  sel.style.color=tc.color;
+  sel.style.borderColor=tc.border;
+  // 抽選ON/OFFのラベル更新
+  block.querySelectorAll('.prize-is-active').forEach(cb=>{
+    cb.addEventListener('change',function(){
+      const label=this.closest('label').querySelector('.prize-active-label');
+      if(label){label.textContent=this.checked?'ON':'OFF';label.style.color=this.checked?'#00cc66':'#ff6060';}
+    });
+  });
+}
+
+async function handlePrizeDrop(event,idx){
+  const file=event.dataTransfer.files[0];
+  if(!file||!file.type.startsWith('image/')){showToast('⚠️ 画像ファイルを選択してください');return;}
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'prizes');
+  if(url){
+    const imgInput=document.getElementById(`prize-img-${idx}`);
+    if(imgInput)imgInput.value=url;
+    const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
+    if(wrap)wrap.innerHTML=`<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain">`;
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+
+async function uploadBlockImage(input,idx){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'prizes');
+  if(url){
+    const imgInput=document.getElementById(`prize-img-${idx}`);
+    if(imgInput)imgInput.value=url;
+    const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
+    if(wrap)wrap.innerHTML=`
+      <img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain">
+      <button onclick="event.preventDefault();event.stopPropagation();clearBlockImage(${idx})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:50%;width:20px;height:20px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>`;
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+
+function previewBlockImage(input,idx){
+  const url=input.value.trim();
+  const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
+  if(!wrap)return;
+  if(url){
+    wrap.innerHTML=`
+      <img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain" onerror="this.parentElement.innerHTML='<span style=\\'font-size:.7rem;color:rgba(255,60,60,.5)\\'>画像を読み込めません</span>'">
+      <button onclick="event.preventDefault();event.stopPropagation();clearBlockImage(${idx})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:50%;width:20px;height:20px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>`;
+  } else {
+    wrap.innerHTML=`<span style="font-size:.7rem;color:rgba(255,255,255,.25)">📷 クリックして画像をアップ</span>`;
+  }
+}
+
+function clearBlockImage(idx){
+  const imgInput=document.getElementById(`prize-img-${idx}`);
+  if(imgInput)imgInput.value='';
+  const wrap=document.getElementById(`prize-preview-wrap-${idx}`);
+  if(wrap)wrap.innerHTML=`<span style="font-size:.7rem;color:rgba(255,255,255,.25)">📷 クリックして画像をアップ</span>`;
+}
+
+function getPrizeBlocksData(packId){
+  return Array.from(document.querySelectorAll('.prize-block')).map(block=>{
+    const tier=block.querySelector('.prize-tier').value;
+    const name=block.querySelector('.prize-name').value.trim();
+    const qty=parseInt(block.querySelector('.prize-qty').value)||1;
+    const weight=parseInt(block.querySelector('.prize-weight').value)||100;
+    const value_jp=parseInt(block.querySelector('.prize-value').value)||0;
+    const exchange_type=block.querySelector('.prize-exchange').value||'both';
+    const image_url=block.querySelector('.prize-img').value.trim()||null;
+    const tier_label={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'}[tier]||'';
+    const is_active=block.querySelector('.prize-is-active')?.checked!==false;
+    const show_quantity=block.querySelector('.prize-show-qty')?.checked||false;
+    const trigger_remaining=block.querySelector('.prize-trigger-remaining')?.value!==''?parseInt(block.querySelector('.prize-trigger-remaining')?.value)||null:null;
+    const is_hidden=block.querySelector('.prize-is-visible')?.checked===false;
+    return{pack_id:packId,tier,tier_label,name,quantity:qty,remaining_qty:qty,weight,value_jp,exchange_type,image_url,is_active,show_quantity,trigger_remaining,is_hidden};
+  }).filter(p=>p.name);
+}
+async function loadPackVideoSelects(selectedMap={}){
+  const{data:vids}=await db.from('gacha_videos').select('*').order('tier');
+  const selects=document.querySelectorAll('.pv-url');
+  selects.forEach(sel=>{
+    sel.innerHTML='<option value="">グローバル動画</option>';
+    (vids||[]).forEach(v=>{
+      const opt=document.createElement('option');
+      opt.value=v.video_url;
+      const tierLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他',all:'共通'}[v.tier]||v.tier;
+      opt.textContent=`${v.name||'無名'}（${tierLabel}）`;
+      sel.appendChild(opt);
+    });
+    if(selectedMap[sel.dataset.tier])sel.value=selectedMap[sel.dataset.tier];
+  });
+}
+async function savePack(){
+  const name=document.getElementById('pm-name').value;
+  if(!name){showToast('⚠️ パック名を入力してください');return;}
+  const total=parseInt(document.getElementById('pm-total').value)||0;
+  const packData={name,series:document.getElementById('pm-series').value,emoji:document.getElementById('pm-emoji').value||'🎴',category:document.getElementById('pm-cat').value,price:parseInt(document.getElementById('pm-price').value)||0,currency:'coin',total_slots:total,tenjo_limit:parseInt(document.getElementById('pm-tenjo').value)||0,bg_style:document.getElementById('pm-bg').value,image_url:document.getElementById('pm-image-url').value||null,sort_order:parseInt(document.getElementById('pm-order').value)||0,is_loop:false,is_new_user_only:document.getElementById('pm-new-user').checked,max_draws_per_user:document.getElementById('pm-one-per-user').checked?1:0,is_active:document.getElementById('pm-active').checked,is_daily_limit:document.getElementById('pm-daily-limit').checked,draw_options:JSON.stringify({d1:document.getElementById('pm-draw-1').checked,d10:document.getElementById('pm-draw-10').checked,d100:document.getElementById('pm-draw-100').checked})};
+  if(!editingPackId){
+    packData.remaining=total;
+  }
+  let packId=editingPackId;
+  if(editingPackId){
+    // 編集時: 現在のremainingを保持したまま更新
+    const{data:curPack}=await db.from('packs').select('remaining,total_slots').eq('id',editingPackId).single();
+    if(curPack){
+      const oldTotal=curPack.total_slots||0;
+      const diff=total-oldTotal;
+      packData.remaining=Math.max(0,(curPack.remaining||0)+diff);
+    }
+    const{error}=await db.from('packs').update(packData).eq('id',editingPackId);
+    if(error){showToast('⚠️ 更新失敗: '+error.message);return;}
+  } else {
+    const{data,error}=await db.from('packs').insert(packData).select().single();
+    if(error){showToast('⚠️ 保存失敗: '+error.message);return;}
+    packId=data.id;
+  }
+  const prizes=getPrizeBlocksData(packId);
+  if(prizes.length){
+    if(editingPackId)await db.from('prizes').delete().eq('pack_id',packId);
+    const{error}=await db.from('prizes').insert(prizes);
+    if(error){showToast('⚠️ 賞品保存エラー: '+error.message);return;}
+  }
+  const pvInputs=document.querySelectorAll('.pv-url');
+  for(const input of pvInputs){
+    const tier=input.dataset.tier;
+    const url=input.value.trim();
+    await db.from('pack_videos').delete().eq('pack_id',packId).eq('tier',tier);
+    if(url)await db.from('pack_videos').insert({pack_id:packId,tier,video_url:url,is_active:true});
+  }
+  closeModal('pack-modal');showToast('✅ オリパを保存しました！');loadPacks();
+}
+
+async function toggleForceSoldout(id,current){
+  await db.from('packs').update({force_soldout:!current}).eq('id',id);
+  showToast(current?'✅ SOLD OUT強制解除しました':'🔴 SOLD OUT強制しました');
+  loadPacks();
+}
+
+async function togglePack(id,current){
+  if(current){
+    // 停止する場合のみ確認
+    const modal=document.createElement('div');
+    modal.className='modal-overlay show';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+    const box=document.createElement('div');
+    box.style.cssText='background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;width:min(320px,92vw);text-align:center';
+    box.innerHTML=`
+      <div style="font-size:1.5rem;margin-bottom:10px">⏸</div>
+      <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">本当に停止しますか？</div>
+      <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">停止するとユーザーがガチャを引けなくなります</div>
+      <div style="display:flex;gap:8px">
+        <button id="tp-cancel" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer">キャンセル</button>
+        <button id="tp-ok" style="flex:1;padding:10px;border-radius:8px;background:#f59e0b;color:#1a0a00;font-weight:900;border:none;cursor:pointer">停止する</button>
+      </div>`;
+    modal.appendChild(box);
+    modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+    document.body.appendChild(modal);
+    box.querySelector('#tp-cancel').addEventListener('click',()=>modal.remove());
+    box.querySelector('#tp-ok').addEventListener('click',async()=>{
+      modal.remove();
+      await db.from('packs').update({is_active:false}).eq('id',id);
+      showToast('⏸ 停止しました');loadPacks();
+    });
+  } else {
+    const modal2=document.createElement('div');
+    modal2.className='modal-overlay show';
+    modal2.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+    const box2=document.createElement('div');
+    box2.style.cssText='background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;width:min(320px,92vw);text-align:center';
+    box2.innerHTML=`
+      <div style="font-size:1.5rem;margin-bottom:10px">▶️</div>
+      <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">本当に再開しますか？</div>
+      <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">再開するとユーザーがガチャを引けるようになります</div>
+      <div style="display:flex;gap:8px">
+        <button id="tp-cancel2" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer">キャンセル</button>
+        <button id="tp-ok2" style="flex:1;padding:10px;border-radius:8px;background:#00e676;color:#0f1117;font-weight:900;border:none;cursor:pointer">再開する</button>
+      </div>`;
+    modal2.appendChild(box2);
+    modal2.addEventListener('click',e=>{if(e.target===modal2)modal2.remove();});
+    document.body.appendChild(modal2);
+    box2.querySelector('#tp-cancel2').addEventListener('click',()=>modal2.remove());
+    box2.querySelector('#tp-ok2').addEventListener('click',async()=>{
+      modal2.remove();
+      await db.from('packs').update({is_active:true}).eq('id',id);
+      showToast('✅ 公開しました');loadPacks();
+    });
+  }
+}
+
+async function deletePack(id){
+  confirmDelete('このオリパを削除します',async()=>{
+    const r1=await db.from('prizes').delete().eq('pack_id',id);
+    if(r1.error){showToast('⚠️ 賞品削除エラー: '+r1.error.message);return;}
+    const r2=await db.from('packs').delete().eq('id',id);
+    if(r2.error){showToast('⚠️ 削除エラー: '+r2.error.message);return;}
+    showToast('🗑️ 削除しました');loadPacks();
+  });
+}
+
+/* ══ BANNERS ══ */
+async function loadBanners(){
+  const{data}=await db.from('banners').select('*').order('sort_order');
+  allBanners=data||[];
+  const container=document.getElementById('banners-cards');
+  if(!allBanners.length){
+    container.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,.2)">バナーがありません。＋ バナー追加で作成してください。</div>';
+    return;
+  }
+  container.innerHTML=allBanners.map(b=>`
+    <div style="background:#1a1b25;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden">
+      <!-- プレビュー -->
+      <div style="width:100%;height:110px;position:relative;overflow:hidden;cursor:pointer" onclick="editBanner('${b.id}')">
+        ${b.image_url
+          ?`<img src="${b.image_url}" style="width:100%;height:100%;object-fit:cover">`
+          :`<div style="width:100%;height:100%;${b.bg_style||'background:linear-gradient(135deg,#e8380d,#ff5a38)'}"></div>`}
+        <div style="position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(0,0,0,.6));display:flex;align-items:flex-end;padding:10px 12px">
+          <div>
+            ${b.tag_text?`<div style="font-size:.58rem;color:rgba(255,255,255,.7);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">${b.tag_text}</div>`:''}
+            <div style="font-size:.9rem;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5)">${b.title||'—'}</div>
+            ${b.sub_text?`<div style="font-size:.7rem;color:rgba(255,255,255,.7);margin-top:1px">${b.sub_text}</div>`:''}
+          </div>
+        </div>
+        <div style="position:absolute;top:8px;right:8px">
+          <span style="background:${b.is_active?'rgba(0,230,120,.2)':'rgba(255,200,0,.15)'};color:${b.is_active?'#00e676':'#e8a800'};border:1px solid ${b.is_active?'rgba(0,230,120,.3)':'rgba(255,200,0,.2)'};font-size:.58rem;font-weight:900;padding:2px 7px;border-radius:3px">${b.is_active?'公開中':'非公開'}</span>
+        </div>
+      </div>
+      <!-- 操作 -->
+      <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="font-size:.68rem;color:rgba(255,255,255,.3)">順序: ${b.sort_order||0} ${b.link_url?`· <a href="${b.link_url}" target="_blank" style="color:rgba(68,136,255,.6);text-decoration:none">リンク↗</a>`:''}</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-edit" onclick="editBanner('${b.id}')">編集</button>
+          <button class="btn btn-danger" onclick="deleteBanner('${b.id}')">削除</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updateBannerPreview(){
+  const title=document.getElementById('bn-title').value;
+  const sub=document.getElementById('bn-sub').value;
+  const tag=document.getElementById('bn-tag').value;
+  const titleEl=document.getElementById('bn-preview-title');
+  const subEl=document.getElementById('bn-preview-sub');
+  const tagEl=document.getElementById('bn-preview-tag');
+  if(titleEl)titleEl.textContent=title;
+  if(subEl){subEl.textContent=sub;subEl.style.display=sub?'block':'none';}
+  if(tagEl){tagEl.textContent=tag;tagEl.style.display=tag?'block':'none';}
+}
+
+function previewBannerImage(url){
+  const prev=document.getElementById('bn-img-preview');
+  const frontPrev=document.getElementById('bn-front-preview');
+  const previewImg=document.getElementById('bn-preview-img');
+  if(url){
+    prev.innerHTML=`
+      <img src="${url}" style="width:100%;height:100%;object-fit:cover">
+      <button onclick="event.preventDefault();event.stopPropagation();clearBannerImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:50%;width:26px;height:26px;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">✕</button>`;
+    if(frontPrev)frontPrev.style.display='block';
+    if(previewImg)previewImg.src=url;
+  } else {
+    prev.innerHTML=`<div style="text-align:center"><div style="font-size:2rem;margin-bottom:6px">📁</div><div style="font-size:.78rem;color:rgba(255,255,255,.4)">クリック or ドロップして画像をアップ</div><div style="font-size:.65rem;color:rgba(255,255,255,.2);margin-top:2px">JPG / PNG / WebP</div></div>`;
+    if(frontPrev)frontPrev.style.display='none';
+  }
+}
+
+function clearBannerImage(){
+  document.getElementById('bn-image-url-hidden').value='';
+  previewBannerImage('');
+}
+
+async function handleBannerDrop(event){
+  const file=event.dataTransfer.files[0];
+  if(!file||!file.type.startsWith('image/')){showToast('⚠️ 画像ファイルを選択してください');return;}
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'banners');
+  if(url){
+    document.getElementById('bn-image-url-hidden').value=url;
+    previewBannerImage(url);
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+
+async function uploadBannerImageNew(input){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'banners');
+  if(url){
+    document.getElementById('bn-image-url-hidden').value=url;
+    previewBannerImage(url);
+    showToast('✅ 画像アップロード完了！プレビューを確認してください');
+  }
+}
+
+function openBannerModal(){
+  editingBannerId=null;
+  document.getElementById('banner-modal-title').textContent='🖼️ バナー追加';
+  ['bn-title','bn-sub','bn-link','bn-tag'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  document.getElementById('bn-image-url-hidden').value='';
+  document.getElementById('bn-order').value='0';
+  document.getElementById('bn-active').checked=true;
+  document.getElementById('bn-file').value='';
+  previewBannerImage('');
+  updateBannerPreview();
+  document.getElementById('banner-modal').classList.add('show');
+}
+
+function editBanner(id){
+  const b=allBanners.find(x=>x.id===id);if(!b)return;
+  editingBannerId=id;
+  document.getElementById('banner-modal-title').textContent='🖼️ バナー編集';
+  document.getElementById('bn-title').value=b.title||'';
+  document.getElementById('bn-sub').value=b.sub_text||'';
+  document.getElementById('bn-link').value=b.link_url||'';
+  document.getElementById('bn-tag').value=b.tag_text||'';
+  document.getElementById('bn-order').value=b.sort_order||0;
+  document.getElementById('bn-active').checked=b.is_active!==false;
+  document.getElementById('bn-image-url-hidden').value=b.image_url||'';
+  previewBannerImage(b.image_url||'');
+  updateBannerPreview();
+  document.getElementById('banner-modal').classList.add('show');
+}
+
+async function saveBanner(){
+  const image_url=document.getElementById('bn-image-url-hidden')?.value||'';
+  const title=document.getElementById('bn-title').value;
+  if(!image_url&&!title){showToast('⚠️ 画像またはタイトルを入力してください');return;}
+  const bannerData={
+    title:title||'',
+    sub_text:document.getElementById('bn-sub').value,
+    link_url:document.getElementById('bn-link').value,
+    bg_style:'linear-gradient(135deg,#1a1200,#2a1e00)',
+    tag_text:document.getElementById('bn-tag').value,
+    image_url:image_url||null,
+    sort_order:parseInt(document.getElementById('bn-order').value)||0,
+    is_active:document.getElementById('bn-active').checked,
+  };
+  if(editingBannerId)await db.from('banners').update(bannerData).eq('id',editingBannerId);
+  else await db.from('banners').insert(bannerData);
+  closeModal('banner-modal');
+  showToast('✅ バナーを保存しました！フロントに反映されます');
+  loadBanners();
+}
+
+async function deleteBanner(id){confirmDelete('このバナーを削除します',async()=>{await db.from('banners').delete().eq('id',id);showToast('🗑️ 削除しました');loadBanners();});}
+
+/* ══ VIDEOS ══ */
+async function loadVideos(){
+  const{data}=await db.from('gacha_videos').select('*').order('created_at');
+  allVideos=data||[];
+  const tierLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他',all:'共通'};
+  document.getElementById('videos-tbl-body').innerHTML=allVideos.map(v=>`
+    <tr>
+      <td><span class="badge badge-gold">${tierLabel[v.tier]||v.tier}</span></td>
+      <td class="td-bold">${v.name||'—'}</td>
+      <td>${v.is_default?'<span class="badge badge-active">デフォルト</span>':'—'}</td>
+      <td><span class="badge ${v.video_url?'badge-active':'badge-pause'}">${v.video_url?'設定済み':'未設定'}</span></td>
+      <td>
+        <button class="btn btn-edit" onclick="editVideo('${v.id}')">編集</button>
+        <button class="btn btn-danger" onclick="deleteVideo('${v.id}')" style="margin-left:4px">削除</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function uploadVideoFile(input){
+  const file=input.files[0];if(!file)return;
+  // ファイルサイズ確認（50MB上限）
+  if(file.size>50*1024*1024){showToast('⚠️ ファイルサイズは50MB以下にしてください');return;}
+  document.getElementById('vd-upload-progress').style.display='block';
+  document.getElementById('vd-upload-status').textContent='アップロード中...';
+  document.getElementById('vd-progress-bar').style.width='30%';
+  const ext=file.name.split('.').pop()||'mp4';
+  const path=`videos/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const{data,error}=await db.storage.from('videos').upload(path,file,{upsert:true,contentType:file.type||'video/mp4'});
+  if(error){
+    document.getElementById('vd-upload-status').textContent='❌ エラー: '+error.message;
+    document.getElementById('vd-progress-bar').style.width='0%';
+    showToast('⚠️ アップロード失敗: '+error.message);
+    return;
+  }
+  document.getElementById('vd-progress-bar').style.width='100%';
+  const{data:urlData}=db.storage.from('videos').getPublicUrl(path);
+  const url=urlData.publicUrl.replace('https://puspoyandexokjtsmajc.supabase.co','https://cdn.oripa-max.com');
+  document.getElementById('vd-url').value=url;
+  document.getElementById('vd-upload-status').textContent='✅ アップロード完了！';
+  // プレビュー表示
+  const prev=document.getElementById('vd-preview');
+  const vid=document.getElementById('vd-preview-video');
+  prev.style.display='block';
+  vid.src=url;
+  showToast('✅ 動画アップロード完了！');
+}
+function openVideoModal(){editingVideoId=null;document.getElementById('video-modal-title').textContent='🎬 動画追加';['vd-name','vd-url'].forEach(i=>document.getElementById(i).value='');document.getElementById('vd-tier').value='sar';document.getElementById('vd-default').checked=false;document.getElementById('vd-upload-progress').style.display='none';document.getElementById('vd-preview').style.display='none';document.getElementById('vd-progress-bar').style.width='0%';document.getElementById('video-modal').classList.add('show');}
+function editVideo(id){const v=allVideos.find(x=>x.id===id);if(!v)return;editingVideoId=id;document.getElementById('video-modal-title').textContent='🎬 動画編集';document.getElementById('vd-name').value=v.name||'';document.getElementById('vd-tier').value=v.tier||'sar';document.getElementById('vd-url').value=v.video_url||'';document.getElementById('vd-default').checked=v.is_default||false;document.getElementById('vd-upload-progress').style.display='none';const prev=document.getElementById('vd-preview');const vid=document.getElementById('vd-preview-video');if(v.video_url){prev.style.display='block';vid.src=v.video_url;}else{prev.style.display='none';}document.getElementById('video-modal').classList.add('show');}
+async function saveVideo(){const videoData={name:document.getElementById('vd-name').value,tier:document.getElementById('vd-tier').value,video_url:document.getElementById('vd-url').value,is_default:document.getElementById('vd-default').checked};if(editingVideoId)await db.from('gacha_videos').update(videoData).eq('id',editingVideoId);else await db.from('gacha_videos').insert(videoData);closeModal('video-modal');showToast('✅ 保存しました');loadVideos();}
+async function deleteVideo(id){confirmDelete('この動画を削除します',async()=>{await db.from('gacha_videos').delete().eq('id',id);showToast('🗑️ 削除しました');loadVideos();});}
+
+/* ══ USERS ══ */
+// 累計消費コイン基準のランク階層（index.html / stripe-webhook.jsと同じ定義）
+const RANKS=[
+  {name:'ランクなし',min:0},
+  {name:'ブロンズ',min:100000},
+  {name:'シルバー',min:500000},
+  {name:'ゴールド',min:1500000},
+  {name:'プラチナ',min:2500000},
+  {name:'ダイヤ',min:10000000},
+  {name:'シークレットVIP',min:50000000},
+];
+function getRankName(totalSpent){
+  for(let i=RANKS.length-1;i>=0;i--){if((totalSpent||0)>=RANKS[i].min)return RANKS[i].name;}
+  return RANKS[0].name;
+}
+async function loadUsers(){
+  const{data}=await db.from('users').select('*').order('created_at',{ascending:false});
+  allUsers=data||[];
+  document.getElementById('u-total').textContent=allUsers.length.toLocaleString();
+  const now=new Date();const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
+  document.getElementById('u-new').textContent=allUsers.filter(u=>u.created_at>=monthStart).length.toLocaleString();
+  renderUsers(allUsers);
+}
+function renderUsers(users){
+  document.getElementById('users-tbl-body').innerHTML=users.map(u=>`
+    <tr style="${u.is_banned?'opacity:.5':''}">
+      <td class="td-bold">${u.username||'—'}${u.is_banned?' <span class="badge badge-open" style="margin-left:4px">BAN中</span>':''}</td>
+      <td style="font-size:.72rem">${u.email||'—'}</td>
+      <td>${(u.coin_points||0).toLocaleString()}</td>
+      <td><span class="badge badge-gold">${getRankName(u.total_spent)}</span></td>
+      <td>¥${(u.total_spent||0).toLocaleString()}</td>
+      <td style="font-size:.72rem">${new Date(u.created_at).toLocaleDateString('ja-JP')}</td>
+      <td><button class="btn btn-edit" onclick="openUserModal('${u.id}')">詳細</button></td>
+    </tr>`).join('');
+}
+function filterUsers(q){renderUsers(allUsers.filter(u=>(u.username||'').includes(q)||(u.email||'').includes(q)));}
+
+function openUserModal(id){
+  editingUserId=id;
+  const u=allUsers.find(x=>x.id===id);if(!u)return;
+  document.getElementById('user-modal-body').innerHTML=`
+    <div style="background:rgba(232,168,0,.05);border:1px solid rgba(232,168,0,.1);border-radius:8px;padding:12px;margin-bottom:14px">
+      <div style="font-size:.82rem;font-weight:900;margin-bottom:6px">${u.username||'—'} ${u.is_banned?'<span class="badge badge-open" style="margin-left:6px">🚫 BAN中</span>':''}</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4)">${u.email||'—'}</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:3px">登録日: ${new Date(u.created_at).toLocaleDateString('ja-JP')}</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:3px">紹介コード: ${u.referral_code||'—'}</div>
+      ${u.is_banned?`<div style="font-size:.75rem;color:#ff6680;margin-top:6px">BAN理由: ${u.banned_reason||'（理由未記入）'}<br>BAN日時: ${u.banned_at?new Date(u.banned_at).toLocaleString('ja-JP'):'—'}</div>`:''}
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">ユーザー名</label><input class="form-input" id="um-name" value="${u.username||''}"></div>
+      <div class="form-group"><label class="form-label">ランク（累計消費額から自動計算）</label>
+        <div class="form-input" style="display:flex;align-items:center;background:rgba(255,255,255,.03)">${getRankName(u.total_spent)}（累計¥${(u.total_spent||0).toLocaleString()}）</div>
+      </div>
+      <div class="form-group"><label class="form-label">コイン</label><input type="number" class="form-input" id="um-coin" value="${u.coin_points||0}"></div>
+      <div class="form-group"><label class="form-label">DP</label><input type="number" class="form-input" id="um-dp" value="${u.dp_points||0}"></div>
+    </div>
+    <div style="margin-top:10px;margin-bottom:10px">
+      <button class="btn btn-purple" style="width:100%" onclick="openGrantPrizeModal('${u.id}')">🎁 景品を手動付与（獲得商品に反映）</button>
+    </div>
+    ${u.is_banned?`
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn btn-success" onclick="unbanUser('${u.id}')">✅ BAN解除する</button>
+    </div>`:`
+    <div style="margin-top:10px">
+      <div class="form-group" style="margin-bottom:8px"><label class="form-label">BAN理由（任意）</label><input class="form-input" id="um-ban-reason" placeholder="例: 不正行為・規約違反"></div>
+      <button class="btn btn-danger" onclick="banUser('${u.id}')">🚫 BANする</button>
+    </div>`}`;
+  document.getElementById('user-modal').classList.add('show');
+}
+async function saveUser(){
+  if(!editingUserId)return;
+  await db.from('users').update({username:document.getElementById('um-name').value,coin_points:parseInt(document.getElementById('um-coin').value)||0,dp_points:parseInt(document.getElementById('um-dp').value)||0}).eq('id',editingUserId);
+  closeModal('user-modal');showToast('✅ 更新しました');loadUsers();
+}
+async function banUser(id){
+  const reason=document.getElementById('um-ban-reason')?.value||'';
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+  const box=document.createElement('div');
+  box.style.cssText='background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;width:min(320px,92vw);text-align:center';
+  box.innerHTML=`
+    <div style="font-size:1.5rem;margin-bottom:10px">🚫</div>
+    <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">本当にBANしますか？</div>
+    <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">BANするとこのユーザーはログイン・ガチャができなくなります</div>
+    <div style="display:flex;gap:8px">
+      <button id="ban-cancel" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer">キャンセル</button>
+      <button id="ban-ok" style="flex:1;padding:10px;border-radius:8px;background:#ff4060;color:#fff;font-weight:900;border:none;cursor:pointer">BANする</button>
+    </div>`;
+  modal.appendChild(box);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  box.querySelector('#ban-cancel').addEventListener('click',()=>modal.remove());
+  box.querySelector('#ban-ok').addEventListener('click',async()=>{
+    modal.remove();
+    const{error}=await db.from('users').update({is_banned:true,banned_reason:reason||null,banned_at:new Date().toISOString()}).eq('id',id);
+    if(error){showToast('⚠️ BAN失敗: '+error.message);return;}
+    closeModal('user-modal');showToast('🚫 BANしました');loadUsers();
+  });
+}
+async function unbanUser(id){
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+  const box=document.createElement('div');
+  box.style.cssText='background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;width:min(320px,92vw);text-align:center';
+  box.innerHTML=`
+    <div style="font-size:1.5rem;margin-bottom:10px">✅</div>
+    <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">BANを解除しますか？</div>
+    <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">解除するとこのユーザーは再びログイン・ガチャができるようになります</div>
+    <div style="display:flex;gap:8px">
+      <button id="unban-cancel" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer">キャンセル</button>
+      <button id="unban-ok" style="flex:1;padding:10px;border-radius:8px;background:#00e676;color:#0f1117;font-weight:900;border:none;cursor:pointer">解除する</button>
+    </div>`;
+  modal.appendChild(box);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  box.querySelector('#unban-cancel').addEventListener('click',()=>modal.remove());
+  box.querySelector('#unban-ok').addEventListener('click',async()=>{
+    modal.remove();
+    const{error}=await db.from('users').update({is_banned:false,banned_reason:null,banned_at:null}).eq('id',id);
+    if(error){showToast('⚠️ 解除失敗: '+error.message);return;}
+    closeModal('user-modal');showToast('✅ BANを解除しました');loadUsers();
+  });
+}
+
+let grantPrizeUserId=null;
+let grantPrizeCardList=[];
+let grantPrizeSelectedCard=null;
+let campaignPackIdCache=null;
+
+async function openGrantPrizeModal(userId){
+  grantPrizeUserId=userId;
+  grantPrizeSelectedCard=null;
+  document.getElementById('gp-selected-label').textContent='未選択';
+  document.getElementById('gp-search').value='';
+  const{data}=await db.from('card_images').select('*').order('created_at',{ascending:false});
+  grantPrizeCardList=data||[];
+  renderGrantPrizeCardGrid('');
+  document.getElementById('grant-prize-modal').classList.add('show');
+}
+function renderGrantPrizeCardGrid(q){
+  const filtered=grantPrizeCardList.filter(c=>!q||c.name.includes(q));
+  document.getElementById('gp-card-grid').innerHTML=filtered.map(c=>`
+    <div onclick='selectGrantPrizeCard(${JSON.stringify(c.name)},${JSON.stringify(c.image_url)})' style="cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid ${grantPrizeSelectedCard?.name===c.name?'#e8a800':'transparent'};aspect-ratio:2/3;background:#1a1b25">
+      <img src="${c.image_url}" style="width:100%;height:100%;object-fit:cover">
+    </div>`).join('')||'<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.2);font-size:.78rem;padding:20px">画像が見つかりません</div>';
+}
+function selectGrantPrizeCard(name,url){
+  grantPrizeSelectedCard={name,url};
+  document.getElementById('gp-selected-label').textContent=`選択中: ${name}`;
+  renderGrantPrizeCardGrid(document.getElementById('gp-search').value);
+}
+async function getOrCreateCampaignPackId(){
+  if(campaignPackIdCache)return campaignPackIdCache;
+  const{data:existing}=await db.from('packs').select('id').eq('name','🎁キャンペーン景品管理用').maybeSingle();
+  if(existing){campaignPackIdCache=existing.id;return existing.id;}
+  const{data:created,error}=await db.from('packs').insert({
+    name:'🎁キャンペーン景品管理用',emoji:'🎁',category:'other',price:0,total_slots:1,remaining:1,
+    is_active:false,sort_order:9999,
+  }).select().single();
+  if(error){throw new Error(error.message);}
+  campaignPackIdCache=created.id;
+  return created.id;
+}
+async function submitGrantPrize(){
+  const userId=grantPrizeUserId;
+  if(!grantPrizeSelectedCard){showToast('⚠️ カードを選択してください');return;}
+  const tier=document.getElementById('gp-tier').value;
+  const valueJp=parseInt(document.getElementById('gp-value').value)||0;
+  const days=parseInt(document.getElementById('gp-days').value)||30;
+  const{name,url}=grantPrizeSelectedCard;
+
+  let campaignPackId;
+  try{campaignPackId=await getOrCreateCampaignPackId();}
+  catch(e){showToast('⚠️ キャンペーン用パックの作成に失敗: '+e.message);return;}
+
+  // 同名・同レア度の賞品が既に登録済みか確認、無ければ新規登録
+  const{data:existingPrize}=await db.from('prizes').select('id').eq('pack_id',campaignPackId).eq('name',name).eq('tier',tier).maybeSingle();
+  if(!existingPrize){
+    const{error:prizeErr}=await db.from('prizes').insert({
+      pack_id:campaignPackId,tier,tier_label:{sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'}[tier]||'',
+      name,quantity:9999,remaining_qty:9999,weight:1,value_jp:valueJp,
+      exchange_type:'both',image_url:url,is_active:false,show_quantity:false,is_hidden:true,
+    });
+    if(prizeErr){showToast('⚠️ 賞品登録エラー: '+prizeErr.message);return;}
+  }
+
+  const expiresAt=new Date(Date.now()+days*24*60*60*1000).toISOString();
+  const{error}=await db.from('draw_sessions').insert({
+    user_id:userId,
+    pack_id:campaignPackId,
+    draw_count:1,
+    total_cost:0,
+    results:[{prize_name:name,prize_tier:tier,is_converted:false,is_shipped:false}],
+    expires_at:expiresAt,
+  });
+  if(error){showToast('⚠️ 付与失敗: '+error.message);return;}
+  closeModal('grant-prize-modal');
+  showToast(`✅ 「${name}」を付与しました（獲得商品に反映されます）`);
+}
+
+/* ══ POINTS ══ */
+async function grantPoints(){
+  const userInput=document.getElementById('pt-user').value;
+  const type=document.getElementById('pt-type').value;
+  const amount=parseInt(document.getElementById('pt-amount').value);
+  const reason=document.getElementById('pt-reason').value;
+  if(!userInput||!amount){showToast('⚠️ 入力してください');return;}
+  const{data:user}=await db.from('users').select('id,coin_points,dp_points').eq('email',userInput).single();
+  if(!user){showToast('⚠️ ユーザーが見つかりません');return;}
+  const field=type==='coin'?'coin_points':'dp_points';
+  await db.from('users').update({[field]:(user[field]||0)+amount}).eq('id',user.id);
+  try{await db.from('transactions').insert({user_id:user.id,type:'bonus',amount,currency:type,description:reason||'管理者付与'});}catch(e){}
+  showToast(`✅ ${amount.toLocaleString()} ${type.toUpperCase()}を付与しました`);
+}
+
+/* ══ RANKING ══ */
+async function loadRanking(type='spent'){
+  document.getElementById('ranking-title').textContent=type==='spent'?'💰 累計消費ランキング':'🎴 ガチャ回数ランキング';
+  let data;
+  if(type==='spent'){
+    const{data:users}=await db.from('users').select('username,total_spent').order('total_spent',{ascending:false}).limit(20);
+    data=(users||[]).map(u=>({name:u.username,val:`¥${(u.total_spent||0).toLocaleString()}`}));
+  } else {
+    const{data:sessions}=await db.from('draw_sessions').select('user_id,users(username)').limit(1000);
+    const counts={};
+    (sessions||[]).forEach(s=>{const n=s.users?.username||'?';counts[n]=(counts[n]||0)+1;});
+    data=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,20).map(([name,val])=>({name,val:`${val}回`}));
+  }
+  document.getElementById('ranking-list').innerHTML=data.map((item,i)=>`
+    <div class="rank-row">
+      <div class="rank-num rank-${i+1}">${i+1}</div>
+      <div class="rank-name">${item.name}</div>
+      <div class="rank-val">${item.val}</div>
+    </div>`).join('');
+}
+
+/* ══ SHIPPING ══ */
+async function loadShipping(status='all'){
+  let q=db.from('shipping_requests').select('*,users(username,email)').order('created_at',{ascending:false});
+  if(status!=='all')q=q.eq('status',status);
+  const{data}=await q;
+  allShipping=data||[];
+
+  // draw_sessionsからパック名・賞品名を取得（JOINなし）
+  const allResultIds=allShipping.flatMap(s=>s.result_ids||[]);
+  const sessionIds=[...new Set(allResultIds.map(id=>id.substring(0,id.lastIndexOf('_'))))].filter(Boolean);
+  let sessMap={};
+  if(sessionIds.length){
+    const{data:sessions}=await db.from('draw_sessions').select('id,results,pack_id').in('id',sessionIds);
+    // pack_idからパック名を取得
+    const packIds=[...new Set((sessions||[]).map(s=>s.pack_id).filter(Boolean))];
+    let packMap={};
+    if(packIds.length){
+      const{data:packs}=await db.from('packs').select('id,name').in('id',packIds);
+      (packs||[]).forEach(p=>{packMap[p.id]=p.name;});
+    }
+    (sessions||[]).forEach(s=>{sessMap[s.id]={...s,packName:packMap[s.pack_id]||'—'};});
+  }
+
+  const pending=allShipping.filter(s=>s.status==='pending').length;
+  const done=allShipping.filter(s=>s.status==='shipped').length;
+  document.getElementById('ship-pending').textContent=pending;
+  document.getElementById('ship-done').textContent=done;
+  document.getElementById('ship-badge').textContent=pending;
+  document.getElementById('stat-ship').textContent=pending;
+
+  document.getElementById('shipping-tbl-body').innerHTML=allShipping.length?allShipping.map(s=>{
+    const addr=s.address||{};
+    const dispName=addr.name||s.name||'—';
+    const dispNameKana=addr.name_kana||'';
+    const dispTel=addr.tel||s.tel||'';
+    const dispZip=addr.zip||s.zip||'—';
+    const dispPref=addr.prefecture||s.prefecture||'';
+    const dispCity=addr.city||s.city||'';
+    const dispAddress=addr.address||'';
+    const dispBuilding=addr.building||s.building||'';
+    const resultIds=s.result_ids||[];
+
+    // 商品情報を組み立て
+    const items=resultIds.map(rid=>{
+      const sessId=rid.substring(0,rid.lastIndexOf('_'));
+      const idx=parseInt(rid.substring(rid.lastIndexOf('_')+1));
+      const sess=sessMap[sessId];
+      const packName=sess?.packName||'—';
+      const result=(sess?.results||[])[idx];
+      const prizeName=result?.prize_name||result?.name||'—';
+      const tier=result?.prize_tier||'';
+      const tierLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'};
+      const tierColor={sar:'#e8380d',sr:'#a855f7',rr:'#dc2626',r:'#16a34a',c:'#374151'};
+      return `<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;background:${tierColor[tier]||'#374151'};color:#fff;padding:1px 5px;border-radius:3px;font-weight:900;flex-shrink:0">${tierLabel[tier]||tier||'—'}</span>
+        <span style="font-size:.72rem;color:rgba(255,255,255,.8);font-weight:700">${prizeName}</span>
+        <span style="font-size:.65rem;color:rgba(255,255,255,.4);margin-left:auto">${packName}</span>
+      </div>`;
+    }).join('');
+
+    return `
+    <tr>
+      <td class="td-bold" style="font-size:.72rem">#${(s.id||'').slice(0,8)}</td>
+      <td><div>${s.users?.username||'—'}</div><div class="td-sub">${s.users?.email||''}</div></td>
+      <td>
+        <div style="font-weight:900;color:#fff">${dispName}</div>
+        ${dispNameKana?`<div class="td-sub">${dispNameKana}</div>`:''}
+        <div class="td-sub">${dispTel}</div>
+      </td>
+      <td style="font-size:.72rem">
+        <div>〒${dispZip}</div>
+        <div>${dispPref}${dispCity}${dispAddress?' '+dispAddress:''}</div>
+        ${dispBuilding?`<div class="td-sub">${dispBuilding}</div>`:''}
+      </td>
+      <td style="min-width:160px">
+        <div style="font-size:.68rem;font-weight:900;color:var(--gold);margin-bottom:4px">📦 ${resultIds.length}件</div>
+        ${items}
+      </td>
+      <td style="font-size:.7rem">${new Date(s.created_at).toLocaleDateString('ja-JP')}</td>
+      <td><span class="badge badge-${s.status==='pending'?'pending':'shipped'}">${s.status==='pending'?'発送待ち':'発送済み'}</span>${s.tracking_number?`<div class="td-sub">${s.tracking_number}</div>`:''}</td>
+      <td>
+        ${s.status==='pending'
+          ?`<button class="btn btn-success" onclick="shipOrder('${s.id}')">✅ 発送処理</button>`
+          :`<button class="btn btn-secondary" onclick="editShipOrder('${s.id}')">✏️ 修正</button>
+            <button class="btn btn-warning" onclick="revertShipping('${s.id}')" style="margin-left:4px">↩️ 戻す</button>`}
+        <button class="btn btn-danger" onclick="cancelShipping('${s.id}')" style="margin-left:4px">✕</button>
+      </td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">発送依頼はありません</td></tr>';
+}
+async function shipOrder(id){
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(360px,95vw)">
+    <div style="font-size:1rem;font-weight:900;margin-bottom:14px">✅ 発送処理</div>
+    <label class="form-label">追跡番号（任意）</label>
+    <input class="form-input" id="ship-tracking-input" placeholder="例: 1234567890123">
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button id="ship-order-ok" class="btn btn-success btn-lg" style="flex:1">✅ 発送完了にする</button>
+      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary">キャンセル</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById('ship-order-ok').addEventListener('click',async()=>{
+    const tracking=document.getElementById('ship-tracking-input').value.trim()||null;
+    modal.remove();
+    await db.from('shipping_requests').update({status:'shipped',tracking_number:tracking,shipped_at:new Date().toISOString()}).eq('id',id);
+    showToast('✅ 発送処理完了');
+    loadShipping('all');
+  });
+}
+async function editShipOrder(id){
+  const s=allShipping.find(x=>x.id===id);if(!s)return;
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(360px,95vw)">
+    <div style="font-size:1rem;font-weight:900;margin-bottom:14px">✏️ 追跡番号を修正</div>
+    <input class="form-input" id="edit-tracking-input" value="${s.tracking_number||''}" placeholder="追跡番号">
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button id="edit-tracking-ok" class="btn btn-primary btn-lg" style="flex:1">✅ 更新する</button>
+      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary">キャンセル</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById('edit-tracking-ok').addEventListener('click',async()=>{
+    const tracking=document.getElementById('edit-tracking-input').value.trim()||null;
+    modal.remove();
+    await db.from('shipping_requests').update({tracking_number:tracking}).eq('id',id);
+    showToast('✅ 追跡番号を更新しました');
+    loadShipping('all');
+  });
+}
+async function revertShipping(id){
+  
+  await db.from('shipping_requests').update({status:'pending',tracking_number:null,shipped_at:null}).eq('id',id);
+  showToast('↩️ 発送待ちに戻しました');
+  loadShipping('all');
+}
+async function cancelShipping(id){
+  confirmDelete('この発送依頼を削除します',async()=>{
+    await db.from('shipping_requests').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    loadShipping('all');
+  });
+}
+function viewShipping(id){
+  const s=allShipping.find(x=>x.id===id);if(!s)return;
+  alert(`【発送先】\n名前: ${s.name||'—'}\n〒${s.zip||'—'} ${s.prefecture||''}${s.city||''}\n${s.building||''}\nTEL: ${s.tel||'—'}\n\n【ユーザー】${s.users?.username||'—'} (${s.users?.email||'—'})\n追跡番号: ${s.tracking_number||'未設定'}`);
+}
+/* ══ HISTORY ══ */
+async function loadHistory(){
+  const{data}=await db.from('draw_sessions').select('*,users(username)').order('created_at',{ascending:false}).limit(200);
+  if(!data||!data.length){allHistory=[];renderHistory([]);return;}
+  // pack_idを一括取得してパック名をマージ
+  const packIds=[...new Set(data.map(s=>s.pack_id).filter(Boolean))];
+  let packsMap={};
+  if(packIds.length){
+    const{data:packs}=await db.from('packs').select('id,name').in('id',packIds);
+    if(packs)packs.forEach(p=>packsMap[p.id]=p);
+  }
+  allHistory=data.map(s=>({...s,packs:packsMap[s.pack_id]||null}));
+  renderHistory(allHistory);
+}
+function renderHistory(data){
+  const tc={sar:'#e8a800',sr:'#bb88ff',rr:'#44ccee',r:'#8899cc',c:'rgba(255,255,255,.3)'};
+  document.getElementById('history-tbl-body').innerHTML=data.map(s=>{
+    const results=s.results||[];
+    return results.map(r=>`
+    <tr>
+      <td style="font-size:.7rem">${new Date(s.created_at).toLocaleString('ja-JP')}</td>
+      <td>${(s.users?.username||'???').slice(0,4)}***</td>
+      <td style="font-size:.72rem">${s.packs?.name||'—'}</td>
+      <td class="td-bold">${r.prize_name||'—'}</td>
+      <td><span style="color:${tc[r.prize_tier]||'#fff'};font-weight:900;font-size:.72rem">${(r.prize_tier||'').toUpperCase()}</span></td>
+      <td style="font-size:.72rem">${s.total_cost||0}</td>
+    </tr>`).join('');
+  }).join('');
+}
+function filterHistory(q){
+  if(!q){renderHistory(allHistory);return;}
+  const filtered=allHistory.filter(s=>
+    (s.users?.username||'').includes(q)||
+    (s.packs?.name||'').includes(q)||
+    (s.results||[]).some(r=>(r.prize_name||'').includes(q))
+  );
+  renderHistory(filtered);
+}
+
+/* ══ COUPONS ══ */
+async function loadCoupons(){
+  const{data}=await db.from('coupons').select('*').order('created_at',{ascending:false});
+  allCoupons=data||[];
+  document.getElementById('coupons-tbl-body').innerHTML=allCoupons.map(c=>`
+    <tr>
+      <td class="td-bold" style="font-family:monospace;letter-spacing:.08em">${c.code}</td>
+      <td>${c.discount_type==='coin'?`🪙 ${c.discount_amount}`:`${c.discount_amount}%OFF`}</td>
+      <td>配布：${c.total_used||0}/${c.max_total_uses||'∞'}</td>
+      <td style="font-size:.72rem">${c.expires_at?new Date(c.expires_at).toLocaleDateString('ja-JP'):'無期限'}</td>
+      <td><span class="badge ${c.is_active?'badge-active':'badge-pause'}">${c.is_active?'有効':'無効'}</span></td>
+      <td>
+        <button class="btn btn-edit" onclick="editCoupon('${c.id}')">編集</button>
+        <button class="btn btn-danger" onclick="deleteCoupon('${c.id}')" style="margin-left:4px">削除</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openCouponModal(){editingCouponId=null;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン作成';document.getElementById('cp-code').value='';document.getElementById('cp-amount').value='';document.getElementById('cp-max-total').value='0';document.getElementById('cp-expires').value='';document.getElementById('cp-type').value='coin';document.getElementById('cp-active').checked=true;document.getElementById('coupon-modal').classList.add('show');}
+function generateCouponCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';for(let i=0;i<8;i++)code+=chars[Math.floor(Math.random()*chars.length)];document.getElementById('cp-code').value=code;}
+function editCoupon(id){const c=allCoupons.find(x=>x.id===id);if(!c)return;editingCouponId=id;document.getElementById('coupon-modal-title').textContent='🎟️ クーポン編集';document.getElementById('cp-code').value=c.code||'';document.getElementById('cp-type').value=c.discount_type||'coin';document.getElementById('cp-amount').value=c.discount_amount||0;document.getElementById('cp-max-total').value=c.max_total_uses||0;document.getElementById('cp-expires').value=c.expires_at?new Date(c.expires_at).toISOString().slice(0,16):'';document.getElementById('cp-active').checked=c.is_active!==false;document.getElementById('coupon-modal').classList.add('show');}
+async function saveCoupon(){
+  const code=document.getElementById('cp-code').value.trim().toUpperCase();
+  if(!code){showToast('⚠️ コードを入力してください');return;}
+  const couponData={code,discount_type:document.getElementById('cp-type').value,discount_amount:parseInt(document.getElementById('cp-amount').value)||0,max_total_uses:parseInt(document.getElementById('cp-max-total').value)||0,expires_at:document.getElementById('cp-expires').value||null,is_active:document.getElementById('cp-active').checked};
+  if(editingCouponId)await db.from('coupons').update(couponData).eq('id',editingCouponId);
+  else await db.from('coupons').insert(couponData);
+  closeModal('coupon-modal');showToast('✅ クーポンを保存しました');loadCoupons();
+}
+async function deleteCoupon(id){confirmDelete('このクーポンを削除します',async()=>{await db.from('coupon_uses').delete().eq('coupon_id',id);await db.from('coupons').delete().eq('id',id);showToast('🗑️ 削除しました');loadCoupons();});}
+
+/* ══ PUSH ══ */
+async function loadPush(){
+  const{data}=await db.from('push_notifications').select('*').order('created_at',{ascending:false});
+  allPush=data||[];
+  document.getElementById('push-tbl-body').innerHTML=allPush.map(p=>`
+    <tr>
+      <td class="td-bold">${p.title||'—'}</td>
+      <td>${p.target==='all'?'全員':p.target}</td>
+      <td style="font-size:.72rem">${p.sent_at?new Date(p.sent_at).toLocaleString('ja-JP'):'—'}</td>
+      <td><span class="badge ${p.is_sent?'badge-active':'badge-pending'}">${p.is_sent?'送信済み':'未送信'}</span></td>
+      <td><button class="btn btn-danger" onclick="deletePush('${p.id}')">削除</button></td>
+    </tr>`).join('');
+}
+function openPushModal(){document.getElementById('pn-title').value='';document.getElementById('pn-body').value='';document.getElementById('pn-target').value='all';document.getElementById('push-modal').classList.add('show');}
+async function savePush(){
+  const title=document.getElementById('pn-title').value;
+  if(!title){showToast('⚠️ タイトルを入力してください');return;}
+  const pushData={title,body:document.getElementById('pn-body').value,target:document.getElementById('pn-target').value,is_sent:true,sent_at:new Date().toISOString()};
+  await db.from('push_notifications').insert(pushData);
+  // お知らせとしても登録
+  try{await db.from('notices').insert({title,body:document.getElementById('pn-body').value,type:'info',is_active:true});}catch(e){}
+  closeModal('push-modal');showToast('✅ 通知を送信しました');loadPush();
+}
+async function deletePush(id){confirmDelete('この通知を削除します',async()=>{await db.from('push_notifications').delete().eq('id',id);showToast('🗑️ 削除しました');loadPush();});}
+
+/* ══ NOTICES ══ */
+async function loadNotices(){
+  const{data}=await db.from('notices').select('*').order('created_at',{ascending:false});
+  allNotices=data||[];
+  document.getElementById('notices-tbl-body').innerHTML=allNotices.map(n=>`
+    <tr>
+      <td class="td-bold">${n.title||'—'}</td>
+      <td><span class="badge ${n.type==='campaign'?'badge-gold':'badge-active'}">${n.type||'info'}</span></td>
+      <td style="font-size:.72rem">${new Date(n.created_at).toLocaleDateString('ja-JP')}</td>
+      <td><span class="badge ${n.is_active?'badge-active':'badge-pause'}">${n.is_active?'公開':'非公開'}</span></td>
+      <td>
+        <button class="btn btn-edit" onclick="editNotice('${n.id}')">編集</button>
+        <button class="btn btn-danger" onclick="deleteNotice('${n.id}')" style="margin-left:4px">削除</button>
+      </td>
+    </tr>`).join('');
+}
+function openNoticeModal(){editingNoticeId=null;document.getElementById('notice-modal-title').textContent='📢 お知らせ作成';['nc-title','nc-body'].forEach(i=>document.getElementById(i).value='');document.getElementById('nc-type').value='info';document.getElementById('notice-modal').classList.add('show');}
+function editNotice(id){const n=allNotices.find(x=>x.id===id);if(!n)return;editingNoticeId=id;document.getElementById('notice-modal-title').textContent='📢 お知らせ編集';document.getElementById('nc-title').value=n.title||'';document.getElementById('nc-body').value=n.body||'';document.getElementById('nc-type').value=n.type||'info';document.getElementById('notice-modal').classList.add('show');}
+async function saveNotice(){const noticeData={title:document.getElementById('nc-title').value,body:document.getElementById('nc-body').value,type:document.getElementById('nc-type').value,is_active:true};if(editingNoticeId)await db.from('notices').update(noticeData).eq('id',editingNoticeId);else await db.from('notices').insert(noticeData);closeModal('notice-modal');showToast('✅ 保存しました');loadNotices();}
+async function deleteNotice(id){confirmDelete('このお知らせを削除します',async()=>{await db.from('notices').delete().eq('id',id);showToast('🗑️ 削除しました');loadNotices();});}
+
+/* ══ INQUIRIES ══ */
+async function loadInquiries(status='all'){
+  let q=db.from('inquiries').select('*,users(username)').order('created_at',{ascending:false});
+  if(status!=='all')q=q.eq('status',status);
+  const{data}=await q;
+  allInquiries=data||[];
+  const open=allInquiries.filter(i=>i.status==='open').length;
+  const closed=allInquiries.filter(i=>i.status==='closed').length;
+  document.getElementById('inq-open').textContent=open;
+  document.getElementById('inq-closed').textContent=closed;
+  document.getElementById('stat-inq').textContent=open;
+  if(open>0){document.getElementById('inq-badge').style.display='block';document.getElementById('inq-badge').textContent=open;}
+  document.getElementById('inquiries-list').innerHTML=allInquiries.map(inq=>`
+    <div class="inquiry-item">
+      <div class="inq-header">
+        <div>
+          <span class="badge badge-${inq.status==='open'?'open':'closed'}" style="margin-right:6px">${inq.status==='open'?'未対応':'対応済み'}</span>
+          <span class="inq-subject">${inq.subject||'件名なし'}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          ${inq.status==='open'?`<button class="btn btn-success" onclick="replyInquiry('${inq.id}')">返信</button>`:''}
+          <button class="btn btn-secondary" onclick="closeInquiry('${inq.id}')">完了</button>
+        </div>
+      </div>
+      <div class="inq-body">${inq.body||'—'}</div>
+      <div class="inq-meta" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span>${inq.users?.username||'—'} · ${new Date(inq.created_at).toLocaleString('ja-JP')}</span>
+        ${inq.email?`<a href="mailto:${inq.email}?subject=Re: ${encodeURIComponent(inq.subject||'お問い合わせ')}" style="background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3);border-radius:5px;padding:2px 10px;font-size:.72rem;font-weight:900;text-decoration:none">📧 ${inq.email}</a>`:''}
+      </div>
+      <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap">
+        ${inq.name?`<span>👤 名前: ${inq.name}</span>`:''}
+        ${inq.users?.username?`<span>🏷️ ユーザーネーム: ${inq.users.username}</span>`:''}
+      </div>
+      ${inq.reply?`<div class="reply-area"><div class="reply-label">返信内容</div><div class="reply-text">${inq.reply}</div></div>`:''}
+    </div>`).join('');
+}
+function replyInquiry(id){
+  editingInquiryId=id;
+  const inq=allInquiries.find(x=>x.id===id);
+  document.getElementById('inquiry-modal-body').innerHTML=`
+    <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:.82rem;font-weight:900;margin-bottom:4px">${inq?.subject||'件名なし'}</div>
+      <div style="font-size:.78rem;color:rgba(255,255,255,.5)">${inq?.body||'—'}</div>
+    </div>
+    <div class="form-group"><label class="form-label">返信内容</label><textarea class="form-textarea" id="inq-reply" style="min-height:100px"></textarea></div>`;
+  document.getElementById('inquiry-modal').classList.add('show');
+}
+async function saveInquiryReply(){
+  if(!editingInquiryId)return;
+  const reply=document.getElementById('inq-reply').value.trim();
+  if(!reply){showToast('⚠️ 返信内容を入力してください');return;}
+  const{error,data}=await db.from('inquiries').update({reply,status:'closed'}).eq('id',editingInquiryId).select();
+  if(error){showToast('⚠️ 更新エラー: '+error.message);return;}
+  if(!data||data.length===0){showToast('⚠️ 更新が反映されませんでした（権限エラーの可能性）');return;}
+  closeModal('inquiry-modal');showToast('✅ 対応済みにしました');loadInquiries('all');
+}
+async function closeInquiry(id){
+  const{error,data}=await db.from('inquiries').update({status:'closed'}).eq('id',id).select();
+  if(error){showToast('⚠️ 更新エラー: '+error.message);return;}
+  if(!data||data.length===0){showToast('⚠️ 更新が反映されませんでした（権限エラーの可能性）');return;}
+  showToast('✅ 完了にしました');loadInquiries('all');
+}
+
+/* ══ REVENUE ══ */
+async function loadRevenue(){
+  const{data:packs}=await db.from('packs').select('id,name,prizes(name,tier,value_jp)');
+  const{data:sessions}=await db.from('draw_sessions').select('pack_id,total_cost,results');
+
+  const packStats={};
+  (packs||[]).forEach(p=>{
+    const valueMap={};
+    (p.prizes||[]).forEach(pr=>{valueMap[`${pr.tier}|${pr.name}`]=pr.value_jp||0;});
+    packStats[p.id]={name:p.name,valueMap,sold:0,revenue:0,payout:0};
+  });
+
+  (sessions||[]).forEach(s=>{
+    const stat=packStats[s.pack_id];
+    if(!stat)return;
+    const results=s.results||[];
+    stat.sold+=results.length||1;
+    stat.revenue+=s.total_cost||0;
+    results.forEach(r=>{
+      stat.payout+=stat.valueMap[`${r.prize_tier}|${r.prize_name}`]||0;
+    });
+  });
+
+  document.getElementById('revenue-tbl-body').innerHTML=Object.values(packStats).map(p=>{
+    const profit=p.revenue-p.payout;
+    const profitRate=p.revenue>0?((profit/p.revenue)*100).toFixed(1):'0.0';
+    const profitColor=profit>=0?'#00e676':'#ff4060';
+    return`<tr><td class="td-bold">${p.name}</td><td>${p.sold.toLocaleString()}</td><td>¥${p.revenue.toLocaleString()}</td><td>¥${p.payout.toLocaleString()}</td><td style="color:${profitColor}">¥${profit.toLocaleString()}</td><td style="color:${profitColor};font-weight:900">${profitRate}%</td></tr>`;
+  }).join('');
+
+  // 月別グラフ
+  const{data:txData}=await db.from('transactions').select('amount,created_at').eq('type','purchase_coin');
+  const months=6;const labels=[];const data=[];
+  for(let i=months-1;i>=0;i--){
+    const d=new Date();d.setMonth(d.getMonth()-i);
+    const label=`${d.getFullYear()}/${d.getMonth()+1}`;
+    labels.push(label);
+    const ms=new Date(d.getFullYear(),d.getMonth(),1).toISOString();
+    const me=new Date(d.getFullYear(),d.getMonth()+1,1).toISOString();
+    const total=(txData||[]).filter(t=>t.created_at>=ms&&t.created_at<me).reduce((s,t)=>s+Math.abs(t.amount||0),0);
+    data.push(total);
+  }
+  const canvas=document.getElementById('revenue-chart');
+  if(canvas._chart)canvas._chart.destroy();
+  canvas._chart=new Chart(canvas,{type:'line',data:{labels,datasets:[{label:'売上',data,borderColor:'rgba(232,168,0,.8)',backgroundColor:'rgba(232,168,0,.1)',fill:true,tension:.4}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}}},y:{ticks:{color:'rgba(255,255,255,.3)',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+}
+
+/* ══ ANALYTICS ══ */
+async function loadAnalytics(){
+  const sel=document.getElementById('ana-month-select');
+  if(!sel.value){const n=new Date();sel.value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;}
+  const[yr,mo]=sel.value.split('-').map(Number);
+  const monthStart=new Date(yr,mo-1,1).toISOString();
+  const monthEnd=new Date(yr,mo,1).toISOString();
+  const daysInMonth=new Date(yr,mo,0).getDate();
+  const[{data:logs},{data:sessions},{data:ships},{data:txns}]=await Promise.all([
+    db.from('access_logs').select('created_at,user_id').gte('created_at',monthStart).lt('created_at',monthEnd),
+    db.from('draw_sessions').select('created_at,user_id,draw_count').gte('created_at',monthStart).lt('created_at',monthEnd),
+    db.from('shipping_requests').select('created_at').gte('created_at',monthStart).lt('created_at',monthEnd),
+    db.from('transactions').select('created_at,user_id').eq('type','purchase').gte('created_at',monthStart).lt('created_at',monthEnd),
+  ]);
+  const totalAccess=(logs||[]).length;
+  const loginUsers=new Set((logs||[]).map(l=>l.user_id).filter(Boolean)).size;
+  const paidUsers=new Set((txns||[]).map(t=>t.user_id).filter(Boolean)).size;
+  const totalDraws=(sessions||[]).reduce((s,r)=>s+(r.draw_count||1),0);
+  const totalShips=(ships||[]).length;
+  document.getElementById('ana-access').textContent=totalAccess.toLocaleString();
+  document.getElementById('ana-login').textContent=loginUsers.toLocaleString();
+  document.getElementById('ana-paid').textContent=paidUsers.toLocaleString();
+  document.getElementById('ana-draws').textContent=totalDraws.toLocaleString();
+  document.getElementById('ana-ships').textContent=totalShips.toLocaleString();
+  const labels=[];const accData=[],loginData=[],drawData=[],shipData=[],paidData=[];
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=new Date(yr,mo-1,d).toISOString();
+    const de=new Date(yr,mo-1,d+1).toISOString();
+    labels.push(`${mo}/${d}`);
+    accData.push((logs||[]).filter(l=>l.created_at>=ds&&l.created_at<de).length);
+    loginData.push(new Set((logs||[]).filter(l=>l.created_at>=ds&&l.created_at<de&&l.user_id).map(l=>l.user_id)).size);
+    drawData.push((sessions||[]).filter(s=>s.created_at>=ds&&s.created_at<de).reduce((sum,r)=>sum+(r.draw_count||1),0));
+    shipData.push((ships||[]).filter(s=>s.created_at>=ds&&s.created_at<de).length);
+    paidData.push(new Set((txns||[]).filter(t=>t.created_at>=ds&&t.created_at<de).map(t=>t.user_id).filter(Boolean)).size);
+  }
+  const tbody=document.getElementById('analytics-tbody');
+  let rows='';
+  for(let i=0;i<daysInMonth;i++){
+    const hasData=accData[i]||loginData[i]||paidData[i]||drawData[i]||shipData[i];
+    rows+=`<tr style="${hasData?'':'opacity:.35'}">
+      <td>${labels[i]}</td>
+      <td class="td-bold" style="color:#4488ff">${accData[i]||0}</td>
+      <td class="td-bold" style="color:#50dc78">${loginData[i]||0}</td>
+      <td class="td-bold">${paidData[i]||0}</td>
+      <td class="td-bold" style="color:#ffc800">${(drawData[i]||0).toLocaleString()}</td>
+      <td class="td-bold" style="color:#ff6464">${shipData[i]||0}</td>
+    </tr>`;
+  }
+  tbody.innerHTML=rows;
+}
+
+/* ══ CSV EXPORT ══ */
+function exportCSV(type){
+  let csv='';let filename='';
+  if(type==='packs'){
+    csv=['パック名,カテゴリ,価格,全口数,残り,還元率,状態'].concat(allPacks.map(p=>`${p.name},${p.category},${p.price},${p.total_slots},${p.remaining},${p.return_rate||''},${p.is_active?'公開':'停止'}`)).join('\n');
+    filename='packs';
+  } else if(type==='users'){
+    csv=['ユーザー名,メール,コイン,ランク,累計消費,登録日'].concat(allUsers.map(u=>`${u.username||''},${u.email||''},${u.coin_points||0},${getRankName(u.total_spent)},${u.total_spent||0},${new Date(u.created_at).toLocaleDateString('ja-JP')}`)).join('\n');
+    filename='users';
+  } else if(type==='history'){
+    csv=['日時,ユーザー,パック,カード,レア度,消費PT'].concat(allHistory.map(r=>`${new Date(r.created_at).toLocaleString('ja-JP')},${r.users?.username||''},${r.packs?.name||''},${r.prize_name||''},${r.prize_tier||''},${r.draw_sessions?.total_cost||''}`)).join('\n');
+    filename='history';
+  } else if(type==='shipping'){
+    csv=['ID,ユーザー,カード数,都道府県,依頼日,状態'].concat(allShipping.map(s=>`${s.id.slice(0,8)},${s.users?.username||''},${(s.result_ids||[]).length},${s.address?.prefecture||''},${new Date(s.created_at).toLocaleDateString('ja-JP')},${s.status}`)).join('\n');
+    filename='shipping';
+  } else if(type==='revenue'){
+    filename='revenue';csv='パック名,販売数,売上';
+  }
+  if(!csv)return;
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${filename}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('📥 CSVをダウンロードしました');
+}
+
+/* ══ SETTINGS ══ */
+
+
+/* ══ UTILS ══ */
+function showToast(msg){
+  const t=document.getElementById('admin-toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function confirmDelete(message, onConfirm){
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+  const box=document.createElement('div');
+  box.style.cssText='background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;width:min(320px,92vw);text-align:center';
+  box.innerHTML=`
+    <div style="font-size:1.5rem;margin-bottom:10px">🗑️</div>
+    <div style="font-size:.95rem;font-weight:900;color:#fff;margin-bottom:6px">削除の確認</div>
+    <div style="font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">${message||'本当に削除しますか？'}</div>
+    <div style="display:flex;gap:8px">
+      <button id="cd-cancel" style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;border:none;cursor:pointer">キャンセル</button>
+      <button id="cd-ok" style="flex:1;padding:10px;border-radius:8px;background:#ef4444;color:#fff;font-weight:900;border:none;cursor:pointer">削除する</button>
+    </div>`;
+  modal.appendChild(box);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  box.querySelector('#cd-cancel').addEventListener('click',()=>modal.remove());
+  box.querySelector('#cd-ok').addEventListener('click',()=>{modal.remove();onConfirm();});
+}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('show');});
+});
+
+/* ══ AUTO LOGIN ══ */
+(async()=>{
+  const{data:{session}}=await db.auth.getSession();
+  if(session?.access_token){
+    const resp=await fetch('/api/admin-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:session.access_token})});
+    const result=await resp.json();
+    if(result.isAdmin){
+      document.getElementById('login-wrap').style.display='none';
+      document.getElementById('main-area').style.display='flex';
+      document.getElementById('admin-user-name').textContent=session.user.email;
+      initDashboard();
+    }
+  }
+})();
+
+/* ══ 交換所管理 ══ */
+let allShopItems=[];
+async function loadShopItems(){
+  const{data}=await db.from('shop_items').select('*').order('sort_order').order('created_at',{ascending:false});
+  allShopItems=data||[];
+  document.getElementById('shop-items-tbl').innerHTML=allShopItems.length?allShopItems.map(item=>`
+    <tr>
+      <td>${item.image_url?`<img src="${item.image_url}" style="width:48px;height:48px;object-fit:cover;border-radius:6px">`:'—'}</td>
+      <td class="td-bold">${item.name}</td>
+      <td style="color:var(--gold2);font-weight:900">${item.price.toLocaleString()}コイン</td>
+      <td>${item.stock<=0?'<span style="color:#ef4444;font-weight:900">完売</span>':`${item.stock}点`}</td>
+      <td><span class="badge" style="background:${item.is_active?'rgba(0,230,120,.15)':'rgba(255,255,255,.05)'};color:${item.is_active?'#00e676':'rgba(255,255,255,.3)'};border:1px solid ${item.is_active?'rgba(0,230,120,.2)':'rgba(255,255,255,.1)'}">${item.is_active?'公開':'非公開'}</span></td>
+      <td>
+        <button class="btn btn-secondary" onclick="editShopItem('${item.id}')">✏️ 編集</button>
+        ${item.stock>0
+          ?`<button class="btn btn-warning" onclick="soldOutShopItem('${item.id}')" style="margin-left:4px">完売</button>`
+          :`<button class="btn btn-success" onclick="restoreShopItem('${item.id}')" style="margin-left:4px">復活</button>`}
+        <button class="btn btn-danger" onclick="deleteShopItem('${item.id}')" style="margin-left:4px">✕</button>
+      </td>
+    </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">商品がありません</td></tr>';
+}
+
+async function loadShopOrders(){
+  const{data,error}=await db.from('shop_orders').select('*').order('created_at',{ascending:false});
+  if(error){showToast('⚠️ 取得エラー: '+error.message);return;}
+  const orders=data||[];
+  // ユーザー情報を別途取得
+  const userIds=[...new Set(orders.map(o=>o.user_id).filter(Boolean))];
+  let userMap={};
+  if(userIds.length){
+    const{data:users}=await db.from('users').select('id,username,email').in('id',userIds);
+    (users||[]).forEach(u=>{userMap[u.id]=u;});
+  }
+  document.getElementById('shop-orders-tbl').innerHTML=orders.length?orders.map(o=>{
+    const u=userMap[o.user_id]||{};
+    const addr=o.address||{};
+    return `
+    <tr>
+      <td class="td-bold" style="font-size:.72rem">#${(o.id||'').slice(0,8)}</td>
+      <td><div>${u.username||u.email?.split('@')[0]||'—'}</div><div class="td-sub">${u.email||''}</div></td>
+      <td>${o.item_name||'—'}</td>
+      <td style="color:var(--gold2);font-weight:900">${(o.price||0).toLocaleString()}コイン</td>
+      <td style="font-size:.7rem">${new Date(o.created_at).toLocaleDateString('ja-JP')}</td>
+      <td>
+        ${addr.name?`<div style="font-size:.72rem"><div style="font-weight:700">${addr.name} / ${addr.tel||''}</div><div class="td-sub">〒${addr.zip||''} ${addr.prefecture||''}${addr.city||''}${addr.building?' '+addr.building:''}</div></div>`:'<span style="color:rgba(255,255,255,.3);font-size:.7rem">住所未入力</span>'}
+      </td>
+      <td><span class="badge badge-${o.status==='completed'?'shipped':'pending'}">${o.status==='pending'?'住所待ち':o.status==='address_submitted'?'発送待ち':o.status==='completed'?'完了':'処理中'}</span></td>
+      <td>
+        ${o.status!=='completed'?`<button class="btn btn-success" onclick="completeShopOrder('${o.id}')">✅ 完了</button>`:''}
+        <button class="btn btn-danger" onclick="deleteShopOrder('${o.id}')" style="margin-left:4px">✕</button>
+      </td>
+    </tr>`}).join(''):'<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,.2)">注文がありません</td></tr>';
+}
+
+let editingShopItemId=null;
+function openShopItemModal(id){
+  editingShopItemId=id||null;
+  const item=id?allShopItems.find(x=>x.id===id):null;
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(480px,95vw);max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-size:1rem;font-weight:900">${item?'✏️ 商品編集':'＋ 商品追加'}</span>
+      <button onclick="this.closest('.modal-overlay').remove()" style="background:none;color:var(--text3);font-size:1.2rem">✕</button>
+    </div>
+    <label class="form-label">商品名 *</label>
+    <input class="form-input" id="si-name" value="${item?.name||''}" placeholder="例: ピカチュウex PSA10">
+    <label class="form-label">説明</label>
+    <textarea class="form-input" id="si-desc" rows="3" placeholder="商品の詳細説明">${item?.description||''}</textarea>
+    <label class="form-label">価格（コイン）*</label>
+    <input class="form-input" type="number" id="si-price" value="${item?.price||''}" placeholder="例: 5000">
+    <label class="form-label">在庫数 *</label>
+    <input class="form-input" type="number" id="si-stock" value="${item?.stock||0}" placeholder="例: 1">
+    <label class="form-label">商品画像</label>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+      <input class="form-input" id="si-image" value="${item?.image_url||''}" placeholder="https://..." style="flex:1;margin-bottom:0" oninput="previewShopImage(this.value)">
+      <label style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:8px 12px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text2)">
+        📤 アップロード
+        <input type="file" accept="image/*" style="display:none" onchange="uploadShopImage(this)">
+      </label>
+    </div>
+    <div id="si-image-preview" style="margin-bottom:12px;${item?.image_url?'':'display:none'}">
+      <img src="${item?.image_url||''}" id="si-image-preview-img" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1)">
+    </div>
+    <label class="form-label">並び順</label>
+    <input class="form-input" type="number" id="si-order" value="${item?.sort_order||0}">
+    <label class="form-check" style="margin-bottom:16px"><input type="checkbox" id="si-active" ${item?.is_active!==false?'checked':''}> 公開する</label>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-primary btn-lg" style="flex:1" onclick="saveShopItem()">✅ 保存</button>
+      <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">キャンセル</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+}
+
+function editShopItem(id){openShopItemModal(id);}
+
+async function saveShopItem(){
+  const name=document.getElementById('si-name').value.trim();
+  const price=parseInt(document.getElementById('si-price').value)||0;
+  const stock=parseInt(document.getElementById('si-stock').value)||0;
+  if(!name||!price){showToast('⚠️ 商品名と価格は必須です');return;}
+  const data={
+    name,
+    description:document.getElementById('si-desc').value.trim()||null,
+    price,stock,
+    image_url:document.getElementById('si-image').value.trim()||null,
+    sort_order:parseInt(document.getElementById('si-order').value)||0,
+    is_active:document.getElementById('si-active').checked,
+  };
+  if(editingShopItemId){
+    await db.from('shop_items').update(data).eq('id',editingShopItemId);
+  } else {
+    await db.from('shop_items').insert(data);
+  }
+  document.querySelector('.modal-overlay.show')?.remove();
+  showToast('✅ 商品を保存しました');
+  loadShopItems();
+}
+
+async function soldOutShopItem(id){
+  await db.from('shop_items').update({stock:0}).eq('id',id);
+  showToast('完売にしました');
+  loadShopItems();
+}
+async function restoreShopItem(id){
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(300px,92vw)">
+    <div style="font-size:.95rem;font-weight:900;margin-bottom:12px">在庫数を入力</div>
+    <input class="form-input" id="restore-stock-input" type="number" value="1" min="1">
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary" style="flex:1">キャンセル</button>
+      <button id="restore-ok" class="btn btn-success" style="flex:1">復活</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+  document.getElementById('restore-ok').addEventListener('click',async()=>{
+    const stock=parseInt(document.getElementById('restore-stock-input').value)||1;
+    modal.remove();
+    await db.from('shop_items').update({stock}).eq('id',id);
+    showToast('✅ 在庫を復活しました');
+    loadShopItems();
+  });
+}
+async function deleteShopItem(id){
+  confirmDelete('この商品を削除します',async()=>{
+    await db.from('shop_items').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    loadShopItems();
+  });
+}
+
+async function uploadShopImage(input){
+  const file=input.files[0];if(!file)return;
+  showToast('📤 アップロード中...');
+  const url=await uploadImage(file,'shop');
+  if(url){
+    document.getElementById('si-image').value=url;
+    previewShopImage(url);
+    showToast('✅ 画像アップロード完了！');
+  }
+}
+function previewShopImage(url){
+  const preview=document.getElementById('si-image-preview');
+  const img=document.getElementById('si-image-preview-img');
+  if(!preview||!img)return;
+  if(url){
+    img.src=url;
+    preview.style.display='block';
+  } else {
+    preview.style.display='none';
+  }
+}
+
+async function completeShopOrder(id){
+  // 追跡番号入力モーダル
+  const modal=document.createElement('div');
+  modal.className='modal-overlay show';
+  modal.innerHTML=`<div class="modal-box" style="background:var(--bg2);border-radius:16px;padding:20px;width:min(360px,95vw)">
+    <div style="font-size:1rem;font-weight:900;margin-bottom:14px">✅ 発送処理</div>
+    <label class="form-label">追跡番号（任意）</label>
+    <input class="form-input" id="tracking-input" placeholder="例: 1234567890123">
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="doCompleteShipOrder('${id}',this)" class="btn btn-success btn-lg" style="flex:1">✅ 発送完了にする</button>
+      <button onclick="this.closest('.modal-overlay').remove()" class="btn btn-secondary">キャンセル</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
+}
+async function doCompleteShipOrder(id, btn){
+  const tracking=document.getElementById('tracking-input')?.value?.trim()||null;
+  btn.closest('.modal-overlay').remove();
+  const{error}=await db.from('shop_orders').update({
+    status:'shipped',
+    tracking_number:tracking,
+    shipped_at:new Date().toISOString()
+  }).eq('id',id);
+  if(error){showToast('⚠️ エラー: '+error.message);return;}
+  showToast('✅ 発送処理完了');
+  loadShopOrders();
+}
+
+async function deleteShopOrder(id){
+  confirmDelete('この注文を削除します',async()=>{
+    await db.from('shop_orders').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    loadShopOrders();
+  });
+}
+</script>
+</body>
+</html><script>
+/* ══ カード画像ライブラリ ══ */
+let ciPendingFiles=[]; // アップロード待ちファイル
+let ciAllImages=[]; // 全画像キャッシュ
+
+async function loadCardImages(){
+  const{data,error}=await db.from('card_images').select('*').order('created_at',{ascending:false});
+  if(error){showToast('⚠️ 画像ライブラリ読み込みエラー');return;}
+  ciAllImages=data||[];
+  renderCardImages(ciAllImages);
+}
+
+function renderCardImages(images){
+  const grid=document.getElementById('ci-grid');
+  const empty=document.getElementById('ci-empty');
+  if(!images.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=images.map(img=>`
+    <div style="position:relative;background:#1a1b25;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.08);cursor:pointer" onclick="selectCardImage('${img.image_url}','${img.name.replace(/'/g,"\\'")}')">
+      <div style="aspect-ratio:2/3;overflow:hidden;background:#111">
+        <img src="${img.image_url}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,.2);font-size:.7rem\\'>読込失敗</div>'">
+      </div>
+      <div style="padding:5px 6px">
+        <div style="font-size:.62rem;font-weight:700;color:rgba(255,255,255,.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.name}</div>
+      </div>
+      <button onclick="event.stopPropagation();deleteCardImage('${img.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);color:#ff6060;border:1px solid rgba(255,96,96,.3);border-radius:50%;width:20px;height:20px;font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+  `).join('');
+}
+
+function filterCardImages(q){
+  if(!q.trim()){renderCardImages(ciAllImages);return;}
+  const filtered=ciAllImages.filter(img=>img.name.includes(q));
+  renderCardImages(filtered);
+}
+
+// ファイル選択 or ドロップ
+function handleCardImageDrop(event){
+  const files=Array.from(event.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+  if(!files.length)return;
+  showCardImageNameModal(files);
+}
+
+async function uploadCardImages(input){
+  const files=Array.from(input.files);
+  if(!files.length)return;
+  showCardImageNameModal(files);
+  input.value='';
+}
+
+function showCardImageNameModal(files){
+  ciPendingFiles=files;
+  const list=document.getElementById('ci-name-list');
+  list.innerHTML=files.map((f,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border-radius:8px;padding:8px">
+      <img src="${URL.createObjectURL(f)}" style="width:40px;height:60px;object-fit:cover;border-radius:4px;flex-shrink:0">
+      <div style="flex:1">
+        <div style="font-size:.65rem;color:rgba(255,255,255,.3);margin-bottom:4px">${f.name}</div>
+        <input class="form-input ci-card-name" data-idx="${i}" style="width:100%;padding:5px 8px;font-size:.82rem" placeholder="カード名を入力（例: リザードンex SAR）" value="${f.name.replace(/\.[^.]+$/,'').replace(/_/g,' ')}">
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('ci-name-modal').style.display='block';
+}
+
+function cancelCardImageUpload(){
+  ciPendingFiles=[];
+  document.getElementById('ci-name-modal').style.display='none';
+}
+
+async function saveCardImages(){
+  const nameInputs=document.querySelectorAll('.ci-card-name');
+  const btn=document.querySelector('#ci-name-modal .btn-primary');
+  btn.textContent='保存中...';btn.disabled=true;
+
+  let success=0;
+  for(let i=0;i<ciPendingFiles.length;i++){
+    const file=ciPendingFiles[i];
+    const name=nameInputs[i]?.value.trim()||file.name;
+
+    btn.textContent=`処理中 ${i+1}/${ciPendingFiles.length}...`;
+
+    // ① 元画像をアップロード
+    const url=await uploadImage(file,'card-images');
+    if(!url){showToast(`⚠️ ${name} のアップロードに失敗`);continue;}
+    await db.from('card_images').insert({name,image_url:url});
+    success++;
+
+    // ② PSA10合成画像を生成してアップロード
+    try{
+      const psaBlob=await composePSA10(file);
+      if(!psaBlob){showToast('⚠️ PSA10合成失敗：Blob null',3000);continue;}
+      const psaFile=new File([psaBlob],file.name.replace(/\.[^.]+$/,'')+'-psa10.jpg',{type:'image/jpeg'});
+      const psaUrl=await uploadImage(psaFile,'card-images');
+      if(!psaUrl){showToast('⚠️ PSA10アップロード失敗',3000);continue;}
+      const{error:e2}=await db.from('card_images').insert({name:`【PSA10】${name}`,image_url:psaUrl});
+      if(e2){showToast('⚠️ PSA10 DB保存失敗:'+e2.message,4000);}
+      else{success++;}
+    }catch(e){showToast('⚠️ PSA10エラー:'+e.message,4000);}
+  }
+
+  btn.textContent='✅ 保存する';btn.disabled=false;
+  document.getElementById('ci-name-modal').style.display='none';
+  ciPendingFiles=[];
+  showToast(`✅ ${success}件登録しました！（元画像＋PSA10各1枚）`);
+  loadCardImages();
+}
+
+/* ══ Canvas でPSA10バッジを合成 ══ */
+function composePSA10(file){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const objUrl=URL.createObjectURL(file);
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=img.width;canvas.height=img.height;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0);
+      const bw=img.width*0.22;
+      const bh=bw*1.18;
+      const bx=img.width-bw-img.width*0.03;
+      const by=img.height*0.03;
+      drawPSABadge(ctx,bx,by,bw,bh);
+      URL.revokeObjectURL(objUrl);
+      canvas.toBlob(blob=>resolve(blob),'image/jpeg',0.92);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(objUrl);resolve(null);};
+    img.src=objUrl;
+  });
+}
+
+function drawPSABadge(ctx,x,y,w,h){
+  // シールドパスを描く関数
+  function shield(ox,oy,sw,sh){
+    ctx.beginPath();
+    ctx.moveTo(ox+sw*0.5, oy+sh*0.03);
+    ctx.lineTo(ox+sw*0.97,oy+sh*0.17);
+    ctx.lineTo(ox+sw*0.97,oy+sh*0.60);
+    ctx.quadraticCurveTo(ox+sw*0.97,oy+sh*0.93,ox+sw*0.5,oy+sh*0.99);
+    ctx.quadraticCurveTo(ox+sw*0.03,oy+sh*0.93,ox+sw*0.03,oy+sh*0.60);
+    ctx.lineTo(ox+sw*0.03,oy+sh*0.17);
+    ctx.closePath();
+  }
+
+  // 影
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.65)';
+  ctx.shadowBlur=w*0.15;
+  ctx.shadowOffsetX=w*0.03;
+  ctx.shadowOffsetY=w*0.06;
+  shield(x,y,w,h);
+  ctx.fillStyle='rgba(0,0,0,0.01)';
+  ctx.fill();
+  ctx.restore();
+
+  // 本体グラデ（ゴールド）
+  const g=ctx.createLinearGradient(x,y,x,y+h);
+  g.addColorStop(0,'#ffe566');
+  g.addColorStop(0.25,'#d4920e');
+  g.addColorStop(0.6,'#a06200');
+  g.addColorStop(1,'#c88a10');
+  shield(x,y,w,h);
+  ctx.fillStyle=g;
+  ctx.fill();
+
+  // 枠線
+  shield(x,y,w,h);
+  ctx.strokeStyle='rgba(255,255,255,0.5)';
+  ctx.lineWidth=w*0.04;
+  ctx.stroke();
+
+  // 内側ハイライト
+  const ghl=ctx.createLinearGradient(x,y,x,y+h*0.45);
+  ghl.addColorStop(0,'rgba(255,255,255,0.35)');
+  ghl.addColorStop(1,'rgba(255,255,255,0)');
+  shield(x+w*0.08,y+h*0.08,w*0.84,h*0.5);
+  ctx.fillStyle=ghl;
+  ctx.fill();
+
+  // 10文字（上・黒太字）
+  ctx.save();
+  ctx.font=`900 ${w*0.50}px Impact,Arial,sans-serif`;
+  ctx.fillStyle='#111111';
+  ctx.textAlign='center';
+  ctx.shadowColor='rgba(0,0,0,0.25)';
+  ctx.shadowBlur=w*0.04;
+  ctx.fillText('10',x+w*0.5,y+h*0.54);
+  ctx.restore();
+
+  // 区切り線
+  ctx.save();
+  ctx.strokeStyle='rgba(120,60,0,0.35)';
+  ctx.lineWidth=w*0.025;
+  ctx.beginPath();
+  ctx.moveTo(x+w*0.15,y+h*0.61);
+  ctx.lineTo(x+w*0.85,y+h*0.61);
+  ctx.stroke();
+  ctx.restore();
+
+  // PSA文字（下・公式ロゴ風：青P・赤S・青A）
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.shadowBlur=0;
+  const psaFontSize=w*0.24;
+  ctx.font=`900 ${psaFontSize}px Impact,Arial,sans-serif`;
+
+  // 全体幅を計算して中央寄せ
+  const pw=ctx.measureText('P').width;
+  const sw=ctx.measureText('S').width;
+  const aw=ctx.measureText('A').width;
+  const total=pw+sw+aw;
+  let lx=x+w*0.5-total/2;
+  const ly=y+h*0.81;
+
+  // P（青）
+  ctx.fillStyle='#1a3a8a';
+  ctx.fillText('P',lx+pw/2,ly);
+  lx+=pw;
+
+  // S（赤）
+  ctx.fillStyle='#cc1100';
+  ctx.fillText('S',lx+sw/2,ly);
+  lx+=sw;
+
+  // A（青）
+  ctx.fillStyle='#1a3a8a';
+  ctx.fillText('A',lx+aw/2,ly);
+
+  ctx.restore();
+}
+
+async function deleteCardImage(id){
+  confirmDelete('この画像をライブラリから削除しますか？',async()=>{
+    await db.from('card_images').delete().eq('id',id);
+    showToast('🗑️ 削除しました');
+    loadCardImages();
+  });
+}
+
+// 賞品ブロックから画像ライブラリを開く（ポップアップ方式）
+let ciTargetIdx=null; // 後方互換用（未使用）
+</script>
+<script>
+// ライブラリポップアップ
+let ciTargetIdx2=null;
+
+// 既存のopenCardLibraryを上書き
+function openCardLibrary(idx){
+  ciTargetIdx2=idx;
+  let popup=document.getElementById('ci-popup');
+  if(!popup){
+    popup=document.createElement('div');
+    popup.id='ci-popup';
+    popup.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:16px';
+    popup.innerHTML=`
+      <div style="background:#1a1b25;border:1px solid rgba(201,168,76,.25);border-radius:14px;width:min(560px,100%);max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px">
+          <span style="font-weight:900;font-size:.92rem;flex:1">🃏 カード画像ライブラリ</span>
+          <input id="ci-popup-search" class="form-input" placeholder="カード名で検索..." style="width:180px;padding:5px 10px;font-size:.8rem" oninput="filterPopupImages(this.value)">
+          <button onclick="document.getElementById('ci-popup').remove()" style="background:rgba(255,255,255,.08);color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem">✕ 閉じる</button>
+        </div>
+        <div id="ci-popup-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;padding:14px;overflow-y:auto;flex:1"><div style="grid-column:1/-1;text-align:center;padding:30px;color:rgba(255,255,255,.3)">読み込み中...</div></div>
+        <div id="ci-popup-empty" style="display:none;text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:.82rem">画像が登録されていません<br><span style="font-size:.72rem">先にライブラリページで画像を登録してください</span></div>
+      </div>`;
+    document.body.appendChild(popup);
+    popup.addEventListener('click',e=>{if(e.target===popup)popup.remove();});
+  } else {
+    popup.style.display='flex';
+  }
+  // DBから最新取得
+  db.from('card_images').select('*').order('created_at',{ascending:false}).then(({data})=>{
+    ciAllImages=data||[];
+    renderPopupImages(ciAllImages);
+  });
+}
+
+function renderPopupImages(images){
+  const grid=document.getElementById('ci-popup-grid');
+  const empty=document.getElementById('ci-popup-empty');
+  if(!images||!images.length){
+    if(grid)grid.innerHTML='';
+    if(empty)empty.style.display='block';
+    return;
+  }
+  if(empty)empty.style.display='none';
+  grid.innerHTML=images.map(img=>`
+    <div onclick="selectCardImage2('${img.image_url}','${img.name.replace(/'/g,"\\'")}')"
+      style="background:#111;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:.15s"
+      onmouseover="this.style.borderColor='rgba(201,168,76,.6)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+      <div style="aspect-ratio:2/3;overflow:hidden">
+        <img src="${img.image_url}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+      </div>
+      <div style="padding:4px 6px;font-size:.58rem;color:rgba(255,255,255,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.name}</div>
+    </div>
+  `).join('');
+}
+
+function filterPopupImages(q){
+  if(!ciAllImages)return;
+  const filtered=q.trim()?ciAllImages.filter(img=>img.name.includes(q)):ciAllImages;
+  renderPopupImages(filtered);
+}
+
+function selectCardImage2(url,name){
+  if(ciTargetIdx2!==null){
+    const imgInput=document.getElementById(`prize-img-${ciTargetIdx2}`);
+    if(imgInput){imgInput.value=url;previewBlockImage(imgInput,ciTargetIdx2);}
+    if(imgInput){const block=imgInput.closest('.prize-block');if(block){const nameInput=block.querySelector('.prize-name');if(nameInput&&!nameInput.value)nameInput.value=name;}}
+    showToast(`✅ 「${name}」をセットしました`);
+    ciTargetIdx2=null;
+  }
+  const popup=document.getElementById('ci-popup');
+  if(popup)popup.remove();
+}
+
+
+</script>
