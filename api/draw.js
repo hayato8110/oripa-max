@@ -19,10 +19,30 @@ function pickPrize(prizes, rng, tenjoCount, tenjoLimit) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { packId, drawCount, userId, userToken, tenjoCount } = req.body;
+  const { packId, drawCount, userId, userToken } = req.body;
 
   if (!packId || !drawCount || !userId || !userToken) {
     return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  // 天井カウントはクライアント申告を信用せず、実際の抽選履歴から都度サーバー側で算出する
+  async function computeTenjoCount() {
+    const { data: pastSessions } = await supabase
+      .from('draw_sessions')
+      .select('results')
+      .eq('user_id', userId)
+      .eq('pack_id', packId)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    let count = 0;
+    for (const s of (pastSessions || [])) {
+      const results = s.results || [];
+      for (let i = results.length - 1; i >= 0; i--) {
+        if (results[i].prize_tier === 'sar') return count;
+        count++;
+      }
+    }
+    return count;
   }
 
   // トークン検証と各データを並列取得
@@ -96,11 +116,29 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '残り口数が不足しています' });
   }
 
+  // コイン残高の減算は「読み取った時点の残高と一致してる場合のみ」成功する条件付き更新にする
+  // →同時に2回リクエストが来ても、片方は失敗して二重消費を防げる
+  const { data: coinLockResult, error: coinLockErr } = await supabase
+    .from('users')
+    .update({ coin_points: userData.coin_points - cost, total_spent: (userData.total_spent || 0) + cost })
+    .eq('id', userId)
+    .eq('coin_points', userData.coin_points)
+    .select('coin_points, total_spent')
+    .single();
+
+  if (coinLockErr || !coinLockResult) {
+    await releaseLockIfNeeded();
+    return res.status(409).json({ error: '処理が混み合っています。もう一度お試しください' });
+  }
+
   // 在庫コピー
   const prizeStock = {};
   prizes.forEach(p => {
     prizeStock[p.id] = (p.remaining_qty != null ? p.remaining_qty : p.quantity) || 0;
   });
+
+  // 天井カウントはパックに天井設定がある時だけ計算（余計なクエリを避ける）
+  const tenjoCount = pack.tenjo_limit > 0 ? await computeTenjoCount() : 0;
 
   // 抽選
   const results = [];
@@ -128,8 +166,8 @@ export default async function handler(req, res) {
 
   const onStockTotal = prizes.reduce((s, p) => s + prizeStock[p.id], 0);
   const newRemaining = onStockTotal <= 0 ? 0 : Math.max(0, (pack.remaining || 0) - results.length);
-  let newCoin = userData.coin_points - cost;
-  const newTotalSpent = (userData.total_spent || 0) + cost;
+  let newCoin = coinLockResult.coin_points;
+  const newTotalSpent = coinLockResult.total_spent;
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
   // ランク階層（累計消費コインで判定）
