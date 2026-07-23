@@ -75,6 +75,16 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '賞品データの取得に失敗しました' });
   }
 
+  // 連打防止：同じユーザーが1秒以内に連続でリクエストしたら拒否する
+  // （request_locksテーブルに (user_id, window_key) のUNIQUE制約が必要）
+  const rateLimitWindow = Math.floor(Date.now() / 1000); // 1秒単位の窓
+  const { error: rateLimitErr } = await supabase
+    .from('request_locks')
+    .insert({ user_id: userId, window_key: `draw_${rateLimitWindow}` });
+  if (rateLimitErr) {
+    return res.status(429).json({ error: 'リクエストが速すぎます。少し待ってから再度お試しください' });
+  }
+
   // 1人1回限定パックの排他ロック（DB側のunique制約で二重実行を確実に防止）
   if (pack.max_draws_per_user === 1) {
     const { error: lockErr } = await supabase
@@ -195,11 +205,31 @@ export default async function handler(req, res) {
   }
   newCoin += rankRewardTotal;
 
+// 在庫を安全に減算する（同時アクセスで他のリクエストの減算が消えないよう、
+// 最新値を都度読み直しながら「更新できるまで」再試行する）
+async function safeDecrement(table, id, amount, floorZero = true) {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const col = table === 'prizes' ? 'remaining_qty' : 'remaining';
+    const { data: cur } = await supabase.from(table).select(col).eq('id', id).single();
+    if (!cur) return false;
+    const curVal = cur[col] || 0;
+    const newVal = floorZero ? Math.max(0, curVal - amount) : curVal - amount;
+    const { data: updated } = await supabase
+      .from(table)
+      .update({ [col]: newVal })
+      .eq('id', id)
+      .eq(col, curVal)
+      .select('id')
+      .single();
+    if (updated) return true;
+    // 他のリクエストが同時に更新した→最新値で再試行
+  }
+  return false;
+}
+
   const [, , , { data: sess }] = await Promise.all([
-    Promise.all(Object.entries(usedPrizes).map(([id]) =>
-      supabase.from('prizes').update({ remaining_qty: Math.max(0, prizeStock[id]) }).eq('id', id)
-    )),
-    supabase.from('packs').update({ remaining: newRemaining }).eq('id', packId),
+    Promise.all(Object.entries(usedPrizes).map(([id, qty]) => safeDecrement('prizes', id, qty))),
+    safeDecrement('packs', packId, results.length),
     supabase.from('users').update({ coin_points: newCoin, total_spent: newTotalSpent }).eq('id', userId),
     supabase.from('draw_sessions').insert({
       user_id: userId,
@@ -212,12 +242,16 @@ export default async function handler(req, res) {
     }).select('id').single()
   ]);
 
+  // 表示用の残数は、実際にDBへ反映された最新値を取得し直す
+  const { data: freshPack } = await supabase.from('packs').select('remaining').eq('id', packId).single();
+  const finalRemaining = freshPack ? freshPack.remaining : newRemaining;
+
   return res.status(200).json({
     results,
     sessionId: sess?.id,
     newCoin,
-    newRemaining,
-    soldOut: newRemaining <= 0,
+    newRemaining: finalRemaining,
+    soldOut: finalRemaining <= 0,
     expiresAt,
     packVideos: packVideos || [],
     newTotalSpent,
