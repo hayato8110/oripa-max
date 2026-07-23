@@ -27,6 +27,18 @@ function getRankBonusRate(totalSpent) {
 async function grantCoins(session) {
   const { userId, coin, bonus } = session.metadata;
 
+  // 二重付与防止：同じsession.idで既に付与済みかチェック
+  const { data: existing } = await supabase
+    .from('point_purchases')
+    .select('id')
+    .eq('stripe_session_id', session.id)
+    .single();
+
+  if (existing) {
+    console.log(`⚠️ 既に付与済みのSession: ${session.id}`);
+    return;
+  }
+
   const { data: user, error: userError } = await supabase
     .from('users')
     .select('coin_points, total_spent')
@@ -44,7 +56,8 @@ async function grantCoins(session) {
   await supabase
     .from('users')
     .update({ coin_points: newCoin })
-    .eq('id', userId);
+    .eq('id', userId)
+    .eq('coin_points', user.coin_points || 0);
 
   await supabase
     .from('point_purchases')
@@ -103,7 +116,8 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
   await supabase
     .from('users')
     .update({ coin_points: newCoin })
-    .eq('id', userId);
+    .eq('id', userId)
+    .eq('coin_points', user.coin_points || 0);
 
   await supabase
     .from('point_purchases')
