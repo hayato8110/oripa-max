@@ -24,6 +24,9 @@ export default async function handler(req, res) {
   if (!packId || !drawCount || !userId || !userToken) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
+  if (!Number.isInteger(drawCount) || drawCount <= 0 || drawCount > 1000) {
+    return res.status(400).json({ error: '不正なリクエストです' });
+  }
 
   // 天井カウントはクライアント申告を信用せず、実際の抽選履歴から都度サーバー側で算出する
   async function computeTenjoCount() {
