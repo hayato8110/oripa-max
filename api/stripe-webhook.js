@@ -23,6 +23,52 @@ function getRankBonusRate(totalSpent) {
   return RANKS[0];
 }
 
+// 友達招待ボーナス（初回コイン購入時に一度だけ判定、招待した側は先着20人まで）
+async function processReferralBonus(userId) {
+  const { data: buyer } = await supabase
+    .from('users')
+    .select('invited_by, referral_rewarded')
+    .eq('id', userId)
+    .single();
+  if (!buyer || !buyer.invited_by || buyer.referral_rewarded) return;
+
+  // この招待者が既に何人分のボーナスを出したか
+  const { count } = await supabase
+    .from('users')
+    .select('id', { count: 'exact', head: true })
+    .eq('invited_by', buyer.invited_by)
+    .eq('referral_rewarded', true);
+
+  // このユーザーの紹介判定は一度きり（条件付き更新で二重処理も防止）
+  const { error: markErr } = await supabase
+    .from('users')
+    .update({ referral_rewarded: true })
+    .eq('id', userId)
+    .eq('referral_rewarded', false);
+  if (markErr) return; // 既に処理済み（同時実行など）
+
+  if ((count || 0) >= 20) {
+    console.log(`⚠️ 招待コードの上限(20人)に達しているため紹介ボーナスなし: referrer=${buyer.invited_by}`);
+    return;
+  }
+
+  const { data: buyerRow } = await supabase.from('users').select('coin_points').eq('id', userId).single();
+  if (buyerRow) {
+    await supabase.from('users').update({ coin_points: (buyerRow.coin_points || 0) + 150 })
+      .eq('id', userId).eq('coin_points', buyerRow.coin_points || 0);
+  }
+  const { data: referrerRow } = await supabase.from('users').select('coin_points').eq('id', buyer.invited_by).single();
+  if (referrerRow) {
+    await supabase.from('users').update({ coin_points: (referrerRow.coin_points || 0) + 150 })
+      .eq('id', buyer.invited_by).eq('coin_points', referrerRow.coin_points || 0);
+  }
+  await supabase.from('transactions').insert([
+    { user_id: userId, type: 'referral_bonus', amount: 150, currency: 'coin', description: '友達招待ボーナス（招待された側）' },
+    { user_id: buyer.invited_by, type: 'referral_bonus', amount: 150, currency: 'coin', description: '友達招待ボーナス（招待した側）' },
+  ]);
+  console.log(`🎁 紹介ボーナス付与: ${userId} <-> ${buyer.invited_by} 各+150コイン`);
+}
+
 // コイン付与共通処理（Checkout Session用）
 async function grantCoins(session) {
   const { userId, coin, bonus } = session.metadata;
@@ -81,6 +127,8 @@ async function grantCoins(session) {
     });
 
   console.log(`✅ コイン付与完了: ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}）`);
+
+  try { await processReferralBonus(userId); } catch (e) { console.error('紹介ボーナスエラー:', e); }
 }
 
 // コイン付与共通処理（PaymentIntent用）
@@ -141,6 +189,8 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
     });
 
   console.log(`✅ コイン付与完了(PI): ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}）`);
+
+  try { await processReferralBonus(userId); } catch (e) { console.error('紹介ボーナスエラー:', e); }
 }
 
 export default async function handler(req, res) {
