@@ -2469,7 +2469,7 @@ function renderItemsPage(tab){
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px">
                 ${(()=>{
                   const tier=r.prize.tier;
-                  const label=prizeData?.tier_label||rarLabel[tier]||tier;
+                  const label=rarLabel[tier]||tier;
                   const tierBg={sar:'linear-gradient(135deg,#ff0080,#ff8c00,#ffe600,#00ff88,#00cfff,#8000ff)',sr:'#c8860a',rr:'#dc2626',r:'#16a34a',c:'#9ca3af'};
                   const bg=tierBg[tier]||'#555';
                   return `<span style="background:${bg};color:#fff;font-size:.7rem;font-weight:900;padding:3px 12px;border-radius:20px;white-space:nowrap">${label}</span>`;
