@@ -3545,7 +3545,7 @@ async function submitInviteCode(){
   const{error}=await db.from('users').update({invited_by:owner.id}).eq('id',state.user.id).is('invited_by',null);
   if(error){showToast('⚠️ 既に別のコードが適用済みです');return;}
   state.user.invited_by=owner.id;
-  showToast('🎉 招待コードを適用しました！次回のコイン購入でボーナスが付与されます',3000);
+  showToast('🎉 招待コードを適用しました！',2500);
   document.querySelector('.modal-overlay')?.remove();
 }
 
