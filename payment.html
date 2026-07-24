@@ -72,19 +72,9 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
       <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="url(#g1)" stroke="url(#g2)" stroke-width="1"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="g1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg>
       <span id="plan-coins">-</span>コイン
     </div>
-    <div class="plan-price">¥<span id="plan-price">-</span></div>
+    <div class="plan-price"><span id="plan-price-original" style="display:none;text-decoration:line-through;color:var(--text3);font-weight:700;font-size:.85em;margin-right:6px"></span>¥<span id="plan-price">-</span></div>
   </div>
   <div class="plan-sub" style="margin-top:4px">1コイン = 1円相当</div>
-</div>
-
-<div class="section" id="coupon-section" style="display:none">
-  <div id="coupon-applied-box" style="display:none;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:12px 14px">
-    <div style="font-size:.78rem;font-weight:700;color:var(--gold2);margin-bottom:4px">🎟️ クーポン適用中</div>
-    <div style="display:flex;align-items:baseline;gap:8px">
-      <span style="font-size:.85rem;color:var(--text3);text-decoration:line-through" id="coupon-original-price">-</span>
-      <span style="font-size:1.2rem;font-weight:900;color:var(--gold2)">¥<span id="coupon-discounted-price">-</span></span>
-    </div>
-  </div>
 </div>
 
 <div class="section" id="main-section" style="display:none">
@@ -269,9 +259,9 @@ async function loadPendingCoupon(){
     if(percent>0){
       pendingCouponCode=code;
       const discounted=Math.max(50,Math.round(amount*(1-percent/100)));
-      document.getElementById('coupon-original-price').textContent='¥'+amount.toLocaleString();
-      document.getElementById('coupon-discounted-price').textContent=discounted.toLocaleString();
-      document.getElementById('coupon-applied-box').style.display='block';
+      document.getElementById('plan-price-original').textContent='¥'+amount.toLocaleString();
+      document.getElementById('plan-price-original').style.display='inline';
+      document.getElementById('plan-price').textContent=discounted.toLocaleString();
     }
   }catch(e){/* クーポン表示に失敗しても決済自体は続行できるので握りつぶす */}
 }
@@ -285,7 +275,6 @@ async function init(){
   document.getElementById('plan-price').textContent=amount.toLocaleString();
   document.getElementById('plan-info').style.display='block';
   await loadPendingCoupon();
-  document.getElementById('coupon-section').style.display='block';
   document.getElementById('loading-wrap').style.display='none';
   document.getElementById('main-section').style.display='block';
   document.getElementById('notice').style.display='block';
