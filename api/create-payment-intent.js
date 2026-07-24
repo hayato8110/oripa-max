@@ -43,7 +43,6 @@ export default async function handler(req, res) {
     if (!plan) return res.status(400).json({ error: 'Invalid plan' });
 
     // クーポンの検証（サーバー側で必ず再検証し、金額を確定する）
-    console.log('DEBUG couponCode受信:', JSON.stringify(couponCode));
     let finalAmount = plan.amount;
     let appliedCouponCode = null;
     if (couponCode) {
@@ -54,7 +53,6 @@ export default async function handler(req, res) {
         .eq('is_active', true)
         .single();
 
-      console.log('DEBUG coupon検索結果:', JSON.stringify(coupon));
       if (coupon) {
         const now = new Date();
         const notExpired = !coupon.expires_at || new Date(coupon.expires_at) > now;
