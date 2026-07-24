@@ -3101,7 +3101,7 @@ async function openPurchase(){
     `+plans.map(p=>{
       const discounted=discountMap[p.price];
       const priceHtml=discounted
-        ?`<span style="text-decoration:line-through;color:var(--text3);font-size:.72em;margin-right:5px">¥${p.price.toLocaleString()}</span>¥${discounted.toLocaleString()}`
+        ?`<span style="text-decoration:line-through;color:rgba(26,10,0,.55);font-size:.72em;margin-right:5px">¥${p.price.toLocaleString()}</span>¥${discounted.toLocaleString()}`
         :`¥${p.price.toLocaleString()}`;
       return`
     <div class="plan-item" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;margin-bottom:8px">
