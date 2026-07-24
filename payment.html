@@ -78,11 +78,13 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 </div>
 
 <div class="section" id="coupon-section" style="display:none">
-  <div class="section-title">🎟️ クーポンコード（任意）</div>
-  <div style="display:flex;gap:8px">
-    <input type="text" id="coupon-code-input" placeholder="お持ちの方はこちらに入力" style="flex:1;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,168,76,.2);border-radius:8px;padding:10px 12px;color:var(--text);font-size:.85rem;text-transform:uppercase">
+  <div id="coupon-applied-box" style="display:none;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:12px 14px">
+    <div style="font-size:.78rem;font-weight:700;color:var(--gold2);margin-bottom:4px">🎟️ クーポン適用中</div>
+    <div style="display:flex;align-items:baseline;gap:8px">
+      <span style="font-size:.85rem;color:var(--text3);text-decoration:line-through" id="coupon-original-price">-</span>
+      <span style="font-size:1.2rem;font-weight:900;color:var(--gold2)">¥<span id="coupon-discounted-price">-</span></span>
+    </div>
   </div>
-  <div style="font-size:.68rem;color:var(--text3);margin-top:6px">※コードが正しければ、お支払い時に自動で割引が適用されます</div>
 </div>
 
 <div class="section" id="main-section" style="display:none">
@@ -227,7 +229,7 @@ const planId=params.get('plan');
 const amount=parseInt(params.get('amount')||'0');
 const coins=parseInt(params.get('coins')||'0');
 let stripe=null,cardNum=null,cardExp=null,cardCvc=null;
-let currentUser=null,currentToken=null,selectedMethod=null,cardMounted=false;
+let currentUser=null,currentToken=null,selectedMethod=null,cardMounted=false,pendingCouponCode=null;
 
 function showToast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
@@ -250,6 +252,30 @@ function showBankInfo(data){
   location.href='/bank.html?'+params.toString();
 }
 
+async function loadPendingCoupon(){
+  const code=localStorage.getItem('oripa_pending_coupon');
+  if(!code)return;
+  try{
+    const{data:coupon}=await db.from('coupons').select('discount_type,discount_amount,max_applicable_amount,tiered_discounts,is_active,expires_at').eq('code',code).eq('is_active',true).single();
+    if(!coupon)return;
+    if(coupon.expires_at&&new Date(coupon.expires_at)<new Date())return;
+    let percent=0;
+    if(coupon.discount_type==='percent'){
+      const capOk=!coupon.max_applicable_amount||coupon.max_applicable_amount===0||amount<=coupon.max_applicable_amount;
+      if(capOk)percent=coupon.discount_amount||0;
+    }else if(coupon.discount_type==='tiered_percent'){
+      percent=(coupon.tiered_discounts&&coupon.tiered_discounts[planId])||0;
+    }
+    if(percent>0){
+      pendingCouponCode=code;
+      const discounted=Math.max(50,Math.round(amount*(1-percent/100)));
+      document.getElementById('coupon-original-price').textContent='¥'+amount.toLocaleString();
+      document.getElementById('coupon-discounted-price').textContent=discounted.toLocaleString();
+      document.getElementById('coupon-applied-box').style.display='block';
+    }
+  }catch(e){/* クーポン表示に失敗しても決済自体は続行できるので握りつぶす */}
+}
+
 async function init(){
   const{data:{session}}=await db.auth.getSession();
   if(!session){showToast('ログインが必要です');setTimeout(()=>location.href='/',1500);return;}
@@ -258,6 +284,7 @@ async function init(){
   document.getElementById('plan-coins').textContent=coins.toLocaleString();
   document.getElementById('plan-price').textContent=amount.toLocaleString();
   document.getElementById('plan-info').style.display='block';
+  await loadPendingCoupon();
   document.getElementById('coupon-section').style.display='block';
   document.getElementById('loading-wrap').style.display='none';
   document.getElementById('main-section').style.display='block';
@@ -300,10 +327,10 @@ async function showBankForm(){
   const errEl=document.getElementById('pay-error');
   btn.disabled=true;btn.textContent='処理中...';errEl.style.display='none';
   try{
-    const couponCode=document.getElementById('coupon-code-input')?.value?.trim()||'';
-    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userToken:currentToken,method:'bank',couponCode})});
+    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userToken:currentToken,method:'bank',couponCode:pendingCouponCode||''})});
     const data=await res.json();
     if(data?.type==='bank'){
+      localStorage.removeItem('oripa_pending_coupon');
       showBankInfo(data);
     }else{
       errEl.textContent=data?.error||'エラー: '+JSON.stringify(data);
@@ -320,15 +347,14 @@ async function submitPayment(){
   btn.textContent='処理中...';
 
   try{
-    const couponCode=document.getElementById('coupon-code-input')?.value?.trim()||'';
-    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userToken:currentToken,couponCode})});
+    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userToken:currentToken,couponCode:pendingCouponCode||''})});
     const data=await res.json();
     if(!data?.clientSecret){errEl.textContent=data?.error||'エラー';errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;return;}
     const name=document.getElementById('card-name').value||currentUser.email;
     btn.textContent='本人確認（3Dセキュア）を確認中です…画面の指示に従ってください';
     const{error,paymentIntent}=await stripe.confirmCardPayment(data.clientSecret,{payment_method:{card:cardNum,billing_details:{name}}});
     if(error){errEl.textContent=error.message;errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;}
-    else if(paymentIntent.status==='succeeded'){showToast('🎉 決済完了！コインが付与されます',3000);setTimeout(()=>location.href='/?payment=success',2000);}
+    else if(paymentIntent.status==='succeeded'){localStorage.removeItem('oripa_pending_coupon');showToast('🎉 決済完了！コインが付与されます',3000);setTimeout(()=>location.href='/?payment=success',2000);}
   }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;}
 }
 
