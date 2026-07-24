@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>コイン購入 | オリパMAX</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--gold:#c9a84c;--gold2:#e8c96a;--gold3:#f5e090;
+  --text:#f0eadc;--text2:rgba(240,234,220,.9);--text3:rgba(240,234,220,.6);
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif}
+body{max-width:480px;margin:0 auto;padding-bottom:40px}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+.header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 16px;gap:12px;backdrop-filter:blur(20px)}
+.back-btn{background:none;border:none;color:var(--gold2);font-size:1rem;font-weight:700;cursor:pointer}
+.header-title{font-size:1rem;font-weight:900}
+.plan-info{margin:16px 16px 0;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:14px 16px}
+.plan-row{display:flex;justify-content:space-between;align-items:center}
+.plan-coins{display:flex;align-items:center;gap:6px;font-size:1.3rem;font-weight:900;color:var(--gold2)}
+.plan-price{font-size:1.1rem;font-weight:900}
+.plan-sub{font-size:.7rem;color:var(--text3);margin-top:4px}
+.section{margin:16px 16px 0}
+.section-title{font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:10px}
+.method-list{display:flex;flex-direction:column;gap:8px}
+.method-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;transition:.15s}
+.method-item.selected{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.method-radio{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.method-item.selected .method-radio{border-color:var(--gold);background:var(--gold)}
+.method-dot{width:7px;height:7px;border-radius:50%;background:#1a0a00;display:none}
+.method-item.selected .method-dot{display:block}
+.method-name{font-size:.95rem;font-weight:700}
+.method-sub{font-size:.72rem;color:var(--text3);margin-top:2px}
+.badges{display:flex;gap:3px}
+.badge{font-size:.55rem;font-weight:900;padding:2px 5px;border-radius:3px;color:#fff}
+.card-form{margin:12px 0 0;background:#fff;border-radius:12px;padding:16px;display:none}
+.field-label{font-size:.75rem;font-weight:700;color:#555;margin-bottom:6px}
+.field{margin-bottom:14px}
+.stripe-field{border:1.5px solid #ddd;border-radius:8px;padding:12px;background:#fafafa}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#card-name{width:100%;font-size:15px;color:#333;outline:none;font-family:inherit;border:1.5px solid #ddd;border-radius:8px;padding:12px;background:#fafafa}
+#card-name:focus{border-color:#c9a84c}
+.pay-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4);transition:.15s;display:none}
+.pay-btn:disabled{opacity:.6;cursor:not-allowed}
+#pay-error{color:#dc2626;font-size:.82rem;margin-top:8px;display:none;padding:8px 12px;background:rgba(220,38,38,.08);border-radius:8px}
+.notice{margin:16px 16px 0;background:rgba(255,255,255,.03);border-radius:10px;padding:12px 14px}
+.notice-item{font-size:.72rem;color:var(--text3);line-height:1.9;display:flex;gap:6px}
+.notice-item::before{content:'•';color:var(--gold);flex-shrink:0}
+.loading-wrap{display:flex;align-items:center;justify-content:center;padding:60px}
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(201,168,76,.1);border-top-color:var(--gold2);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="header">
+  <button class="back-btn" onclick="history.back()">← 戻る</button>
+  <div class="header-title">コイン購入</div>
+</div>
+
+<div class="plan-info" id="plan-info" style="display:none">
+  <div class="plan-sub">購入内容</div>
+  <div class="plan-row">
+    <div class="plan-coins">
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="10" fill="url(#g1)" stroke="url(#g2)" stroke-width="1"/><text x="11" y="14.5" text-anchor="middle" font-size="5.5" font-weight="900" font-family="sans-serif" fill="#1a0a00">MAX</text><defs><radialGradient id="g1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#fff3a0"/><stop offset="50%" stop-color="#ffd700"/><stop offset="100%" stop-color="#c8860a"/></radialGradient><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff3a0"/><stop offset="100%" stop-color="#c8860a"/></linearGradient></defs></svg>
+      <span id="plan-coins">-</span>コイン
+    </div>
+    <div class="plan-price">¥<span id="plan-price">-</span></div>
+  </div>
+  <div class="plan-sub" style="margin-top:4px">1コイン = 1円相当</div>
+</div>
+
+<div class="section" id="coupon-section" style="display:none">
+  <div class="section-title">🎟️ クーポンコード（任意）</div>
+  <div style="display:flex;gap:8px">
+    <input type="text" id="coupon-code-input" placeholder="お持ちの方はこちらに入力" style="flex:1;background:rgba(255,255,255,.05);border:1.5px solid rgba(201,168,76,.2);border-radius:8px;padding:10px 12px;color:var(--text);font-size:.85rem;text-transform:uppercase">
+  </div>
+  <div style="font-size:.68rem;color:var(--text3);margin-top:6px">※コードが正しければ、お支払い時に自動で割引が適用されます</div>
+</div>
+
+<div class="section" id="main-section" style="display:none">
+  <div class="section-title">💳 お支払い方法を選択</div>
+  <div class="method-list">
+    <div class="method-item" id="method-card" onclick="selectMethod('card')">
+      <div class="method-radio"><div class="method-dot"></div></div>
+      <div style="flex:1">
+        <div class="method-name">クレジットカード</div>
+        <div class="method-sub">即時反映</div>
+      </div>
+      
+    </div>
+
+  <!-- カード入力フォーム -->
+  <div class="card-form" id="card-form">
+    <div class="field">
+      <div class="field-label">カード番号</div>
+      <div class="stripe-field" id="card-number-el"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">有効期限</div>
+        <div class="stripe-field" id="card-expiry-el"></div>
+      </div>
+      <div class="field">
+        <div class="field-label">セキュリティコード</div>
+        <div class="stripe-field" id="card-cvc-el"></div>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">名義人</div>
+      <input type="text" id="card-name" placeholder="TARO YAMADA" autocomplete="cc-name">
+    </div>
+  </div>
+
+    <div class="method-item" id="method-bank" onclick="selectMethod('bank')">
+      <div class="method-radio"><div class="method-dot"></div></div>
+      <div style="flex:1">
+        <div class="method-name">銀行振込</div>
+        <div class="method-sub">入金確認後に反映（通常1時間程度、混雑時は最大1営業日）</div>
+      </div>
+      
+    </div>
+
+  <div id="pay-error"></div>
+  <button class="pay-btn" id="pay-btn" onclick="submitPayment()">購入する</button>
+  <button id="bank-btn" onclick="showBankForm()" style="display:none;width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4)">振込先を表示する</button>
+</div>
+
+<div class="notice" id="notice" style="display:none">
+  <div class="notice-item">クレジットカードは即時反映されます</div>
+  <div class="notice-item">銀行振込は入金確認後にコインが付与されます（通常1時間程度、営業時間外は翌営業日になる場合があります）</div>
+  <div class="notice-item">コインは購入から1年間有効です</div>
+</div>
+
+<div class="loading-wrap" id="loading-wrap">
+  <div class="spinner"></div>
+</div>
+
+<!-- 振込先情報 -->
+<div id="bank-info-section" style="display:none;margin:16px">
+  <div style="font-size:1rem;font-weight:900;margin-bottom:16px">振込先情報</div>
+
+  <!-- ステータス -->
+  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.82rem">
+      <span style="color:var(--text3)">ステータス</span><span style="color:#f59e0b;font-weight:700">入金待ち</span>
+      <span style="color:var(--text3)">決済方法</span><span style="font-weight:700">銀行振込</span>
+      <span style="color:var(--text3)">金額</span><span style="font-weight:700">¥<span id="bi-amount">-</span></span>
+      <span style="color:var(--text3)">コイン</span><span style="font-weight:700"><span id="bi-coins">-</span>コイン</span>
+      <span style="color:var(--text3)">支払い期日</span><span style="font-weight:700;color:#f87171" id="bi-due">-</span>
+    </div>
+  </div>
+
+  <!-- 振込先 -->
+  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="font-size:.82rem;font-weight:700;color:var(--gold2);margin-bottom:14px">振込先情報</div>
+    <div style="color:#f59e0b;font-size:.75rem;margin-bottom:12px">以下の口座へお振り込みください。入金が確認されると自動的にコインが付与されます。</div>
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span style="font-size:.8rem;color:var(--text3)">銀行名</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.88rem;font-weight:700" id="bi-bank">-</span>
+          <button onclick="copyText('bi-bank')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span style="font-size:.8rem;color:var(--text3)">支店名</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.88rem;font-weight:700" id="bi-branch">-</span>
+          <button onclick="copyText('bi-branch')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span style="font-size:.8rem;color:var(--text3)">口座種別</span>
+        <span style="font-size:.88rem;font-weight:700" id="bi-type">-</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span style="font-size:.8rem;color:var(--text3)">口座番号</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.88rem;font-weight:700" id="bi-number">-</span>
+          <button onclick="copyText('bi-number')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+        <span style="font-size:.8rem;color:var(--text3)">口座名義</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.88rem;font-weight:700" id="bi-name">-</span>
+          <button onclick="copyText('bi-name')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 注意事項 -->
+  <div style="background:rgba(255,150,0,.06);border:1px solid rgba(255,150,0,.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+    <div style="font-size:.72rem;color:rgba(255,200,100,.8);line-height:1.9">
+      ※ 必ずご本人様名義でお振り込みください<br>
+      ※ 通常10分〜1時間程度で反映されます（最大3営業日）<br>
+      ※ 土日祝は翌営業日の処理となります<br>
+      ※ 振込金額が不足している場合、コインは反映されません
+    </div>
+  </div>
+
+  <button onclick="location.href='/'" style="width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-weight:900;font-size:.9rem;border:none;cursor:pointer">一覧に戻る</button>
+</div>
+
+<script>
+const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1c3BveWFuZGV4b2tqdHNtYWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4NTkwNTgsImV4cCI6MjA1NzQzNTA1OH0.xyOmSPTOkMkSQ-0SIxQOtSINj8GHuL0C6oRQTLBbslI';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
+  auth:{
+    storageKey:'oripa-max-auth',
+    detectSessionInUrl:false,
+    autoRefreshToken:true,
+    persistSession:true,
+  }
+});
+const params=new URLSearchParams(location.search);
+const planId=params.get('plan');
+const amount=parseInt(params.get('amount')||'0');
+const coins=parseInt(params.get('coins')||'0');
+let stripe=null,cardNum=null,cardExp=null,cardCvc=null;
+let currentUser=null,currentToken=null,selectedMethod=null,cardMounted=false;
+
+function showToast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+
+function copyText(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  navigator.clipboard.writeText(el.textContent).then(()=>showToast('コピーしました'));
+}
+
+function showBankInfo(data){
+  const zengin=data.bankInfo||{};
+  const params=new URLSearchParams({
+    amount: data.amount||amount,
+    coins: coins,
+    bank: zengin.bank_name||'',
+    branch: zengin.branch_name||'',
+    number: zengin.account_number||'',
+    name: zengin.account_holder_name||'',
+  });
+  location.href='/bank.html?'+params.toString();
+}
+
+async function init(){
+  const{data:{session}}=await db.auth.getSession();
+  if(!session){showToast('ログインが必要です');setTimeout(()=>location.href='/',1500);return;}
+  currentUser=session.user;
+  currentToken=session.access_token;
+  document.getElementById('plan-coins').textContent=coins.toLocaleString();
+  document.getElementById('plan-price').textContent=amount.toLocaleString();
+  document.getElementById('plan-info').style.display='block';
+  document.getElementById('coupon-section').style.display='block';
+  document.getElementById('loading-wrap').style.display='none';
+  document.getElementById('main-section').style.display='block';
+  document.getElementById('notice').style.display='block';
+  stripe=Stripe('pk_live_51TB2BeJoybCGBMPZ8zckgTLwxvh5vXPYjHEWaHl9rm2QlRZj70b9sRQ9TFVa4l0Kod1zBnV3QWUofQ1sDjCbIhvM005EXcgFPF');
+}
+
+function selectMethod(method){
+  selectedMethod=method;
+  document.querySelectorAll('.method-item').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('method-'+method).classList.add('selected');
+  const cardForm=document.getElementById('card-form');
+  const payBtn=document.getElementById('pay-btn');
+  const bankBtn=document.getElementById('bank-btn');
+  if(method==='card'){
+    cardForm.style.display='block';
+    payBtn.style.display='block';
+    payBtn.textContent='カードで購入する';
+    bankBtn.style.display='none';
+    if(!cardMounted){
+      const els=stripe.elements();
+      const style={base:{fontSize:'15px',color:'#333',fontFamily:'Noto Sans JP,sans-serif','::placeholder':{color:'#bbb'}},invalid:{color:'#dc2626'}};
+      cardNum=els.create('cardNumber',{style,showIcon:true});
+      cardExp=els.create('cardExpiry',{style});
+      cardCvc=els.create('cardCvc',{style});
+      cardNum.mount('#card-number-el');
+      cardExp.mount('#card-expiry-el');
+      cardCvc.mount('#card-cvc-el');
+      cardMounted=true;
+    }
+  }else{
+    cardForm.style.display='none';
+    payBtn.style.display='none';
+    bankBtn.style.display='block';
+  }
+}
+
+async function showBankForm(){
+  const btn=document.getElementById('bank-btn');
+  const errEl=document.getElementById('pay-error');
+  btn.disabled=true;btn.textContent='処理中...';errEl.style.display='none';
+  try{
+    const couponCode=document.getElementById('coupon-code-input')?.value?.trim()||'';
+    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userToken:currentToken,method:'bank',couponCode})});
+    const data=await res.json();
+    if(data?.type==='bank'){
+      showBankInfo(data);
+    }else{
+      errEl.textContent=data?.error||'エラー: '+JSON.stringify(data);
+      errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';
+    }
+  }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;btn.textContent='振込先を表示する';}
+}
+
+async function submitPayment(){
+  const btn=document.getElementById('pay-btn');
+  const errEl=document.getElementById('pay-error');
+  const originalText=btn.textContent;
+  btn.disabled=true;errEl.style.display='none';
+  btn.textContent='処理中...';
+
+  try{
+    const couponCode=document.getElementById('coupon-code-input')?.value?.trim()||'';
+    const res=await fetch('/api/create-payment-intent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planId,userId:currentUser.id,userToken:currentToken,couponCode})});
+    const data=await res.json();
+    if(!data?.clientSecret){errEl.textContent=data?.error||'エラー';errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;return;}
+    const name=document.getElementById('card-name').value||currentUser.email;
+    btn.textContent='本人確認（3Dセキュア）を確認中です…画面の指示に従ってください';
+    const{error,paymentIntent}=await stripe.confirmCardPayment(data.clientSecret,{payment_method:{card:cardNum,billing_details:{name}}});
+    if(error){errEl.textContent=error.message;errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;}
+    else if(paymentIntent.status==='succeeded'){showToast('🎉 決済完了！コインが付与されます',3000);setTimeout(()=>location.href='/?payment=success',2000);}
+  }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;}
+}
+
+init();
+</script>
+</body>
+</html>
