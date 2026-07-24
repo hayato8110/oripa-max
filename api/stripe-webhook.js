@@ -23,6 +23,17 @@ function getRankBonusRate(totalSpent) {
   return RANKS[0];
 }
 
+// 決済成功時にクーポン使用履歴を記録する（悪用防止のため、成功時のみ記録）
+async function recordCouponUse(userId, couponCode) {
+  if (!couponCode) return;
+  const { data: coupon } = await supabase.from('coupons').select('id, total_used').eq('code', couponCode).single();
+  if (!coupon) return;
+  const { error } = await supabase.from('coupon_uses').insert({ user_id: userId, coupon_id: coupon.id });
+  if (!error) {
+    await supabase.from('coupons').update({ total_used: (coupon.total_used || 0) + 1 }).eq('id', coupon.id);
+  }
+}
+
 // 友達招待ボーナス（初回コイン購入時に一度だけ判定、招待した側は先着20人まで）
 async function processReferralBonus(userId) {
   const { data: buyer } = await supabase
@@ -71,7 +82,7 @@ async function processReferralBonus(userId) {
 
 // コイン付与共通処理（Checkout Session用）
 async function grantCoins(session) {
-  const { userId, coin, bonus } = session.metadata;
+  const { userId, coin, bonus, couponCode } = session.metadata;
 
   // 二重付与防止：同じsession.idで既に付与済みかチェック
   const { data: existing } = await supabase
@@ -129,11 +140,12 @@ async function grantCoins(session) {
   console.log(`✅ コイン付与完了: ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}）`);
 
   try { await processReferralBonus(userId); } catch (e) { console.error('紹介ボーナスエラー:', e); }
+  try { await recordCouponUse(userId, couponCode); } catch (e) { console.error('クーポン記録エラー:', e); }
 }
 
 // コイン付与共通処理（PaymentIntent用）
 async function grantCoinsFromPaymentIntent(paymentIntent) {
-  const { userId, coin, bonus } = paymentIntent.metadata;
+  const { userId, coin, bonus, couponCode } = paymentIntent.metadata;
 
   const { data: user, error: userError } = await supabase
     .from('users')
@@ -191,6 +203,7 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
   console.log(`✅ コイン付与完了(PI): ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}）`);
 
   try { await processReferralBonus(userId); } catch (e) { console.error('紹介ボーナスエラー:', e); }
+  try { await recordCouponUse(userId, couponCode); } catch (e) { console.error('クーポン記録エラー:', e); }
 }
 
 export default async function handler(req, res) {
