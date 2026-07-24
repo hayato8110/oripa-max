@@ -1,4 +1,10 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
 const PLANS = [
   { id: 'p110',     coin: 110,     amount: 110 },
@@ -23,9 +29,56 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { planId, userId, userEmail, method } = req.body;
+    const { planId, userId, userToken, method, couponCode } = req.body;
+    if (!userToken) return res.status(400).json({ error: 'Missing token' });
+
+    // 本人確認：リクエストしてきたuserTokenが、本当にuserIdの持ち主かを検証する
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(userToken);
+    if (authErr || !user || user.id !== userId) {
+      return res.status(401).json({ error: '認証エラー' });
+    }
+    const userEmail = user.email;
+
     const plan = PLANS.find(p => p.id === planId);
     if (!plan) return res.status(400).json({ error: 'Invalid plan' });
+
+    // クーポンの検証（サーバー側で必ず再検証し、金額を確定する）
+    let finalAmount = plan.amount;
+    let appliedCouponCode = null;
+    if (couponCode) {
+      const { data: coupon } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', couponCode.toUpperCase())
+        .eq('is_active', true)
+        .single();
+
+      if (coupon) {
+        const now = new Date();
+        const notExpired = !coupon.expires_at || new Date(coupon.expires_at) > now;
+        const { data: alreadyUsed } = await supabase
+          .from('coupon_uses')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('coupon_id', coupon.id)
+          .single();
+        const underTotalCap = !coupon.max_total_uses || coupon.max_total_uses === 0 || (coupon.total_used || 0) < coupon.max_total_uses;
+
+        if (notExpired && !alreadyUsed && underTotalCap) {
+          let percent = 0;
+          if (coupon.discount_type === 'percent') {
+            const capOk = !coupon.max_applicable_amount || coupon.max_applicable_amount === 0 || plan.amount <= coupon.max_applicable_amount;
+            if (capOk) percent = coupon.discount_amount || 0;
+          } else if (coupon.discount_type === 'tiered_percent') {
+            percent = (coupon.tiered_discounts && coupon.tiered_discounts[planId]) || 0;
+          }
+          if (percent > 0) {
+            finalAmount = Math.max(50, Math.round(plan.amount * (1 - percent / 100)));
+            appliedCouponCode = coupon.code;
+          }
+        }
+      }
+    }
 
     // Stripe Customer取得 or 作成
     let customerId;
@@ -59,7 +112,7 @@ export default async function handler(req, res) {
         paymentIntent = existingPI;
       } else {
         paymentIntent = await stripe.paymentIntents.create({
-          amount: plan.amount,
+          amount: finalAmount,
           currency: 'jpy',
           customer: customerId,
           payment_method_types: ['customer_balance'],
@@ -71,7 +124,7 @@ export default async function handler(req, res) {
           },
           confirm: true,
           payment_method_data: { type: 'customer_balance' },
-          metadata: { userId, planId, coin: String(plan.coin), bonus: '0' },
+          metadata: { userId, planId, coin: String(plan.coin), bonus: '0', couponCode: appliedCouponCode || '' },
         });
       }
 
@@ -84,7 +137,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         type: 'bank',
         paymentIntentId: paymentIntent.id,
-        amount: instructions?.amount_remaining || plan.amount,
+        amount: instructions?.amount_remaining || finalAmount,
         bankInfo: financialAddress?.zengin || financialAddress || null,
         reference: instructions?.reference,
         instructionsUrl: instructions?.hosted_instructions_url || null,
@@ -93,16 +146,17 @@ export default async function handler(req, res) {
 
     // クレカの場合
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: plan.amount,
+      amount: finalAmount,
       currency: 'jpy',
       customer: customerId,
       payment_method_types: ['card'],
-      metadata: { userId, planId, coin: String(plan.coin), bonus: '0' },
+      metadata: { userId, planId, coin: String(plan.coin), bonus: '0', couponCode: appliedCouponCode || '' },
     });
 
     return res.status(200).json({
       type: 'card',
       clientSecret: paymentIntent.client_secret,
+      amount: finalAmount,
     });
   } catch (error) {
     console.error('Stripe error:', error);
