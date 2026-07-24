@@ -244,9 +244,14 @@ function showBankInfo(data){
 
 async function loadPendingCoupon(){
   const code=localStorage.getItem('oripa_pending_coupon');
+  const dbg=document.createElement('div');
+  dbg.style.cssText='background:#300;color:#fff;font-size:11px;padding:8px;white-space:pre-wrap;word-break:break-all';
+  document.body.insertBefore(dbg,document.body.firstChild);
+  dbg.textContent='DEBUG code='+JSON.stringify(code)+' planId='+planId+' amount='+amount;
   if(!code)return;
   try{
-    const{data:coupon}=await db.from('coupons').select('discount_type,discount_amount,max_applicable_amount,tiered_discounts,is_active,expires_at').eq('code',code).eq('is_active',true).single();
+    const{data:coupon,error}=await db.from('coupons').select('discount_type,discount_amount,max_applicable_amount,tiered_discounts,is_active,expires_at').eq('code',code).eq('is_active',true).single();
+    dbg.textContent+='\ncoupon='+JSON.stringify(coupon)+'\nerror='+JSON.stringify(error);
     if(!coupon)return;
     if(coupon.expires_at&&new Date(coupon.expires_at)<new Date())return;
     let percent=0;
@@ -256,6 +261,7 @@ async function loadPendingCoupon(){
     }else if(coupon.discount_type==='tiered_percent'){
       percent=(coupon.tiered_discounts&&coupon.tiered_discounts[planId])||0;
     }
+    dbg.textContent+='\npercent='+percent;
     if(percent>0){
       pendingCouponCode=code;
       const discounted=Math.max(50,Math.round(amount*(1-percent/100)));
@@ -263,7 +269,7 @@ async function loadPendingCoupon(){
       document.getElementById('plan-price-original').style.display='inline';
       document.getElementById('plan-price').textContent=discounted.toLocaleString();
     }
-  }catch(e){/* クーポン表示に失敗しても決済自体は続行できるので握りつぶす */}
+  }catch(e){dbg.textContent+='\ncatch e='+e.message;}
 }
 
 async function init(){
