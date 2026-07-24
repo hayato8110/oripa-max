@@ -3191,8 +3191,9 @@ async function applyCoupon(){
     document.getElementById('coupon-code-input').value='';
     showToast(`🎟️ クーポン適用！+${data.discountAmount}コイン！`,3000);
   } else {
+    localStorage.setItem('oripa_pending_coupon',code);
     document.getElementById('coupon-code-input').value='';
-    showToast(`🎟️ ${data.discountAmount}%OFFクーポンを適用しました！`,3000);
+    showToast(`🎟️ クーポンを適用しました！次回のコイン購入時に自動で割引されます`,3000);
   }
 }
 
