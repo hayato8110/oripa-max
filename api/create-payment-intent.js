@@ -104,7 +104,8 @@ export default async function handler(req, res) {
       const existingPI = existingPIs.data.find(pi => 
         pi.status === 'requires_action' && 
         pi.payment_method_types.includes('customer_balance') &&
-        pi.metadata?.planId === planId
+        pi.metadata?.planId === planId &&
+        pi.amount === finalAmount
       );
 
       let paymentIntent;
