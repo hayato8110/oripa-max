@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, newCoin, orderId: orders[0].id });
 
   } else if (action === 'coupon') {
-    // クーポン適用
+    // クーポン適用（コイン付与型はここで即時付与、割引%型は決済時にサーバー側で反映）
     const { code } = req.body;
 
     const { data: coupon } = await supabase
@@ -70,30 +70,37 @@ export default async function handler(req, res) {
 
     if (!coupon) return res.status(404).json({ error: 'クーポンが見つかりません' });
 
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'このクーポンは期限切れです' });
+    }
+    if (coupon.max_total_uses > 0 && (coupon.total_used || 0) >= coupon.max_total_uses) {
+      return res.status(400).json({ error: 'このクーポンは配布上限に達しました' });
+    }
+
     // 使用済みチェック
     const { data: used } = await supabase
       .from('coupon_uses').select('id').eq('user_id', userId).eq('coupon_id', coupon.id).single();
     if (used) return res.status(400).json({ error: '既に使用済みです' });
 
-    const { data: userData } = await supabase
-      .from('users').select('coin_points').eq('id', userId).single();
-
-    let newCoin = userData.coin_points;
     if (coupon.discount_type === 'coin') {
-      newCoin += coupon.discount_amount;
-      await supabase.from('users').update({ coin_points: newCoin }).eq('id', userId);
+      const { data: userData } = await supabase
+        .from('users').select('coin_points').eq('id', userId).single();
+      const newCoin = (userData?.coin_points || 0) + coupon.discount_amount;
+      await Promise.all([
+        supabase.from('users').update({ coin_points: newCoin }).eq('id', userId),
+        supabase.from('coupons').update({ total_used: (coupon.total_used || 0) + 1 }).eq('id', coupon.id),
+        supabase.from('coupon_uses').insert({ user_id: userId, coupon_id: coupon.id })
+      ]);
+      return res.status(200).json({ success: true, newCoin, discountType: 'coin', discountAmount: coupon.discount_amount });
     }
 
-    await Promise.all([
-      supabase.from('coupons').update({ total_used: (coupon.total_used || 0) + 1 }).eq('id', coupon.id),
-      supabase.from('coupon_uses').insert({ user_id: userId, coupon_id: coupon.id })
-    ]);
-
+    // 割引%型・プラン別割引型は、ここでは「使用済み」にせず、次回のコイン購入時にサーバー側で自動適用される
     return res.status(200).json({
       success: true,
-      newCoin,
       discountType: coupon.discount_type,
-      discountAmount: coupon.discount_amount
+      discountAmount: coupon.discount_amount,
+      maxApplicableAmount: coupon.max_applicable_amount,
+      tieredDiscounts: coupon.tiered_discounts,
     });
 
   } else {
