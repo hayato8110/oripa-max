@@ -1066,8 +1066,12 @@ async function openWithdrawAccount(){
         ・退会後は同じメールアドレスでログインできなくなります<br>
         ・法令に基づき、取引履歴の記録は一定期間保持されます
       </div>
+      <div style="margin-bottom:20px">
+        <div style="font-size:.8rem;color:var(--text2);margin-bottom:6px">確認のため、下の欄に「<b>退会</b>」と入力してください</div>
+        <input id="withdraw-confirm-input" type="text" placeholder="退会" style="width:100%;padding:12px;border-radius:8px;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text);font-size:.9rem" oninput="const ok=(this.value==='退会');const b=document.getElementById('withdraw-confirm-btn');b.disabled=!ok;b.style.opacity=ok?'1':'.4';b.style.cursor=ok?'pointer':'not-allowed'">
+      </div>
       <button onclick="closeWithdrawModal()" style="width:100%;background:var(--primary);color:#fff;border-radius:8px;padding:14px;font-size:.9rem;font-weight:900;margin-bottom:10px">キャンセル</button>
-      <button onclick="confirmWithdrawAccount()" style="width:100%;background:none;border:1.5px solid #d33;color:#d33;border-radius:8px;padding:14px;font-size:.85rem;font-weight:900">同意して退会する</button>
+      <button id="withdraw-confirm-btn" onclick="confirmWithdrawAccount()" disabled style="width:100%;background:none;border:1.5px solid #d33;color:#d33;border-radius:8px;padding:14px;font-size:.85rem;font-weight:900;opacity:.4">同意して退会する</button>
     </div>
   </div>`;
   modal.id='withdraw-modal';
@@ -1079,6 +1083,8 @@ function closeWithdrawModal(){
 }
 
 async function confirmWithdrawAccount(){
+  const val=document.getElementById('withdraw-confirm-input')?.value;
+  if(val!=='退会'){showToast('⚠️ 「退会」と入力してください');return;}
   const{data:{session}}=await db.auth.getSession();
   if(!session){showToast('⚠️ セッションが切れています');return;}
   showToast('処理中...');
