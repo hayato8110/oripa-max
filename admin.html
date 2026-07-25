@@ -2086,6 +2086,7 @@ function renderHistory(data){
   const rarLabel={sar:'S賞',sr:'A賞',rr:'B賞',r:'C賞',c:'その他'};
   document.getElementById('history-tbl-body').innerHTML=data.map(s=>{
     const results=s.results||[];
+    const perDrawCost=results.length?Math.round((s.total_cost||0)/results.length):0;
     return results.map(r=>`
     <tr>
       <td style="font-size:.7rem">${new Date(s.created_at).toLocaleString('ja-JP')}</td>
@@ -2093,7 +2094,7 @@ function renderHistory(data){
       <td style="font-size:.72rem">${s.packs?.name||'—'}</td>
       <td class="td-bold">${r.prize_name||'—'}</td>
       <td><span style="color:${tc[r.prize_tier]||'#fff'};font-weight:900;font-size:.72rem">${rarLabel[r.prize_tier]||(r.prize_tier||'').toUpperCase()}</span></td>
-      <td style="font-size:.72rem">${s.total_cost||0}</td>
+      <td style="font-size:.72rem">${perDrawCost}</td>
     </tr>`).join('');
   }).join('');
 }
