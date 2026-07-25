@@ -990,6 +990,11 @@ async function doRegister(){
     birth_date:birth,
     created_at:new Date().toISOString(),
   });
+  if(!data.session){
+    closeAllModals();
+    showToast('📧 確認メールを送信しました。メール内のリンクから認証してください',5000);
+    return;
+  }
   state.session=data.session;
   await loadUserProfile(data.user.id);
   closeAllModals();
