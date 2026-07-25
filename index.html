@@ -981,6 +981,8 @@ async function doRegister(){
   if(!name||!email||!pass||!birth){showToast('⚠️ 全項目を入力してください');return;}
   const age=Math.floor((Date.now()-new Date(birth))/(365.25*24*3600*1000));
   if(age<18){showToast('⚠️ 18歳未満は利用できません');return;}
+  const{data:existingUser}=await db.from('users').select('id').eq('email',email).maybeSingle();
+  if(existingUser){showToast('⚠️ このメールアドレスは既に登録されています');return;}
   showToast('登録中...');
   const{data,error}=await db.auth.signUp({email,password:pass});
   if(error){showToast('⚠️ '+error.message);return;}
