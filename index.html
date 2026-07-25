@@ -1031,7 +1031,7 @@ function linkLine(){
   if(!state.user){showToast('⚠️ ログインが必要です');return;}
   const lineState=btoa(state.user.id); // ユーザーIDをbase64エンコードしてstateに埋め込む
   const redirectUri=encodeURIComponent(`${location.origin}/line-callback.html`);
-  const url=`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2009627127&redirect_uri=${redirectUri}&state=${lineState}&scope=profile`;
+  const url=`https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=2009627127&redirect_uri=${redirectUri}&state=${encodeURIComponent(lineState)}&scope=profile`;
   location.href=url;
 }
 
