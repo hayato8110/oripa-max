@@ -123,7 +123,6 @@ async function grantCoins(session) {
       amount_jpy: session.amount_total,
       jp_points: parseInt(coin),
       bonus_points: parseInt(bonus) + rankBonusCoin,
-      status: 'completed',
       stripe_session_id: session.id,
     });
 
@@ -186,7 +185,6 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
       amount_jpy: paymentIntent.amount,
       jp_points: parseInt(coin),
       bonus_points: parseInt(bonus || 0) + rankBonusCoin,
-      status: 'completed',
       stripe_session_id: paymentIntent.id,
     });
 
