@@ -237,7 +237,7 @@ async function safeDecrement(table, id, amount, floorZero = true) {
       draw_count: results.length,
       total_cost: cost,
       currency: 'coin',
-      results: results.map(r => ({ prize_name: r.prize.name, prize_tier: r.prize.tier, is_converted: false, is_shipped: false })),
+      results: results.map(r => ({ prize_name: r.prize.name, prize_tier: r.prize.tier, value_jp: r.prize.value_jp || 0, is_converted: false, is_shipped: false })),
       expires_at: expiresAt,
     }).select('id').single()
   ]);
