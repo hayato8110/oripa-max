@@ -45,7 +45,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #card-name{width:100%;font-size:15px;color:#333;outline:none;font-family:inherit;border:1.5px solid #ddd;border-radius:8px;padding:12px;background:#fafafa}
 #card-name:focus{border-color:#c9a84c}
-.pay-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4);transition:.15s;display:none}
+.pay-btn{width:100%;padding:15px;border-radius:12px;background:var(--gold2);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4);transition:.15s;display:none}
 .pay-btn:disabled{opacity:.6;cursor:not-allowed}
 #pay-error{color:#dc2626;font-size:.82rem;margin-top:8px;display:none;padding:8px 12px;background:rgba(220,38,38,.08);border-radius:8px}
 .notice{margin:16px 16px 0;background:var(--bg2);border-radius:10px;padding:12px 14px}
@@ -123,7 +123,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 
   <div id="pay-error"></div>
   <button class="pay-btn" id="pay-btn" onclick="submitPayment()">購入する</button>
-  <button id="bank-btn" onclick="showBankForm()" style="display:none;width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4)">振込先を表示する</button>
+  <button id="bank-btn" onclick="showBankForm()" style="display:none;width:100%;padding:15px;border-radius:12px;background:var(--gold2);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4)">振込先を表示する</button>
 </div>
 
 <div class="notice" id="notice" style="display:none">
@@ -201,7 +201,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
     </div>
   </div>
 
-  <button onclick="location.href='/'" style="width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-weight:900;font-size:.9rem;border:none;cursor:pointer">一覧に戻る</button>
+  <button onclick="location.href='/'" style="width:100%;padding:14px;border-radius:12px;background:var(--gold2);color:#1a0a00;font-weight:900;font-size:.9rem;border:none;cursor:pointer">一覧に戻る</button>
 </div>
 
 <script>
