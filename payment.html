@@ -10,26 +10,27 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0a0a0f;--bg2:#111118;--gold:#c9a84c;--gold2:#e8c96a;--gold3:#f5e090;
-  --text:#f0eadc;--text2:rgba(240,234,220,.9);--text3:rgba(240,234,220,.6);
+  --bg:#ffffff;--bg2:#f7f7f7;--gold:#c9a84c;--gold2:#e8c96a;--gold3:#f5e090;
+  --text:#1a1a1a;--text2:rgba(26,26,26,.65);--text3:rgba(26,26,26,.4);
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.14);
 }
 html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif}
 body{max-width:480px;margin:0 auto;padding-bottom:40px}
 button{font-family:inherit;cursor:pointer;border:none;outline:none}
-.header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.96);border-bottom:1px solid rgba(201,168,76,.12);height:52px;display:flex;align-items:center;padding:0 16px;gap:12px;backdrop-filter:blur(20px)}
-.back-btn{background:none;border:none;color:var(--gold2);font-size:1rem;font-weight:700;cursor:pointer}
+.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 16px;gap:12px;backdrop-filter:blur(20px)}
+.back-btn{background:none;border:none;color:var(--gold);font-size:1rem;font-weight:700;cursor:pointer}
 .header-title{font-size:1rem;font-weight:900}
 .plan-info{margin:16px 16px 0;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:14px 16px}
 .plan-row{display:flex;justify-content:space-between;align-items:center}
-.plan-coins{display:flex;align-items:center;gap:6px;font-size:1.3rem;font-weight:900;color:var(--gold2)}
+.plan-coins{display:flex;align-items:center;gap:6px;font-size:1.3rem;font-weight:900;color:var(--text)}
 .plan-price{font-size:1.1rem;font-weight:900}
 .plan-sub{font-size:.7rem;color:var(--text3);margin-top:4px}
 .section{margin:16px 16px 0}
 .section-title{font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:10px}
 .method-list{display:flex;flex-direction:column;gap:8px}
-.method-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;transition:.15s}
+.method-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg2);border:1.5px solid var(--border2);border-radius:12px;cursor:pointer;transition:.15s}
 .method-item.selected{border-color:var(--gold);background:rgba(201,168,76,.08)}
-.method-radio{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.method-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
 .method-item.selected .method-radio{border-color:var(--gold);background:var(--gold)}
 .method-dot{width:7px;height:7px;border-radius:50%;background:#1a0a00;display:none}
 .method-item.selected .method-dot{display:block}
@@ -37,7 +38,7 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 .method-sub{font-size:.72rem;color:var(--text3);margin-top:2px}
 .badges{display:flex;gap:3px}
 .badge{font-size:.55rem;font-weight:900;padding:2px 5px;border-radius:3px;color:#fff}
-.card-form{margin:12px 0 0;background:#fff;border-radius:12px;padding:16px;display:none}
+.card-form{margin:12px 0 0;background:#fff;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.05);border-radius:12px;padding:16px;display:none}
 .field-label{font-size:.75rem;font-weight:700;color:#555;margin-bottom:6px}
 .field{margin-bottom:14px}
 .stripe-field{border:1.5px solid #ddd;border-radius:8px;padding:12px;background:#fafafa}
@@ -47,11 +48,11 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
 .pay-btn{width:100%;padding:15px;border-radius:12px;background:linear-gradient(135deg,var(--gold3),var(--gold2),#b8832a);color:#1a0a00;font-size:1rem;font-weight:900;border:none;cursor:pointer;margin-top:16px;letter-spacing:.05em;box-shadow:0 4px 18px rgba(201,168,76,.4);transition:.15s;display:none}
 .pay-btn:disabled{opacity:.6;cursor:not-allowed}
 #pay-error{color:#dc2626;font-size:.82rem;margin-top:8px;display:none;padding:8px 12px;background:rgba(220,38,38,.08);border-radius:8px}
-.notice{margin:16px 16px 0;background:rgba(255,255,255,.03);border-radius:10px;padding:12px 14px}
+.notice{margin:16px 16px 0;background:var(--bg2);border-radius:10px;padding:12px 14px}
 .notice-item{font-size:.72rem;color:var(--text3);line-height:1.9;display:flex;gap:6px}
 .notice-item::before{content:'•';color:var(--gold);flex-shrink:0}
 .loading-wrap{display:flex;align-items:center;justify-content:center;padding:60px}
-.spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(201,168,76,.1);border-top-color:var(--gold2);animation:spin .8s linear infinite}
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(201,168,76,.15);border-top-color:var(--gold);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;padding:10px 22px;border-radius:999px;font-size:.82rem;font-weight:700;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap}
 #toast.show{opacity:1}
@@ -140,59 +141,59 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none}
   <div style="font-size:1rem;font-weight:900;margin-bottom:16px">振込先情報</div>
 
   <!-- ステータス -->
-  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.82rem">
-      <span style="color:var(--text3)">ステータス</span><span style="color:#f59e0b;font-weight:700">入金待ち</span>
+      <span style="color:var(--text3)">ステータス</span><span style="color:#b45309;font-weight:700">入金待ち</span>
       <span style="color:var(--text3)">決済方法</span><span style="font-weight:700">銀行振込</span>
       <span style="color:var(--text3)">金額</span><span style="font-weight:700">¥<span id="bi-amount">-</span></span>
       <span style="color:var(--text3)">コイン</span><span style="font-weight:700"><span id="bi-coins">-</span>コイン</span>
-      <span style="color:var(--text3)">支払い期日</span><span style="font-weight:700;color:#f87171" id="bi-due">-</span>
+      <span style="color:var(--text3)">支払い期日</span><span style="font-weight:700;color:#dc2626" id="bi-due">-</span>
     </div>
   </div>
 
   <!-- 振込先 -->
-  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="font-size:.82rem;font-weight:700;color:var(--gold2);margin-bottom:14px">振込先情報</div>
-    <div style="color:#f59e0b;font-size:.75rem;margin-bottom:12px">以下の口座へお振り込みください。入金が確認されると自動的にコインが付与されます。</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="font-size:.82rem;font-weight:700;color:var(--gold);margin-bottom:14px">振込先情報</div>
+    <div style="color:#b45309;font-size:.75rem;margin-bottom:12px">以下の口座へお振り込みください。入金が確認されると自動的にコインが付与されます。</div>
     <div style="display:flex;flex-direction:column;gap:0">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:.8rem;color:var(--text3)">銀行名</span>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:.88rem;font-weight:700" id="bi-bank">-</span>
-          <button onclick="copyText('bi-bank')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+          <button onclick="copyText('bi-bank')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#8a6d1f;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
         </div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:.8rem;color:var(--text3)">支店名</span>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:.88rem;font-weight:700" id="bi-branch">-</span>
-          <button onclick="copyText('bi-branch')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+          <button onclick="copyText('bi-branch')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#8a6d1f;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
         </div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:.8rem;color:var(--text3)">口座種別</span>
         <span style="font-size:.88rem;font-weight:700" id="bi-type">-</span>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:.8rem;color:var(--text3)">口座番号</span>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:.88rem;font-weight:700" id="bi-number">-</span>
-          <button onclick="copyText('bi-number')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+          <button onclick="copyText('bi-number')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#8a6d1f;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
         <span style="font-size:.8rem;color:var(--text3)">口座名義</span>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:.88rem;font-weight:700" id="bi-name">-</span>
-          <button onclick="copyText('bi-name')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
+          <button onclick="copyText('bi-name')" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#8a6d1f;border-radius:4px;padding:2px 8px;font-size:.65rem;cursor:pointer">コピー</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- 注意事項 -->
-  <div style="background:rgba(255,150,0,.06);border:1px solid rgba(255,150,0,.2);border-radius:10px;padding:12px 14px;margin-bottom:12px">
-    <div style="font-size:.72rem;color:rgba(255,200,100,.8);line-height:1.9">
+  <div style="background:rgba(255,150,0,.08);border:1px solid rgba(255,150,0,.25);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+    <div style="font-size:.72rem;color:#92400e;line-height:1.9">
       ※ 必ずご本人様名義でお振り込みください<br>
       ※ 通常10分〜1時間程度で反映されます（最大3営業日）<br>
       ※ 土日祝は翌営業日の処理となります<br>
