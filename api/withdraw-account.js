@@ -24,6 +24,7 @@ export default async function handler(req, res) {
     .from('users')
     .update({
       username: '退会済みユーザー',
+      email: anonEmail,
       is_banned: true,
       coin_points: 0,
       invited_by: null,
