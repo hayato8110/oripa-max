@@ -43,7 +43,11 @@ export default async function handler(req, res) {
 
   // Supabase Auth側のメールアドレスも変更し、再登録を防ぐ
   try {
-    await supabase.auth.admin.updateUserById(userId, { email: anonEmail });
+    const { error: emailErr } = await supabase.auth.admin.updateUserById(userId, {
+      email: anonEmail,
+      email_confirm: true,
+    });
+    if (emailErr) console.error('auth email更新エラー:', emailErr);
   } catch (e) {
     console.error('auth email更新エラー:', e);
   }
