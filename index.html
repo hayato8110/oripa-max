@@ -3029,7 +3029,7 @@ function renderMyPage(){
       </div>
       <div class="mp-pts-row" style="position:relative;z-index:1">
         <div class="mp-pt" style="grid-column:span 2;${getRankBoxStyle(getRankInfo(state.totalSpent).rank.name)}">
-          ${getRankInfo(state.totalSpent).rank.name!=='ランクなし'?`<img src="/rank-badge-${{'ブロンズ':'bronze','シルバー':'silver','ゴールド':'gold','プラチナ':'platinum','ダイヤ':'diamond','シークレットVIP':'vip'}[getRankInfo(state.totalSpent).rank.name]}.png" style="width:110px;height:auto;margin-bottom:6px" alt="rank badge">`:''}
+          ${getRankInfo(state.totalSpent).rank.name!=='ランクなし'?`<img src="/rank-badge-${{'ブロンズ':'bronze','シルバー':'silver','ゴールド':'gold','プラチナ':'platinum','ダイヤ':'diamond','シークレットVIP':'vip'}[getRankInfo(state.totalSpent).rank.name]}.png" style="width:160px;height:auto;margin-bottom:6px" alt="rank badge">`:''}
           ${getRankInfo(state.totalSpent).rank.name==='ランクなし'?`<div style="font-size:1.3rem;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)">${getRankInfo(state.totalSpent).rank.name}</div>`:''}
           <div style="font-size:.65rem;margin-top:6px;${getRankInfo(state.totalSpent).rank.name==='シークレットVIP'?'color:rgba(245,224,144,.7)':'color:rgba(255,255,255,.75)'}">${(()=>{const info=getRankInfo(state.totalSpent);const next=RANKS[info.idx+1];return next?`次のランクまであと${(next.min-state.totalSpent).toLocaleString()}コイン`:'';})()}</div>
         </div>
