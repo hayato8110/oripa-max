@@ -129,11 +129,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '残り口数が不足しています' });
   }
 
+  // exclude_from_rank(ランク集計対象外)のパックは、コインは減らすが
+  // ランク判定用のtotal_spentには加算しない
+  const spentDelta = pack.exclude_from_rank ? 0 : cost;
+
   // コイン残高の減算は「読み取った時点の残高と一致してる場合のみ」成功する条件付き更新にする
   // →同時に2回リクエストが来ても、片方は失敗して二重消費を防げる
   const { data: coinLockResult, error: coinLockErr } = await supabase
     .from('users')
-    .update({ coin_points: userData.coin_points - cost, total_spent: (userData.total_spent || 0) + cost })
+    .update({ coin_points: userData.coin_points - cost, total_spent: (userData.total_spent || 0) + spentDelta })
     .eq('id', userId)
     .eq('coin_points', userData.coin_points)
     .select('coin_points, total_spent')
