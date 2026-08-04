@@ -181,7 +181,7 @@ export default async function handler(req, res) {
   const onStockTotal = prizes.reduce((s, p) => s + prizeStock[p.id], 0);
   const newRemaining = onStockTotal <= 0 ? 0 : Math.max(0, (pack.remaining || 0) - results.length);
   let newCoin = coinLockResult.coin_points;
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
   // ランク判定は「チャージ額」ベースに変更したため、ここでは行わない
   // （コインチャージが確定する処理側でランク判定・報酬付与を行う）
 
