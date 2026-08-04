@@ -58,7 +58,7 @@ export default async function handler(req, res) {
   ] = await Promise.all([
     supabase.auth.getUser(userToken),
     supabase.from('packs').select('*').eq('id', packId).single(),
-    supabase.from('users').select('coin_points, total_spent, is_banned').eq('id', userId).single(),
+    supabase.from('users').select('coin_points, is_banned').eq('id', userId).single(),
     supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, exchange_type, image_url, quantity, remaining_qty, trigger_remaining').eq('pack_id', packId).eq('is_active', true),
     supabase.from('pack_videos').select('tier, video_url').eq('pack_id', packId).eq('is_active', true)
   ]);
@@ -129,18 +129,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '残り口数が不足しています' });
   }
 
-  // exclude_from_rank(ランク集計対象外)のパックは、コインは減らすが
-  // ランク判定用のtotal_spentには加算しない
-  const spentDelta = pack.exclude_from_rank ? 0 : cost;
-
   // コイン残高の減算は「読み取った時点の残高と一致してる場合のみ」成功する条件付き更新にする
   // →同時に2回リクエストが来ても、片方は失敗して二重消費を防げる
+  // ※ランクはチャージ額ベースに変更したため、total_spentはここでは更新しない
   const { data: coinLockResult, error: coinLockErr } = await supabase
     .from('users')
-    .update({ coin_points: userData.coin_points - cost, total_spent: (userData.total_spent || 0) + spentDelta })
+    .update({ coin_points: userData.coin_points - cost })
     .eq('id', userId)
     .eq('coin_points', userData.coin_points)
-    .select('coin_points, total_spent')
+    .select('coin_points')
     .single();
 
   if (coinLockErr || !coinLockResult) {
@@ -184,30 +181,9 @@ export default async function handler(req, res) {
   const onStockTotal = prizes.reduce((s, p) => s + prizeStock[p.id], 0);
   const newRemaining = onStockTotal <= 0 ? 0 : Math.max(0, (pack.remaining || 0) - results.length);
   let newCoin = coinLockResult.coin_points;
-  const newTotalSpent = coinLockResult.total_spent;
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-
-  // ランク階層（累計消費コインで判定）
-  const RANKS = [
-    { name: 'ランクなし', min: 0, reward: 0 },
-    { name: 'ブロンズ', min: 100000, reward: 500 },
-    { name: 'シルバー', min: 500000, reward: 5000 },
-    { name: 'ゴールド', min: 1500000, reward: 20000 },
-    { name: 'プラチナ', min: 2500000, reward: 30000 },
-    { name: 'ダイヤ', min: 10000000, reward: 100000 },
-    { name: 'シークレットVIP', min: 50000000, reward: 500000 },
-  ];
-  const oldSpent = userData.total_spent || 0;
-  const newlyCrossedRanks = RANKS.filter(r => oldSpent < r.min && newTotalSpent >= r.min);
-
-  let rankRewardTotal = 0;
-  for (const r of newlyCrossedRanks) {
-    const { error: claimErr } = await supabase
-      .from('rank_rewards_claimed')
-      .insert({ user_id: userId, rank_name: r.name, reward_coin: r.reward });
-    if (!claimErr) rankRewardTotal += r.reward; // unique制約で二重付与を防止
-  }
-  newCoin += rankRewardTotal;
+  // ランク判定は「チャージ額」ベースに変更したため、ここでは行わない
+  // （コインチャージが確定する処理側でランク判定・報酬付与を行う）
 
 // 在庫を安全に減算する（同時アクセスで他のリクエストの減算が消えないよう、
 // 最新値を都度読み直しながら「更新できるまで」再試行する）
@@ -234,7 +210,7 @@ async function safeDecrement(table, id, amount, floorZero = true) {
   const [, , , { data: sess }] = await Promise.all([
     Promise.all(Object.entries(usedPrizes).map(([id, qty]) => safeDecrement('prizes', id, qty))),
     safeDecrement('packs', packId, results.length),
-    supabase.from('users').update({ coin_points: newCoin, total_spent: newTotalSpent }).eq('id', userId),
+    supabase.from('users').update({ coin_points: newCoin }).eq('id', userId),
     supabase.from('draw_sessions').insert({
       user_id: userId,
       pack_id: packId,
@@ -258,8 +234,5 @@ async function safeDecrement(table, id, amount, floorZero = true) {
     soldOut: finalRemaining <= 0,
     expiresAt,
     packVideos: packVideos || [],
-    newTotalSpent,
-    rankUp: newlyCrossedRanks.length ? newlyCrossedRanks[newlyCrossedRanks.length - 1].name : null,
-    rankRewardTotal,
   });
 }
