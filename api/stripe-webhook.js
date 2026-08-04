@@ -6,21 +6,36 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// ランク階層（累計消費コイン基準）と購入時ボーナス率
+// ランク階層（累計チャージ額基準）購入時ボーナス率＋ランクアップ報酬
 const RANKS = [
-  { name: 'ランクなし', min: 0, bonusRate: 0 },
-  { name: 'ブロンズ', min: 100000, bonusRate: 0 },
-  { name: 'シルバー', min: 500000, bonusRate: 0.005 },
-  { name: 'ゴールド', min: 1500000, bonusRate: 0.01 },
-  { name: 'プラチナ', min: 2500000, bonusRate: 0.015 },
-  { name: 'ダイヤ', min: 10000000, bonusRate: 0.02 },
-  { name: 'シークレットVIP', min: 50000000, bonusRate: 0.03 },
+  { name: 'ランクなし', min: 0, bonusRate: 0, reward: 0 },
+  { name: 'ブロンズ', min: 100000, bonusRate: 0, reward: 500 },
+  { name: 'シルバー', min: 500000, bonusRate: 0.005, reward: 5000 },
+  { name: 'ゴールド', min: 1500000, bonusRate: 0.01, reward: 20000 },
+  { name: 'プラチナ', min: 2500000, bonusRate: 0.015, reward: 30000 },
+  { name: 'ダイヤ', min: 10000000, bonusRate: 0.02, reward: 100000 },
+  { name: 'シークレットVIP', min: 50000000, bonusRate: 0.03, reward: 500000 },
 ];
 function getRankBonusRate(totalSpent) {
   for (let i = RANKS.length - 1; i >= 0; i--) {
     if ((totalSpent || 0) >= RANKS[i].min) return RANKS[i];
   }
   return RANKS[0];
+}
+
+// チャージ額をtotal_spentに加算し、新しく到達したランクがあれば報酬コインを付与する
+// （ランク判定はコイン消費ではなく「累計チャージ額」で行う）
+async function applyChargeAndRank(userId, oldTotalSpent, chargeAmount) {
+  const newTotalSpent = (oldTotalSpent || 0) + chargeAmount;
+  const newlyCrossedRanks = RANKS.filter(r => (oldTotalSpent || 0) < r.min && newTotalSpent >= r.min);
+  let rankRewardTotal = 0;
+  for (const r of newlyCrossedRanks) {
+    const { error: claimErr } = await supabase
+      .from('rank_rewards_claimed')
+      .insert({ user_id: userId, rank_name: r.name, reward_coin: r.reward });
+    if (!claimErr) rankRewardTotal += r.reward; // unique制約で二重付与を防止
+  }
+  return { newTotalSpent, rankRewardTotal, rankUp: newlyCrossedRanks.length ? newlyCrossedRanks[newlyCrossedRanks.length - 1].name : null };
 }
 
 // 決済成功時にクーポン使用履歴を記録する（悪用防止のため、成功時のみ記録）
@@ -107,12 +122,13 @@ async function grantCoins(session) {
   const baseCoin = parseInt(coin) + parseInt(bonus);
   const rankInfo = getRankBonusRate(user.total_spent);
   const rankBonusCoin = Math.floor(baseCoin * rankInfo.bonusRate);
-  const totalCoin = baseCoin + rankBonusCoin;
+  const { newTotalSpent, rankRewardTotal, rankUp } = await applyChargeAndRank(userId, user.total_spent, session.amount_total);
+  const totalCoin = baseCoin + rankBonusCoin + rankRewardTotal;
   const newCoin = (user.coin_points || 0) + totalCoin;
 
   await supabase
     .from('users')
-    .update({ coin_points: newCoin })
+    .update({ coin_points: newCoin, total_spent: newTotalSpent })
     .eq('id', userId)
     .eq('coin_points', user.coin_points || 0);
 
@@ -133,10 +149,10 @@ async function grantCoins(session) {
       type: 'purchase_coin',
       amount: totalCoin,
       currency: 'coin',
-      description: `コインチャージ ¥${session.amount_total?.toLocaleString()}${rankBonusCoin > 0 ? `（${rankInfo.name}特典+${rankBonusCoin}）` : ''}`,
+      description: `コインチャージ ¥${session.amount_total?.toLocaleString()}${rankBonusCoin > 0 ? `（${rankInfo.name}特典+${rankBonusCoin}）` : ''}${rankRewardTotal > 0 ? `（${rankUp}昇格ボーナス+${rankRewardTotal}）` : ''}`,
     });
 
-  console.log(`✅ コイン付与完了: ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}）`);
+  console.log(`✅ コイン付与完了: ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}、昇格報酬+${rankRewardTotal}）`);
 
   try { await processReferralBonus(userId); } catch (e) { console.error('紹介ボーナスエラー:', e); }
   try { await recordCouponUse(userId, couponCode); } catch (e) { console.error('クーポン記録エラー:', e); }
@@ -169,12 +185,13 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
   const baseCoin = parseInt(coin) + parseInt(bonus || 0);
   const rankInfo = getRankBonusRate(user.total_spent);
   const rankBonusCoin = Math.floor(baseCoin * rankInfo.bonusRate);
-  const totalCoin = baseCoin + rankBonusCoin;
+  const { newTotalSpent, rankRewardTotal, rankUp } = await applyChargeAndRank(userId, user.total_spent, paymentIntent.amount);
+  const totalCoin = baseCoin + rankBonusCoin + rankRewardTotal;
   const newCoin = (user.coin_points || 0) + totalCoin;
 
   await supabase
     .from('users')
-    .update({ coin_points: newCoin })
+    .update({ coin_points: newCoin, total_spent: newTotalSpent })
     .eq('id', userId)
     .eq('coin_points', user.coin_points || 0);
 
@@ -195,10 +212,10 @@ async function grantCoinsFromPaymentIntent(paymentIntent) {
       type: 'purchase_coin',
       amount: totalCoin,
       currency: 'coin',
-      description: `コインチャージ ¥${paymentIntent.amount?.toLocaleString()}${rankBonusCoin > 0 ? `（${rankInfo.name}特典+${rankBonusCoin}）` : ''}`,
+      description: `コインチャージ ¥${paymentIntent.amount?.toLocaleString()}${rankBonusCoin > 0 ? `（${rankInfo.name}特典+${rankBonusCoin}）` : ''}${rankRewardTotal > 0 ? `（${rankUp}昇格ボーナス+${rankRewardTotal}）` : ''}`,
     });
 
-  console.log(`✅ コイン付与完了(PI): ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}）`);
+  console.log(`✅ コイン付与完了(PI): ${userId} → +${totalCoin}コイン（ランクボーナス+${rankBonusCoin}、昇格報酬+${rankRewardTotal}）`);
 
   try { await processReferralBonus(userId); } catch (e) { console.error('紹介ボーナスエラー:', e); }
   try { await recordCouponUse(userId, couponCode); } catch (e) { console.error('クーポン記録エラー:', e); }
