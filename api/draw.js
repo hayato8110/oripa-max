@@ -58,7 +58,7 @@ export default async function handler(req, res) {
   ] = await Promise.all([
     supabase.auth.getUser(userToken),
     supabase.from('packs').select('*').eq('id', packId).single(),
-    supabase.from('users').select('coin_points, is_banned').eq('id', userId).single(),
+    supabase.from('users').select('coin_points, total_spent, is_banned').eq('id', userId).single(),
     supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, exchange_type, image_url, quantity, remaining_qty, trigger_remaining').eq('pack_id', packId).eq('is_active', true),
     supabase.from('pack_videos').select('tier, video_url').eq('pack_id', packId).eq('is_active', true)
   ]);
@@ -85,6 +85,13 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'リクエストが速すぎます。少し待ってから再度お試しください' });
   }
 
+  // 必要チャージ額（累計で実際に支払った金額）に達してないと引けないパック
+  if (pack.required_charge > 0 && (userData.total_spent || 0) < pack.required_charge) {
+    return res.status(400).json({
+      error: `このガチャを引くには累計チャージ額${pack.required_charge.toLocaleString()}円が必要です（現在${(userData.total_spent || 0).toLocaleString()}円）`,
+    });
+  }
+
   // 1人1回限定パックの排他ロック（DB側のunique制約で二重実行を確実に防止）
   if (pack.max_draws_per_user === 1) {
     const { error: lockErr } = await supabase
@@ -93,6 +100,31 @@ export default async function handler(req, res) {
     if (lockErr) {
       // unique制約違反 = 既に引いている（連打・多重リクエストもここで確実にブロック）
       return res.status(400).json({ error: 'このガチャは1人1回限定です' });
+    }
+  }
+
+  // 1人N回まで（N>=2）の排他カウント。楽観ロック(count一致時のみ更新)で二重実行を防止
+  if (pack.max_draws_per_user > 1) {
+    const { data: attemptRow } = await supabase
+      .from('pack_draw_attempts')
+      .select('count')
+      .eq('user_id', userId).eq('pack_id', packId)
+      .maybeSingle();
+    const currentCount = attemptRow?.count || 0;
+    if (currentCount >= pack.max_draws_per_user) {
+      return res.status(400).json({ error: `このガチャは1人${pack.max_draws_per_user}回までです` });
+    }
+    if (attemptRow) {
+      const { error: incErr } = await supabase
+        .from('pack_draw_attempts')
+        .update({ count: currentCount + 1 })
+        .eq('user_id', userId).eq('pack_id', packId).eq('count', currentCount);
+      if (incErr) return res.status(400).json({ error: '処理が混み合っています。もう一度お試しください' });
+    } else {
+      const { error: insErr } = await supabase
+        .from('pack_draw_attempts')
+        .insert({ user_id: userId, pack_id: packId, count: 1 });
+      if (insErr) return res.status(400).json({ error: '処理が混み合っています。もう一度お試しください' });
     }
   }
 
@@ -113,6 +145,12 @@ export default async function handler(req, res) {
   const releaseLockIfNeeded = async () => {
     if (pack.max_draws_per_user === 1) {
       await supabase.from('one_time_draw_locks').delete().eq('user_id', userId).eq('pack_id', packId);
+    }
+    if (pack.max_draws_per_user > 1) {
+      const { data: row } = await supabase.from('pack_draw_attempts').select('count').eq('user_id', userId).eq('pack_id', packId).maybeSingle();
+      if (row && row.count > 0) {
+        await supabase.from('pack_draw_attempts').update({ count: row.count - 1 }).eq('user_id', userId).eq('pack_id', packId);
+      }
     }
     if (pack.is_daily_limit) {
       await supabase.from('daily_gacha_log').delete().eq('user_id', userId).eq('pack_id', packId).eq('drawn_date', today);
