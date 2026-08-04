@@ -85,34 +85,41 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'リクエストが速すぎます。少し待ってから再度お試しください' });
   }
 
-  // 必要チャージ額（累計で実際に支払った金額）に達してないと引けないパック
-  if (pack.required_charge > 0 && (userData.total_spent || 0) < pack.required_charge) {
-    return res.status(400).json({
-      error: `このガチャを引くには累計チャージ額${pack.required_charge.toLocaleString()}円が必要です（現在${(userData.total_spent || 0).toLocaleString()}円）`,
-    });
-  }
-
-  // 1人1回限定パックの排他ロック（DB側のunique制約で二重実行を確実に防止）
-  if (pack.max_draws_per_user === 1) {
-    const { error: lockErr } = await supabase
-      .from('one_time_draw_locks')
-      .insert({ user_id: userId, pack_id: packId });
-    if (lockErr) {
-      // unique制約違反 = 既に引いている（連打・多重リクエストもここで確実にブロック）
-      return res.status(400).json({ error: 'このガチャは1人1回限定です' });
+  // 必要チャージ額：このパックが公開された「後」にチャージした金額だけを見る
+  // （昔からのユーザーの過去の累計チャージまで含めてしまうと、1円もチャージしなくても
+  //  条件を満たしたことになってしまうため）。required_charge円チャージするごとに+1回、
+  // という繰り返し型の権利として計算する。
+  let earnedAttempts = Infinity;
+  if (pack.required_charge > 0) {
+    const { data: purchases } = await supabase
+      .from('point_purchases')
+      .select('amount_jpy')
+      .eq('user_id', userId)
+      .gte('created_at', pack.created_at);
+    const eligibleCharge = (purchases || []).reduce((s, p) => s + (p.amount_jpy || 0), 0);
+    earnedAttempts = Math.floor(eligibleCharge / pack.required_charge);
+    if (earnedAttempts <= 0) {
+      return res.status(400).json({
+        error: `このガチャを引くには、パック公開後に累計チャージ額${pack.required_charge.toLocaleString()}円が必要です（現在${eligibleCharge.toLocaleString()}円）`,
+      });
     }
   }
 
-  // 1人N回まで（N>=2）の排他カウント。楽観ロック(count一致時のみ更新)で二重実行を防止
-  if (pack.max_draws_per_user > 1) {
+  // 挑戦回数の上限（1人◯回まで、と必要チャージ額の両方があれば、より厳しい方を採用）
+  const effectiveLimit = pack.max_draws_per_user > 0
+    ? Math.min(pack.max_draws_per_user, earnedAttempts)
+    : earnedAttempts;
+
+  // 挑戦回数を安全にカウント（楽観ロック。count一致時のみ更新し、同時多重実行を防止）
+  if (effectiveLimit < Infinity) {
     const { data: attemptRow } = await supabase
       .from('pack_draw_attempts')
       .select('count')
       .eq('user_id', userId).eq('pack_id', packId)
       .maybeSingle();
     const currentCount = attemptRow?.count || 0;
-    if (currentCount >= pack.max_draws_per_user) {
-      return res.status(400).json({ error: `このガチャは1人${pack.max_draws_per_user}回までです` });
+    if (currentCount >= effectiveLimit) {
+      return res.status(400).json({ error: pack.required_charge > 0 ? 'このガチャを引く権利を使い切りました。追加でチャージすると挑戦できます' : `このガチャは1人${effectiveLimit}回までです` });
     }
     if (attemptRow) {
       const { error: incErr } = await supabase
@@ -143,10 +150,7 @@ export default async function handler(req, res) {
 
   // 以降の失敗時にロックを解放するヘルパー
   const releaseLockIfNeeded = async () => {
-    if (pack.max_draws_per_user === 1) {
-      await supabase.from('one_time_draw_locks').delete().eq('user_id', userId).eq('pack_id', packId);
-    }
-    if (pack.max_draws_per_user > 1) {
+    if (effectiveLimit < Infinity) {
       const { data: row } = await supabase.from('pack_draw_attempts').select('count').eq('user_id', userId).eq('pack_id', packId).maybeSingle();
       if (row && row.count > 0) {
         await supabase.from('pack_draw_attempts').update({ count: row.count - 1 }).eq('user_id', userId).eq('pack_id', packId);
