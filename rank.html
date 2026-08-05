@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ランク制度 | オリパMAX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#ffffff;
+  --bg2:#f7f7f7;
+  --bg3:#f0f0f0;
+  --card-bg:#ffffff;
+  --primary:#e8380d;
+  --primary2:#ff5a38;
+  --gold:#c9a84c;
+  --gold2:#f3be20;
+  --gold3:#f5e090;
+  --green:#22c55e;
+  --blue:#3b82f6;
+  --border:rgba(0,0,0,.08);
+  --border2:rgba(0,0,0,.14);
+  --text:#1a1a1a;
+  --text2:rgba(26,26,26,.65);
+  --text3:rgba(26,26,26,.4);
+  --header-bg:#ffffff;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:40px}
+::-webkit-scrollbar{display:none}
+.rk-header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--header-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.rk-back{font-size:1.3rem;color:var(--text);background:none;border:none;cursor:pointer;padding:0 4px}
+.rk-title{font-size:1rem;font-weight:900;color:var(--text)}
+.rk-body{padding:16px}
+.rk-card{border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.rk-progress-wrap{background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:20px}
+.rk-progress-bar{height:8px;background:#e2e2e2;border-radius:99px;overflow:hidden}
+.rk-progress-fill{height:100%;background:var(--green)}
+.rk-section-title{font-size:.85rem;font-weight:900;color:var(--text);margin:16px 0 6px}
+.rk-section-body{font-size:.78rem;color:var(--text2);line-height:1.7}
+.rk-table{width:100%;border-collapse:collapse;font-size:.75rem}
+.rk-table th{text-align:center;padding:8px 6px;color:var(--text2);border-bottom:2px solid var(--border)}
+.rk-table th:first-child{text-align:left}
+.rk-table td{padding:9px 6px;text-align:center;border-bottom:1px solid var(--border);color:var(--text)}
+.rk-table td:first-child{text-align:left}
+.rk-note{font-size:.68rem;color:var(--text3);margin-top:16px;line-height:1.6}
+.rk-loading{padding:40px;text-align:center;color:var(--text3);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="rk-header">
+  <button class="rk-back" onclick="location.href='/'">‹</button>
+  <span class="rk-title">🏆 ランク制度</span>
+</div>
+<div class="rk-body" id="rk-body">
+  <div class="rk-loading">読み込み中…</div>
+</div>
+
+<script>
+const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
+const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
+const{createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY,{
+  auth:{storageKey:'oripa-max-auth',detectSessionInUrl:false,autoRefreshToken:true,persistSession:true}
+});
+
+const RANKS=[
+  {name:'ランクなし',min:0,reward:0,bg:'#3a3a3d'},
+  {name:'ブロンズ',min:100000,reward:500,bg:'linear-gradient(135deg,#3a2210,#6a4020)'},
+  {name:'シルバー',min:500000,reward:5000,bg:'linear-gradient(135deg,#2a2a30,#5a5a62)'},
+  {name:'ゴールド',min:1500000,reward:20000,bg:'linear-gradient(135deg,#3a2c05,#7a5c10)'},
+  {name:'プラチナ',min:2500000,reward:30000,bg:'linear-gradient(135deg,#1a1a3a,#3a3560)'},
+  {name:'ダイヤ',min:10000000,reward:100000,bg:'linear-gradient(135deg,#0a1a3a,#1a3a6a)'},
+  {name:'シークレットVIP',min:50000000,reward:500000,bg:'blackgold'},
+];
+const RANK_RATE={'ランクなし':'0%','ブロンズ':'0%','シルバー':'0.5%','ゴールド':'1%','プラチナ':'1.5%','ダイヤ':'2%','シークレットVIP':'???'};
+const RANK_BADGE={'ランクなし':'normal','ブロンズ':'bronze','シルバー':'silver','ゴールド':'gold','プラチナ':'platinum','ダイヤ':'diamond','シークレットVIP':'vip'};
+const RANK_LABEL={'ランクなし':'ノーマル'};
+
+function getRankInfo(spent){
+  for(let i=RANKS.length-1;i>=0;i--)if(spent>=RANKS[i].min)return{rank:RANKS[i],idx:i};
+  return{rank:RANKS[0],idx:0};
+}
+function getRankBoxStyle(rankName){
+  const r=RANKS.find(x=>x.name===rankName)||RANKS[0];
+  if(r.bg==='blackgold')return'background:#0a0805;border:2px solid #f5e090';
+  return`background:${r.bg};border:none`;
+}
+
+async function init(){
+  let totalSpent=0;
+  try{
+    const{data:{session}}=await db.auth.getSession();
+    if(session){
+      const{data:profile}=await db.from('users').select('total_spent').eq('id',session.user.id).single();
+      totalSpent=profile?.total_spent||0;
+    }
+  }catch(e){}
+  render(totalSpent);
+}
+
+function render(totalSpent){
+  const info=getRankInfo(totalSpent);
+  const next=RANKS[info.idx+1];
+  const badge=RANK_BADGE[info.rank.name];
+  document.getElementById('rk-body').innerHTML=`
+    <div class="rk-card" style="${getRankBoxStyle(info.rank.name)}">
+      <img src="/rank-badge-${badge}.png" style="width:56px;height:56px;flex-shrink:0" alt="rank">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.62rem;font-weight:700;color:rgba(255,255,255,.75);margin-bottom:2px">現在のランク</div>
+        <div style="font-size:1.15rem;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)">${RANK_LABEL[info.rank.name]||info.rank.name}</div>
+        <div style="font-size:.72rem;margin-top:2px;color:rgba(255,255,255,.85)">コイン還元率:${RANK_RATE[info.rank.name]||'0%'}</div>
+      </div>
+    </div>
+    <div class="rk-progress-wrap">
+      <div style="font-size:.78rem;font-weight:900;color:var(--text);margin-bottom:8px">チャージ額</div>
+      <div class="rk-progress-bar"><div class="rk-progress-fill" style="width:${next?Math.min(100,Math.round(totalSpent/next.min*100)):100}%"></div></div>
+      <div style="text-align:right;font-size:.75rem;color:var(--text2);margin-top:6px">${next?`次のランクまで <b style="font-size:.95rem;color:var(--text)">${(next.min-totalSpent).toLocaleString()}</b> コイン`:'最高ランクです'}</div>
+    </div>
+    <div class="rk-section-title">■ ランクについて</div>
+    <div class="rk-section-body">コイン購入時の還元率アップ、ランクアップ時のコインプレゼント、ランク限定ガチャなど、さまざまな特典が受けられるランクシステムです。ステージは7段階で、累計チャージ額によって決まります。</div>
+    <div class="rk-section-title">■ ランクアップ条件</div>
+    <div class="rk-section-body">ランクごとに設定された累計チャージ額を達成することで、次のランクに昇格します。ランクに降格はありません。</div>
+    <div class="rk-section-title">■ ランク特典</div>
+    <div style="overflow-x:auto">
+      <table class="rk-table">
+        <thead><tr><th>ランク</th><th>コイン<br>還元率</th><th>ランクアップ<br>ボーナス</th></tr></thead>
+        <tbody>
+          ${RANKS.map((r,i)=>`<tr style="background:${i===info.idx?'rgba(201,168,76,.12)':'transparent'}">
+            <td style="font-weight:${i===info.idx?'900':'700'}">${RANK_LABEL[r.name]||r.name}</td>
+            <td style="font-weight:900">${RANK_RATE[r.name]||'0%'}</td>
+            <td style="font-weight:900">${r.name==='シークレットVIP'?'???':(r.reward>0?'<img src="/coin-max.png" width="16" height="16" style="vertical-align:middle;margin-right:2px">'+r.reward.toLocaleString():'-')}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="rk-note">※ランクの昇格条件、ランク特典、ランクアップボーナスに関する内容は予告なく変更となる場合がございます。あらかじめご了承ください。</div>
+  `;
+}
+init();
+</script>
+</body>
+</html>
