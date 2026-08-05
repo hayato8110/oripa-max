@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PayPayでの決済方法 | オリパMAX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;
+  --bg2:#f7f7f7;
+  --bg3:#f0f0f0;
+  --primary:#e8380d;
+  --gold:#c9a84c;
+  --gold2:#f3be20;
+  --border:rgba(0,0,0,.08);
+  --text:#1a1a1a;
+  --text2:rgba(26,26,26,.65);
+  --text3:rgba(26,26,26,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:40px}
+.pp-header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.pp-back{font-size:1.3rem;color:var(--text);background:none;border:none;cursor:pointer;padding:0 4px}
+.pp-title{font-size:1rem;font-weight:900;color:var(--text)}
+.pp-hero{background:linear-gradient(135deg,#ff0033,#ff5c7a);padding:22px 16px;color:#fff}
+.pp-hero h1{margin:0 0 4px;font-size:1.3rem;font-weight:900}
+.pp-hero p{margin:0;font-size:.8rem;opacity:.9}
+.pp-body{padding:18px 16px}
+.pp-section-title{font-size:.95rem;font-weight:900;color:var(--text);margin:22px 0 12px;display:flex;align-items:center;gap:6px}
+.pp-step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.pp-step:last-child{border-bottom:none}
+.pp-num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-weight:900;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+.pp-step-text{font-size:.82rem;color:var(--text);line-height:1.6;padding-top:2px}
+.pp-note{background:var(--bg2);border-radius:10px;padding:14px;font-size:.75rem;color:var(--text2);line-height:1.7;margin-top:18px}
+.pp-cta{display:block;text-align:center;background:linear-gradient(135deg,#ff0033,#ff5c7a);color:#fff;font-weight:900;padding:14px;border-radius:10px;text-decoration:none;margin-top:20px;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="pp-header">
+  <button class="pp-back" onclick="location.href='/'">‹</button>
+  <span class="pp-title">PayPayでの決済方法</span>
+</div>
+
+<div class="pp-hero">
+  <h1>💳 PayPay残高でクレジット決済</h1>
+  <p>PayPayの「バーチャルカード」を使えば、PayPay残高でオリパMAXのコインをチャージできます</p>
+</div>
+
+<div class="pp-body">
+
+  <div class="pp-section-title">① PayPayカードを発行する(初回のみ)</div>
+  <div class="pp-step"><div class="pp-num">1</div><div class="pp-step-text">PayPayアプリを起動し、ホーム画面の残高の右下にある「Tap」を選択</div></div>
+  <div class="pp-step"><div class="pp-num">2</div><div class="pp-step-text">「はじめる」を選択</div></div>
+  <div class="pp-step"><div class="pp-num">3</div><div class="pp-step-text">画面が切り替わるので、再度「はじめる」を選択</div></div>
+  <div class="pp-step"><div class="pp-num">4</div><div class="pp-step-text">利用規約を確認し、「上記内容に同意する」を選択</div></div>
+  <div class="pp-step"><div class="pp-num">5</div><div class="pp-step-text">PayPay残高カードの発行が完了します</div></div>
+
+  <div class="pp-section-title">② オリパMAXでチャージする</div>
+  <div class="pp-step"><div class="pp-num">1</div><div class="pp-step-text">PayPayアプリのホーム画面から、残高右下の「Tap」を選択</div></div>
+  <div class="pp-step"><div class="pp-num">2</div><div class="pp-step-text">目のマークを選択してカード情報を表示</div></div>
+  <div class="pp-step"><div class="pp-num">3</div><div class="pp-step-text">表示されたカード番号のコピーマークを押してコピー</div></div>
+  <div class="pp-step"><div class="pp-num">4</div><div class="pp-step-text">オリパMAXの「コインをチャージ」からお支払い方法で「クレジットカード」を選択</div></div>
+  <div class="pp-step"><div class="pp-num">5</div><div class="pp-step-text">カード番号欄に、先ほどコピーしたPayPay残高カードの番号を入力</div></div>
+  <div class="pp-step"><div class="pp-num">6</div><div class="pp-step-text">決済完了!PayPay残高から利用金額が差し引かれます</div></div>
+
+  <div class="pp-note">
+    ※PayPay残高カードはVisaのバーチャルカードです。クレジットカード情報の入力欄に、カード番号・有効期限・セキュリティコードをそのまま入力してご利用いただけます。<br>
+    ※ご利用にはPayPayアプリ側での本人確認等の設定が必要な場合があります。詳しくはPayPay公式アプリ内の案内をご確認ください。<br>
+    ※決済時にワンタイムパスワードの入力を求められる場合があります。SMS(ショートメッセージ)に届いた番号を入力すると決済が完了します。
+  </div>
+
+  <a class="pp-cta" href="/">コインをチャージする</a>
+</div>
+</body>
+</html>
