@@ -77,6 +77,7 @@ const RANKS=[
 ];
 const RANK_RATE={'ランクなし':'0%','ブロンズ':'0%','シルバー':'0.5%','ゴールド':'1%','プラチナ':'1.5%','ダイヤ':'2%','シークレットVIP':'???'};
 const RANK_BADGE={'ランクなし':'normal','ブロンズ':'bronze','シルバー':'silver','ゴールド':'gold','プラチナ':'platinum','ダイヤ':'diamond','シークレットVIP':'vip'};
+const RANK_BAR={'ランクなし':'none','ブロンズ':'bronze','シルバー':'silver','ゴールド':'gold','プラチナ':'platinum','ダイヤ':'diamond','シークレットVIP':'vip'};
 const RANK_LABEL={'ランクなし':'ノーマル'};
 
 function getRankInfo(spent){
@@ -105,15 +106,9 @@ function render(totalSpent){
   const info=getRankInfo(totalSpent);
   const next=RANKS[info.idx+1];
   const badge=RANK_BADGE[info.rank.name];
+  const bar=RANK_BAR[info.rank.name];
   document.getElementById('rk-body').innerHTML=`
-    <div class="rk-card" style="${getRankBoxStyle(info.rank.name)}">
-      <img src="/rank-badge-${badge}.png" style="width:56px;height:56px;flex-shrink:0" alt="rank">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.62rem;font-weight:700;color:rgba(255,255,255,.75);margin-bottom:2px">現在のランク</div>
-        <div style="font-size:1.15rem;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)">${RANK_LABEL[info.rank.name]||info.rank.name}</div>
-        <div style="font-size:.72rem;margin-top:2px;color:rgba(255,255,255,.85)">コイン還元率:${RANK_RATE[info.rank.name]||'0%'}</div>
-      </div>
-    </div>
+    <img src="/rank-bar-${bar}.png" style="width:100%;height:auto;border-radius:12px;display:block;margin-bottom:14px" alt="rank banner">
     <div class="rk-progress-wrap">
       <div style="font-size:.78rem;font-weight:900;color:var(--text);margin-bottom:8px">チャージ額</div>
       <div class="rk-progress-bar"><div class="rk-progress-fill" style="width:${next?Math.min(100,Math.round(totalSpent/next.min*100)):100}%"></div></div>
