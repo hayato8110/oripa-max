@@ -5,14 +5,17 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-function pickPrize(prizes, rng, tenjoCount, tenjoLimit) {
+function pickPrize(prizes, rng, tenjoCount, tenjoLimit, prizeStock) {
   if (tenjoLimit > 0 && tenjoCount >= tenjoLimit - 1) {
     const sarPrizes = prizes.filter(p => p.tier === 'sar');
     if (sarPrizes.length) return sarPrizes[0];
   }
-  const total = prizes.reduce((s, p) => s + p.weight, 0);
+  // 確率は残り在庫数に比例させる（真の抽選箱方式）。
+  // static weightだけで決めると、レア賞品の在庫が最後まで温存され、
+  // ハズレ在庫が尽きた瞬間に「消去法で強制当選」する偏りが生まれるため。
+  const total = prizes.reduce((s, p) => s + (prizeStock[p.id] || 0), 0);
   let t = rng * total;
-  for (const p of prizes) { t -= p.weight; if (t <= 0) return p; }
+  for (const p of prizes) { t -= (prizeStock[p.id] || 0); if (t <= 0) return p; }
   return prizes[prizes.length - 1];
 }
 
@@ -209,7 +212,7 @@ export default async function handler(req, res) {
       return true;
     });
     if (!available.length) break;
-    const prize = pickPrize(available, Math.random(), tenjoCount + i, pack.tenjo_limit || 0);
+    const prize = pickPrize(available, Math.random(), tenjoCount + i, pack.tenjo_limit || 0, prizeStock);
     results.push({ prize: { id: prize.id, name: prize.name, tier: prize.tier, tier_label: prize.tier_label, value_jp: prize.value_jp, exchange_type: prize.exchange_type, image_url: prize.image_url } });
     prizeStock[prize.id]--;
   }
