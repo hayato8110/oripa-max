@@ -91,11 +91,14 @@ export default async function handler(req, res) {
   // という繰り返し型の権利として計算する。
   let earnedAttempts = Infinity;
   if (pack.required_charge > 0) {
+    if (drawCount !== 1) {
+      return res.status(400).json({ error: 'このガチャは1回ずつのみ引けます' });
+    }
     const { data: purchases } = await supabase
       .from('point_purchases')
       .select('amount_jpy')
       .eq('user_id', userId)
-      .gte('created_at', pack.created_at);
+      .gte('created_at', pack.published_at || pack.created_at);
     const eligibleCharge = (purchases || []).reduce((s, p) => s + (p.amount_jpy || 0), 0);
     earnedAttempts = Math.floor(eligibleCharge / pack.required_charge);
     if (earnedAttempts <= 0) {
