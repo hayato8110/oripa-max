@@ -94,9 +94,6 @@ export default async function handler(req, res) {
   // という繰り返し型の権利として計算する。
   let earnedAttempts = Infinity;
   if (pack.required_charge > 0) {
-    if (drawCount !== 1) {
-      return res.status(400).json({ error: 'このガチャは1回ずつのみ引けます' });
-    }
     const { data: purchases } = await supabase
       .from('point_purchases')
       .select('amount_jpy')
@@ -117,6 +114,9 @@ export default async function handler(req, res) {
     : earnedAttempts;
 
   // 挑戦回数を安全にカウント（楽観ロック。count一致時のみ更新し、同時多重実行を防止）
+  // ※チャージ制パックは「引いた枚数(drawCount)の累計」で消費、通常の1人◯回までパックは
+  //  従来通り「引いた回数(クリック数)」で消費する。
+  const consumeUnit = pack.required_charge > 0 ? drawCount : 1;
   if (effectiveLimit < Infinity) {
     const { data: attemptRow } = await supabase
       .from('pack_draw_attempts')
@@ -124,19 +124,23 @@ export default async function handler(req, res) {
       .eq('user_id', userId).eq('pack_id', packId)
       .maybeSingle();
     const currentCount = attemptRow?.count || 0;
-    if (currentCount >= effectiveLimit) {
+    const remainingAttempts = effectiveLimit - currentCount;
+    if (remainingAttempts <= 0) {
       return res.status(400).json({ error: pack.required_charge > 0 ? 'このガチャを引く権利を使い切りました。追加でチャージすると挑戦できます' : `このガチャは1人${effectiveLimit}回までです` });
+    }
+    if (consumeUnit > remainingAttempts) {
+      return res.status(400).json({ error: pack.required_charge > 0 ? `残り${remainingAttempts}回分の権利しかありません（${drawCount}連は引けません）` : `残り${remainingAttempts}回までです` });
     }
     if (attemptRow) {
       const { error: incErr } = await supabase
         .from('pack_draw_attempts')
-        .update({ count: currentCount + 1 })
+        .update({ count: currentCount + consumeUnit })
         .eq('user_id', userId).eq('pack_id', packId).eq('count', currentCount);
       if (incErr) return res.status(400).json({ error: '処理が混み合っています。もう一度お試しください' });
     } else {
       const { error: insErr } = await supabase
         .from('pack_draw_attempts')
-        .insert({ user_id: userId, pack_id: packId, count: 1 });
+        .insert({ user_id: userId, pack_id: packId, count: consumeUnit });
       if (insErr) return res.status(400).json({ error: '処理が混み合っています。もう一度お試しください' });
     }
   }
