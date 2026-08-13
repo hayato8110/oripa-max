@@ -59,16 +59,19 @@ function oripaBuildResultArray(tier){
 // 上のoripaBuildResultArrayは既にこの順で組んでいるのでそのままでOK。
 
 var oripaSpinInProgress = false;
+var oripaCurrentSpinCoin = 0;
+var oripaRemainingSpins = 0;
+
 var oripaOriginalCompleteSpin = completeSpin;
 completeSpin = function(c){
   oripaOriginalCompleteSpin(c);
   if(slotData.spinComplete === gameSettings.slotSettings.column && oripaSpinInProgress){
     oripaSpinInProgress = false;
+    // 獲得コインを「MAX BET」枠に表示（既存のCanvas UIを流用）
+    oripaShowCoinResult(oripaCurrentSpinCoin);
     // ハイライト演出(highlightWinSlots)がしばらくループするので、
     // 少し見せてから親ウィンドウに「終わったよ」と伝える
     setTimeout(function(){
-      var counterEl = document.getElementById('oripa-spin-counter');
-      if(counterEl) counterEl.style.display='none';
       window.parent.postMessage({type:'oripa-slot-complete'}, '*');
     }, 2200);
   }
@@ -78,21 +81,33 @@ completeSpin = function(c){
 // (mobile.jsのcheckMobileEvent内でrotateInstructionを見てるので、ここで先にfalseにしておく)
 rotateInstruction = false;
 
-// 残りスピン数のオーバーレイ（iframe内、ゲーム画面の一部として表示）
+// 残りスピン数を「LINES」枠に表示（既存のCanvas UIを流用）
 function oripaShowSpinCounter(remaining, total){
-  var el = document.getElementById('oripa-spin-counter');
-  if(!el){
-    el = document.createElement('div');
-    el.id = 'oripa-spin-counter';
-    el.style.cssText = 'position:fixed;top:10px;right:10px;z-index:99999;background:rgba(0,0,0,.7);color:#f3be20;font-weight:900;font-size:14px;padding:6px 14px;border-radius:16px;font-family:sans-serif;pointer-events:none';
-    document.body.appendChild(el);
+  oripaRemainingSpins = remaining;
+  try{
+    if(typeof linesTxt !== 'undefined' && linesTxt){
+      linesTxt.text = '残り' + remaining;
+    }
+    if(typeof stage !== 'undefined') stage.update();
+  }catch(ex){
+    console.warn('oripaShowSpinCounter: 表示更新エラー', ex);
   }
-  el.textContent = '残り ' + remaining + ' スピン';
-  el.style.display = remaining>0 ? 'block' : 'none';
+}
+
+// 1スピンごとの獲得コインを「MAX BET」枠に表示（既存のCanvas UIを流用）
+function oripaShowCoinResult(coin){
+  try{
+    if(typeof maxBetTxt !== 'undefined' && maxBetTxt){
+      maxBetTxt.text = coin>0 ? ('+' + coin.toLocaleString()) : 'ハズレ';
+    }
+    if(typeof stage !== 'undefined') stage.update();
+  }catch(ex){
+    console.warn('oripaShowCoinResult: 表示更新エラー', ex);
+  }
 }
 
 function oripaPlayTier(tier){
-  // クレジット/ベット表示は残しつつ、実際の増減はオリパ側のコイン管理と無関係なので
+  // クレジット表示は残しつつ、実際の増減はオリパ側のコイン管理と無関係なので
   // 尽きて止まらないよう大きめに設定しておく
   playerData.credit = 999999;
   playerData.creditSum = 999999;
@@ -101,11 +116,16 @@ function oripaPlayTier(tier){
   oripaSpinInProgress = true;
   gameData.resultArray = oripaBuildResultArray(tier);
   proceedStartSpin();
+
+  // updateGameStat()や内部処理がmaxBetTxt/linesTxtを上書きすることがあるため、
+  // スピン開始のタイミングで改めて残りスピン数を出し直す
+  oripaShowSpinCounter(oripaRemainingSpins);
 }
 
 window.addEventListener('message', function(e){
   var data = e.data || {};
   if(data.type !== 'oripa-slot-play') return;
+  oripaCurrentSpinCoin = typeof data.coin === 'number' ? data.coin : 0;
   if(typeof data.remaining === 'number') oripaShowSpinCounter(data.remaining, data.total);
   oripaPlayTier(data.tier || 'c');
 });
@@ -128,6 +148,7 @@ var oripaOriginalInitMain=initMain;
 initMain=function(){
   try{
     oripaOriginalInitMain();
+    oripaHideUnusedUI();
     goPage('game');
     window.parent.postMessage({type:'oripa-slot-ready'}, '*');
   }catch(ex){
@@ -144,8 +165,37 @@ initMain=function(){
     var testTier = params.get('test');
     var validTiers = ['sar','sr','rr','r','c'];
     if(validTiers.indexOf(testTier) === -1) testTier = 'sar';
+    oripaRemainingSpins = 1;
     setTimeout(function(){
       oripaPlayTier(testTier);
     }, 800);
   }
 };
+
+// CREDIT表示・BETボタン等の不要UIを非表示にする
+// (オリパはパック価格固定でベット額の概念が無いため不要)
+// LINES枠→残りスピン数、MAX BET枠→獲得コイン表示として流用するため、
+// itemDisplayLines/linesTxt・itemDisplayMaxBet/maxBetTxt は残し、
+// 上下矢印ボタン(buttonLines/buttonMaxBet)のみ非表示にする。
+function oripaHideUnusedUI(){
+  try{
+    var toHide = [
+      'itemCredit','itemCreditAlert','itemCreditAnimate','creditTxt',
+      'buttonLines',
+      'itemDisplayBet','buttonBet','betTxt',
+      'buttonMaxBet'
+    ];
+    toHide.forEach(function(name){
+      if(typeof window[name] !== 'undefined' && window[name] && window[name].visible !== undefined){
+        window[name].visible = false;
+      }
+    });
+    if(typeof linesTxt !== 'undefined' && linesTxt){ linesTxt.text = ''; }
+    if(typeof maxBetTxt !== 'undefined' && maxBetTxt){ maxBetTxt.text = ''; }
+    if(typeof stage !== 'undefined'){
+      stage.update();
+    }
+  }catch(ex){
+    console.warn('oripaHideUnusedUI: UI非表示処理でエラー', ex);
+  }
+}
