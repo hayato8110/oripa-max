@@ -158,5 +158,32 @@ setTimeout(function(){
   }
 }, 3000);
 </script>
+<h2>⑤ ファイルの中身が本物か確認</h2>
+<div id="contentCheck">確認中...</div>
+
+<script>
+var contentFilesToCheck = [
+  '/slot/game/js/game.js',
+  '/slot/game/css/main.css',
+  '/slot/game/js/libs/createjs.min.js',
+  '/slot/game/js/libs/mobile-detect.js'
+];
+Promise.all(contentFilesToCheck.map(function(url){
+  return fetch(url, {cache:'no-store'})
+    .then(function(res){ return res.text().then(function(t){ return {url:url, text:t, ct:res.headers.get('content-type')}; }); })
+    .catch(function(e){ return {url:url, text:'(取得失敗: '+e.message+')', ct:'?'}; });
+})).then(function(list){
+  var html = list.map(function(r){
+    var snippet = r.text.slice(0, 150).replace(/</g,'&lt;');
+    var looksWrong = r.text.trim().toLowerCase().indexOf('<!doctype') === 0 || r.text.trim().toLowerCase().indexOf('<html') === 0;
+    return '<div style="margin-bottom:14px;border:1px solid #ccc;padding:8px">' +
+      '<b>' + r.url + '</b><br>Content-Type: ' + r.ct + '<br>' +
+      '<span class="' + (looksWrong ? 'ng' : 'ok') + '">' + (looksWrong ? '⚠️ HTMLが返ってきてる疑いあり' : '中身はJS/CSSっぽい') + '</span><br>' +
+      '<pre style="white-space:pre-wrap;background:#f5f5f5;padding:6px">' + snippet + '</pre>' +
+      '</div>';
+  }).join('');
+  document.getElementById('contentCheck').innerHTML = html;
+});
+</script>
 </body>
 </html>
