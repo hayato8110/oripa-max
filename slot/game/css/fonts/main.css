@@ -1,0 +1,39 @@
+/* Base style
+   ========================================================================== */
+   
+/* Fonts */
+@font-face {
+    font-family: 'bebas_neueregular';
+    src: url('fonts/bebasneue-webfont.woff2') format('woff2'),
+         url('fonts/bebasneue-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+html{ -webkit-user-select: none; -ms-user-select: none; user-select: none; background:#B66528;}
+
+/*-- Percent Loader -- */
+#mainLoader{position:absolute;z-index:5; display:none; font-size:20px; line-height:25px; color:#fff; text-align:center; width:100%; font-family:'bebas_neueregular';  background:url(../assets/background.png) center center no-repeat; background-size:cover;}
+
+/*-- Content Wrapper -- */
+#mainHolder{position:absolute; width:100%;height:100%; background:url(../assets/background.png) center center no-repeat; background-size:cover;}
+
+/*-- Browser Not Support -- */
+#notSupportHolder{ width:90%; margin:5% auto; position:relative; color:#fff; text-align:center; font-size:25px; font-family:'bebas_neueregular'; display:none;}
+
+/*-- Mobile Rotate Instruction -- */
+#rotateHolder{position:absolute;width:100%;height:100%;background-color:#B66528;z-index:1000; display:none;}
+.mobileRotate{width:200px;height:auto;position:absolute;text-align:center;}
+.rotateImg{-webkit-animation:spin .5s linear infinite; -moz-animation:spin .5s linear infinite; animation:spin .5s linear infinite; margin-bottom:10px;}
+.rotateDesc{color:#fff; font-size:20px; line-height:20px; font-family:'bebas_neueregular';}
+
+@-moz-keyframes spin { 50% { -moz-transform: rotate(0deg); } 100% { -moz-transform: rotate(0deg); } }
+@-webkit-keyframes spin { 50% { -webkit-transform: rotate(90deg); } 100% { -webkit-transform: rotate(0deg); } }
+@keyframes spin { 50% { -webkit-transform: rotate(90deg); transform:rotate(90deg); } 100% { -webkit-transform: rotate(90deg); transform:rotate(90deg); } }
+
+/*-- Canvas Wrapper -- */
+#canvasHolder{ display:none; width:100%; max-width:1280px; height:100%; margin:auto; position:relative;}
+canvas{ position:fixed;}
+
+
