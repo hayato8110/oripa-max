@@ -72,6 +72,58 @@
 })();
 </script>
 
+<script>
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    var out = [];
+
+    out.push('=== manifest総数 = ' + (typeof manifest!=='undefined' ? manifest.length : '(manifest未定義)'));
+
+    if(typeof manifest !== 'undefined' && typeof loader !== 'undefined'){
+      out.push('\n=== loader.getResult()がnullのID一覧 ===');
+      var missing = [];
+      manifest.forEach(function(m){
+        var res;
+        try{ res = loader.getResult(m.id); }catch(ex){ res = 'ERR:'+ex.message; }
+        if(!res){
+          missing.push(m.id + ' -> ' + m.src);
+        }
+      });
+      out.push(missing.length ? missing.join('\n') : '(nullなし、全部取得できてる)');
+    }
+
+    out.push('\n=== fetchで直接404チェック ===');
+    function box3(html){
+      var old = document.getElementById('diag3Box');
+      if(old) old.remove();
+      var b = document.createElement('div');
+      b.id = 'diag3Box';
+      b.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;color:#000;font-size:11px;padding:10px;z-index:2147483647;overflow:auto;font-family:monospace;white-space:pre-wrap;border:4px solid blue';
+      b.innerHTML = html;
+      document.body.appendChild(b);
+    }
+
+    if(typeof manifest !== 'undefined'){
+      Promise.all(manifest.map(function(m){
+        return fetch(m.src, {cache:'no-store'}).then(function(r){
+          return r.status + ' ' + m.src;
+        }).catch(function(e){
+          return 'ERR ' + m.src + ' ' + e.message;
+        });
+      })).then(function(results){
+        var bad = results.filter(function(r){ return !r.startsWith('200'); });
+        out.push(bad.length ? bad.join('\n') : '(全部200 OK)');
+        box3(out.join('\n'));
+      });
+    } else {
+      box3(out.join('\n'));
+    }
+
+    box3(out.join('\n') + '\n\n(fetchチェック中...)');
+  }, 3500);
+});
+</script>
+
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
