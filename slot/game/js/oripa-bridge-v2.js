@@ -61,14 +61,18 @@ function oripaBuildResultArray(tier){
 var oripaSpinInProgress = false;
 var oripaCurrentSpinCoin = 0;
 var oripaRemainingSpins = 0;
+var oripaScoreTotal = 0;   // 累計獲得コイン(このプレイ内の合計)
+var oripaRate = 0;         // 購入金額(レート)
 
 var oripaOriginalCompleteSpin = completeSpin;
 completeSpin = function(c){
   oripaOriginalCompleteSpin(c);
   if(slotData.spinComplete === gameSettings.slotSettings.column && oripaSpinInProgress){
     oripaSpinInProgress = false;
-    // 獲得コインを「MAX BET」枠に表示（既存のCanvas UIを流用）
+    // 累計スコアに加算して表示
+    oripaScoreTotal += oripaCurrentSpinCoin;
     oripaShowCoinResult(oripaCurrentSpinCoin);
+    oripaShowScore(oripaScoreTotal);
     // ハイライト演出(highlightWinSlots)がしばらくループするので、
     // 少し見せてから親ウィンドウに「終わったよ」と伝える
     setTimeout(function(){
@@ -106,6 +110,31 @@ function oripaShowCoinResult(coin){
   }
 }
 
+// 累計獲得コイン(スコア)を「CREDIT」枠に表示（既存のCanvas UIを流用）
+function oripaShowScore(score){
+  try{
+    if(typeof creditTxt !== 'undefined' && creditTxt){
+      creditTxt.text = score.toLocaleString();
+    }
+    if(typeof stage !== 'undefined') stage.update();
+  }catch(ex){
+    console.warn('oripaShowScore: 表示更新エラー', ex);
+  }
+}
+
+// 購入金額(レート)を「BET」枠に表示（既存のCanvas UIを流用）
+function oripaShowRate(rate){
+  oripaRate = rate;
+  try{
+    if(typeof betTxt !== 'undefined' && betTxt){
+      betTxt.text = rate.toLocaleString();
+    }
+    if(typeof stage !== 'undefined') stage.update();
+  }catch(ex){
+    console.warn('oripaShowRate: 表示更新エラー', ex);
+  }
+}
+
 function oripaPlayTier(tier){
   // クレジット表示は残しつつ、実際の増減はオリパ側のコイン管理と無関係なので
   // 尽きて止まらないよう大きめに設定しておく
@@ -117,15 +146,22 @@ function oripaPlayTier(tier){
   gameData.resultArray = oripaBuildResultArray(tier);
   proceedStartSpin();
 
-  // updateGameStat()や内部処理がmaxBetTxt/linesTxtを上書きすることがあるため、
-  // スピン開始のタイミングで改めて残りスピン数を出し直す
+  // updateGameStat()や内部処理がテキストを上書きすることがあるため、
+  // スピン開始のタイミングで改めて残りスピン数・スコア・レートを出し直す
   oripaShowSpinCounter(oripaRemainingSpins);
+  oripaShowScore(oripaScoreTotal);
+  oripaShowRate(oripaRate);
 }
 
 window.addEventListener('message', function(e){
   var data = e.data || {};
   if(data.type !== 'oripa-slot-play') return;
   oripaCurrentSpinCoin = typeof data.coin === 'number' ? data.coin : 0;
+  if(typeof data.rate === 'number') oripaRate = data.rate;
+  // 新しいプレイの1回目(remaining === total)ならスコアをリセット
+  if(typeof data.remaining === 'number' && typeof data.total === 'number' && data.remaining === data.total){
+    oripaScoreTotal = 0;
+  }
   if(typeof data.remaining === 'number') oripaShowSpinCounter(data.remaining, data.total);
   oripaPlayTier(data.tier || 'c');
 });
@@ -160,30 +196,32 @@ initMain=function(){
 
   // テストモード: ?test=1 を付けて単体で開いた時、自動で1回スロットを回す
   // (?test=sar / ?test=sr / ?test=rr / ?test=r / ?test=c で当選tierも指定可能)
+  // ?rate=1000 のように付けるとレート表示のテストもできる(省略時は1000)
   var params = new URLSearchParams(location.search);
   if(params.has('test')){
     var testTier = params.get('test');
     var validTiers = ['sar','sr','rr','r','c'];
     if(validTiers.indexOf(testTier) === -1) testTier = 'sar';
     oripaRemainingSpins = 1;
+    oripaRate = Number(params.get('rate')) || 1000;
     setTimeout(function(){
+      oripaScoreTotal = 0;
       oripaPlayTier(testTier);
     }, 800);
   }
 };
 
-// CREDIT表示・BETボタン等の不要UIを非表示にする
-// (オリパはパック価格固定でベット額の概念が無いため不要)
-// LINES枠→残りスピン数、MAX BET枠→獲得コイン表示として流用するため、
-// itemDisplayLines/linesTxt・itemDisplayMaxBet/maxBetTxt は残し、
-// 上下矢印ボタン(buttonLines/buttonMaxBet)のみ非表示にする。
+// CREDIT・BET表示を「スコア」「レート」として流用し、不要な矢印ボタンのみ非表示にする
+// (オリパはパック価格固定でベット額の概念が無いため、増減ボタン自体は不要)
+// itemDisplayLines/linesTxt → 残りスピン数
+// itemDisplayMaxBet/maxBetTxt → 今回のスピンの獲得コイン
+// itemCredit/creditTxt → 累計スコア(このプレイの合計獲得コイン)
+// itemDisplayBet/betTxt → レート(購入金額)
 function oripaHideUnusedUI(){
   try{
     var toHide = [
-      'itemCredit','itemCreditAlert','itemCreditAnimate','creditTxt',
-      'buttonLines',
-      'itemDisplayBet','buttonBet','betTxt',
-      'buttonMaxBet'
+      'itemCreditAlert','itemCreditAnimate',
+      'buttonLines','buttonBet','buttonMaxBet'
     ];
     toHide.forEach(function(name){
       if(typeof window[name] !== 'undefined' && window[name] && window[name].visible !== undefined){
@@ -192,6 +230,8 @@ function oripaHideUnusedUI(){
     });
     if(typeof linesTxt !== 'undefined' && linesTxt){ linesTxt.text = ''; }
     if(typeof maxBetTxt !== 'undefined' && maxBetTxt){ maxBetTxt.text = ''; }
+    if(typeof creditTxt !== 'undefined' && creditTxt){ creditTxt.text = '0'; }
+    if(typeof betTxt !== 'undefined' && betTxt){ betTxt.text = '0'; }
     if(typeof stage !== 'undefined'){
       stage.update();
     }
