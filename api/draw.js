@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     supabase.auth.getUser(userToken),
     supabase.from('packs').select('*').eq('id', packId).single(),
     supabase.from('users').select('coin_points, total_spent, is_banned').eq('id', userId).single(),
-    supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, exchange_type, image_url, quantity, remaining_qty, trigger_remaining').eq('pack_id', packId).eq('is_active', true),
+    supabase.from('prizes').select('id, name, tier, tier_label, weight, value_jp, slot_coin_min, slot_coin_max, exchange_type, image_url, quantity, remaining_qty, trigger_remaining').eq('pack_id', packId).eq('is_active', true),
     supabase.from('pack_videos').select('tier, video_url').eq('pack_id', packId).eq('is_active', true)
   ]);
 
@@ -217,7 +217,13 @@ export default async function handler(req, res) {
     });
     if (!available.length) break;
     const prize = pickPrize(available, Math.random(), tenjoCount + i, pack.tenjo_limit || 0, prizeStock);
-    results.push({ prize: { id: prize.id, name: prize.name, tier: prize.tier, tier_label: prize.tier_label, value_jp: prize.value_jp, exchange_type: prize.exchange_type, image_url: prize.image_url } });
+    // スロット表示コイン範囲が設定されてる景品は、実際の還元額もその場でランダムに決定する
+    // (毎回変わる。決定はサーバー側で行い、そのままclientの表示・履歴保存両方に使う)
+    let effectiveValueJp = prize.value_jp;
+    if (prize.slot_coin_min != null && prize.slot_coin_max != null && prize.slot_coin_max >= prize.slot_coin_min) {
+      effectiveValueJp = prize.slot_coin_min + Math.floor(Math.random() * (prize.slot_coin_max - prize.slot_coin_min + 1));
+    }
+    results.push({ prize: { id: prize.id, name: prize.name, tier: prize.tier, tier_label: prize.tier_label, value_jp: effectiveValueJp, exchange_type: prize.exchange_type, image_url: prize.image_url } });
     prizeStock[prize.id]--;
   }
 
