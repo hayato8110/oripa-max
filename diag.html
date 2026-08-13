@@ -114,5 +114,49 @@ function renderFiles(){
 
 setTimeout(render, 3000);
 </script>
+<h2>④ iframe内部の変数を直接のぞく</h2>
+<div id="deepCheck">3秒後に確認します...</div>
+
+<script>
+setTimeout(function(){
+  var el = document.getElementById('deepCheck');
+  try {
+    var win = document.getElementById('gameFrame').contentWindow;
+    var doc = win.document;
+    var lines = [];
+    lines.push('browserSupport = ' + win.browserSupport);
+    lines.push('isDesktop = ' + win.isDesktop);
+    lines.push('isMobile = ' + win.isMobile);
+    lines.push('isTablet = ' + win.isTablet);
+    lines.push('isLoaded = ' + win.isLoaded);
+    lines.push('typeof jQuery = ' + (typeof win.jQuery));
+    lines.push('typeof $ = ' + (typeof win.$));
+    lines.push('typeof createjs = ' + (typeof win.createjs));
+    lines.push('typeof MobileDetect = ' + (typeof win.MobileDetect));
+    lines.push('typeof checkBrowser = ' + (typeof win.checkBrowser));
+    lines.push('typeof initMain = ' + (typeof win.initMain));
+    lines.push('typeof initPreload = ' + (typeof win.initPreload));
+
+    var nsh = doc.getElementById('notSupportHolder');
+    if(nsh){
+      var style = win.getComputedStyle(nsh);
+      lines.push('#notSupportHolder computed display = ' + style.display);
+      lines.push('#notSupportHolder inline style = "' + nsh.getAttribute('style') + '"');
+    } else {
+      lines.push('#notSupportHolder が見つからない(HTML構造自体がおかしい可能性)');
+    }
+
+    var ml = doc.getElementById('mainLoader');
+    if(ml){
+      var style2 = win.getComputedStyle(ml);
+      lines.push('#mainLoader computed display = ' + style2.display);
+    }
+
+    el.innerHTML = lines.map(function(l){ return '<div>'+l+'</div>'; }).join('');
+  } catch(ex){
+    el.innerHTML = '<div class="err">アクセス失敗: ' + ex.message + '</div>';
+  }
+}, 3000);
+</script>
 </body>
 </html>
