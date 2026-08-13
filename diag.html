@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>診断ページ</title>
+<style>
+body{font-family:sans-serif;padding:16px;font-size:14px;line-height:1.6;word-break:break-all}
+.ok{color:green}
+.ng{color:red;font-weight:bold}
+.err{background:#fee;border:1px solid #c00;padding:8px;margin:6px 0;color:#900}
+h2{margin-top:24px;border-bottom:2px solid #333}
+</style>
+</head>
+<body>
+<h1>スロット診断ページ</h1>
+
+<h2>① JSエラーのキャプチャ</h2>
+<div id="errors">(まだエラーなし。下のiframeが読み込まれるのを待ってます…)</div>
+
+<h2>② 各ファイルの読み込み状況</h2>
+<div id="fileChecks">確認中...</div>
+
+<h2>③ 実際のゲーム画面(iframe)</h2>
+<p>下に本物のゲームを埋め込みます。真っ白/真っ黒でもOK、①にエラーが出ればそれが手がかりになります。</p>
+<iframe id="gameFrame" src="/slot/game/index.html" style="width:100%;height:400px;border:1px solid #ccc"></iframe>
+
+<script>
+var errors = [];
+window.addEventListener('error', function(e){
+  errors.push((e.filename||'?') + ' : line ' + (e.lineno||'?') + ' : ' + e.message);
+  render();
+});
+
+// iframe内のエラーも拾う
+document.getElementById('gameFrame').addEventListener('load', function(){
+  try {
+    var win = document.getElementById('gameFrame').contentWindow;
+    win.addEventListener('error', function(e){
+      errors.push('[iframe内] ' + (e.filename||'?') + ' : line ' + (e.lineno||'?') + ' : ' + e.message);
+      render();
+    });
+  } catch(ex){
+    errors.push('iframeへのアクセス自体に失敗: ' + ex.message);
+    render();
+  }
+});
+
+function render(){
+  var el = document.getElementById('errors');
+  if(errors.length === 0){
+    el.innerHTML = '<span class="ok">エラーなし(まだ)</span>';
+  } else {
+    el.innerHTML = errors.map(function(e){ return '<div class="err">' + e + '</div>'; }).join('');
+  }
+}
+
+// ファイルの存在チェック
+var filesToCheck = [
+  '/slot/game/index.html',
+  '/slot/game/css/main.css',
+  '/slot/game/css/normalize.css',
+  '/slot/game/js/settings.js',
+  '/slot/game/js/game.js',
+  '/slot/game/js/mobile.js',
+  '/slot/game/js/main.js',
+  '/slot/game/js/loader.js',
+  '/slot/game/js/oripa-bridge.js',
+  '/slot/game/js/init.js',
+  '/slot/game/js/canvas.js',
+  '/slot/game/js/plugins.js',
+  '/slot/game/js/sound.js',
+  '/slot/game/js/libs/jquery.min.js',
+  '/slot/game/js/libs/createjs.min.js',
+  '/slot/game/js/libs/TweenMax.min.js',
+  '/slot/game/js/libs/mobile-detect.js',
+  '/slot/game/assets/logo.png',
+  '/slot/game/assets/button_start.png',
+  '/slot/game/assets/loader.png',
+  '/slot/game/assets/background.png',
+  '/slot/game/assets/multiple/item_machine.png',
+  '/slot/game/assets/multiple/frame_Spritesheet5x1.png',
+  '/slot/game/assets/multiple/item_shadow.png',
+  '/slot/game/assets/multiple/item_info.png',
+  '/slot/game/assets/multiple/slot_01.png',
+  '/slot/game/assets/sounds/click.ogg',
+  '/slot/game/css/fonts/bebasneue-webfont.woff'
+];
+
+var results = [];
+var pending = filesToCheck.length;
+
+filesToCheck.forEach(function(url){
+  fetch(url, {cache:'no-store'})
+    .then(function(res){
+      results.push({url:url, status:res.status, ok:res.ok});
+    })
+    .catch(function(e){
+      results.push({url:url, status:'エラー: '+e.message, ok:false});
+    })
+    .finally(function(){
+      pending--;
+      if(pending === 0) renderFiles();
+    });
+});
+
+function renderFiles(){
+  results.sort(function(a,b){ return (a.ok === b.ok) ? 0 : (a.ok ? 1 : -1); });
+  var html = results.map(function(r){
+    var cls = r.ok ? 'ok' : 'ng';
+    return '<div class="'+cls+'">[' + r.status + '] ' + r.url + '</div>';
+  }).join('');
+  document.getElementById('fileChecks').innerHTML = html;
+}
+
+setTimeout(render, 3000);
+</script>
+</body>
+</html>
