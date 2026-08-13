@@ -90,11 +90,14 @@ window.addEventListener('message', function(e){
 });
 
 // ロード完了後、自動でメニューを飛ばしてゲーム画面へ
-var oripaCheckLoaded = setInterval(function(){
-  if(typeof isLoaded !== 'undefined' && isLoaded){
-    clearInterval(oripaCheckLoaded);
-    goPage('game');
-    // 準備完了を親ウィンドウに通知
-    window.parent.postMessage({type:'oripa-slot-ready'}, '*');
-  }
-}, 100);
+// ※isLoadedはアセット読み込み開始のタイミングでtrueになるだけで、
+//   実際にcanvas等の準備が整うのはinitMain()が呼ばれた後。
+//   ここを早まってgoPage('game')すると、まだ存在しないgameContainer等を
+//   参照してJSエラーになり、ローディング画面が固まる原因になるので、
+//   initMain()自体をラップして「本当に準備できたタイミング」を検知する。
+var oripaOriginalInitMain=initMain;
+initMain=function(){
+  oripaOriginalInitMain();
+  goPage('game');
+  window.parent.postMessage({type:'oripa-slot-ready'}, '*');
+};
