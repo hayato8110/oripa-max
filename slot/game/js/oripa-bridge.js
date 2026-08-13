@@ -67,17 +67,31 @@ completeSpin = function(c){
     // ハイライト演出(highlightWinSlots)がしばらくループするので、
     // 少し見せてから親ウィンドウに「終わったよ」と伝える
     setTimeout(function(){
+      var counterEl = document.getElementById('oripa-spin-counter');
+      if(counterEl) counterEl.style.display='none';
       window.parent.postMessage({type:'oripa-slot-complete'}, '*');
     }, 2200);
   }
 };
 
-window.addEventListener('message', function(e){
-  var data = e.data || {};
-  if(data.type !== 'oripa-slot-play') return;
+// 縦画面のままでも横画面専用の判定を無視して常に表示させる
+// (mobile.jsのcheckMobileEvent内でrotateInstructionを見てるので、ここで先にfalseにしておく)
+rotateInstruction = false;
 
-  var tier = data.tier || 'c';
+// 残りスピン数のオーバーレイ（iframe内、ゲーム画面の一部として表示）
+function oripaShowSpinCounter(remaining, total){
+  var el = document.getElementById('oripa-spin-counter');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'oripa-spin-counter';
+    el.style.cssText = 'position:fixed;top:10px;right:10px;z-index:99999;background:rgba(0,0,0,.7);color:#f3be20;font-weight:900;font-size:14px;padding:6px 14px;border-radius:16px;font-family:sans-serif;pointer-events:none';
+    document.body.appendChild(el);
+  }
+  el.textContent = '残り ' + remaining + ' スピン';
+  el.style.display = remaining>0 ? 'block' : 'none';
+}
 
+function oripaPlayTier(tier){
   // クレジット/ベット表示は残しつつ、実際の増減はオリパ側のコイン管理と無関係なので
   // 尽きて止まらないよう大きめに設定しておく
   playerData.credit = 999999;
@@ -87,6 +101,13 @@ window.addEventListener('message', function(e){
   oripaSpinInProgress = true;
   gameData.resultArray = oripaBuildResultArray(tier);
   proceedStartSpin();
+}
+
+window.addEventListener('message', function(e){
+  var data = e.data || {};
+  if(data.type !== 'oripa-slot-play') return;
+  if(typeof data.remaining === 'number') oripaShowSpinCounter(data.remaining, data.total);
+  oripaPlayTier(data.tier || 'c');
 });
 
 // ロード完了後、自動でメニューを飛ばしてゲーム画面へ
@@ -100,4 +121,16 @@ initMain=function(){
   oripaOriginalInitMain();
   goPage('game');
   window.parent.postMessage({type:'oripa-slot-ready'}, '*');
+
+  // テストモード: ?test=1 を付けて単体で開いた時、自動で1回スロットを回す
+  // (?test=sar / ?test=sr / ?test=rr / ?test=r / ?test=c で当選tierも指定可能)
+  var params = new URLSearchParams(location.search);
+  if(params.has('test')){
+    var testTier = params.get('test');
+    var validTiers = ['sar','sr','rr','r','c'];
+    if(validTiers.indexOf(testTier) === -1) testTier = 'sar';
+    setTimeout(function(){
+      oripaPlayTier(testTier);
+    }, 800);
+  }
 };
