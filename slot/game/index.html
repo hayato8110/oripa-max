@@ -72,43 +72,6 @@
 })();
 </script>
 
-		<script>
-(function(){
-  var errors = [];
-  window.addEventListener('error', function(e){
-    errors.push({
-      msg: e.message,
-      file: e.filename,
-      line: e.lineno,
-      col: e.colno
-    });
-    render();
-  });
-
-  function render(){
-    var old = document.getElementById('jsErrBox');
-    if(old) old.remove();
-    var box = document.createElement('div');
-    box.id = 'jsErrBox';
-    box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fff;color:#c00;font-size:12px;padding:10px;z-index:999999;max-height:60%;overflow:auto;font-family:monospace;border:4px solid red;white-space:pre-wrap';
-    if(errors.length === 0){
-      box.innerHTML = '<b>JSエラー検出中...(まだエラーなし)</b>';
-    } else {
-      box.innerHTML = '<b>JSエラー検出: ' + errors.length + '件</b><br>' +
-        errors.map(function(e, i){
-          return (i+1) + '. ' + e.msg + '\n   file: ' + e.file + '\n   line: ' + e.line + ':' + e.col;
-        }).join('\n\n');
-    }
-    document.body.appendChild(box);
-  }
-
-  document.addEventListener('DOMContentLoaded', function(){
-    render();
-    setTimeout(render, 4000);
-  });
-})();
-</script>
-
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -199,37 +162,6 @@
         <script src="js/loader.js"></script>
         <!-- <script src="js/oripa-bridge-v2.js"></script> 一時的に無効化（素の動作確認用） -->
         <script src="js/init.js"></script>
-    <script>
-setTimeout(function(){
-  var lines = [];
-  try{
-    lines.push('loader.progress = ' + loader.progress);
-    lines.push('loader.loaded = ' + loader.loaded);
-    var items = loader._loadQueue || loader._loadQueueBackup || [];
-    lines.push('queue length = ' + items.length);
-    var failed = [];
-    items.forEach(function(it){
-      if(it && it.item && it.loaded === false){
-        failed.push(it.item.src || it.item.id);
-      }
-    });
-    lines.push('未完了アイテム数 = ' + failed.length);
-    failed.slice(0,20).forEach(function(f){ lines.push(' - ' + f); });
-  }catch(ex){
-    lines.push('loader確認エラー: ' + ex.message);
-  }
-  lines.push('gameData.paused = ' + (typeof gameData!=='undefined'?gameData.paused:'?'));
-  lines.push('curPage = ' + (typeof curPage!=='undefined'?curPage:'?'));
-  try{ lines.push('gameContainer.visible = ' + gameContainer.visible); }catch(ex){ lines.push('gameContainer未定義'); }
-  try{ lines.push('mainContainer.visible = ' + mainContainer.visible); }catch(ex){}
-  try{ lines.push('canvasHolder display = ' + document.getElementById('canvasHolder').style.display); }catch(ex){}
-
-  var box = document.createElement('div');
-  box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fff;color:#000;font-size:12px;padding:12px;z-index:999999;max-height:100%;overflow:auto;font-family:monospace;border:4px solid purple;word-break:break-all';
-  box.innerHTML = '<b>ローダー診断</b><br>' + lines.join('<br>');
-  document.body.appendChild(box);
-},4000);
-    </script>
     </body>
     
     
