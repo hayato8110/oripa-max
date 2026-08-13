@@ -186,5 +186,19 @@ Promise.all(contentFilesToCheck.map(function(url){
   document.getElementById('contentCheck').innerHTML = html;
 });
 </script>
+<h2>⑥ レスポンスヘッダーを直接確認(CSP等)</h2>
+<div id="headerCheck">確認中...</div>
+
+<script>
+fetch('/slot/game/index.html', {cache:'no-store'}).then(function(res){
+  var lines = [];
+  res.headers.forEach(function(value, key){
+    lines.push('<b>' + key + '</b>: ' + value);
+  });
+  document.getElementById('headerCheck').innerHTML = lines.map(function(l){return '<div>'+l+'</div>';}).join('');
+}).catch(function(e){
+  document.getElementById('headerCheck').innerHTML = '取得失敗: ' + e.message;
+});
+</script>
 </body>
 </html>
