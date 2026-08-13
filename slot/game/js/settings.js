@@ -200,7 +200,7 @@ var lines_arr = [
 //Social share, [SCORE] will replace with game score
 var shareText = "SHARE YOUR SCORE"; //social share message
 var shareSettings = {
-	enable:true,
+	enable:false,
 	options:['facebook','twitter','whatsapp','telegram','reddit','linkedin'],
 	shareTitle:'Highscore on Slot Machine Game is $[SCORE].',
 	shareText:'$[SCORE] is mine new highscore on Slot Machine Game! Play it now!',
