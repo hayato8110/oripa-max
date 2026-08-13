@@ -169,8 +169,13 @@ function buildGameCanvas(){
 	var _frame = {"regX": _frameW/2, "regY": _frameH/2, "height": _frameH, "count": 5, "width": _frameW};
 	var _animations = {animate:{frames: [0,1,2,3,4], speed:1}};
 						
+	var _creditImg = loader.getResult('itemCreditAnimate');
+	if(!_creditImg){
+		console.warn('itemCreditAnimate 画像が読み込めていません');
+		_creditImg = {src:''};
+	}
 	itemCreditData = new createjs.SpriteSheet({
-		"images": [loader.getResult('itemCreditAnimate').src],
+		"images": [_creditImg.src],
 		"frames": _frame,
 		"animations": _animations
 	});
@@ -552,6 +557,10 @@ function tick(event) {
  * 
  */
 function centerReg(obj){
+	if(!obj || !obj.image){
+		console.warn('centerReg: 画像が読み込めていないオブジェクトをスキップしました', obj);
+		return;
+	}
 	obj.regX=obj.image.naturalWidth/2;
 	obj.regY=obj.image.naturalHeight/2;
 }
