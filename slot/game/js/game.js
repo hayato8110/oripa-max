@@ -1171,6 +1171,7 @@ function findManySlotMatch(indexArray){
  */
 function updateGame(){
 	for(var c = 0; c<gameSettings.slotSettings.column; c++){
+		if(!slotData || !slotData.array || !slotData.array[c] || !slotData.array[c].obj){ continue; }
 		for(var s = 0; s<slotData.array[c].obj.length; s++){
 			var thisObj = slotData.array[c].obj[s];
 			thisObj.y = thisObj.oriY + slotData.array[c].y;
