@@ -57,7 +57,38 @@
         out.push(i + ': ' + (s.src ? s.src.replace(location.origin,'') : '(インライン ' + s.textContent.length + '文字)'));
       });
 
-      box(out.join('\n'));
+      out.push('\n=== ⑥ manifestアセットの404チェック(baseタグ修正後) ===');
+      if(typeof manifest !== 'undefined'){
+        out.push('manifest総数 = ' + manifest.length);
+        Promise.all(manifest.map(function(m){
+          var url = new URL(m.src, document.baseURI).href;
+          return fetch(url, {cache:'no-store'}).then(function(r){
+            return r.status + ' ' + m.id + ' -> ' + url;
+          }).catch(function(e){
+            return 'ERR ' + m.id + ' ' + e.message;
+          });
+        })).then(function(results){
+          var bad = results.filter(function(r){ return !r.startsWith('200'); });
+          out.push(bad.length ? bad.join('\n') : '(全部200 OK)');
+
+          out.push('\n=== ⑦ loader.getResult()がnullのID ===');
+          if(typeof loader !== 'undefined'){
+            var missing = [];
+            manifest.forEach(function(m){
+              var res;
+              try{ res = loader.getResult(m.id); }catch(ex){ res = null; }
+              if(!res){ missing.push(m.id + ' -> ' + m.src); }
+            });
+            out.push(missing.length ? missing.join('\n') : '(nullなし)');
+          }
+
+          box(out.join('\n'));
+        });
+      } else {
+        out.push('(manifest未定義)');
+      }
+
+      box(out.join('\n') + '\n\n(⑥⑦を確認中...)');
     }, 3000);
   });
 })();
