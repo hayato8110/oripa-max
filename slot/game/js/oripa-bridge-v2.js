@@ -48,31 +48,51 @@ function oripaBuildResultArray(tier){
   }
   return arr;
 }
-// ↑ presetSlotsResult()はresultArrayを「行ごとに列を回す」順で読むので、
-//   実際に反映する直前にoripaToRowMajorForEngine()で並び替える(下記)
-
-// このテンプレートのpresetSlotsResult()は resultArrayを
-// 「列0の(下から)3個、列1の3個…」ではなく、行→列の単純な配列として
-// 上から順に流し込む実装(game.js L630〜648参照)。
-// サンプルコメント(game.js L76-79)の並びに合わせて、
-// [row0col0..row0col4, row1col0..row1col4, row2col0..row2col4] の順で渡す。
-// 上のoripaBuildResultArrayは既にこの順で組んでいるのでそのままでOK。
 
 var oripaSpinInProgress = false;
 var oripaCurrentSpinCoin = 0;
 var oripaRemainingSpins = 0;
 var oripaScoreTotal = 0;   // 累計獲得コイン(このプレイ内の合計)
 var oripaRate = 0;         // 購入金額(レート)
+var oripaCoinLabel = '';   // MAX BET枠に出す文字列(スピン結果が出るまでは空)
+
+// ==== 表示テキストの一元管理 ====
+// game.js内部のupdateGameStat()が何度呼ばれても、
+// 必ず最後にこちらの値で上書きして「BET:」等の元表示に戻らないようにする
+function oripaApplyDisplay(){
+  try{
+    if(typeof linesTxt !== 'undefined' && linesTxt){
+      linesTxt.text = oripaRemainingSpins>0 ? ('残り' + oripaRemainingSpins) : '';
+    }
+    if(typeof betTxt !== 'undefined' && betTxt){
+      betTxt.text = oripaRate ? oripaRate.toLocaleString() : '';
+    }
+    if(typeof maxBetTxt !== 'undefined' && maxBetTxt){
+      maxBetTxt.text = oripaCoinLabel;
+    }
+    if(typeof creditTxt !== 'undefined' && creditTxt){
+      creditTxt.text = oripaScoreTotal.toLocaleString();
+    }
+  }catch(ex){
+    console.warn('oripaApplyDisplay: 表示更新エラー', ex);
+  }
+}
+
+var oripaOriginalUpdateGameStat = updateGameStat;
+updateGameStat = function(){
+  oripaOriginalUpdateGameStat();
+  oripaApplyDisplay();
+  if(typeof stage !== 'undefined') stage.update();
+};
 
 var oripaOriginalCompleteSpin = completeSpin;
 completeSpin = function(c){
   oripaOriginalCompleteSpin(c);
   if(slotData.spinComplete === gameSettings.slotSettings.column && oripaSpinInProgress){
     oripaSpinInProgress = false;
-    // 累計スコアに加算して表示
     oripaScoreTotal += oripaCurrentSpinCoin;
-    oripaShowCoinResult(oripaCurrentSpinCoin);
-    oripaShowScore(oripaScoreTotal);
+    oripaCoinLabel = oripaCurrentSpinCoin>0 ? ('+' + oripaCurrentSpinCoin.toLocaleString()) : 'ハズレ';
+    oripaApplyDisplay();
     // ハイライト演出(highlightWinSlots)がしばらくループするので、
     // 少し見せてから親ウィンドウに「終わったよ」と伝える
     setTimeout(function(){
@@ -85,72 +105,16 @@ completeSpin = function(c){
 // (mobile.jsのcheckMobileEvent内でrotateInstructionを見てるので、ここで先にfalseにしておく)
 rotateInstruction = false;
 
-// 残りスピン数を「LINES」枠に表示（既存のCanvas UIを流用）
-function oripaShowSpinCounter(remaining, total){
-  oripaRemainingSpins = remaining;
-  try{
-    if(typeof linesTxt !== 'undefined' && linesTxt){
-      linesTxt.text = '残り' + remaining;
-    }
-    if(typeof stage !== 'undefined') stage.update();
-  }catch(ex){
-    console.warn('oripaShowSpinCounter: 表示更新エラー', ex);
-  }
-}
-
-// 1スピンごとの獲得コインを「MAX BET」枠に表示（既存のCanvas UIを流用）
-function oripaShowCoinResult(coin){
-  try{
-    if(typeof maxBetTxt !== 'undefined' && maxBetTxt){
-      maxBetTxt.text = coin>0 ? ('+' + coin.toLocaleString()) : 'ハズレ';
-    }
-    if(typeof stage !== 'undefined') stage.update();
-  }catch(ex){
-    console.warn('oripaShowCoinResult: 表示更新エラー', ex);
-  }
-}
-
-// 累計獲得コイン(スコア)を「CREDIT」枠に表示（既存のCanvas UIを流用）
-function oripaShowScore(score){
-  try{
-    if(typeof creditTxt !== 'undefined' && creditTxt){
-      creditTxt.text = score.toLocaleString();
-    }
-    if(typeof stage !== 'undefined') stage.update();
-  }catch(ex){
-    console.warn('oripaShowScore: 表示更新エラー', ex);
-  }
-}
-
-// 購入金額(レート)を「BET」枠に表示（既存のCanvas UIを流用）
-function oripaShowRate(rate){
-  oripaRate = rate;
-  try{
-    if(typeof betTxt !== 'undefined' && betTxt){
-      betTxt.text = rate.toLocaleString();
-    }
-    if(typeof stage !== 'undefined') stage.update();
-  }catch(ex){
-    console.warn('oripaShowRate: 表示更新エラー', ex);
-  }
-}
-
 function oripaPlayTier(tier){
   // クレジット表示は残しつつ、実際の増減はオリパ側のコイン管理と無関係なので
   // 尽きて止まらないよう大きめに設定しておく
   playerData.credit = 999999;
   playerData.creditSum = 999999;
-  updateGameStat();
 
   oripaSpinInProgress = true;
   gameData.resultArray = oripaBuildResultArray(tier);
   proceedStartSpin();
-
-  // updateGameStat()や内部処理がテキストを上書きすることがあるため、
-  // スピン開始のタイミングで改めて残りスピン数・スコア・レートを出し直す
-  oripaShowSpinCounter(oripaRemainingSpins);
-  oripaShowScore(oripaScoreTotal);
-  oripaShowRate(oripaRate);
+  oripaApplyDisplay();
 }
 
 window.addEventListener('message', function(e){
@@ -162,16 +126,12 @@ window.addEventListener('message', function(e){
   if(typeof data.remaining === 'number' && typeof data.total === 'number' && data.remaining === data.total){
     oripaScoreTotal = 0;
   }
-  if(typeof data.remaining === 'number') oripaShowSpinCounter(data.remaining, data.total);
+  if(typeof data.remaining === 'number') oripaRemainingSpins = data.remaining;
+  oripaCoinLabel = ''; // 今回の結果はまだ出てないので空に
+  oripaApplyDisplay();
   oripaPlayTier(data.tier || 'c');
 });
 
-// ロード完了後、自動でメニューを飛ばしてゲーム画面へ
-// ※isLoadedはアセット読み込み開始のタイミングでtrueになるだけで、
-//   実際にcanvas等の準備が整うのはinitMain()が呼ばれた後。
-//   ここを早まってgoPage('game')すると、まだ存在しないgameContainer等を
-//   参照してJSエラーになり、ローディング画面が固まる原因になるので、
-//   initMain()自体をラップして「本当に準備できたタイミング」を検知する。
 // グローバルエラーを画面に直接表示（原因究明用、一時的）
 window.onerror = function(msg, src, line, col, err){
   var box = document.createElement('div');
@@ -206,6 +166,8 @@ initMain=function(){
     oripaRate = Number(params.get('rate')) || 1000;
     setTimeout(function(){
       oripaScoreTotal = 0;
+      oripaCoinLabel = '';
+      oripaApplyDisplay();
       oripaPlayTier(testTier);
     }, 800);
   }
@@ -228,10 +190,7 @@ function oripaHideUnusedUI(){
         window[name].visible = false;
       }
     });
-    if(typeof linesTxt !== 'undefined' && linesTxt){ linesTxt.text = ''; }
-    if(typeof maxBetTxt !== 'undefined' && maxBetTxt){ maxBetTxt.text = ''; }
-    if(typeof creditTxt !== 'undefined' && creditTxt){ creditTxt.text = '0'; }
-    if(typeof betTxt !== 'undefined' && betTxt){ betTxt.text = '0'; }
+    oripaApplyDisplay();
     if(typeof stage !== 'undefined'){
       stage.update();
     }
