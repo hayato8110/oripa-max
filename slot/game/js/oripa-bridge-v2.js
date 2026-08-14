@@ -11,7 +11,8 @@ var ORIPA_TIER_SYMBOL = {
   sr:  7, // A賞
   rr:  5, // B賞
   r:   3, // C賞
-  c:   0  // ハズレ(揃わない)
+  c:   1, // その他(実際に価値を持つ場合がある低ランク景品)
+  none: null // ハズレ演出専用(常に揃わない。buildSlotSpinPlanのフィラー用)
 };
 
 // 5列×3行のresultArrayを作る。中央のライン(lines_arr[0]、r:1の横一列)に
@@ -23,7 +24,7 @@ function oripaBuildResultArray(tier){
   var col = gameSettings.slotSettings.column; // 5
   var arr = [];
 
-  if(tier === 'c' || symbol == null){
+  if(tier === 'none' || symbol == null){
     // ハズレ: 絶対に揃わないようにランダム(同じ列内で重複しない程度に散らす)
     for(var c=0;c<col;c++){
       for(var r=0;r<row;r++){
@@ -129,7 +130,7 @@ window.addEventListener('message', function(e){
   if(typeof data.remaining === 'number') oripaRemainingSpins = data.remaining;
   oripaCoinLabel = ''; // 今回の結果はまだ出てないので空に
   oripaApplyDisplay();
-  oripaPlayTier(data.tier || 'c');
+  oripaPlayTier(data.tier || 'none');
 });
 
 // グローバルエラーを画面に直接表示（原因究明用、一時的）
