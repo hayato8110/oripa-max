@@ -106,6 +106,30 @@ completeSpin = function(c){
 // (mobile.jsのcheckMobileEvent内でrotateInstructionを見てるので、ここで先にfalseにしておく)
 rotateInstruction = false;
 
+// 倍速演出：spinSettingsの秒数を縮めることでリールの回転自体を速める
+var oripaOriginalSpinSettings = null; // 通常速度に戻す時のため元の値を保持
+function oripaSetSpeed(fast){
+  try{
+    if(!oripaOriginalSpinSettings){
+      oripaOriginalSpinSettings = {
+        startSpeed: gameSettings.spinSettings.startSpeed,
+        delay: gameSettings.spinSettings.delay,
+        spinningSpeed: gameSettings.spinSettings.spinningSpeed,
+        increaseSpeed: gameSettings.spinSettings.increaseSpeed,
+        stopSpeed: gameSettings.spinSettings.stopSpeed
+      };
+    }
+    var scale = fast ? 0.35 : 1;
+    gameSettings.spinSettings.startSpeed = oripaOriginalSpinSettings.startSpeed * scale;
+    gameSettings.spinSettings.delay = oripaOriginalSpinSettings.delay * scale;
+    gameSettings.spinSettings.spinningSpeed = oripaOriginalSpinSettings.spinningSpeed * scale;
+    gameSettings.spinSettings.increaseSpeed = oripaOriginalSpinSettings.increaseSpeed * scale;
+    gameSettings.spinSettings.stopSpeed = oripaOriginalSpinSettings.stopSpeed * scale;
+  }catch(ex){
+    console.warn('oripaSetSpeed: 速度変更エラー', ex);
+  }
+}
+
 function oripaPlayTier(tier){
   // クレジット表示は残しつつ、実際の増減はオリパ側のコイン管理と無関係なので
   // 尽きて止まらないよう大きめに設定しておく
@@ -120,9 +144,14 @@ function oripaPlayTier(tier){
 
 window.addEventListener('message', function(e){
   var data = e.data || {};
+  if(data.type === 'oripa-slot-speed'){
+    oripaSetSpeed(!!data.speedUp);
+    return;
+  }
   if(data.type !== 'oripa-slot-play') return;
   oripaCurrentSpinCoin = typeof data.coin === 'number' ? data.coin : 0;
   if(typeof data.rate === 'number') oripaRate = data.rate;
+  if(typeof data.speedUp === 'boolean') oripaSetSpeed(data.speedUp);
   // 新しいプレイの1回目(remaining === total)ならスコアをリセット
   if(typeof data.remaining === 'number' && typeof data.total === 'number' && data.remaining === data.total){
     oripaScoreTotal = 0;
