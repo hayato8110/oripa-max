@@ -88,18 +88,30 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'リクエストが速すぎます。少し待ってから再度お試しください' });
   }
 
-  // 必要チャージ額：このパックが公開された「後」にチャージした金額だけを見る
-  // （昔からのユーザーの過去の累計チャージまで含めてしまうと、1円もチャージしなくても
-  //  条件を満たしたことになってしまうため）。required_charge円チャージするごとに+1回、
-  // という繰り返し型の権利として計算する。
+  // 必要チャージ額：このパックが「公開されていて、かつ販売開始時刻(starts_at)を過ぎていた期間」
+  // 中にチャージした金額だけを見る（非公開中・予約公開でまだ販売開始前のチャージは対象外。
+  //  active_periodsが無い古いパックはpublished_at/created_atで代用する）
   let earnedAttempts = Infinity;
   if (pack.required_charge > 0) {
     const { data: purchases } = await supabase
       .from('point_purchases')
-      .select('amount_jpy')
-      .eq('user_id', userId)
-      .gte('created_at', pack.published_at || pack.created_at);
-    const eligibleCharge = (purchases || []).reduce((s, p) => s + (p.amount_jpy || 0), 0);
+      .select('amount_jpy, created_at')
+      .eq('user_id', userId);
+    const periods = (pack.active_periods && pack.active_periods.length)
+      ? pack.active_periods
+      : [{ start: pack.published_at || pack.created_at || 0, end: null }];
+    const startsAtMs = pack.starts_at ? new Date(pack.starts_at).getTime() : 0;
+    const eligibleCharge = (purchases || [])
+      .filter(p => {
+        const t = new Date(p.created_at).getTime();
+        if (t < startsAtMs) return false; // 予約公開の販売開始前は対象外
+        return periods.some(period => {
+          const start = new Date(period.start).getTime();
+          const end = period.end ? new Date(period.end).getTime() : Infinity;
+          return t >= start && t < end;
+        });
+      })
+      .reduce((s, p) => s + (p.amount_jpy || 0), 0);
     earnedAttempts = Math.floor(eligibleCharge / pack.required_charge);
     if (earnedAttempts <= 0) {
       return res.status(400).json({
@@ -197,7 +209,7 @@ export default async function handler(req, res) {
     return res.status(409).json({ error: '処理が混み合っています。もう一度お試しください' });
   }
 
-  // 在庫コピー
+  // 在庫コピー（口数無制限パックでは使わない）
   const prizeStock = {};
   prizes.forEach(p => {
     prizeStock[p.id] = (p.remaining_qty != null ? p.remaining_qty : p.quantity) || 0;
@@ -209,22 +221,28 @@ export default async function handler(req, res) {
   // 抽選
   const results = [];
   for (let i = 0; i < drawCount; i++) {
-    const currentRemaining = (pack.remaining || 0) - i;
-    const available = prizes.filter(p => {
-      if (prizeStock[p.id] <= 0) return false;
-      if (p.trigger_remaining != null && currentRemaining > p.trigger_remaining) return false;
-      return true;
-    });
-    if (!available.length) break;
-    const prize = pickPrize(available, Math.random(), tenjoCount + i, pack.tenjo_limit || 0, prizeStock);
-    // スロット表示コイン範囲が設定されてる景品は、実際の還元額もその場でランダムに決定する
-    // (毎回変わる。決定はサーバー側で行い、そのままclientの表示・履歴保存両方に使う)
+    let prize;
+    if (pack.unlimited_draws) {
+      // 口数無制限: 在庫を見ず、固定weightだけで毎回同じ確率で抽選(実スロットのRTP方式)
+      prize = pickPrizeUnlimited(prizes, Math.random(), tenjoCount + i, pack.tenjo_limit || 0);
+    } else {
+      const currentRemaining = (pack.remaining || 0) - i;
+      const available = prizes.filter(p => {
+        if (prizeStock[p.id] <= 0) return false;
+        if (p.trigger_remaining != null && currentRemaining > p.trigger_remaining) return false;
+        return true;
+      });
+      if (!available.length) break;
+      prize = pickPrize(available, Math.random(), tenjoCount + i, pack.tenjo_limit || 0, prizeStock);
+      prizeStock[prize.id]--;
+    }
+    // スロット表示コイン範囲は、スロット演出のパックでのみ適用する
+    // (動画/カラー演出のパックでは、うっかり範囲を設定してても無視して固定の還元コインを使う)
     let effectiveValueJp = prize.value_jp;
-    if (prize.slot_coin_min != null && prize.slot_coin_max != null && prize.slot_coin_max >= prize.slot_coin_min) {
+    if (pack.animation_type === 'slot' && prize.slot_coin_min != null && prize.slot_coin_max != null && prize.slot_coin_max >= prize.slot_coin_min) {
       effectiveValueJp = prize.slot_coin_min + Math.floor(Math.random() * (prize.slot_coin_max - prize.slot_coin_min + 1));
     }
     results.push({ prize: { id: prize.id, name: prize.name, tier: prize.tier, tier_label: prize.tier_label, value_jp: effectiveValueJp, exchange_type: prize.exchange_type, image_url: prize.image_url } });
-    prizeStock[prize.id]--;
   }
 
   if (!results.length) {
@@ -275,7 +293,7 @@ async function safeDecrement(table, id, amount, floorZero = true) {
       draw_count: results.length,
       total_cost: cost,
       currency: 'coin',
-      results: results.map(r => ({ prize_name: r.prize.name, prize_tier: r.prize.tier, value_jp: r.prize.value_jp || 0, is_converted: false, is_shipped: false })),
+      results: results.map(r => ({ prize_name: r.prize.name, prize_tier: r.prize.tier, tier_label: r.prize.tier_label, value_jp: r.prize.value_jp || 0, exchange_type: r.prize.exchange_type, image_url: r.prize.image_url, is_converted: false, is_shipped: false })),
       expires_at: expiresAt,
     }).select('id').single()
   ]);
