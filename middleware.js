@@ -1,5 +1,9 @@
 export const config = {
-  matcher: '/admin.html',
+  // vercel.jsonのcleanUrls:trueにより、/admin.htmlへのアクセスは
+  // 自動で/admin(拡張子なし)にリダイレクトされる。
+  // matcherが/admin.htmlのみだと、そのリダイレクト後のURLにマッチせず
+  // Middleware自体が発動しなくなるため、両方を指定しておく。
+  matcher: ['/admin.html', '/admin'],
 };
 
 export default function middleware(request) {
