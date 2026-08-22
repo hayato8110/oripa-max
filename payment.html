@@ -344,7 +344,7 @@ async function submitPayment(){
     btn.textContent='本人確認（3Dセキュア）を確認中です…画面の指示に従ってください';
     const{error,paymentIntent}=await stripe.confirmCardPayment(data.clientSecret,{payment_method:{card:cardNum,billing_details:{name}}});
     if(error){errEl.textContent=error.message;errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;}
-    else if(paymentIntent.status==='succeeded'){localStorage.removeItem('oripa_pending_coupon');showToast('🎉 決済完了！コインが付与されます',3000);setTimeout(()=>location.href='/?payment=success',2000);}
+    else if(paymentIntent.status==='succeeded'){localStorage.removeItem('oripa_pending_coupon');showToast('🎉 決済完了！コインが付与されます',3000);setTimeout(()=>location.href='/?payment=success&amount='+(data.amount||amount)+'&coins='+coins+'&pi='+paymentIntent.id,2000);}
   }catch(e){errEl.textContent=e.message;errEl.style.display='block';btn.disabled=false;btn.textContent=originalText;}
 }
 
