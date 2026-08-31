@@ -190,7 +190,7 @@ export default async function handler(req, res) {
 
   if ((pack.remaining || 0) < drawCount) {
     await releaseLockIfNeeded();
-    return res.status(400).json({ error: '残り口数が不足しています' });
+    return res.status(400).json({ error: '完売しました' });
   }
 
   // コイン残高の減算は「読み取った時点の残高と一致してる場合のみ」成功する条件付き更新にする
@@ -247,7 +247,7 @@ export default async function handler(req, res) {
 
   if (!results.length) {
     await releaseLockIfNeeded();
-    return res.status(400).json({ error: '在庫がありません' });
+    return res.status(400).json({ error: '完売しました' });
   }
 
   // 在庫・パック・ユーザー・セッションを並列更新
