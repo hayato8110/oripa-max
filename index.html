@@ -2323,8 +2323,10 @@ async function loadHistoryFromDB(){
     }
   }
 
-  const{data:shipData}=await db.from('shipping_requests').select('result_ids,status,tracking_number,carrier,shipped_at').eq('user_id',state.user.id);
+select('id,cancel_locked,result_ids,status,tracking_number,carrier,shipped_at').eq('user_id',state.user.id);
   const waitingIds=new Set((shipData||[]).filter(s=>s.status==='pending').flatMap(s=>s.result_ids||[]));
+  const waitingMap=new Map();
+  (shipData||[]).filter(s=>s.status==='pending').forEach(s=>(s.result_ids||[]).forEach(id=>waitingMap.set(id,{reqId:s.id,locked:!!s.cancel_locked})));
   const shippedMap=new Map();
   (shipData||[]).filter(s=>s.status==='shipped').forEach(s=>{
     (s.result_ids||[]).forEach(id=>shippedMap.set(id,{tracking:s.tracking_number||null,carrier:s.carrier||'japanpost',shippedAt:s.shipped_at||null}));
@@ -2343,7 +2345,9 @@ async function loadHistoryFromDB(){
         return{dbId,sessionId:s.id,resultIndex:i,prize:{name:r.prize_name,tier:r.prize_tier,tier_label:r.tier_label,value_jp:r.value_jp,exchange_type:r.exchange_type,image_url:r.image_url},
           converted:r.is_converted||false,
           shipped:r.is_shipped||!!shipInfo||false,
-          waiting:waitingIds.has(dbId)||false,
+                    waiting:waitingIds.has(dbId)||false,
+          shipReqId:waitingMap.get(dbId)?.reqId||null,
+          cancelLocked:waitingMap.get(dbId)?.locked||false,
           trackingNumber:shipInfo?.tracking||null,
           carrier:shipInfo?.carrier||'japanpost',
           shippedAt:shipInfo?.shippedAt||null,
@@ -2887,7 +2891,8 @@ function renderItemsPage(tab){
                 })()}
                 ${statusBadge||''}
               </div>
-              ${trackingHtml}
+                            ${trackingHtml}
+              ${itemsTab==='waiting'&&r.shipReqId&&!r.cancelLocked?`<button onclick="cancelShippingRequest('${r.shipReqId}')" style="margin-top:4px;padding:7px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-size:.72rem;font-weight:900;cursor:pointer">発送をキャンセル</button>`:''}
               ${itemsTab==='unselected'&&exType==='ship_only'?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:.62rem;color:var(--primary);font-weight:900">📦 発送専用</span></div>${convertCoin>0?`<div style="font-size:.88rem;color:#1a1a1a;font-weight:900;display:flex;align-items:center;gap:3px"><img src="/coin-max.png" width="24" height="24" style="vertical-align:middle;flex-shrink:0;margin-right:2px" alt="coin"> ${convertCoin.toLocaleString()}コイン</div>`:''}`:''} 
               ${itemsTab==='unselected'&&showShip?`<div style="display:flex;gap:6px;margin-top:4px">
                 <button class="ic-ship-btn" onclick="openShippingModal('${r.dbId}')">発送依頼</button>
@@ -2906,6 +2911,24 @@ function renderItemsPage(tab){
         ${itemsPage<totalPages?`<button onclick="itemsPage++;renderItemsPage()" style="padding:6px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-size:.82rem;font-weight:700;cursor:pointer">次へ ›</button>`:''}
       </div>`:''}
     </div>`;
+}
+
+async function cancelShippingRequest(reqId){
+  if(!state.user)return;
+  confirmAction('発送依頼をキャンセルしますか？<br><span style="font-size:.72rem;color:var(--text3)">この依頼に含まれる商品は、すべて「未選択」に戻ります</span>',async()=>{
+    const{data,error}=await db.rpc('cancel_shipping_request',{p_request_id:String(reqId)});
+    if(error||!data||!data.ok){
+      const msg=data?.reason==='locked'?'⚠️ キャンセルできませんでした'
+        :data?.reason==='not_pending'?'⚠️ すでに発送処理が進んでいるため、キャンセルできません'
+        :'⚠️ キャンセルできませんでした。もう一度お試しください';
+      showToast(msg,4000);
+      await loadHistoryFromDB();renderItemsPage();
+      return;
+    }
+    showToast('↩️ 発送依頼をキャンセルしました',2500);
+    await loadHistoryFromDB();
+    renderItemsPage('unselected');
+  });
 }
 
 function updateSelectedCount(){
