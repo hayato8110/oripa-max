@@ -2557,6 +2557,7 @@ function closePackDetail(){
 }
 async function openPackDetail(packId){
   const pack=state.packs.find(p=>p.id===packId);if(!pack)return;
+  if(pack.game_type==='fruit_max'){location.href='/cluster.html?pack='+encodeURIComponent(packId);return;}
   currentDetailPackId=packId;
 
   const modal=document.getElementById('pack-detail-modal');
