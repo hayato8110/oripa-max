@@ -2474,7 +2474,7 @@ function renderPackCards(list){
       </div>
       <div class="pc-bottom">
         <div class="pc-meta">
-          <div><span class="pc-price"><img src="/coin-max.png" width="30" height="30" style="vertical-align:middle;flex-shrink:0;margin-right:2px" alt="coin"> ${p.price.toLocaleString()}</span><span class="pc-price-unit">&#47;1回</span></div>
+          <div><span class="pc-price"><img src="/coin-max.png" width="30" height="30" style="vertical-align:middle;flex-shrink:0;margin-right:2px" alt="coin"> ${p.price.toLocaleString()}${p.game_type==='fruit_max'&&(p.game_config?.prices||[]).length>1?'〜':''}</span><span class="pc-price-unit">${p.game_type==='fruit_max'?'&#47;1プレイ':'&#47;1回'}</span></div>
           ${(p.show_remaining!==false&&!p.is_new_user_only&&!p.is_daily_limit&&!(p.force_soldout||p.remaining<=0))?`<span class="pc-remain">残り<b>${(p.remaining||0).toLocaleString()}</b>&#47;${(p.total_slots||0).toLocaleString()}口</span>`:''}
         </div>
         ${(p.show_remaining!==false&&!p.is_new_user_only&&!p.is_daily_limit&&!(p.force_soldout||p.remaining<=0))?`<div class="progress-bg"><div class="progress-fill ${barClass}" style="width:${pct}%"></div></div>`:''}
