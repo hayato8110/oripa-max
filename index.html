@@ -2344,7 +2344,7 @@ const{data:shipData}=await db.from('shipping_requests').select('id,cancel_locked
         const shipInfo=shippedMap.get(dbId);
         return{dbId,sessionId:s.id,resultIndex:i,prize:{name:r.prize_name,tier:r.prize_tier,tier_label:r.tier_label,value_jp:r.value_jp,exchange_type:r.exchange_type,image_url:r.image_url},
           converted:r.is_converted||false,
-          shipped:r.is_shipped||!!shipInfo||false,
+          shipped:!!shipInfo||(r.is_shipped&&!waitingIds.has(dbId))||false,
                     waiting:waitingIds.has(dbId)||false,
           shipReqId:waitingMap.get(dbId)?.reqId||null,
           cancelLocked:waitingMap.get(dbId)?.locked||false,
