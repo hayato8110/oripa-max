@@ -2323,7 +2323,7 @@ async function loadHistoryFromDB(){
     }
   }
 
-select('id,cancel_locked,result_ids,status,tracking_number,carrier,shipped_at').eq('user_id',state.user.id);
+const{data:shipData}=await db.from('shipping_requests').select('id,cancel_locked,result_ids,status,tracking_number,carrier,shipped_at').eq('user_id',state.user.id);
   const waitingIds=new Set((shipData||[]).filter(s=>s.status==='pending').flatMap(s=>s.result_ids||[]));
   const waitingMap=new Map();
   (shipData||[]).filter(s=>s.status==='pending').forEach(s=>(s.result_ids||[]).forEach(id=>waitingMap.set(id,{reqId:s.id,locked:!!s.cancel_locked})));
