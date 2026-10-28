@@ -2494,6 +2494,8 @@ function renderPackCards(list){
             return `<div id="su-countdown-${p.id}" data-starts="${startsAt}" style="text-align:center;padding:12px;border-radius:8px;background:var(--bg2);border:1px solid var(--border2);margin:0 0 8px">
               <div style="font-size:.75rem;color:var(--text2);font-weight:700">販売開始まであと <span class="su-time" style="font-size:1rem;font-weight:900;color:var(--primary)">--</span></div>
             </div>`;
+          } else if(p.game_type==='fruit_max'&&!p.force_soldout){
+            return `<div class="pc-btns"><button class="pc-btn-1" onclick="location.href='/cluster.html?pack=${encodeURIComponent(p.id)}'">🍓 遊ぶ</button></div>`;
           } else if(p.force_soldout||p.remaining<=0){
             return `<div style="text-align:center;padding:10px;font-size:.78rem;color:#1a1a1a;font-weight:700;letter-spacing:.08em">— ありがとうございました —</div>`;
           } else if(dailyLimitReached){
