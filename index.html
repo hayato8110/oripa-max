@@ -2418,7 +2418,10 @@ function renderCatTabs(){
 }
 function renderPacks(){
   let list=[...state.packs];
-  list=list.filter(p=>p.is_active!==false||p.starts_at||(p.remaining||0)<=0||state.isAdmin);
+ list=list.filter(p=>p.is_active!==false||p.starts_at||(p.remaining||0)<=0||state.isAdmin);
+  // FRUIT MAX(ゲーム)はカテゴリに関係なく、一番上の専用セクションに出す
+  const gameList=state.packs.filter(p=>p.game_type==='fruit_max'&&(p.is_active!==false||p.starts_at||state.isAdmin)).sort((a,b)=>(a.sort_order||999)-(b.sort_order||999));
+  list=list.filter(p=>p.game_type!=='fruit_max');
   if(state.currentCat!=='all')list=list.filter(p=>p.category===state.currentCat);
   // 新規限定パック：ログイン済みで期限切れなら非表示（未ログインは表示）
   if(state.user){
@@ -2440,7 +2443,7 @@ function renderPacks(){
     return (aOut+aDaily)-(bOut+bDaily);
   });
   const container=document.getElementById('packs-list');
-  if(!list.length){
+  if(!list.length&&!gameList.length){
     container.innerHTML='<div style="text-align:center;padding:48px 16px;color:var(--text3)"><div style="font-size:2rem;margin-bottom:10px">📦</div><div style="font-weight:700">オリパがありません</div></div>';
     return;
   }
@@ -2448,6 +2451,12 @@ function renderPacks(){
   const newUserList=list.filter(p=>p.is_new_user_only);
   const regularList=list.filter(p=>!p.is_new_user_only);
   let html='';
+  if(gameList.length){
+    html+=`<div class="nu-section" style="grid-column:1/-1;background:linear-gradient(135deg,#ff9a1f,#ff3d81,#8a2be2);border-radius:16px;padding:14px;margin-bottom:12px">
+      <div style="text-align:center;color:#fff;font-weight:900;font-size:.95rem;margin-bottom:10px;letter-spacing:.03em;white-space:nowrap">🍓 新オリパ登場！FRUIT MAX</div>
+      <div class="nu-section-grid">${renderPackCards(gameList)}</div>
+    </div>`;
+  }
   if(newUserList.length){
     html+=`<div class="nu-section" style="grid-column:1/-1;background:linear-gradient(135deg,#7c3aed,#ec4899,#3b82f6,#06b6d4);border-radius:16px;padding:14px;margin-bottom:12px">
       <div style="text-align:center;color:#fff;font-weight:900;font-size:.95rem;margin-bottom:10px;letter-spacing:.03em;white-space:nowrap">🎁 新規会員様限定！今だけの超お得オリパ</div>
