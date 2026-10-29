@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>FRUIT MAX</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#1a0f3d;min-height:100vh;font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;align-items:center;padding:12px;gap:10px;color:#fff;user-select:none}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(20,10,60,.35),rgba(20,10,60,.55)),url(/cluster/bg.jpg) 28% center/cover no-repeat}
+.logo{display:block;width:34%;max-width:150px;height:auto;filter:drop-shadow(0 3px 5px #0008)}
+.rt{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.vol{display:flex;align-items:center;gap:6px;background:#0008;border:1.5px solid #f5c84299;border-radius:999px;padding:4px 10px}
+.vol span{font-size:1rem;line-height:1;width:1.2em;text-align:center}
+.vol input{width:84px;accent-color:#f5c842;height:20px;margin:0}
+.sndb{background:#0008;border:1.5px solid #f5c84299;color:#fff;border-radius:999px;width:34px;height:34px;padding:0;font-size:1rem;line-height:1}
+.top{width:100%;max-width:440px;display:flex;justify-content:space-between;align-items:center}
+h1{font-size:1.2rem;font-weight:900;text-shadow:0 2px 0 #0007}
+.tag::before{content:'';display:inline-block;width:1.5em;height:1.5em;background:url(/coin-max.png) center/contain no-repeat;vertical-align:middle;margin-right:4px}
+.tag.nl::before{display:none}
+.tag{font-size:.7rem;font-weight:900;background:#0008;padding:4px 8px;border-radius:999px}
+#hud{display:flex;gap:0;width:100%;max-width:440px}
+.box{flex:1;position:relative;aspect-ratio:692/322;background:center/100% 100% no-repeat;container-type:inline-size}
+.box.a{background-image:url(/cluster/hud-a.webp)}
+.box.b{background-image:url(/cluster/hud-b.webp)}
+.box.c{background-image:url(/cluster/hud-c.webp)}
+.box b{position:absolute;left:10%;width:80%;top:50%;height:33%;display:flex;align-items:center;justify-content:center;font-size:17cqw;font-weight:900;color:#fff;text-shadow:0 0 2.2cqw #3a8cff,0 .6cqw 0 #0a0a60}
+#wrap{position:relative;width:100%;max-width:440px;padding:6px;background:#2a1860;border:3px solid #f5c842;border-radius:14px}
+#board{position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:8px}
+#board{background:url(/cluster/tile.png) 0 0/calc(100%/7) calc(100%/7),linear-gradient(#3a2290,#27156b)}
+
+.cell{position:absolute;width:calc(100%/7);height:calc(100%/7);display:flex;align-items:center;justify-content:center;font-size:clamp(1.3rem,7.2vw,2.1rem);transition:top .42s cubic-bezier(.3,1.25,.5,1),transform .25s,opacity .25s;will-change:top}
+.cell span{filter:drop-shadow(0 2px 2px #0007);display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.cell img{width:86%;height:86%;object-fit:contain;pointer-events:none}
+.cell.g img{width:98%;height:98%}
+.cell.hl{z-index:2}
+.cell.hl::before{content:'';position:absolute;inset:3%;border-radius:9px;background:rgba(150,255,80,.42);border:2px solid rgba(200,255,130,.95);box-shadow:0 0 10px rgba(160,255,90,.8),inset 0 0 8px rgba(255,255,255,.35);animation:glow .5s ease-in-out infinite alternate}
+@keyframes glow{to{background:rgba(170,255,100,.6)}}
+.cell span{position:relative;z-index:1}
+.cell.pop{transform:scale(.1);opacity:0;transition:transform .25s,opacity .25s}
+.cell img.mb{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);width:78%;height:auto;object-fit:contain;filter:drop-shadow(0 1px 2px #0009);z-index:2}
+.cell.g span{filter:drop-shadow(0 0 8px #ffe066) drop-shadow(0 0 2px #fff)}
+.fl{position:absolute;transform:translate(-50%,-50%);font-weight:900;font-size:clamp(1.25rem,7.2vw,1.9rem);color:#fff;z-index:6;pointer-events:none;white-space:nowrap;letter-spacing:.02em;text-shadow:-2px -2px 0 #2a1860,2px -2px 0 #2a1860,-2px 2px 0 #2a1860,2px 2px 0 #2a1860,0 3px 6px #000;animation:winpop 1.15s ease-out forwards}
+.fl.short{animation:winpop2 .7s ease-out forwards}
+@keyframes winpop2{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}45%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+.fl b{color:#ffb02e;font-size:.85em;margin-left:.2em}
+@keyframes winpop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}30%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-62%) scale(1)}}
+#banner{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%) scale(.5);font-size:3rem;font-weight:900;color:#ffe066;text-shadow:0 4px 0 #8a3a00,0 0 20px #ff9d2e;opacity:0;z-index:8;pointer-events:none}
+#banner.show{animation:bn 1.1s ease-out forwards}
+@keyframes bn{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.25)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+#msg{height:22px;font-weight:900;text-shadow:0 2px 0 #0007}
+button{padding:14px 28px;border:none;border-radius:30px;font-size:1.05rem;font-weight:900;cursor:pointer}
+#skip{background:#0007;color:#fff;font-size:.8rem;padding:8px 18px;display:none}
+#buys{position:relative;width:100%;max-width:440px;aspect-ratio:1840/855;background:url(/cluster/buy.webp) center/100% 100% no-repeat;container-type:inline-size;transition:filter .2s}
+#buys.busy{filter:brightness(.75) saturate(.7)}
+#buys .stp,#buys .go{position:absolute;background:transparent;border:0;padding:0;margin:0;color:transparent;font-size:0;box-shadow:none;cursor:pointer;opacity:1;-webkit-tap-highlight-color:transparent}
+#buys .stp{top:37.4%;height:24.6%;width:12.5%;border-radius:18%}
+#buys .stp.m{left:11.4%}
+#buys .stp.p{left:76.1%}
+#buys .stp.end{background:#0007}
+#buys .stp:active:not(.end),#buys .go:active{background:#ffffff2e}
+#buys .go{left:11.4%;top:66.7%;width:78.3%;height:25.7%;border-radius:6cqw}
+#buys .stp-val{position:absolute;left:27%;width:46%;top:44%;height:17%;display:flex;align-items:center;justify-content:center;font-size:7.6cqw;font-weight:900;color:#fff;-webkit-text-stroke:.6cqw #4a0f6a;paint-order:stroke fill;text-shadow:0 0 1.6cqw #ff5fd2;pointer-events:none}
+#res{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:20}
+#res #resNote{font-size:1.3rem;font-weight:900;color:#ffe066;letter-spacing:.05em}
+#res h2{font-size:1.5rem;color:#f5c842}
+#res .big{font-size:2.6rem;font-weight:900}
+#res button{background:#f5c842;color:#1a0a00}
+#resItem{text-align:center}
+#resItem img{max-height:150px;max-width:70vw;border-radius:10px;display:block;margin:6px auto}
+#resItem .t{font-size:.8rem;color:#ffe066;font-weight:900}
+#resItem .nm{font-size:1.1rem;font-weight:900}
+#resItem .vl{font-size:.8rem;opacity:.8}
+#resBtns{display:flex;gap:10px}
+#res button.sub{background:#ffffff22;color:#fff;border:2px solid #f5c84299}
+</style>
+</head>
+<body>
+<div class="top"><img class="logo" src="/cluster/logo.png" alt="FRUIT MAX" draggable="false"><div class="rt"><a href="/" style="color:#fff;font-size:.8rem;text-decoration:none">← 戻る</a><span class="tag" id="coinTag">-</span><div class="vol"><span id="snd">🔊</span><input id="vol" type="range" min="0" max="100" value="80" aria-label="音量"></div></div></div>
+<div id="hud">
+  <div class="box a"><b id="left">0</b></div>
+  <div class="box b"><b id="spinWin">0</b></div>
+  <div class="box c"><b id="total">0</b></div>
+</div>
+<div id="wrap"><div id="board"></div><div id="banner"></div></div>
+<div id="msg"></div>
+<button id="skip">スキップ</button>
+<div id="buys"></div>
+
+<div id="res"><h2>結果</h2><div class="big" id="resTotal"></div><div id="resItem"></div><div id="resNote"></div><div id="resBtns"><button id="resCvt" class="sub" style="display:none">コインに交換</button><button id="resOk">OK</button></div></div>
+<div id="toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000d;color:#fff;padding:10px 18px;border-radius:20px;font-size:.85rem;display:none;z-index:30;max-width:90%;text-align:center"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ===== 設定(見た目用。抽選・配当はすべてサーバー側 api/cluster.js) ===== */
+const ROWS=7, COLS=7, TRIES=5; let PRICE=1000, PRICES=[1000,2000,3000], CUR_ITEM=null;
+const PACK_ID=new URLSearchParams(location.search).get('pack');
+const SYMS=['strawberry','orange','apple','grapes','blueberry','star','heart'].map(n=>'/cluster/'+n+'.png'), SCATTER_ICON='/cluster/scatter.png';   // 画像はサイトの /cluster/ フォルダ
+const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
+const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storageKey:'oripa-max-auth',detectSessionInUrl:false,autoRefreshToken:true,persistSession:true}});
+
+const $=id=>document.getElementById(id);
+const board=$('board'), S=100/COLS;
+let busy=false, skip=false, curSnap=[]; const cellsEl=new Map();
+const sleep=ms=>new Promise(r=>setTimeout(r,skip?Math.min(ms,10):ms));
+const fmt=n=>n.toLocaleString();
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3500);}
+
+SYMS.concat(['/cluster/logo.png',SCATTER_ICON,'/cluster/x2.png','/cluster/x4.png']).forEach(u=>{ const i=new Image(); i.src=u; });
+function mkCell(x){
+  const el=document.createElement('div'); el.className='cell'+(x.t==='g'?' g':'');
+  el.innerHTML='<span>'+'<img src="'+(x.t==='g'?SCATTER_ICON:SYMS[x.v])+'" alt="" draggable="false">'+'</span>'+(x.m?'<img class="mb" src="/cluster/x'+x.m+'.png" alt="×'+x.m+'" draggable="false">':'');
+  el.style.left=x.c*S+'%'; el.dataset.id=x.id; return el;
+}
+function render(snapshot){
+  curSnap=snapshot;
+  const ids=new Set(snapshot.map(x=>x.id));
+  for(const [id,el] of [...cellsEl]){ if(!ids.has(id)){ el.classList.add('pop'); setTimeout(()=>el.remove(),280); cellsEl.delete(id); } }
+  const fresh=[];
+  for(const x of snapshot){
+    let el=cellsEl.get(x.id), top=x.r*S+'%';
+    if(!el){ el=mkCell(x); el.style.top=((x.r-ROWS-1)*S)+'%'; board.appendChild(el); cellsEl.set(x.id,el); fresh.push([el,top]); }
+    else el.style.top=top;
+  }
+  void board.offsetHeight; fresh.forEach(([el,top])=>el.style.top=top);
+}
+const SND_SRC={res0:'/cluster/snd/res0.mp3',res1:'/cluster/snd/res1.mp3',res2:'/cluster/snd/res2.mp3',res3:'/cluster/snd/res3.mp3',res4:'/cluster/snd/res4.mp3',bgm:'/cluster/snd/bgm.mp3',click:'/cluster/snd/click.mp3',start:'/cluster/snd/start.mp3',land:'/cluster/snd/land.mp3',scatter:'/cluster/snd/scatter.mp3',near:'/cluster/snd/near.mp3',small:'/cluster/snd/small.mp3',medium:'/cluster/snd/medium.mp3',big:'/cluster/snd/big.mp3',mega:'/cluster/snd/mega.mp3',x2:'/cluster/snd/x2.mp3',x4:'/cluster/snd/x4.mp3',rollup:'/cluster/snd/rollup.mp3',spins:'/cluster/snd/spins.mp3',jackpot:'/cluster/snd/jackpot.mp3',menu:'/cluster/snd/menu.mp3',up:'/cluster/snd/up.mp3',down:'/cluster/snd/down.mp3'};
+/* ===== 音(Web Audio) ===== */
+const SILENT='data:audio/wav;base64,UklGRpgiAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YXQiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=';
+const Snd=(()=>{
+  let keep=null,ctx=null,master=null,bufs={},loading=false,vol=.8,bgmWanted=false,bgmSrc=null,bgmGain=null;
+  try{ const v=localStorage.getItem('fm-vol'); if(v!==null&&v!==''&&isFinite(+v)) vol=Math.min(1,Math.max(0,+v)); }catch(e){}
+  async function load(){
+    if(loading) return; loading=true;
+    await Promise.all(Object.keys(SND_SRC).map(async n=>{
+      try{
+        let ab; const u=SND_SRC[n];
+        if(u.startsWith('data:')){ const bin=atob(u.split(',')[1]); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); ab=a.buffer; }   // 埋め込み音は通信せずに読む
+        else { const r=await fetch(u); ab=await r.arrayBuffer(); }
+        bufs[n]=await new Promise((res,rej)=>ctx.decodeAudioData(ab,res,rej));
+      }catch(e){ console.warn('sound load failed',n,e); }
+    }));
+    if(bgmWanted) startBgm();
+  }
+  function init(){
+    if(!ctx){
+      try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}       // iPhone: マナーモードでも鳴らす(iOS17以降)
+      try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=vol; master.connect(ctx.destination); }catch(e){ return; }
+      try{ const a=document.createElement('audio'); a.src=SILENT; a.loop=true; a.volume=.01; a.setAttribute('playsinline',''); a.play().catch(()=>{}); keep=a; }catch(e){}   // iPhone(古い版): 無音を流してマナーモードの影響を避ける
+      load();
+    }
+    if(ctx.state==='suspended') ctx.resume();
+  }
+  function play(n,v=1){
+    if(vol<=0||!ctx||!bufs[n]) return;
+    const s=ctx.createBufferSource(); s.buffer=bufs[n]; const g=ctx.createGain(); g.gain.value=v;
+    s.connect(g); g.connect(master); s.start();
+  }
+  function startBgm(){
+    bgmWanted=true; if(vol<=0||!ctx||!bufs.bgm||bgmSrc) return;
+    bgmSrc=ctx.createBufferSource(); bgmSrc.buffer=bufs.bgm; bgmSrc.loop=true;
+    bgmGain=ctx.createGain(); bgmGain.gain.setValueAtTime(0,ctx.currentTime); bgmGain.gain.linearRampToValueAtTime(.22,ctx.currentTime+.6);
+    bgmSrc.connect(bgmGain); bgmGain.connect(master); bgmSrc.start();
+  }
+  function killBgm(fade){
+    if(!bgmSrc) return; const s=bgmSrc,g=bgmGain; bgmSrc=bgmGain=null;
+    try{ g.gain.cancelScheduledValues(ctx.currentTime); g.gain.setValueAtTime(g.gain.value,ctx.currentTime); g.gain.linearRampToValueAtTime(0,ctx.currentTime+fade); s.stop(ctx.currentTime+fade+.05); }catch(e){}
+  }
+  function stopBgm(){ bgmWanted=false; killBgm(.8); }
+  function setVol(v){
+    vol=Math.min(1,Math.max(0,v)); try{ localStorage.setItem('fm-vol',String(vol)); }catch(e){}
+    if(master) master.gain.value=vol;
+    if(vol<=0) killBgm(.2); else { init(); if(bgmWanted) startBgm(); }
+  }
+  return {init,play,startBgm,stopBgm,setVol,get vol(){return vol;}};
+})();
+const sfx=(n,v)=>{ if(!skip) Snd.play(n,v); };
+function setSndBtn(){ const i=document.getElementById('snd'),r=document.getElementById('vol'); if(!i||!r) return; r.value=Math.round(Snd.vol*100); i.textContent=Snd.vol<=0?'🔇':Snd.vol<.4?'🔈':'🔊'; }
+document.addEventListener('pointerdown',()=>Snd.init(),{once:true});
+function floatWin(cl){
+  const xs=cl.pos.map(q=>q[0]), ys=cl.pos.map(q=>q[1]);
+  const cx=(Math.min(...xs)+Math.max(...xs))/2+.5, cy=(Math.min(...ys)+Math.max(...ys))/2+.5;
+  const put=(html,ms,cls)=>{ const t=document.createElement('div'); t.className='fl'+(cls?' '+cls:''); t.innerHTML=html;
+    t.style.left=(cx*S)+'%'; t.style.top=(cy*S)+'%'; board.appendChild(t); setTimeout(()=>t.remove(),ms); };
+  if(cl.mult>1){
+    const base=cl.base!=null?cl.base:Math.round(cl.pay/cl.mult);
+    put(fmt(base)+'<b>×'+cl.mult+'</b>',700,'short');       // 例: 15 ×6
+    setTimeout(()=>put(fmt(cl.pay),1150),700);                // 例: 90
+  } else put(fmt(cl.pay),1150);
+}
+function showBanner(t){ const b=$('banner'); b.textContent=t; b.classList.remove('show'); void b.offsetWidth; b.classList.add('show'); }
+
+async function playSet(set){
+  busy=true; skip=false; $('skip').style.display='inline-block'; Snd.startBgm();
+  let total=0; $('total').textContent='0';
+  const all=set.spins.length; let shown=TRIES;
+  for(let n=0;n<all;n++){
+    const sp=set.spins[n];
+    $('left').textContent=shown-n; $('spinWin').textContent='0'; $('msg').textContent=(n+1)+'スピン目';
+    render(sp.deal); sfx('start',.8); setTimeout(()=>sfx('land',.5),350);
+    if(sp.scatters>=1) setTimeout(()=>sfx(sp.scatters===2?'near':'scatter',.9),600);
+    await sleep(750);
+    if(sp.extra>0){ shown=Math.min(shown+sp.extra,all); $('left').textContent=shown-n; showBanner('+'+sp.extra+' SPIN'); sfx('spins',1); await sleep(1100); }
+    let run=0;
+    for(const st of sp.steps){
+      const hl=new Set(); st.clusters.forEach(cl=>cl.pos.forEach(([c,r])=>hl.add(c+','+r)));
+      for(const [id,el] of cellsEl){ const x=curSnap.find(q=>q.id==id); if(x&&hl.has(x.c+','+x.r)) el.classList.add('hl'); }
+      const hasM=st.clusters.some(cl=>cl.mult>1);
+      const stepPay=st.clusters.reduce((a,cl)=>a+cl.pay,0), rt=stepPay/PRICE, winSnd=rt<.1?'small':rt<.4?'medium':rt<1?'big':'mega';
+      if(hasM){ sfx(st.clusters.some(cl=>cl.mult>=4)?'x4':'x2',1); setTimeout(()=>sfx(winSnd,1),700); } else sfx(winSnd,1);
+      for(const cl of st.clusters){ floatWin(cl); run+=cl.pay; }
+      const runNow=run;
+      setTimeout(()=>{ $('spinWin').textContent=fmt(runNow); },hasM?700:0); await sleep(hasM?1700:850);
+      render(st.after); setTimeout(()=>sfx('land',.5),250); await sleep(650);
+    }
+    total+=sp.win; $('total').textContent=fmt(total);
+    await sleep(400); render([]); await sleep(350);
+  }
+  $('left').textContent='0'; $('msg').textContent=''; $('skip').style.display='none';
+  $('resTotal').textContent=fmt(total)+' コイン';
+  $('resNote').textContent='Congratulations!';
+  { const it=CUR_ITEM, esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    $('resItem').innerHTML=it?`<div class="t">🎁 商品獲得！</div>${it.image_url?`<img src="${esc(it.image_url)}" alt="">`:''}<div class="nm">${esc(it.name)}</div><div class="vl">交換価値 ${fmt(it.value)} コイン</div>`:'';
+    $('resCvt').style.display=it&&it.exchange_type!=='ship_only'?'':'none'; $('resCvt').disabled=false;
+    $('resOk').textContent=it?'アイテムを保持':'OK'; }
+  Snd.stopBgm();
+  { const r=total/PRICE; Snd.play(total<=0?'res0':r<1?'res1':r<3?'res2':r<8?'res3':'res4',1); }
+    $('res').style.display='flex'; busy=false;
+}
+
+/* 購入: サーバーがコインを引いて結果を決める。クライアントは再生するだけ */
+async function buy(price){
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){ toast('ログインしてください'); setTimeout(()=>location.href='/',1200); return null; }
+  const r=await fetch('/api/cluster',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({userId:session.user.id,userToken:session.access_token,packId:PACK_ID,price})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){ toast(j.error||'エラーが発生しました'); return null; }
+  return j;
+}
+async function loadCoin(){
+  try{
+    const {data:{session}}=await db.auth.getSession();
+    if(!session){ $('coinTag').classList.add('nl'); $('coinTag').textContent='未ログイン'; return; }
+    const {data}=await db.from('users').select('coin_points').eq('id',session.user.id).single();
+    if(data) $('coinTag').textContent=fmt(data.coin_points);
+  }catch(e){}
+}
+let SEL=PRICES[0];
+function makeButtons(){
+  const box=$('buys'); box.innerHTML='';
+  if(!PRICES.includes(SEL)) SEL=PRICES[0];
+  const mk=(cls,label)=>{ const b=document.createElement('button'); b.className=cls+' buyb'; b.setAttribute('aria-label',label); return b; };
+  const minus=mk('stp m','減らす'), plus=mk('stp p','増やす'), go=mk('go','購入');
+  const val=document.createElement('div'); val.className='stp-val';
+  box.append(minus,plus,val,go);
+  const show=()=>{ const i=PRICES.indexOf(SEL);
+    val.textContent=fmt(SEL);
+    minus.classList.toggle('end',i<=0); plus.classList.toggle('end',i>=PRICES.length-1); };
+  const move=d=>{ Snd.init(); const i=PRICES.indexOf(SEL), j=i+d;
+    if(j<0||j>=PRICES.length) return; SEL=PRICES[j]; Snd.play(d>0?'up':'down',.8); show(); };
+  minus.onclick=()=>move(-1); plus.onclick=()=>move(1); go.onclick=()=>start(SEL);
+  show();
+}
+function setDisabled(v){ document.querySelectorAll('.buyb').forEach(b=>b.disabled=v); $('buys').classList.toggle('busy',v); }
+if(!PACK_ID){ $('msg').textContent='パックが指定されていません'; }
+else fetch('/api/cluster',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'info',packId:PACK_ID})})
+  .then(r=>r.json().then(j=>({ok:r.ok,j})))
+  .then(({ok,j})=>{
+    if(!ok||!j.prices){ $('msg').textContent=j.error||'パックが見つかりません'; return; }
+    PRICES=j.prices; SEL=PRICES[0]; if(j.name) document.title=j.name; makeButtons();
+    if(j.enabled===false) $('msg').textContent='現在は公開されていません(管理者のみ遊べます)';
+  }).catch(()=>{ $('msg').textContent='読み込みに失敗しました'; });
+async function start(p){
+  if(busy) return; PRICE=p; setDisabled(true); Snd.init(); Snd.play('click',.9);
+  try{
+    const j=await buy(p);
+    if(j){
+      CUR_ITEM=j.item||null;
+      $('coinTag').textContent=fmt(j.item?j.coin:j.coin-j.set.total);
+      await playSet(j.set);
+      $('coinTag').textContent=fmt(j.coin);
+    }
+  }catch(e){ console.error(e); toast('通信エラーが発生しました'); }
+  setDisabled(false);
+}
+$('resOk').onclick=()=>{ $('res').style.display='none'; if(CUR_ITEM){ toast('アイテム欄に入りました'); CUR_ITEM=null; } };
+$('resCvt').onclick=async()=>{
+  const it=CUR_ITEM; if(!it) return; $('resCvt').disabled=true;
+  try{
+    const {data:{session}}=await db.auth.getSession();
+    const rr=await fetch('/api/cluster',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'convert',userId:session.user.id,userToken:session.access_token,sessionId:it.sessionId})});
+    const data=await rr.json().catch(()=>({}));
+    if(!rr.ok||!data.ok){ toast(data.error||'交換できませんでした。アイテム欄から交換できます'); $('resCvt').disabled=false; return; }
+    CUR_ITEM=null; $('res').style.display='none'; toast(fmt(data.bonus)+'コインに交換しました'); $('coinTag').textContent=fmt(data.coin);
+  }catch(e){ toast('交換できませんでした'); $('resCvt').disabled=false; }
+};
+$('skip').onclick=()=>{ skip=true; };
+loadCoin();
+setSndBtn(); $('vol').oninput=e=>{ Snd.setVol(e.target.value/100); setSndBtn(); };
+</script>
+</body>
+</html>
