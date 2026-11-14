@@ -2293,16 +2293,17 @@ async function loadHistoryFromDB(){
   const data=[...(recentData||[]),...extraData].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   if(!data||!data.length)return;
 
-  // 期限切れセッションを自動コイン変換
+ // 期限切れセッションを自動コイン変換
   const now=new Date();
+  const lockedShipIds=new Set((allShipData||[]).flatMap(s=>s.result_ids||[]));   // 発送依頼中・発送済みは自動変換しない
   for(const s of data){
     const expiresAt=s.expires_at?new Date(s.expires_at):new Date(new Date(s.created_at).getTime()+3*24*60*60*1000);
     if(now>expiresAt){
       // 未変換・未発送の賞品をコイン変換
       const results=s.results||[];
       let totalBonus=0;
-      const updatedResults=results.map(r=>{
-        if(!r.is_converted&&!r.is_shipped){
+      const updatedResults=results.map((r,i)=>{
+        if(!r.is_converted&&!r.is_shipped&&!lockedShipIds.has(s.id+'_'+i)){
           const pack=state.packs.find(p=>p.id===s.pack_id);
           const prizeData=(pack?.prizes_public||pack?.prizes||[]).find(p=>p.name===r.prize_name&&p.tier===r.prize_tier);
           if(r.value_jp==null&&prizeData?.value_jp==null)return r; // 価値不明の商品は自動変換せずそのまま残す
