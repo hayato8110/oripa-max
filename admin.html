@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<head><script>
+(function(){var f=window.fetch;window.fetch=function(u,o){try{if(String(u).indexOf('/api/coin')>-1){var t='';for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/^sb-.*-auth-token$/.test(k)){try{t=JSON.parse(localStorage.getItem(k)).access_token||t}catch(e){}}}o=Object.assign({},o);o.headers=Object.assign({},o.headers||{},{Authorization:'Bearer '+t});}}catch(e){}return f.call(this,u,o)}})();
+</script>  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>オリパMAX 管理画面</title>
