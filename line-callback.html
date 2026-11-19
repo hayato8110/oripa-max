@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINE連携中... | オリパMAX</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#ffffff;color:#1a1a1a;font-family:'Noto Sans JP',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid rgba(201,168,76,.2);border-top-color:#c9a84c;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.msg{font-size:.9rem;color:rgba(26,26,26,.6)}
+.error{color:#dc2626;font-size:.88rem;text-align:center;max-width:300px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="spinner" id="spinner"></div>
+<div class="msg" id="msg">LINE連携中...</div>
+<div class="error" id="error" style="display:none"></div>
+
+<script>
+const SUPABASE_URL='https://puspoyandexokjtsmajc.supabase.co';
+const SUPABASE_KEY='sb_publishable_C9BObAzp_hdjJts8ou0Lpw_3csDTCaW';
+const LINE_CLIENT_ID='2009627127';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+async function logError(step,message,detail,userId){
+  try{
+    await db.from('line_error_logs').insert({
+      user_id:userId||null,
+      step,
+      message,
+      raw_detail:detail?JSON.stringify(detail).slice(0,2000):null,
+      user_agent:navigator.userAgent,
+    });
+  }catch(e){
+    // ログ保存自体が失敗しても連携フローは止めない
+    console.error('ログ保存失敗',e);
+  }
+}
+
+async function handleCallback(){
+  const params=new URLSearchParams(location.search);
+  const code=params.get('code');
+  const state=params.get('state');
+  const error=params.get('error');
+
+  if(error){
+    await logError('line_redirect_error','LINE認証がキャンセルされました',{error});
+    showError('LINE認証がキャンセルされました');
+    setTimeout(()=>location.href='/',2000);
+    return;
+  }
+
+  if(!code){
+    await logError('missing_code','認証コードが見つかりません',{search:location.search});
+    showError('認証コードが見つかりません');
+    setTimeout(()=>location.href='/',2000);
+    return;
+  }
+
+  // stateにユーザーIDが埋め込まれている
+  let userId;
+  try{
+    userId=atob(state); // base64デコードしてユーザーIDを取得
+  }catch(e){
+    userId=null;
+  }
+  if(!userId){
+    await logError('missing_state','ログイン情報が見つかりません',{state});
+    showError('ログイン情報が見つかりません。再度お試しください');
+    setTimeout(()=>location.href='/',2000);
+    return;
+  }
+
+  try{
+    document.getElementById('msg').textContent='LINEアカウントを確認中...';
+
+    // LINEのアクセストークンをAPI Route経由で取得（Client Secretをフロントに露出させない）
+    const tokenRes=await fetch('/api/line-token',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        code,
+        redirect_uri:`${location.origin}/line-callback.html`,
+      })
+    });
+    const tokenData=await tokenRes.json();
+    if(!tokenData.access_token){
+      await logError('token_fetch_failed','LINEトークンの取得に失敗しました',{status:tokenRes.status,tokenData},userId);
+      showError('LINEトークンの取得に失敗しました');
+      setTimeout(()=>location.href='/',2000);
+      return;
+    }
+
+    // LINEプロフィールを取得
+    const profileRes=await fetch('https://api.line.me/v2/profile',{
+      headers:{Authorization:`Bearer ${tokenData.access_token}`}
+    });
+    const profile=await profileRes.json();
+    const lineId=profile.userId;
+
+    if(!lineId){
+      await logError('profile_fetch_failed','LINEプロフィールの取得に失敗しました',{status:profileRes.status,profile},userId);
+      showError('LINEプロフィールの取得に失敗しました');
+      setTimeout(()=>location.href='/',2000);
+      return;
+    }
+
+    // 重複チェックと保存をDB関数で行う（ログインしていないLINE内ブラウザでも動く）
+    const{data:result,error:linkError}=await db.rpc('link_line',{p_user_id:userId,p_line_id:lineId});
+    if(linkError){
+      await logError('db_update_failed','連携の保存に失敗しました',{linkError},userId);
+      showError('連携の保存に失敗しました: '+linkError.message);
+      setTimeout(()=>location.href='/',3000);
+      return;
+    }
+    if(result==='already_linked'){
+      await logError('already_linked','このLINEアカウントは既に別のアカウントに連携されています',{lineId},userId);
+      showError('このLINEアカウントは既に別のアカウントに連携されています');
+      setTimeout(()=>location.href='/',3000);
+      return;
+    }
+    if(result!=='ok'){
+      await logError('link_rejected','連携できませんでした: '+result,{lineId,result},userId);
+      showError('連携できませんでした。お問い合わせください');
+      setTimeout(()=>location.href='/',3000);
+      return;
+    }
+
+    document.getElementById('spinner').style.display='none';
+    document.getElementById('msg').textContent='✅ LINE連携が完了しました！';
+    document.getElementById('msg').style.color='#4ade80';
+
+    setTimeout(()=>location.href='/',2000);
+
+  }catch(e){
+    await logError('unexpected_error','予期しないエラー',{message:e.message,stack:e.stack},userId);
+    showError('エラーが発生しました: '+e.message);
+    setTimeout(()=>location.href='/',3000);
+  }
+}
+
+function showError(msg){
+  document.getElementById('spinner').style.display='none';
+  document.getElementById('msg').style.display='none';
+  document.getElementById('error').style.display='block';
+  document.getElementById('error').textContent='❌ '+msg;
+}
+
+handleCallback();
+</script>
+</body>
+</html>
